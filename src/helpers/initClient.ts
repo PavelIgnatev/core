@@ -20,6 +20,7 @@ export const initClient = async (account: Account, onUpdate: any) => {
 
     if (
       [
+        "USER_DEACTIVATED_BAN",
         "AUTH_KEY_UNREGISTERED",
         "AUTH_KEY_INVALID",
         "USER_DEACTIVATED",
