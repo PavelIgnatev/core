@@ -4,7 +4,9 @@ export const getRecipient = async () => {
       const response = await fetch(`${process.env.BACKEND_URL}/recipient`);
       const user = await response.json();
 
-      console.log(`GET RECIPIENT: user data before writing: ${JSON.stringify(user)}`);
+      console.log(
+        `GET RECIPIENT: user data before writing: ${JSON.stringify(user)}`
+      );
 
       if (
         user?.firstMessage &&
@@ -16,6 +18,7 @@ export const getRecipient = async () => {
       }
     } catch (error) {
       console.log(`Recipient User Error: ${error}`);
+      await new Promise((res) => setTimeout(res, 1500));
     }
   }
 };

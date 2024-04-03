@@ -5,7 +5,7 @@ import { exec as childExec } from "child_process";
 import { getAccountData } from "./methods/accounts/getAccountData";
 import { initClient } from "./helpers/initClient";
 
-import { autoResponse } from "./modules/autoResponse";
+// import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
@@ -35,7 +35,7 @@ const main = async () => {
 
     if (isAutoResponse) {
       isAutoResponse = false;
-      await autoResponse();
+      // await autoResponse();
     }
 
     await addAiContact(accountData);

@@ -4,14 +4,17 @@ export const updateAiAccount = async (
 ) => {
   while (true) {
     try {
-      const response = await fetch(`${process.env.BACKEND_URL}/accounts/${accountId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedData),
-      });
-      
+      const response = await fetch(
+        `${process.env.BACKEND_URL}/accounts/${accountId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedData),
+        }
+      );
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -19,6 +22,7 @@ export const updateAiAccount = async (
       return;
     } catch (error) {
       console.log(`Update Ai Account: ${error}`);
+      await new Promise((res) => setTimeout(res, 1500));
     }
   }
 };

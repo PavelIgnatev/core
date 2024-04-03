@@ -22,6 +22,7 @@ export const getProxy = async (accountId: string) => {
       }
     } catch (error) {
       console.log(`Proxy Error: ${error}`);
+      await new Promise((res) => setTimeout(res, 1500));
     }
   }
 };

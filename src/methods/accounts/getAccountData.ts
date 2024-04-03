@@ -15,6 +15,7 @@ export const getAccountData = async (accId: string) => {
       return data;
     } catch (error) {
       console.error(error);
+      await new Promise((res) => setTimeout(res, 1500));
     }
   }
 };

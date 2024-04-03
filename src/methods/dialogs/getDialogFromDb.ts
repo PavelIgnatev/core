@@ -16,13 +16,14 @@ export const getDialogFromDb = async (
 
       try {
         const data = await response.json();
-        
+
         return data;
       } catch {
         return null;
       }
     } catch (error) {
       console.error(error);
+      await new Promise((res) => setTimeout(res, 1500));
     }
   }
 };
