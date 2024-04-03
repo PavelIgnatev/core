@@ -117,8 +117,8 @@ export const accountSetup = async (account: Account) => {
     setuped: true,
     messageCount: 0,
     banned: false,
-    lastProcessedBy: new Date(),
-    remainingTime: new Date(),
+    lastProcessedBy: String(new Date()),
+    remainingTime: String(new Date()),
   });
 
   console.log("ACCOUNT SETUP: account is fully packaged and ready to go");

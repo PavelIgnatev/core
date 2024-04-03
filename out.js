@@ -30247,7 +30247,7 @@ var checkSpamBlock = async (accountId2) => {
     nextDay.setDate(currentDate.getDate() + 1);
     console.log(`The account has a spamblock to ${spamBlockDate}`);
     await updateAiAccount(accountId2, {
-      remainingTime: nextDay,
+      remainingTime: String(nextDay),
       spamBlockDate
     });
     return spamBlockDate;
@@ -30872,8 +30872,8 @@ var accountSetup = async (account) => {
     setuped: true,
     messageCount: 0,
     banned: false,
-    lastProcessedBy: /* @__PURE__ */ new Date(),
-    remainingTime: /* @__PURE__ */ new Date()
+    lastProcessedBy: String(/* @__PURE__ */ new Date()),
+    remainingTime: String(/* @__PURE__ */ new Date())
   });
   console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
 };
@@ -30981,7 +30981,7 @@ var addAiContact = async (account) => {
         );
         await updateAiAccount(account.accountId, {
           aiContactCount: aiContactCount + 1,
-          aiRemainingTime: futureTime
+          aiRemainingTime: String(futureTime)
         });
       } catch (error) {
         console.log(`Error when sending a message to a user: ${error}`);

@@ -45,7 +45,7 @@ export const checkSpamBlock = async (accountId: string) => {
     nextDay.setDate(currentDate.getDate() + 1);
     console.log(`The account has a spamblock to ${spamBlockDate}`);
     await updateAiAccount(accountId, {
-      remainingTime: nextDay,
+      remainingTime: String(nextDay),
       spamBlockDate,
     });
     return spamBlockDate;

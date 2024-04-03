@@ -51,7 +51,7 @@ export const addAiContact = async (account: Account) => {
         );
         await updateAiAccount(account.accountId, {
           aiContactCount: aiContactCount + 1,
-          aiRemainingTime: futureTime,
+          aiRemainingTime: String(futureTime),
         });
       } catch (error) {
         console.log(`Error when sending a message to a user: ${error}`);
