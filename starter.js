@@ -19,8 +19,8 @@ async function getAccounts() {
 async function startProcesses() {
   const ids = await getAccounts();
   for (const accId of ids) {
-    console.log(`pm2 start 'ID=${accId} node out.js' --name '${accId}'`);
-    await exec(`pm2 start 'ID=${accId} node out.js' --name '${accId}'`);
+    console.log(`ID=${accId} pm2 start --interpreter ~/.bun/bin/bun src/index.ts' --name ${accId}`);
+    await exec(`ID=${accId} pm2 start --interpreter ~/.bun/bin/bun src/index.ts --name ${accId}`);
   }
 }
 
