@@ -14,7 +14,7 @@ export const saveRecipient = async (
     phone,
     username,
     firstName,
-    lastName,
+    lastName = "",
   } = recipient["users"][0] as GramJs.User;
   const {
     fullUser: { about },

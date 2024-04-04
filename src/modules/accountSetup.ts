@@ -6,7 +6,7 @@ import GramJs from "../telegram/tl/api";
 
 import { updateProfile } from "../methods/profile/updateProfile";
 import { generateUser } from "../helpers/generateUser";
-import { getProfileFile } from "../methods/files/getProfileFile";
+import { getProfileFiles } from "../methods/files/getProfileFiles";
 
 import { invokeRequest, uploadFile } from "../telegram";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
@@ -71,11 +71,15 @@ export const accountSetup = async (account: Account) => {
     );
   }
 
-  await invokeRequest(
-    new GramJs.photos.UploadProfilePhoto({
-      file: await uploadFile(getProfileFile()),
-    })
-  );
+  const files = getProfileFiles();
+
+  for (const file of files) {
+    await invokeRequest(
+      new GramJs.photos.UploadProfilePhoto({
+        file: await uploadFile(file),
+      })
+    );
+  }
 
   await invokeRequest(
     new GramJs.account.SetPrivacy({
@@ -117,8 +121,9 @@ export const accountSetup = async (account: Account) => {
     setuped: true,
     messageCount: 0,
     banned: false,
-    lastProcessedBy: String(new Date()),
-    remainingTime: String(new Date()),
+    lastProcessedBy: new Date(),
+    remainingTime: new Date(),
+    aiRemainingTime: new Date(),
   });
 
   console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
