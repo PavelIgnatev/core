@@ -30237,26 +30237,20 @@ var checkSpamBlock = async (accountId2) => {
   }
   const { message } = messages[0];
   if (message.includes("no limits are currently applied")) {
+    console.log(`Account #${accountId2} is clean from spamblock`);
     return false;
   }
   const untilDateMatch = message.match(/until\s(.*)\./);
   const spamBlockDate = untilDateMatch ? untilDateMatch[1].replace("UTC", "") : "INFINITY";
-  if (spamBlockDate) {
-    const currentDate = /* @__PURE__ */ new Date();
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    console.log(`The account has a spamblock to ${spamBlockDate}`);
-    await updateAiAccount(accountId2, {
-      remainingTime: String(nextDay),
-      spamBlockDate
-    });
-    return spamBlockDate;
-  }
-  console.log(`Account #${accountId2} is clean from spamblock`);
+  const currentDate = /* @__PURE__ */ new Date();
+  const nextDay = new Date(currentDate);
+  nextDay.setDate(currentDate.getDate() + 1);
+  console.log(`The account has a spamblock to ${spamBlockDate}`);
   await updateAiAccount(accountId2, {
-    spamBlockDate: null
+    remainingTime: String(nextDay),
+    spamBlockDate
   });
-  return null;
+  return spamBlockDate;
 };
 
 // src/methods/folders/editFolder.ts
@@ -30541,9 +30535,6 @@ var firstNames = [
   "Danila",
   "Dmitry",
   "Dima",
-  "Yevgeny",
-  "Yevgeniy",
-  "Yegor",
   "Zakhar",
   "Matvey",
   "Nikolay",
@@ -30704,8 +30695,6 @@ var lastNames = [
   "Voronin",
   "Vorontsov",
   "Vasiliev",
-  "Yegorov",
-  "Yermakov",
   "Yudin",
   "Zakharov",
   "Zaitsev",
@@ -30797,7 +30786,7 @@ var getProfileFiles = () => {
 
 // src/modules/accountSetup.ts
 var accountSetup = async (account) => {
-  if (account.setuped) {
+  if (!account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
   }
