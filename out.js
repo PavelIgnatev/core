@@ -30763,6 +30763,7 @@ var getProfileFiles = () => {
   let files = [];
   let folderName = "";
   const getFilesFromFolder = () => {
+    console.log(import_path.default.join(__dirname, "../../images"));
     const folders = import_fs.default.readdirSync(import_path.default.join(__dirname, "../../images"));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
@@ -30789,7 +30790,7 @@ var getProfileFiles = () => {
 
 // src/modules/accountSetup.ts
 var accountSetup = async (account) => {
-  if (account.setuped) {
+  if (!account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
   }
