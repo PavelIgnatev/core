@@ -30238,6 +30238,9 @@ var checkSpamBlock = async (accountId2) => {
   const { message } = messages[0];
   if (message.includes("no limits are currently applied")) {
     console.log(`Account #${accountId2} is clean from spamblock`);
+    await updateAiAccount(accountId2, {
+      spamBlockDate: /* @__PURE__ */ new Date()
+    });
     return false;
   }
   const untilDateMatch = message.match(/until\s(.*)\./);
