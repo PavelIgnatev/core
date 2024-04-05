@@ -29,6 +29,7 @@ export const checkSpamBlock = async (accountId: string) => {
   const { message } = messages[0];
 
   if (message.includes("no limits are currently applied")) {
+    console.log(`Account #${accountId} is clean from spamblock`);
     return false;
   }
 
@@ -38,21 +39,15 @@ export const checkSpamBlock = async (accountId: string) => {
     ? untilDateMatch[1].replace("UTC", "")
     : "INFINITY";
 
-  if (spamBlockDate) {
-    const currentDate = new Date();
-    const nextDay = new Date(currentDate);
+  const currentDate = new Date();
+  const nextDay = new Date(currentDate);
 
-    nextDay.setDate(currentDate.getDate() + 1);
-    console.log(`The account has a spamblock to ${spamBlockDate}`);
-    await updateAiAccount(accountId, {
-      remainingTime: String(nextDay),
-      spamBlockDate,
-    });
-    return spamBlockDate;
-  }
-  console.log(`Account #${accountId} is clean from spamblock`);
+  nextDay.setDate(currentDate.getDate() + 1);
+
+  console.log(`The account has a spamblock to ${spamBlockDate}`);
   await updateAiAccount(accountId, {
-    spamBlockDate: null,
+    remainingTime: String(nextDay),
+    spamBlockDate,
   });
-  return null;
+  return spamBlockDate;
 };
