@@ -30789,7 +30789,7 @@ var getProfileFiles = () => {
 
 // src/modules/accountSetup.ts
 var accountSetup = async (account) => {
-  if (!account.setuped) {
+  if (account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
   }
