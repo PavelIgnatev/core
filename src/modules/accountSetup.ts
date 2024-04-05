@@ -12,7 +12,7 @@ import { invokeRequest, uploadFile } from "../telegram";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
 export const accountSetup = async (account: Account) => {
-  if (!account.setuped) {
+  if (account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
   }
