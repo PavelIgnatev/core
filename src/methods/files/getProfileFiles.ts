@@ -8,6 +8,7 @@ export const getProfileFiles = () => {
   let folderName = "";
 
   const getFilesFromFolder = () => {
+    console.log(path.join(__dirname, "../../images"))
     const folders = fs.readdirSync(path.join(__dirname, "../../images"));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
