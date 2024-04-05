@@ -30423,12 +30423,11 @@ var getProfileFiles = () => {
   let files = [];
   let folderName = "";
   const getFilesFromFolder = () => {
-    console.log(__dirname, import_path.default.join(__dirname, "../../images"));
-    const folders = import_fs.default.readdirSync(import_path.default.join(__dirname, "../../images"));
+    const folders = import_fs.default.readdirSync(import_path.default.join(__dirname, "/src/images"));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
     folderName = import_path.default.basename(randomFolder);
-    files = import_fs.default.readdirSync(import_path.default.join(__dirname, `../../images/${folderName}`)).filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
+    files = import_fs.default.readdirSync(import_path.default.join(__dirname, `/src/images/${folderName}`)).filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
   };
   while (files.length < 3) {
     getFilesFromFolder();
@@ -30437,11 +30436,11 @@ var getProfileFiles = () => {
     return new CustomFile(
       fileName,
       import_fs.default.statSync(
-        import_path.default.join(__dirname, `../../images/${folderName}/${fileName}`)
+        import_path.default.join(__dirname, `/src/images/${folderName}/${fileName}`)
       ).size,
-      import_path.default.join(__dirname, `../../images/${folderName}/${fileName}`),
+      import_path.default.join(__dirname, `/src/images/${folderName}/${fileName}`),
       import_fs.default.readFileSync(
-        import_path.default.join(__dirname, `../../images/${folderName}/${fileName}`)
+        import_path.default.join(__dirname, `/src/images/${folderName}/${fileName}`)
       )
     );
   });
