@@ -31,7 +31,7 @@ export const checkSpamBlock = async (accountId: string) => {
   if (message.includes("no limits are currently applied")) {
     console.log(`Account #${accountId} is clean from spamblock`);
     await updateAiAccount(accountId, {
-      spamBlockDate: new Date(),
+      spamBlockDate: null,
     });
     return false;
   }

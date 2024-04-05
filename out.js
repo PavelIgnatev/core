@@ -30239,7 +30239,7 @@ var checkSpamBlock = async (accountId2) => {
   if (message.includes("no limits are currently applied")) {
     console.log(`Account #${accountId2} is clean from spamblock`);
     await updateAiAccount(accountId2, {
-      spamBlockDate: /* @__PURE__ */ new Date()
+      spamBlockDate: null
     });
     return false;
   }
@@ -30789,7 +30789,7 @@ var getProfileFiles = () => {
 
 // src/modules/accountSetup.ts
 var accountSetup = async (account) => {
-  if (!account.setuped) {
+  if (account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
   }
