@@ -19,33 +19,33 @@ export const accountSetup = async (account: Account) => {
 
   let user;
 
-  // while (true) {
-  //   try {
-  //     const genUser = generateUser();
-  //     const { firstName, lastName, username } = genUser;
-  //     console.log(
-  //       `Generated data to populate profile: ${JSON.stringify(genUser)}`
-  //     );
+  while (true) {
+    try {
+      const genUser = generateUser();
+      const { firstName, lastName, username } = genUser;
+      console.log(
+        `Generated data to populate profile: ${JSON.stringify(genUser)}`
+      );
 
-  //     await invokeRequest(
-  //       new GramJs.account.UpdateUsername({
-  //         username,
-  //       })
-  //     );
+      await invokeRequest(
+        new GramJs.account.UpdateUsername({
+          username,
+        })
+      );
 
-  //     await updateProfile({
-  //       firstName,
-  //       lastName,
-  //       about: "",
-  //     });
+      await updateProfile({
+        firstName,
+        lastName,
+        about: "",
+      });
 
-  //     user = genUser;
+      user = genUser;
 
-  //     break;
-  //   } catch (error: any) {
-  //     console.log(`Error when updating user data: ${error.message}`);
-  //   }
-  // }
+      break;
+    } catch (error: any) {
+      console.log(`Error when updating user data: ${error.message}`);
+    }
+  }
 
   const { photos: profilePhotos } = await invokeRequest(
     new GramJs.photos.GetUserPhotos({
