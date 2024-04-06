@@ -11,7 +11,7 @@ import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 const exec = util.promisify(childExec);
 
 export const initClient = async (account: Account, onUpdate: any) => {
-  // await setupProxy(account.accountId);
+  await setupProxy(account.accountId);
 
   try {
     await init(account, onUpdate);
