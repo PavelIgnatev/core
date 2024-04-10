@@ -118,7 +118,7 @@ export async function init(accountData: Account, _onUpdate: any) {
 
 export async function invokeRequest(request: any) {
   try {
-    const randomDelay = Math.floor(Math.random() * 500) + 2000;
+    const randomDelay = Math.floor(Math.random() * 8000) + 2000;
     console.log(
       `Random delay ${randomDelay}ms before action execution: ${request.className}`
     );
