@@ -16,6 +16,10 @@ function capitalizeFirstLetter(string: string) {
 }
 
 function removeNonAlphaPrefix(string: string) {
+  if (string === "/start") {
+    return string;
+  }
+
   return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
 }
 
@@ -28,7 +32,9 @@ export const sendMessage = async (
   try {
     const sentMessage = await invokeRequest(
       new GramJs.messages.SendMessage({
-        message: removeNonAlphaPrefix(capitalizeFirstLetter(reduceSpaces(message))),
+        message: removeNonAlphaPrefix(
+          capitalizeFirstLetter(reduceSpaces(message))
+        ),
         clearDraft: true,
         peer: new GramJs.InputPeerUser({
           userId: BigInt(userId),
