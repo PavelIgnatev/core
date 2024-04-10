@@ -17,7 +17,7 @@ export const autoSender = async (account: Account, meId: string) => {
     const currentTime = new Date();
     let remainingTime = new Date(account.remainingTime || currentTime);
 
-    if (currentTime >= remainingTime) {
+    if (currentTime <= remainingTime) {
       const spamBlockDate = await checkSpamBlock(account.accountId);
       if (spamBlockDate) {
         return;
