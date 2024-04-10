@@ -13,7 +13,12 @@ export const checkSpamBlock = async (accountId: string) => {
     return true;
   }
 
-  const sentMessage = await sendMessage(userId, accessHash, "/start");
+  const sentMessage = await sendMessage(
+    userId,
+    accessHash,
+    "/start",
+    accountId
+  );
   const { maxId } = sentMessage?.updates?.[2] ?? {};
   if (!maxId) {
     console.error("MaxId from SpamBot not defined");

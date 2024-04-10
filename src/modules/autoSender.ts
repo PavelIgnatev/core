@@ -9,11 +9,10 @@ import { editFolder } from "../methods/folders/editFolder";
 import { getRecipient } from "../methods/recipients/getRecipient";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { resolveUsername } from "../methods/users/resolveUsername";
-import { me } from "../methods/users/me";
 import { resolvePhone } from "../methods/users/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
 
-export const autoSender = async (account: Account) => {
+export const autoSender = async (account: Account, meId: string) => {
   try {
     const currentTime = new Date();
     let remainingTime = new Date(account.remainingTime || currentTime);
@@ -53,12 +52,14 @@ export const autoSender = async (account: Account) => {
         const sentFirstMessage = await sendMessage(
           userId,
           accessHash,
-          recipient.firstMessage
+          recipient.firstMessage,
+          account.accountId
         );
         const sentSecondMessage = await sendMessage(
           userId,
           accessHash,
-          recipient.secondMessage
+          recipient.secondMessage,
+          account.accountId
         );
         console.log(
           `Sending messages to user ${recipient.recipientUsername}:${userId} was successful!`
@@ -68,8 +69,7 @@ export const autoSender = async (account: Account) => {
           `Added a chat with user ${recipient.recipientUsername}:${userId} to the archive`
         );
 
-        const { id: meId } = await me();
-        await saveRecipient(meId, account.accountId, recipientFull, recipient, [
+        await saveRecipient(account.accountId, recipientFull, recipient, [
           {
             id: sentFirstMessage.id,
             text: recipient.firstMessage,

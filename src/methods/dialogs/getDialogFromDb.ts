@@ -7,7 +7,6 @@ export const getDialogFromDb = async (
       const response = await fetch(
         `${process.env.BACKEND_URL}/dialogues/${accountId}/${recipientId}`
       );
-
       if (!response.ok) {
         throw new Error(
           `Failed to retrieve dialog data for account #${accountId}/${recipientId}`

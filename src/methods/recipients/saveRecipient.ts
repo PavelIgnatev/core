@@ -3,7 +3,6 @@ import GramJs from "../../telegram/tl/api";
 import { Dialogue } from "../../@types/Dialogue";
 
 export const saveRecipient = async (
-  meId: string,
   accountId: string,
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue,
@@ -25,7 +24,6 @@ export const saveRecipient = async (
   const data = {
     groupId,
     accountId,
-    meId: String(meId),
     recipientId: String(recipientId),
     recipientUsername: (username || recipientUsername || "").toLowerCase(),
     recipientTitle: `${firstName} ${lastName}`.trim(),

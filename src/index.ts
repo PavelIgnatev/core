@@ -2,10 +2,12 @@ import "dotenv/config";
 import util from "util";
 import { exec as childExec } from "child_process";
 
-import { getAccountData } from "./methods/accounts/getAccountData";
 import { initClient } from "./helpers/initClient";
 
-// import { autoResponse } from "./modules/autoResponse";
+import { getAccountData } from "./methods/accounts/getAccountData";
+import { usersMe } from "./methods/users/usersMe";
+
+import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
@@ -30,16 +32,22 @@ const main = async () => {
   await updateAuthorizations(accountData);
   await accountSetup(accountData);
 
+  const {
+    fullUser: { id: meFullUserId },
+    users,
+  } = await usersMe();
+  const meFullUser = users[0];
+
   for (let i = 0; i < 60; i++) {
     const accountData = await getAccountData(ID);
 
     if (isAutoResponse) {
       isAutoResponse = false;
-      // await autoResponse();
+      await autoResponse(accountData, meFullUser);
     }
 
     await addAiContact(accountData);
-    await autoSender(accountData);
+    await autoSender(accountData, String(meFullUserId));
     await new Promise((res) => setTimeout(res, 60000));
   }
 

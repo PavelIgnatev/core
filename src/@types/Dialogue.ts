@@ -3,7 +3,6 @@ export interface Dialogue {
 
   groupId: number;
   accountId: string;
-  meId: string;
   recipientId: string;
   recipientUsername: string;
   recipientTitle: string;
