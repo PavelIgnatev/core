@@ -78,9 +78,6 @@ export const autoResponse = async (
     } = groupId || { offer: {} };
 
     let promptGoal = "";
-    if (currentStage === 1) {
-      promptGoal = `ЦЕЛЬ ДЛЯ '${meName}': представиться как '${meName}' - ${aiRole}`;
-    }
     if (currentStage > 1) {
       promptGoal = `ЦЕЛЬ ДЛЯ '${meName}': ответить на последнее сообщениe пользователя '${userName}' c обязательным акцентом на привлечение внимания '${userName}' к предложению из 'ОПИСАНИЕ ПРЕДЛОЖЕНИЯ'.`;
     }
@@ -102,7 +99,7 @@ ${combinedMessages
       currentStage === 1,
       true,
       currentStage <= 2 ? 2 : 1,
-      currentStage === 1 ? meName : currentStage === 2 ? part : null
+      currentStage === 2 ? part : null
     );
     const sentResponseMessage = await sendMessage(
       id,
