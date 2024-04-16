@@ -856,7 +856,6 @@ class MTProtoSender {
 
         const newTimeOffset = this._state.updateTimeOffset(message.msgId);
         if (this._updateCallback) {
-
             this._updateCallback(new UpdateServerTimeOffset(newTimeOffset));
         }
 

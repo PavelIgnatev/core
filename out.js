@@ -2383,7 +2383,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/telegram/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer2(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -2391,14 +2391,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt = BigInt11(randBuffer.toString("hex"), 16);
+      let bigInt = BigInt10(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
-        bigInt = bigInt.subtract(BigInt11(2).pow(BigInt11(bytesNumber * 8)));
+        bigInt = bigInt.subtract(BigInt10(2).pow(BigInt10(bytesNumber * 8)));
       }
       return bigInt;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt11(big);
+      const bigNumber = BigInt10(big);
       const byteArray = [];
       for (let i2 = 0; i2 < number; i2++) {
         byteArray[i2] = bigNumber.shiftRight(8 * i2).and(255);
@@ -2406,17 +2406,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-      bigInt = BigInt11(bigInt);
+      bigInt = BigInt10(bigInt);
       const bitLength = bigInt.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt.lesser(BigInt11(0))) {
+      if (!signed && bigInt.lesser(BigInt10(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt.lesser(BigInt11(0))) {
+      if (bigInt.lesser(BigInt10(0))) {
         below = true;
         bigInt = bigInt.abs();
       }
@@ -2434,7 +2434,7 @@ var require_Helpers = __commonJS({
       return buffer;
     }
     function generateRandomLong(signed = true) {
-      return readBigIntFromBuffer2(generateRandomBytes3(8), true, signed);
+      return readBigIntFromBuffer2(generateRandomBytes2(8), true, signed);
     }
     function mod(n, m2) {
       return (n % m2 + m2) % m2;
@@ -2442,7 +2442,7 @@ var require_Helpers = __commonJS({
     function bigIntMod(n, m2) {
       return n.remainder(m2).add(m2).remainder(m2);
     }
-    function generateRandomBytes3(count) {
+    function generateRandomBytes2(count) {
       return Buffer.from(crypto.randomBytes(count));
     }
     async function generateKeyDataFromNonce(serverNonce, newNonce) {
@@ -2479,12 +2479,12 @@ var require_Helpers = __commonJS({
     }
     function modExp(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt11.one;
+      let result = BigInt10.one;
       let x2 = a;
-      while (b.greater(BigInt11.zero)) {
-        const leastSignificantBit = b.remainder(BigInt11(2));
-        b = b.divide(BigInt11(2));
-        if (leastSignificantBit.eq(BigInt11.one)) {
+      while (b.greater(BigInt10.zero)) {
+        const leastSignificantBit = b.remainder(BigInt10(2));
+        b = b.divide(BigInt10(2));
+        if (leastSignificantBit.eq(BigInt10.one)) {
           result = result.multiply(x2);
           result = result.remainder(n);
         }
@@ -2496,14 +2496,14 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt(BigInt11(integer), byteLength, false, signed);
+      return readBufferFromBigInt(BigInt10(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    var sleep4 = (ms) => new Promise((resolve) => {
+    var sleep2 = (ms) => new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
     function bufferXor(a, b) {
@@ -2546,7 +2546,7 @@ var require_Helpers = __commonJS({
       generateRandomLong,
       mod,
       crc32,
-      generateRandomBytes: generateRandomBytes3,
+      generateRandomBytes: generateRandomBytes2,
       // calcKey,
       generateKeyDataFromNonce,
       sha1,
@@ -2554,7 +2554,7 @@ var require_Helpers = __commonJS({
       bigIntMod,
       modExp,
       getRandomInt,
-      sleep: sleep4,
+      sleep: sleep2,
       getByteArray,
       // isArrayLike,
       toSignedLittleBuffer,
@@ -5033,7 +5033,6 @@ var require_tl = __commonJS({
       serializeDate
     } = require_generationHelpers();
     module2.exports = {
-      // TODO Refactor internal usages to always use `api`.
       constructors: api,
       requests: api,
       serializeBytes,
@@ -7699,7 +7698,7 @@ var require_AuthKey = __commonJS({
       readBigIntFromBuffer: readBigIntFromBuffer2
     } = require_Helpers();
     var BinaryReader = require_BinaryReader();
-    var { sleep: sleep4 } = require_Helpers();
+    var { sleep: sleep2 } = require_Helpers();
     var AuthKey = class _AuthKey {
       constructor(value, hash) {
         if (!hash || !value) {
@@ -7736,7 +7735,7 @@ var require_AuthKey = __commonJS({
       }
       async waitForKey() {
         while (!this.keyId) {
-          await sleep4(20);
+          await sleep2(20);
         }
       }
       getKey() {
@@ -7858,7 +7857,7 @@ var require_Utils = __commonJS({
       header[166] = stripped[2];
       return Buffer.concat([header, stripped.slice(3), JPEG_FOOTER]);
     }
-    function getDownloadPartSize2(fileSize) {
+    function getDownloadPartSize(fileSize) {
       if (fileSize <= 65536) {
         return 64;
       }
@@ -7970,7 +7969,7 @@ var require_Utils = __commonJS({
       getDisplayName,
       // resolveId,
       // isListLike,
-      getDownloadPartSize: getDownloadPartSize2,
+      getDownloadPartSize,
       getUploadPartSize: getUploadPartSize2,
       // getInputLocation,
       strippedPhotoToJpg,
@@ -7985,7 +7984,7 @@ var require_CallbackSession = __commonJS({
     "use strict";
     var MemorySession = require_Memory();
     var AuthKey = require_AuthKey();
-    var utils2 = require_Utils();
+    var utils = require_Utils();
     var CallbackSession2 = class extends MemorySession {
       constructor(sessionData, callback) {
         super();
@@ -8011,7 +8010,7 @@ var require_CallbackSession = __commonJS({
         const {
           ipAddress,
           port
-        } = utils2.getDC(mainDcId);
+        } = utils.getDC(mainDcId);
         this.setDC(mainDcId, ipAddress, port, true);
         await Promise.all(Object.keys(keys).map(async (dcId) => {
           const key = typeof keys[dcId] === "string" ? Buffer.from(keys[dcId], "hex") : Buffer.from(keys[dcId]);
@@ -8402,7 +8401,7 @@ var require_IGE = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/telegram/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers = require_Helpers();
     var IGE = require_IGE();
@@ -8457,7 +8456,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt11(0);
+        this._lastMsgId = BigInt10(0);
         this.msgIds = [];
       }
       /**
@@ -8650,9 +8649,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt11(Math.floor(now)).shiftLeft(BigInt11(32)).or(BigInt11(nanoseconds).shiftLeft(BigInt11(2)));
+        let newMsgId = BigInt10(Math.floor(now)).shiftLeft(BigInt10(32)).or(BigInt10(nanoseconds).shiftLeft(BigInt10(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt11(4));
+          newMsgId = this._lastMsgId.add(BigInt10(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -8664,7 +8663,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt11(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt10(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -8675,10 +8674,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt11(32));
+        const correct = correctMsgId.shiftRight(BigInt10(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt11(0);
+          this._lastMsgId = BigInt10(0);
           this._log.debug(
             `Updated time offset (old offset ${old}, bad ${bad}, good ${correctMsgId}, new ${this.timeOffset})`
           );
@@ -21017,7 +21016,6 @@ var require_PromisedWebSockets = __commonJS({
     var mutex = new Mutex();
     var closeError = new Error("WebSocket was closed");
     var CONNECTION_TIMEOUT = 3e3;
-    var MAX_TIMEOUT = 3e4;
     var PromisedWebSockets = class {
       constructor(disconnectedCallback) {
         this.client = void 0;
@@ -21115,15 +21113,6 @@ var require_PromisedWebSockets = __commonJS({
               return;
             reject(new Error("WebSocket connection timeout"));
             throw new Error("WebSocket connection timeout");
-            this.resolveRead(false);
-            this.closed = true;
-            if (this.disconnectedCallback) {
-              this.disconnectedCallback();
-            }
-            this.client.close();
-            this.timeout *= 2;
-            this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
-            timeout = void 0;
           }, this.timeout);
         });
       }
@@ -21348,7 +21337,7 @@ var require_Connection = __commonJS({
 var require_TCPAbridged = __commonJS({
   "src/telegram/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var { readBufferFromBigInt } = require_Helpers();
     var {
       Connection,
@@ -21369,7 +21358,7 @@ var require_TCPAbridged = __commonJS({
           b.writeUInt8(length, 0);
           length = b;
         } else {
-          length = Buffer.concat([Buffer.from("7f", "hex"), readBufferFromBigInt(BigInt11(length), 3)]);
+          length = Buffer.concat([Buffer.from("7f", "hex"), readBufferFromBigInt(BigInt10(length), 3)]);
         }
         return Buffer.concat([length, data]);
       }
@@ -21416,7 +21405,7 @@ var require_CTR = __commonJS({
 var require_TCPObfuscated = __commonJS({
   "src/telegram/network/connection/TCPObfuscated.js"(exports2, module2) {
     "use strict";
-    var { generateRandomBytes: generateRandomBytes3 } = require_Helpers();
+    var { generateRandomBytes: generateRandomBytes2 } = require_Helpers();
     var { ObfuscatedConnection } = require_Connection();
     var { AbridgedPacketCodec } = require_TCPAbridged();
     var CTR = require_CTR();
@@ -21438,7 +21427,7 @@ var require_TCPObfuscated = __commonJS({
         ];
         let random;
         while (true) {
-          random = generateRandomBytes3(64);
+          random = generateRandomBytes2(64);
           if (random[0] !== 239 && !random.slice(4, 8).equals(Buffer.alloc(4))) {
             let ok = true;
             for (const key of keywords) {
@@ -21531,703 +21520,6 @@ var require_network = __commonJS({
   }
 });
 
-// src/telegram/Password.js
-var require_Password = __commonJS({
-  "src/telegram/Password.js"(exports2, module2) {
-    "use strict";
-    var BigInt11 = require_BigInteger();
-    var { constructors } = require_tl();
-    var {
-      readBigIntFromBuffer: readBigIntFromBuffer2,
-      readBufferFromBigInt,
-      sha256,
-      bigIntMod,
-      modExp,
-      generateRandomBytes: generateRandomBytes3
-    } = require_Helpers();
-    var crypto = require_crypto();
-    var SIZE_FOR_HASH = 256;
-    function checkPrimeAndGood(primeBytes, g) {
-      const goodPrime = Buffer.from([
-        199,
-        28,
-        174,
-        185,
-        198,
-        177,
-        201,
-        4,
-        142,
-        108,
-        82,
-        47,
-        112,
-        241,
-        63,
-        115,
-        152,
-        13,
-        64,
-        35,
-        142,
-        62,
-        33,
-        193,
-        73,
-        52,
-        208,
-        55,
-        86,
-        61,
-        147,
-        15,
-        72,
-        25,
-        138,
-        10,
-        167,
-        193,
-        64,
-        88,
-        34,
-        148,
-        147,
-        210,
-        37,
-        48,
-        244,
-        219,
-        250,
-        51,
-        111,
-        110,
-        10,
-        201,
-        37,
-        19,
-        149,
-        67,
-        174,
-        212,
-        76,
-        206,
-        124,
-        55,
-        32,
-        253,
-        81,
-        246,
-        148,
-        88,
-        112,
-        90,
-        198,
-        140,
-        212,
-        254,
-        107,
-        107,
-        19,
-        171,
-        220,
-        151,
-        70,
-        81,
-        41,
-        105,
-        50,
-        132,
-        84,
-        241,
-        143,
-        175,
-        140,
-        89,
-        95,
-        100,
-        36,
-        119,
-        254,
-        150,
-        187,
-        42,
-        148,
-        29,
-        91,
-        205,
-        29,
-        74,
-        200,
-        204,
-        73,
-        136,
-        7,
-        8,
-        250,
-        155,
-        55,
-        142,
-        60,
-        79,
-        58,
-        144,
-        96,
-        190,
-        230,
-        124,
-        249,
-        164,
-        164,
-        166,
-        149,
-        129,
-        16,
-        81,
-        144,
-        126,
-        22,
-        39,
-        83,
-        181,
-        107,
-        15,
-        107,
-        65,
-        13,
-        186,
-        116,
-        216,
-        168,
-        75,
-        42,
-        20,
-        179,
-        20,
-        78,
-        14,
-        241,
-        40,
-        71,
-        84,
-        253,
-        23,
-        237,
-        149,
-        13,
-        89,
-        101,
-        180,
-        185,
-        221,
-        70,
-        88,
-        45,
-        177,
-        23,
-        141,
-        22,
-        156,
-        107,
-        196,
-        101,
-        176,
-        214,
-        255,
-        156,
-        163,
-        146,
-        143,
-        239,
-        91,
-        154,
-        228,
-        228,
-        24,
-        252,
-        21,
-        232,
-        62,
-        190,
-        160,
-        248,
-        127,
-        169,
-        255,
-        94,
-        237,
-        112,
-        5,
-        13,
-        237,
-        40,
-        73,
-        244,
-        123,
-        249,
-        89,
-        217,
-        86,
-        133,
-        12,
-        233,
-        41,
-        133,
-        31,
-        13,
-        129,
-        21,
-        246,
-        53,
-        177,
-        5,
-        238,
-        46,
-        78,
-        21,
-        208,
-        75,
-        36,
-        84,
-        191,
-        111,
-        79,
-        173,
-        240,
-        52,
-        177,
-        4,
-        3,
-        17,
-        156,
-        216,
-        227,
-        185,
-        47,
-        204,
-        91
-      ]);
-      if (goodPrime.equals(primeBytes)) {
-        if ([3, 4, 5, 7].includes(g)) {
-          return;
-        }
-      }
-      throw new Error("Changing passwords unsupported");
-    }
-    function isGoodLarge(number, p) {
-      return number.greater(BigInt11(0)) && p.subtract(number).greater(BigInt11(0));
-    }
-    function numBytesForHash(number) {
-      return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
-    }
-    function bigNumForHash(g) {
-      return readBufferFromBigInt(g, SIZE_FOR_HASH, false);
-    }
-    function isGoodModExpFirst(modexp, prime) {
-      const diff = prime.subtract(modexp);
-      const minDiffBitsCount = 2048 - 64;
-      const maxModExpSize = 256;
-      return !(diff.lesser(BigInt11(0)) || diff.bitLength() < minDiffBitsCount || modexp.bitLength() < minDiffBitsCount || Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
-    }
-    function xor2(a, b) {
-      const length = Math.min(a.length, b.length);
-      for (let i2 = 0; i2 < length; i2++) {
-        a[i2] ^= b[i2];
-      }
-      return a;
-    }
-    function pbkdf2sha512(password, salt, iterations) {
-      return crypto.pbkdf2(password, salt, iterations, 64, "sha512");
-    }
-    async function computeHash(algo, password) {
-      const hash1 = await sha256(Buffer.concat([algo.salt1, Buffer.from(password, "utf-8"), algo.salt1]));
-      const hash2 = await sha256(Buffer.concat([algo.salt2, hash1, algo.salt2]));
-      const hash3 = await pbkdf2sha512(hash2, algo.salt1, 1e5);
-      return sha256(Buffer.concat([algo.salt2, hash3, algo.salt2]));
-    }
-    async function computeDigest2(algo, password) {
-      try {
-        checkPrimeAndGood(algo.p, algo.g);
-      } catch (e2) {
-        throw new Error("bad p/g in password");
-      }
-      const value = modExp(
-        BigInt11(algo.g),
-        readBigIntFromBuffer2(await computeHash(algo, password), false),
-        readBigIntFromBuffer2(algo.p, false)
-      );
-      return bigNumForHash(value);
-    }
-    async function computeCheck2(request, password) {
-      const algo = request.currentAlgo;
-      if (!(algo instanceof constructors.PasswordKdfAlgoSHA256SHA256PBKDF2HMACSHA512iter100000SHA256ModPow)) {
-        throw new Error(`Unsupported password algorithm ${algo.className}`);
-      }
-      const pwHash = await computeHash(algo, password);
-      const p = readBigIntFromBuffer2(algo.p, false);
-      const { g } = algo;
-      const B = readBigIntFromBuffer2(request.srp_B, false);
-      try {
-        checkPrimeAndGood(algo.p, g);
-      } catch (e2) {
-        throw new Error("bad /g in password");
-      }
-      if (!isGoodLarge(B, p)) {
-        throw new Error("bad b in check");
-      }
-      const x2 = readBigIntFromBuffer2(pwHash, false);
-      const pForHash = numBytesForHash(algo.p);
-      const gForHash = bigNumForHash(g);
-      const bForHash = numBytesForHash(request.srp_B);
-      const gX = modExp(BigInt11(g), x2, p);
-      const k = readBigIntFromBuffer2(await sha256(Buffer.concat([pForHash, gForHash])), false);
-      const kgX = bigIntMod(k.multiply(gX), p);
-      const generateAndCheckRandom = async () => {
-        const randomSize = 256;
-        while (true) {
-          const random = generateRandomBytes3(randomSize);
-          const a2 = readBigIntFromBuffer2(random, false);
-          const A2 = modExp(BigInt11(g), a2, p);
-          if (isGoodModExpFirst(A2, p)) {
-            const aForHash2 = bigNumForHash(A2);
-            const u2 = readBigIntFromBuffer2(await sha256(Buffer.concat([aForHash2, bForHash])), false);
-            if (u2.greater(BigInt11(0))) {
-              return [a2, aForHash2, u2];
-            }
-          }
-        }
-      };
-      const [a, aForHash, u] = await generateAndCheckRandom();
-      const gB = bigIntMod(B.subtract(kgX), p);
-      if (!isGoodModExpFirst(gB, p)) {
-        throw new Error("bad gB");
-      }
-      const ux = u.multiply(x2);
-      const aUx = a.add(ux);
-      const S2 = modExp(gB, aUx, p);
-      const [K, pSha, gSha, salt1Sha, salt2Sha] = await Promise.all([
-        sha256(bigNumForHash(S2)),
-        sha256(pForHash),
-        sha256(gForHash),
-        sha256(algo.salt1),
-        sha256(algo.salt2)
-      ]);
-      const M1 = await sha256(Buffer.concat([
-        xor2(pSha, gSha),
-        salt1Sha,
-        salt2Sha,
-        aForHash,
-        bForHash,
-        K
-      ]));
-      return new constructors.InputCheckPasswordSRP({
-        srpId: request.srpId,
-        A: Buffer.from(aForHash),
-        M1
-      });
-    }
-    module2.exports = {
-      computeCheck: computeCheck2,
-      computeDigest: computeDigest2
-    };
-  }
-});
-
-// src/telegram/client/auth.ts
-var auth_exports = {};
-__export(auth_exports, {
-  authFlow: () => authFlow,
-  checkAuthorization: () => checkAuthorization,
-  signInUserWithPreferredMethod: () => signInUserWithPreferredMethod
-});
-async function authFlow(client2, apiCredentials, authParams) {
-  let me;
-  if ("botAuthToken" in authParams) {
-    me = await signInBot(client2, apiCredentials, authParams);
-  } else if ("webAuthToken" in authParams && authParams.webAuthToken) {
-    me = await signInUserWithWebToken(client2, apiCredentials, authParams);
-  } else {
-    me = await signInUserWithPreferredMethod(client2, apiCredentials, authParams);
-  }
-  client2._log.info("Signed in successfully as", import_Utils.default.getDisplayName(me));
-}
-function signInUserWithPreferredMethod(client2, apiCredentials, authParams) {
-  const { initialMethod = DEFAULT_INITIAL_METHOD } = authParams;
-  if (initialMethod === "phoneNumber") {
-    return signInUser(client2, apiCredentials, authParams);
-  } else {
-    return signInUserWithQrCode(client2, apiCredentials, authParams);
-  }
-}
-async function checkAuthorization(client2, shouldThrow = false) {
-  try {
-    await client2.invoke(new import_api.default.updates.GetState());
-    return true;
-  } catch (e2) {
-    if (e2.message === "Disconnect" || shouldThrow)
-      throw e2;
-    return false;
-  }
-}
-async function signInUserWithWebToken(client2, apiCredentials, authParams) {
-  try {
-    const { apiId, apiHash } = apiCredentials;
-    const sendResult = await client2.invoke(new import_api.default.auth.ImportWebTokenAuthorization({
-      webAuthToken: authParams.webAuthToken,
-      apiId,
-      apiHash
-    }));
-    if (sendResult instanceof import_api.default.auth.Authorization) {
-      return sendResult.user;
-    } else {
-      throw new Error("SIGN_UP_REQUIRED");
-    }
-  } catch (err) {
-    if (err.message === "SESSION_PASSWORD_NEEDED") {
-      return signInWithPassword(client2, apiCredentials, authParams, true);
-    } else {
-      client2._log.error(`Failed to login with web token: ${err}`);
-      authParams.webAuthTokenFailed();
-      return signInUserWithPreferredMethod(client2, apiCredentials, {
-        ...authParams,
-        webAuthToken: void 0
-      });
-    }
-  }
-}
-async function signInUser(client2, apiCredentials, authParams) {
-  let phoneNumber;
-  let phoneCodeHash;
-  let isCodeViaApp = false;
-  while (true) {
-    try {
-      if (typeof authParams.phoneNumber === "function") {
-        try {
-          phoneNumber = await authParams.phoneNumber();
-        } catch (err) {
-          if (err.message === "RESTART_AUTH_WITH_QR") {
-            return signInUserWithQrCode(client2, apiCredentials, authParams);
-          }
-          throw err;
-        }
-      } else {
-        phoneNumber = authParams.phoneNumber;
-      }
-      const sendCodeResult = await sendCode(client2, apiCredentials, phoneNumber, authParams.forceSMS);
-      phoneCodeHash = sendCodeResult.phoneCodeHash;
-      isCodeViaApp = sendCodeResult.isCodeViaApp;
-      if (typeof phoneCodeHash !== "string") {
-        throw new Error("Failed to retrieve phone code hash");
-      }
-      break;
-    } catch (err) {
-      if (typeof authParams.phoneNumber !== "function") {
-        throw err;
-      }
-      authParams.onError(err);
-    }
-  }
-  let phoneCode;
-  let isRegistrationRequired = false;
-  let termsOfService;
-  while (1) {
-    try {
-      try {
-        phoneCode = await authParams.phoneCode(isCodeViaApp);
-      } catch (err) {
-        if (err.message === "RESTART_AUTH") {
-          return signInUser(client2, apiCredentials, authParams);
-        }
-      }
-      if (!phoneCode) {
-        throw new Error("Code is empty");
-      }
-      const result = await client2.invoke(new import_api.default.auth.SignIn({
-        phoneNumber,
-        phoneCodeHash,
-        phoneCode
-      }));
-      if (result instanceof import_api.default.auth.AuthorizationSignUpRequired) {
-        isRegistrationRequired = true;
-        termsOfService = result.termsOfService;
-        break;
-      }
-      return result.user;
-    } catch (err) {
-      if (err.message === "SESSION_PASSWORD_NEEDED") {
-        return signInWithPassword(client2, apiCredentials, authParams);
-      } else {
-        authParams.onError(err);
-      }
-    }
-  }
-  if (isRegistrationRequired) {
-    while (1) {
-      try {
-        const [firstName, lastName] = await authParams.firstAndLastNames();
-        if (!firstName) {
-          throw new Error("First name is required");
-        }
-        const { user } = await client2.invoke(new import_api.default.auth.SignUp({
-          phoneNumber,
-          phoneCodeHash,
-          firstName,
-          lastName
-        }));
-        if (termsOfService) {
-          await client2.invoke(new import_api.default.help.AcceptTermsOfService({ id: termsOfService.id }));
-        }
-        return user;
-      } catch (err) {
-        authParams.onError(err);
-      }
-    }
-  }
-  authParams.onError(new Error("Auth failed"));
-  return signInUser(client2, apiCredentials, authParams);
-}
-async function signInUserWithQrCode(client2, apiCredentials, authParams) {
-  let isScanningComplete = false;
-  const inputPromise = (async () => {
-    while (1) {
-      if (isScanningComplete) {
-        break;
-      }
-      const result = await client2.invoke(new import_api.default.auth.ExportLoginToken({
-        apiId: Number(process.env.TELEGRAM_API_ID),
-        apiHash: process.env.TELEGRAM_API_HASH,
-        exceptIds: []
-      }));
-      if (!(result instanceof import_api.default.auth.LoginToken)) {
-        throw new Error("Unexpected");
-      }
-      const { token, expires } = result;
-      await Promise.race([
-        authParams.qrCode({ token, expires }),
-        (0, import_Helpers.sleep)(QR_CODE_TIMEOUT)
-      ]);
-    }
-  })();
-  const updatePromise = new Promise((resolve) => {
-    client2.addEventHandler((update) => {
-      if (update instanceof import_api.default.UpdateLoginToken) {
-        resolve();
-      }
-    }, { build: (update) => update });
-  });
-  try {
-    await Promise.race([updatePromise, inputPromise]);
-  } catch (err) {
-    if (err.message === "RESTART_AUTH") {
-      return await signInUser(client2, apiCredentials, authParams);
-    }
-    throw err;
-  } finally {
-    isScanningComplete = true;
-  }
-  try {
-    const result2 = await client2.invoke(new import_api.default.auth.ExportLoginToken({
-      apiId: Number(process.env.TELEGRAM_API_ID),
-      apiHash: process.env.TELEGRAM_API_HASH,
-      exceptIds: []
-    }));
-    if (result2 instanceof import_api.default.auth.LoginTokenSuccess && result2.authorization instanceof import_api.default.auth.Authorization) {
-      return result2.authorization.user;
-    } else if (result2 instanceof import_api.default.auth.LoginTokenMigrateTo) {
-      await client2._switchDC(result2.dcId);
-      const migratedResult = await client2.invoke(new import_api.default.auth.ImportLoginToken({
-        token: result2.token
-      }));
-      if (migratedResult instanceof import_api.default.auth.LoginTokenSuccess && migratedResult.authorization instanceof import_api.default.auth.Authorization) {
-        return migratedResult.authorization.user;
-      }
-    }
-  } catch (err) {
-    if (err.message === "SESSION_PASSWORD_NEEDED") {
-      return signInWithPassword(client2, apiCredentials, authParams);
-    }
-    throw err;
-  }
-  throw void 0;
-}
-async function sendCode(client2, apiCredentials, phoneNumber, forceSMS = false) {
-  try {
-    const { apiId, apiHash } = apiCredentials;
-    const sendResult = await client2.invoke(new import_api.default.auth.SendCode({
-      phoneNumber,
-      apiId,
-      apiHash,
-      settings: new import_api.default.CodeSettings()
-    }));
-    if (!(sendResult instanceof import_api.default.auth.SentCode)) {
-      throw Error("Unexpected SentCodeSuccess");
-    }
-    if (!forceSMS || sendResult.type instanceof import_api.default.auth.SentCodeTypeSms) {
-      return {
-        phoneCodeHash: sendResult.phoneCodeHash,
-        isCodeViaApp: sendResult.type instanceof import_api.default.auth.SentCodeTypeApp
-      };
-    }
-    const resendResult = await client2.invoke(new import_api.default.auth.ResendCode({
-      phoneNumber,
-      phoneCodeHash: sendResult.phoneCodeHash
-    }));
-    if (!(resendResult instanceof import_api.default.auth.SentCode)) {
-      throw Error("Unexpected SentCodeSuccess");
-    }
-    return {
-      phoneCodeHash: resendResult.phoneCodeHash,
-      isCodeViaApp: resendResult.type instanceof import_api.default.auth.SentCodeTypeApp
-    };
-  } catch (err) {
-    if (err.message === "AUTH_RESTART") {
-      return sendCode(client2, apiCredentials, phoneNumber, forceSMS);
-    } else {
-      throw err;
-    }
-  }
-}
-async function signInWithPassword(client2, apiCredentials, authParams, noReset = false) {
-  while (1) {
-    try {
-      const passwordSrpResult = await client2.invoke(new import_api.default.account.GetPassword());
-      const password = await authParams.password(passwordSrpResult.hint, noReset);
-      if (!password) {
-        throw new Error("Password is empty");
-      }
-      const passwordSrpCheck = await (0, import_Password.computeCheck)(passwordSrpResult, password);
-      const { user } = await client2.invoke(new import_api.default.auth.CheckPassword({
-        password: passwordSrpCheck
-      }));
-      return user;
-    } catch (err) {
-      authParams.onError(err);
-    }
-  }
-  return void 0;
-}
-async function signInBot(client2, apiCredentials, authParams) {
-  const { apiId, apiHash } = apiCredentials;
-  const { botAuthToken } = authParams;
-  const { user } = await client2.invoke(new import_api.default.auth.ImportBotAuthorization({
-    apiId,
-    apiHash,
-    botAuthToken
-  }));
-  return user;
-}
-var import_api, import_Utils, import_Helpers, import_Password, DEFAULT_INITIAL_METHOD, QR_CODE_TIMEOUT;
-var init_auth = __esm({
-  "src/telegram/client/auth.ts"() {
-    "use strict";
-    import_api = __toESM(require_api());
-    import_Utils = __toESM(require_Utils());
-    import_Helpers = __toESM(require_Helpers());
-    import_Password = __toESM(require_Password());
-    DEFAULT_INITIAL_METHOD = "phoneNumber";
-    QR_CODE_TIMEOUT = 3e4;
-  }
-});
-
 // src/telegram/foreman.ts
 var Foreman;
 var init_foreman = __esm({
@@ -22262,243 +21554,6 @@ var init_foreman = __esm({
   }
 });
 
-// src/telegram/client/downloadFile.ts
-var downloadFile_exports = {};
-__export(downloadFile_exports, {
-  downloadFile: () => downloadFile
-});
-async function downloadFile(client2, inputLocation, fileParams, shouldDebugExportedSenders) {
-  const { dcId } = fileParams;
-  for (let i2 = 0; i2 < SENDER_RETRIES; i2++) {
-    try {
-      return await downloadFile2(client2, inputLocation, fileParams, shouldDebugExportedSenders);
-    } catch (err) {
-      if ((err.message.startsWith("SESSION_REVOKED") || err.message.startsWith("CONNECTION_NOT_INITED")) && i2 < SENDER_RETRIES - 1) {
-        await client2._cleanupExportedSenders(dcId);
-      } else {
-        throw err;
-      }
-    }
-  }
-  return void 0;
-}
-async function downloadFile2(client2, inputLocation, fileParams, shouldDebugExportedSenders) {
-  let {
-    partSizeKb,
-    end
-  } = fileParams;
-  const {
-    fileSize
-  } = fileParams;
-  const fileId = "id" in inputLocation ? inputLocation.id : void 0;
-  const logWithId = (...args) => {
-    if (!shouldDebugExportedSenders)
-      return;
-    console.log(`\u2B07\uFE0F [${fileId}/${fileParams.dcId}]`, ...args);
-  };
-  logWithId("Downloading file...");
-  const isPremium = Boolean(client2.isPremium);
-  const { dcId, progressCallback, start = 0 } = fileParams;
-  end = end && end < fileSize ? end : fileSize - 1;
-  if (!partSizeKb) {
-    partSizeKb = fileSize ? (0, import_Utils2.getDownloadPartSize)(start ? end - start + 1 : fileSize) : DEFAULT_CHUNK_SIZE;
-  }
-  const partSize = partSizeKb * 1024;
-  const partsCount = end ? Math.ceil((end + 1 - start + 1) / partSize) : 1;
-  const noParallel = !end;
-  const shouldUseMultipleConnections = fileSize && fileSize >= MULTIPLE_CONNECTIONS_MIN_FILE_SIZE && !noParallel;
-  let deferred;
-  if (partSize % MIN_CHUNK_SIZE !== 0) {
-    throw new Error(`The part size must be evenly divisible by ${MIN_CHUNK_SIZE}`);
-  }
-  client2._log.info(`Downloading file in chunks of ${partSize} bytes`);
-  const fileView = new FileView(end - start + 1);
-  const promises = [];
-  let offset = start;
-  const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
-  let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
-  let hasEnded = false;
-  let progress = 0;
-  if (progressCallback) {
-    progressCallback(progress);
-  }
-  await fileView.init();
-  while (true) {
-    let limit = partSize;
-    let isPrecise = false;
-    if (Math.floor(offset / ONE_MB) !== Math.floor((offset + limit - 1) / ONE_MB)) {
-      limit = ONE_MB - offset % ONE_MB;
-      isPrecise = true;
-    }
-    if (offset % MIN_CHUNK_SIZE !== 0 || limit % MIN_CHUNK_SIZE !== 0) {
-      isPrecise = true;
-    }
-    const senderIndex = !shouldUseMultipleConnections ? 0 : currentForemanIndex % (isPremium ? MAX_CONCURRENT_CONNECTIONS_PREMIUM : MAX_CONCURRENT_CONNECTIONS);
-    await foremans[senderIndex].requestWorker();
-    if (deferred)
-      await deferred.promise;
-    if (noParallel)
-      deferred = new Deferred();
-    if (hasEnded) {
-      foremans[senderIndex].releaseWorker();
-      break;
-    }
-    const logWithSenderIndex = (...args) => {
-      logWithId(`[${senderIndex}/${dcId}]`, ...args);
-    };
-    promises.push((async (offsetMemo) => {
-      while (true) {
-        let sender;
-        try {
-          let isDone = false;
-          if (shouldDebugExportedSenders) {
-            setTimeout(() => {
-              if (isDone)
-                return;
-              logWithSenderIndex(`\u2757\uFE0F\uFE0F getSender took too long ${offsetMemo}`);
-            }, 8e3);
-          }
-          sender = await client2.getSender(dcId, senderIndex, isPremium);
-          isDone = true;
-          let isDone2 = false;
-          if (shouldDebugExportedSenders) {
-            setTimeout(() => {
-              if (isDone2)
-                return;
-              logWithSenderIndex(`\u2757\uFE0F\uFE0F sender.send took too long ${offsetMemo}`);
-            }, 6e3);
-          }
-          const result = await Promise.race([
-            sender.send(new import_api2.default.upload.GetFile({
-              location: inputLocation,
-              offset: (0, import_big_integer.default)(offsetMemo),
-              limit,
-              precise: isPrecise || void 0
-            })),
-            (0, import_Helpers2.sleep)(SENDER_TIMEOUT).then(() => {
-              if (dcId === client2.session.dcId) {
-                logWithSenderIndex(`Download timed out ${offsetMemo}`);
-                return Promise.reject(new Error("USER_CANCELED"));
-              } else {
-                logWithSenderIndex(`Download timed out [not main] ${offsetMemo}`);
-                return Promise.reject(new Error("SESSION_REVOKED"));
-              }
-            })
-          ]);
-          client2.releaseExportedSender(sender);
-          isDone2 = true;
-          if (progressCallback) {
-            if (progressCallback.isCanceled) {
-              throw new Error("USER_CANCELED");
-            }
-            progress += 1 / partsCount;
-            logWithSenderIndex(`\u2B07\uFE0F\uFE0F ${progress * 100}%`);
-            progressCallback(progress);
-          }
-          if (!end && result.bytes.length < limit) {
-            hasEnded = true;
-          }
-          foremans[senderIndex].releaseWorker();
-          if (deferred)
-            deferred.resolve();
-          fileView.write(result.bytes, offsetMemo - start);
-          return;
-        } catch (err) {
-          if (sender && !sender.isConnected()) {
-            await (0, import_Helpers2.sleep)(DISCONNECT_SLEEP);
-            continue;
-          } else if (err instanceof import_errors.default.FloodWaitError) {
-            await (0, import_Helpers2.sleep)(err.seconds * 1e3);
-            continue;
-          }
-          logWithSenderIndex(`Ended not gracefully ${offsetMemo}`);
-          foremans[senderIndex].releaseWorker();
-          if (deferred)
-            deferred.resolve();
-          hasEnded = true;
-          client2.releaseExportedSender(sender);
-          throw err;
-        }
-      }
-    })(offset));
-    offset += limit;
-    currentForemanIndex++;
-    if (end && offset > end) {
-      break;
-    }
-  }
-  await Promise.all(promises);
-  return fileView.getData();
-}
-var import_big_integer, import_errors, import_api2, import_Helpers2, import_Utils2, MIN_CHUNK_SIZE, DEFAULT_CHUNK_SIZE, ONE_MB, DISCONNECT_SLEEP, SENDER_TIMEOUT, SENDER_RETRIES, FileView, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, MULTIPLE_CONNECTIONS_MIN_FILE_SIZE, foremans;
-var init_downloadFile = __esm({
-  "src/telegram/client/downloadFile.ts"() {
-    "use strict";
-    import_big_integer = __toESM(require_BigInteger());
-    init_Deferred();
-    init_foreman();
-    import_errors = __toESM(require_errors());
-    import_api2 = __toESM(require_api());
-    import_Helpers2 = __toESM(require_Helpers());
-    import_Utils2 = __toESM(require_Utils());
-    MIN_CHUNK_SIZE = 4096;
-    DEFAULT_CHUNK_SIZE = 64;
-    ONE_MB = 1024 * 1024;
-    DISCONNECT_SLEEP = 1e3;
-    SENDER_TIMEOUT = 60 * 1e3;
-    SENDER_RETRIES = 5;
-    FileView = class {
-      type;
-      size;
-      buffer;
-      largeFile;
-      largeFileAccessHandle;
-      constructor(size) {
-        this.size = size;
-        this.type = size && size > self.maxBufferSize ? "opfs" : "memory";
-      }
-      async init() {
-        if (this.type === "opfs") {
-          if (!(FileSystemFileHandle == null ? void 0 : FileSystemFileHandle.prototype.createSyncAccessHandle)) {
-            throw new Error("`createSyncAccessHandle` is not available. Cannot download files larger than 2GB.");
-          }
-          const directory = await navigator.storage.getDirectory();
-          const downloadsFolder = await directory.getDirectoryHandle("downloads", { create: true });
-          this.largeFile = await downloadsFolder.getFileHandle(Math.random().toString(), { create: true });
-          this.largeFileAccessHandle = await this.largeFile.createSyncAccessHandle();
-        } else {
-          this.buffer = this.size ? Buffer.alloc(this.size) : Buffer.alloc(0);
-        }
-      }
-      write(data, offset) {
-        if (this.type === "opfs") {
-          this.largeFileAccessHandle.write(data, { at: offset });
-        } else if (this.size) {
-          for (let i2 = 0; i2 < data.length; i2++) {
-            if (offset + i2 >= this.buffer.length)
-              return;
-            this.buffer.writeUInt8(data[i2], offset + i2);
-          }
-        } else {
-          this.buffer = Buffer.concat([this.buffer, data]);
-        }
-      }
-      getData() {
-        if (this.type === "opfs") {
-          return this.largeFile.getFile();
-        } else {
-          return Promise.resolve(this.buffer);
-        }
-      }
-    };
-    MAX_CONCURRENT_CONNECTIONS = 3;
-    MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
-    MAX_WORKERS_PER_CONNECTION = 10;
-    MULTIPLE_CONNECTIONS_MIN_FILE_SIZE = 10485760;
-    foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(void 0).map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
-  }
-});
-
 // src/telegram/client/uploadFile.ts
 var uploadFile_exports = {};
 __export(uploadFile_exports, {
@@ -22508,16 +21563,16 @@ async function uploadFile(client2, fileParams) {
   const { file: reailFile } = fileParams;
   const { name, size } = reailFile;
   const file = new import_buffer.Blob([reailFile.buffer]);
-  const fileId = (0, import_Helpers3.readBigIntFromBuffer)((0, import_Helpers3.generateRandomBytes)(8), true, true);
+  const fileId = (0, import_Helpers.readBigIntFromBuffer)((0, import_Helpers.generateRandomBytes)(8), true, true);
   const isLarge = size > LARGE_FILE_THRESHOLD;
-  const partSize = (0, import_Utils3.getUploadPartSize)(size) * KB_TO_BYTES;
+  const partSize = (0, import_Utils.getUploadPartSize)(size) * KB_TO_BYTES;
   const partCount = Math.floor((size + partSize - 1) / partSize);
-  const activeCounts = foremans2.map(({ activeWorkers }) => activeWorkers);
+  const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
   const promises = [];
   let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
   for (let i2 = 0; i2 < partCount; i2++) {
-    const senderIndex = currentForemanIndex % MAX_CONCURRENT_CONNECTIONS2;
-    await foremans2[senderIndex].requestWorker();
+    const senderIndex = currentForemanIndex % MAX_CONCURRENT_CONNECTIONS;
+    await foremans[senderIndex].requestWorker();
     const blobSlice = file.slice(i2 * partSize, (i2 + 1) * partSize);
     promises.push(
       (async (jMemo, blobSliceMemo) => {
@@ -22531,12 +21586,12 @@ async function uploadFile(client2, fileParams) {
             );
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api3.default.upload.SaveBigFilePart({
+              isLarge ? new import_api.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api3.default.upload.SaveFilePart({
+              }) : new import_api.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -22545,17 +21600,17 @@ async function uploadFile(client2, fileParams) {
             client2.releaseExportedSender(sender);
           } catch (err) {
             if (sender && !sender.isConnected()) {
-              await (0, import_Helpers3.sleep)(DISCONNECT_SLEEP2);
+              await (0, import_Helpers.sleep)(DISCONNECT_SLEEP);
               continue;
-            } else if (err instanceof import_errors2.default.FloodWaitError) {
-              await (0, import_Helpers3.sleep)(err.seconds * 1e3);
+            } else if (err instanceof import_errors.default.FloodWaitError) {
+              await (0, import_Helpers.sleep)(err.seconds * 1e3);
               continue;
             }
-            foremans2[senderIndex].releaseWorker();
+            foremans[senderIndex].releaseWorker();
             client2.releaseExportedSender(sender);
             throw err;
           }
-          foremans2[senderIndex].releaseWorker();
+          foremans[senderIndex].releaseWorker();
           break;
         }
       })(i2, blobSlice)
@@ -22563,128 +21618,34 @@ async function uploadFile(client2, fileParams) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api3.default.InputFileBig({
+  return isLarge ? new import_api.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api3.default.InputFile({
+  }) : new import_api.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api3, import_Helpers3, import_Utils3, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, DISCONNECT_SLEEP2, MAX_CONCURRENT_CONNECTIONS2, MAX_CONCURRENT_CONNECTIONS_PREMIUM2, MAX_WORKERS_PER_CONNECTION2, foremans2;
+var import_buffer, import_api, import_Helpers, import_Utils, import_errors, KB_TO_BYTES, LARGE_FILE_THRESHOLD, DISCONNECT_SLEEP, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/telegram/client/uploadFile.ts"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api3 = __toESM(require_api());
-    import_Helpers3 = __toESM(require_Helpers());
-    import_Utils3 = __toESM(require_Utils());
-    import_errors2 = __toESM(require_errors());
+    import_api = __toESM(require_api());
+    import_Helpers = __toESM(require_Helpers());
+    import_Utils = __toESM(require_Utils());
+    import_errors = __toESM(require_errors());
     init_foreman();
     KB_TO_BYTES = 1024;
     LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
-    DISCONNECT_SLEEP2 = 1e3;
-    MAX_CONCURRENT_CONNECTIONS2 = 3;
-    MAX_CONCURRENT_CONNECTIONS_PREMIUM2 = 6;
-    MAX_WORKERS_PER_CONNECTION2 = 10;
-    foremans2 = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM2).fill(void 0).map(() => new Foreman(MAX_WORKERS_PER_CONNECTION2));
-  }
-});
-
-// src/telegram/client/2fa.ts
-var fa_exports = {};
-__export(fa_exports, {
-  getTmpPassword: () => getTmpPassword,
-  updateTwoFaSettings: () => updateTwoFaSettings
-});
-async function updateTwoFaSettings(client2, {
-  isCheckPassword,
-  currentPassword,
-  newPassword,
-  hint = "",
-  email,
-  emailCodeCallback,
-  onEmailCodeError
-}) {
-  if (!newPassword && !currentPassword) {
-    throw new Error("Neither `currentPassword` nor `newPassword` is present");
-  }
-  if (email && !(emailCodeCallback && onEmailCodeError)) {
-    throw new Error("`email` present without `emailCodeCallback` and `onEmailCodeError`");
-  }
-  const pwd = await client2.invoke(new import_api4.default.account.GetPassword());
-  if (!(pwd.newAlgo instanceof import_api4.default.PasswordKdfAlgoUnknown)) {
-    pwd.newAlgo.salt1 = Buffer.concat([pwd.newAlgo.salt1, (0, import_Helpers4.generateRandomBytes)(32)]);
-  }
-  if (!pwd.hasPassword && currentPassword) {
-    currentPassword = void 0;
-  }
-  const password = currentPassword ? await (0, import_Password2.computeCheck)(pwd, currentPassword) : new import_api4.default.InputCheckPasswordEmpty();
-  if (isCheckPassword) {
-    await client2.invoke(new import_api4.default.auth.CheckPassword({ password }));
-    return;
-  }
-  try {
-    await client2.invoke(new import_api4.default.account.UpdatePasswordSettings({
-      password,
-      newSettings: new import_api4.default.account.PasswordInputSettings({
-        newAlgo: pwd.newAlgo,
-        newPasswordHash: newPassword ? await (0, import_Password2.computeDigest)(pwd.newAlgo, newPassword) : Buffer.alloc(0),
-        hint,
-        email,
-        // not explained what it does and it seems to always be set to empty in tdesktop
-        newSecureSettings: void 0
-      })
-    }));
-  } catch (e2) {
-    if (e2 instanceof import_errors3.default.EmailUnconfirmedError) {
-      while (true) {
-        try {
-          const code = await emailCodeCallback(e2.codeLength);
-          if (!code) {
-            throw new Error("Code is empty");
-          }
-          await client2.invoke(new import_api4.default.account.ConfirmPasswordEmail({ code }));
-          break;
-        } catch (err) {
-          onEmailCodeError(err);
-        }
-      }
-    } else {
-      throw e2;
-    }
-  }
-}
-async function getTmpPassword(client2, currentPassword, ttl = 60) {
-  const pwd = await client2.invoke(new import_api4.default.account.GetPassword());
-  if (!pwd) {
-    return void 0;
-  }
-  const inputPassword = await (0, import_Password2.computeCheck)(pwd, currentPassword);
-  try {
-    const result = await client2.invoke(new import_api4.default.account.GetTmpPassword({
-      password: inputPassword,
-      period: ttl
-    }));
-    return result;
-  } catch (err) {
-    if (err.message === "PASSWORD_HASH_INVALID") {
-      return { error: err.message };
-    }
-    throw err;
-  }
-}
-var import_api4, import_Helpers4, import_Password2, import_errors3;
-var init_fa = __esm({
-  "src/telegram/client/2fa.ts"() {
-    "use strict";
-    import_api4 = __toESM(require_api());
-    import_Helpers4 = __toESM(require_Helpers());
-    import_Password2 = __toESM(require_Password());
-    import_errors3 = __toESM(require_errors());
+    DISCONNECT_SLEEP = 1e3;
+    MAX_CONCURRENT_CONNECTIONS = 3;
+    MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
+    MAX_WORKERS_PER_CONNECTION = 10;
+    foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM).fill(void 0).map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
   }
 });
 
@@ -22694,30 +21655,26 @@ var require_TelegramClient = __commonJS({
     "use strict";
     var os = require("os");
     var Logger = require_Logger();
-    var { sleep: sleep4 } = require_Helpers();
-    var errors4 = require_errors();
+    var { sleep: sleep2 } = require_Helpers();
+    var errors2 = require_errors();
     var MemorySession = require_Memory();
     var Helpers = require_Helpers();
-    var utils2 = require_Utils();
+    var utils = require_Utils();
     var Session = require_Abstract();
     var { LAYER } = require_AllTLObjects();
+    var Api2 = require_api();
     var { constructors, requests } = require_tl();
     var {
       ConnectionTCPObfuscated,
       MTProtoSender,
       UpdateConnectionState
     } = require_network();
-    var { authFlow: authFlow2, checkAuthorization: checkAuthorization2 } = (init_auth(), __toCommonJS(auth_exports));
-    var { downloadFile: downloadFile3 } = (init_downloadFile(), __toCommonJS(downloadFile_exports));
     var { uploadFile: uploadFile3 } = (init_uploadFile(), __toCommonJS(uploadFile_exports));
-    var { updateTwoFaSettings: updateTwoFaSettings2, getTmpPassword: getTmpPassword2 } = (init_fa(), __toCommonJS(fa_exports));
     var RequestState = require_RequestState();
     var Deferred2 = (init_Deferred(), __toCommonJS(Deferred_exports)).default;
     var DEFAULT_DC_ID = 2;
-    var WEBDOCUMENT_DC_ID = 4;
     var EXPORTED_SENDER_RECONNECT_TIMEOUT = 1e3;
     var EXPORTED_SENDER_RELEASE_TIMEOUT = 3e4;
-    var WEBDOCUMENT_REQUEST_PART_SIZE = 131072;
     var PING_INTERVAL = 3e3;
     var PING_TIMEOUT = 5e3;
     var PING_FAIL_ATTEMPTS = 3;
@@ -22729,6 +21686,9 @@ var require_TelegramClient = __commonJS({
     var sizeTypes = ["u", "v", "w", "y", "d", "x", "c", "m", "b", "a", "s", "f"];
     var FallbackClass = class {
       constructor() {
+      }
+      isConnected() {
+        throw new Error("Not connected");
       }
     };
     var TelegramClient2 = class _TelegramClient {
@@ -22914,31 +21874,13 @@ var require_TelegramClient = __commonJS({
       async _initSession() {
         await this.session.load();
         if (!this.session.serverAddress || this.session.serverAddress.includes(":") !== this._useIPV6) {
-          const DC = utils2.getDC(this.defaultDcId);
+          const DC = utils.getDC(this.defaultDcId);
           this.session.setDC(
             this.defaultDcId,
             DC.ipAddress,
             this._args.useWSS ? 443 : 80
           );
         }
-      }
-      setPingCallback(callback) {
-        this.pingCallback = callback;
-      }
-      async setForceHttpTransport(forceHttpTransport) {
-        this._shouldForceHttpTransport = forceHttpTransport;
-        await this.disconnect();
-        this._sender = void 0;
-        await this.connect();
-      }
-      async setAllowHttpTransport(allowHttpTransport) {
-        this._shouldAllowHttpTransport = allowHttpTransport;
-        await this.disconnect();
-        this._sender = void 0;
-        await this.connect();
-      }
-      setShouldDebugExportedSenders(shouldDebugExportedSenders) {
-        this._shouldDebugExportedSenders = shouldDebugExportedSenders;
       }
       getShouldDebugExportedSenders() {
         return this._shouldDebugExportedSenders;
@@ -23051,7 +21993,7 @@ var require_TelegramClient = __commonJS({
       }
       async _switchDC(newDc) {
         this._log.info(`Reconnecting to new data center ${newDc}`);
-        const DC = utils2.getDC(newDc);
+        const DC = utils.getDC(newDc);
         this.session.setDC(newDc, DC.ipAddress, DC.port);
         await this._sender.authKey.setKey(void 0);
         this.session.setAuthKey(void 0);
@@ -23108,7 +22050,7 @@ var require_TelegramClient = __commonJS({
             });
           }
         }
-        const dc = utils2.getDC(dcId, hasAuthKey);
+        const dc = utils.getDC(dcId, hasAuthKey);
         while (true) {
           try {
             await sender.connect(
@@ -23259,125 +22201,6 @@ var require_TelegramClient = __commonJS({
       getSender(dcId, index, isPremium) {
         return dcId ? this._borrowExportedSender(dcId, void 0, void 0, index, isPremium) : Promise.resolve(this._sender);
       }
-      // end region
-      // download region
-      /**
-       * Complete flow to download a file.
-       * @param inputLocation {constructors.InputFileLocation}
-       * @param [args[partSizeKb] {number}]
-       * @param [args[fileSize] {number}]
-       * @param [args[progressCallback] {Function}]
-       * @param [args[start] {number}]
-       * @param [args[end] {number}]
-       * @param [args[dcId] {number}]
-       * @param [args[workers] {number}]
-       * @returns {Promise<Buffer>}
-       */
-      downloadFile(inputLocation, args = {}) {
-        return downloadFile3(
-          this,
-          inputLocation,
-          args,
-          this._shouldDebugExportedSenders
-        );
-      }
-      downloadMedia(entityOrMedia, args) {
-        let media;
-        if (entityOrMedia instanceof constructors.Message || entityOrMedia instanceof constructors.StoryItem) {
-          media = entityOrMedia.media;
-        } else if (entityOrMedia instanceof constructors.MessageService) {
-          media = entityOrMedia.action.photo;
-        } else {
-          media = entityOrMedia;
-        }
-        if (typeof media === "string") {
-          throw new Error("not implemented");
-        }
-        if (media instanceof constructors.MessageMediaWebPage) {
-          if (media.webpage instanceof constructors.WebPage) {
-            media = media.webpage.document || media.webpage.photo;
-          }
-        }
-        if (media instanceof constructors.MessageMediaPhoto || media instanceof constructors.Photo) {
-          return this._downloadPhoto(media, args);
-        } else if (media instanceof constructors.MessageMediaDocument || media instanceof constructors.Document) {
-          return this._downloadDocument(media, args);
-        } else if (media instanceof constructors.MessageMediaContact) {
-          return this._downloadContact(media, args);
-        } else if (media instanceof constructors.WebDocument || media instanceof constructors.WebDocumentNoProxy) {
-          return this._downloadWebDocument(media, args);
-        }
-        return void 0;
-      }
-      downloadProfilePhoto(entity, isBig = false) {
-        const ENTITIES = [765557111, 3316604308, 524706233, 3566872215];
-        const sizeType = isBig ? "x" : "m";
-        let photo;
-        if (!ENTITIES.includes(entity.SUBCLASS_OF_ID)) {
-          photo = entity;
-        } else {
-          if (!entity.photo) {
-            if (!entity.chatPhoto) {
-              return void 0;
-            }
-            return this._downloadPhoto(entity.chatPhoto, { sizeType });
-          }
-          photo = entity.photo;
-        }
-        let dcId;
-        let loc;
-        if (photo instanceof constructors.UserProfilePhoto || photo instanceof constructors.ChatPhoto) {
-          dcId = photo.dcId;
-          loc = new constructors.InputPeerPhotoFileLocation({
-            peer: utils2.getInputPeer(entity),
-            photoId: photo.photoId,
-            big: isBig
-          });
-        } else {
-          return void 0;
-        }
-        return this.downloadFile(loc, {
-          dcId
-        });
-      }
-      downloadStickerSetThumb(stickerSet) {
-        var _a4;
-        if (!((_a4 = stickerSet.thumbs) == null ? void 0 : _a4.length) && !stickerSet.thumbDocumentId) {
-          return void 0;
-        }
-        const { thumbVersion } = stickerSet;
-        if (!stickerSet.thumbDocumentId) {
-          return this.downloadFile(
-            new constructors.InputStickerSetThumb({
-              stickerset: new constructors.InputStickerSetID({
-                id: stickerSet.id,
-                accessHash: stickerSet.accessHash
-              }),
-              thumbVersion
-            }),
-            { dcId: stickerSet.thumbDcId }
-          );
-        }
-        return this.invoke(
-          new constructors.messages.GetCustomEmojiDocuments({
-            documentId: [stickerSet.thumbDocumentId]
-          })
-        ).then((docs) => {
-          const doc = docs[0];
-          return this.downloadFile(
-            new constructors.InputDocumentFileLocation({
-              id: doc.id,
-              accessHash: doc.accessHash,
-              fileReference: doc.fileReference,
-              thumbSize: ""
-            }),
-            {
-              fileSize: doc.size.toJSNumber(),
-              dcId: doc.dcId
-            }
-          );
-        });
-      }
       _pickFileSize(sizes, sizeType) {
         if (!sizeType || !sizes || !sizes.length) {
           return void 0;
@@ -23391,179 +22214,6 @@ var require_TelegramClient = __commonJS({
           }
         }
         return void 0;
-      }
-      _downloadCachedPhotoSize(size) {
-        let data;
-        if (size instanceof constructors.PhotoStrippedSize) {
-          data = utils2.strippedPhotoToJpg(size.bytes);
-        } else {
-          data = size.bytes;
-        }
-        return data;
-      }
-      _downloadPhoto(photo, args) {
-        if (photo instanceof constructors.MessageMediaPhoto) {
-          photo = photo.photo;
-        }
-        if (!(photo instanceof constructors.Photo)) {
-          return void 0;
-        }
-        const isVideoSize = args.sizeType === "u" || args.sizeType === "v";
-        const size = this._pickFileSize(
-          isVideoSize ? [...photo.videoSizes, ...photo.sizes] : photo.sizes,
-          args.sizeType
-        );
-        if (!size || size instanceof constructors.PhotoSizeEmpty) {
-          return void 0;
-        }
-        if (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize) {
-          return this._downloadCachedPhotoSize(size);
-        }
-        return this.downloadFile(
-          new constructors.InputPhotoFileLocation({
-            id: photo.id,
-            accessHash: photo.accessHash,
-            fileReference: photo.fileReference,
-            thumbSize: size.type
-          }),
-          {
-            dcId: photo.dcId,
-            fileSize: size.size || Math.max(...size.sizes || []),
-            progressCallback: args.progressCallback
-          }
-        );
-      }
-      _downloadDocument(doc, args) {
-        if (doc instanceof constructors.MessageMediaDocument) {
-          doc = doc.document;
-        }
-        if (!(doc instanceof constructors.Document)) {
-          return void 0;
-        }
-        let size;
-        if (args.sizeType) {
-          size = doc.thumbs ? this._pickFileSize(
-            [...doc.videoThumbs || [], ...doc.thumbs],
-            args.sizeType
-          ) : void 0;
-          if (!size && doc.mimeType.startsWith("video/")) {
-            return void 0;
-          }
-          if (size && (size instanceof constructors.PhotoCachedSize || size instanceof constructors.PhotoStrippedSize)) {
-            return this._downloadCachedPhotoSize(size);
-          }
-        }
-        return this.downloadFile(
-          new constructors.InputDocumentFileLocation({
-            id: doc.id,
-            accessHash: doc.accessHash,
-            fileReference: doc.fileReference,
-            thumbSize: size ? size.type : ""
-          }),
-          {
-            fileSize: size ? size.size : doc.size.toJSNumber(),
-            progressCallback: args.progressCallback,
-            start: args.start,
-            end: args.end,
-            dcId: doc.dcId,
-            workers: args.workers
-          }
-        );
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _downloadContact(media, args) {
-        throw new Error("not implemented");
-      }
-      async _downloadWebDocument(media) {
-        if (media.url && !("accessHash" in media)) {
-          return Buffer.from([]);
-        }
-        try {
-          const buff = [];
-          let offset = 0;
-          while (true) {
-            const downloaded = new requests.upload.GetWebFile({
-              location: new constructors.InputWebFileLocation({
-                url: media.url,
-                accessHash: media.accessHash
-              }),
-              offset,
-              limit: WEBDOCUMENT_REQUEST_PART_SIZE
-            });
-            const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
-            const res = await sender.send(downloaded);
-            this.releaseExportedSender(sender);
-            offset += 131072;
-            if (res.bytes.length) {
-              buff.push(res.bytes);
-              if (res.bytes.length < WEBDOCUMENT_REQUEST_PART_SIZE) {
-                break;
-              }
-            } else {
-              break;
-            }
-          }
-          return Buffer.concat(buff);
-        } catch (e2) {
-          if (e2.message === "WEBFILE_NOT_AVAILABLE") {
-            return Buffer.alloc(0);
-          } else {
-            throw e2;
-          }
-        }
-      }
-      async downloadStaticMap(accessHash, long, lat, w, h2, zoom, scale, accuracyRadius) {
-        try {
-          const buff = [];
-          let offset = 0;
-          while (true) {
-            try {
-              const downloaded = new requests.upload.GetWebFile({
-                location: new constructors.InputWebFileGeoPointLocation({
-                  geoPoint: new constructors.InputGeoPoint({
-                    lat,
-                    long,
-                    accuracyRadius
-                  }),
-                  accessHash,
-                  w,
-                  h: h2,
-                  zoom,
-                  scale
-                }),
-                offset,
-                limit: WEBDOCUMENT_REQUEST_PART_SIZE
-              });
-              const sender = await this._borrowExportedSender(WEBDOCUMENT_DC_ID);
-              const res = await sender.send(downloaded);
-              this.releaseExportedSender(sender);
-              offset += 131072;
-              if (res.bytes.length) {
-                buff.push(res.bytes);
-                if (res.bytes.length < WEBDOCUMENT_REQUEST_PART_SIZE) {
-                  break;
-                }
-              } else {
-                break;
-              }
-            } catch (err) {
-              if (err instanceof errors4.FloodWaitError) {
-                console.warn(
-                  `getWebFile: sleeping for ${err.seconds}s on flood wait`
-                );
-                await sleep4(err.seconds * 1e3);
-                continue;
-              }
-            }
-          }
-          return Buffer.concat(buff);
-        } catch (e2) {
-          if (e2.message === "WEBFILE_NOT_AVAILABLE") {
-            return Buffer.alloc(0);
-          } else {
-            throw e2;
-          }
-        }
       }
       // region Invoking Telegram request
       /**
@@ -23593,25 +22243,25 @@ var require_TelegramClient = __commonJS({
               this.releaseExportedSender(sender);
             return result;
           } catch (e2) {
-            if (e2 instanceof errors4.ServerError || e2.message === "RPC_CALL_FAIL" || e2.message === "RPC_MCGET_FAIL") {
+            if (e2 instanceof errors2.ServerError || e2.message === "RPC_CALL_FAIL" || e2.message === "RPC_MCGET_FAIL") {
               this._log.warn(
                 `Telegram is having internal issues ${e2.constructor.name}`
               );
-              await sleep4(2e3);
-            } else if (e2 instanceof errors4.FloodWaitError || e2 instanceof errors4.FloodTestPhoneWaitError) {
+              await sleep2(2e3);
+            } else if (e2 instanceof errors2.FloodWaitError || e2 instanceof errors2.FloodTestPhoneWaitError) {
               if (e2.seconds <= this.floodSleepLimit) {
                 this._log.info(`Sleeping for ${e2.seconds}s on flood wait`);
-                await sleep4(e2.seconds * 1e3);
+                await sleep2(e2.seconds * 1e3);
               } else {
                 state.finished.resolve();
                 if (isExported)
                   this.releaseExportedSender(sender);
                 throw e2;
               }
-            } else if (e2 instanceof errors4.PhoneMigrateError || e2 instanceof errors4.NetworkMigrateError || e2 instanceof errors4.UserMigrateError) {
+            } else if (e2 instanceof errors2.PhoneMigrateError || e2 instanceof errors2.NetworkMigrateError || e2 instanceof errors2.UserMigrateError) {
               this._log.info(`Phone migrated to ${e2.newDc}`);
-              const shouldRaise = e2 instanceof errors4.PhoneMigrateError || e2 instanceof errors4.NetworkMigrateError;
-              if (shouldRaise && await checkAuthorization2(this)) {
+              const shouldRaise = e2 instanceof errors2.PhoneMigrateError || e2 instanceof errors2.NetworkMigrateError;
+              if (shouldRaise && await await this.invoke(new Api2.updates.GetState())) {
                 state.finished.resolve();
                 if (isExported)
                   this.releaseExportedSender(sender);
@@ -23621,14 +22271,14 @@ var require_TelegramClient = __commonJS({
               if (isExported)
                 this.releaseExportedSender(sender);
               sender = this._sender;
-            } else if (e2 instanceof errors4.MsgWaitError) {
+            } else if (e2 instanceof errors2.MsgWaitError) {
               await state.isReady();
               state.after = void 0;
             } else if (e2.message === "CONNECTION_NOT_INITED") {
               await this.disconnect();
-              await sleep4(2e3);
+              await sleep2(2e3);
               await this.connect();
-            } else if (e2 instanceof errors4.TimedOutError) {
+            } else if (e2 instanceof errors2.TimedOutError) {
             } else {
               state.finished.resolve();
               if (isExported)
@@ -23641,19 +22291,6 @@ var require_TelegramClient = __commonJS({
         if (isExported)
           this.releaseExportedSender(sender);
         throw new Error(`Request was unsuccessful ${attempt} time(s)`);
-      }
-      async invokeBeacon(request, dcId) {
-        if (request.classType !== "request") {
-          throw new Error("You can only invoke MTProtoRequests");
-        }
-        const isExported = dcId !== void 0;
-        const sender = !isExported ? this._sender : await this.getSender(dcId);
-        sender.sendBeacon(request);
-        if (isExported)
-          this.releaseExportedSender(sender);
-      }
-      setIsPremium(isPremium) {
-        this.isPremium = isPremium;
       }
       async getMe() {
         try {
@@ -23672,23 +22309,13 @@ var require_TelegramClient = __commonJS({
         if (!this.isConnected()) {
           await this.connect();
         }
-        if (await checkAuthorization2(this, authParams.shouldThrowIfUnauthorized)) {
-          return;
+        const isAuth = await this.invoke(new Api2.updates.GetState());
+        if (!isAuth) {
+          throw new Error("Not auth");
         }
-        const apiCredentials = {
-          apiId: this.apiId,
-          apiHash: this.apiHash
-        };
-        await authFlow2(this, apiCredentials, authParams);
       }
       uploadFile(fileParams) {
         return uploadFile3(this, fileParams, this._shouldDebugExportedSenders);
-      }
-      updateTwoFaSettings(params) {
-        return updateTwoFaSettings2(this, params);
-      }
-      getTmpPassword(currentPassword, ttl) {
-        return getTmpPassword2(this, currentPassword, ttl);
       }
       // event region
       addEventHandler(callback, event) {
@@ -23714,226 +22341,6 @@ var require_TelegramClient = __commonJS({
         };
         this._dispatchUpdate(args);
       }
-      // endregion
-      // region private methods
-      /**
-           Gets a full entity from the given string, which may be a phone or
-           a username, and processes all the found entities on the session.
-           The string may also be a user link, or a channel/chat invite link.
-      
-           This method has the side effect of adding the found users to the
-           session database, so it can be queried later without API calls,
-           if this option is enabled on the session.
-      
-           Returns the found entity, or raises TypeError if not found.
-           * @param string {string}
-           * @returns {Promise<void>}
-           * @private
-           */
-      /* CONTEST
-        async _getEntityFromString(string) {
-            const phone = utils.parsePhone(string)
-            if (phone) {
-                try {
-                    for (const user of (await this.invoke(
-                        new requests.contacts.GetContacts(0))).users) {
-                        if (user.phone === phone) {
-                            return user
-                        }
-                    }
-                } catch (e) {
-                    if (e.message === 'BOT_METHOD_INVALID') {
-                        throw new Error('Cannot get entity by phone number as a ' +
-                            'bot (try using integer IDs, not strings)')
-                    }
-                    throw e
-                }
-            } else if (['me', 'this'].includes(string.toLowerCase())) {
-                return this.getMe()
-            } else {
-                const { username, isJoinChat } = utils.parseUsername(string)
-                if (isJoinChat) {
-                    const invite = await this.invoke(new requests.messages.CheckChatInvite({
-                        'hash': username,
-                    }))
-                    if (invite instanceof constructors.ChatInvite) {
-                        throw new Error('Cannot get entity from a channel (or group) ' +
-                            'that you are not part of. Join the group and retry',
-                        )
-                    } else if (invite instanceof constructors.ChatInviteAlready) {
-                        return invite.chat
-                    }
-                } else if (username) {
-                    try {
-                        const result = await this.invoke(
-                            new requests.contacts.ResolveUsername(username))
-                        const pid = utils.getPeerId(result.peer, false)
-                        if (result.peer instanceof constructors.PeerUser) {
-                            for (const x of result.users) {
-                                if (x.id === pid) {
-                                    return x
-                                }
-                            }
-                        } else {
-                            for (const x of result.chats) {
-                                if (x.id === pid) {
-                                    return x
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        if (e.message === 'USERNAME_NOT_OCCUPIED') {
-                            throw new Error(`No user has "${username}" as username`)
-                        }
-                        throw e
-                    }
-                }
-            }
-            throw new Error(`Cannot find any entity corresponding to "${string}"`)
-        }
-        */
-      // endregion
-      // users region
-      /**
-           Turns the given entity into its input entity version.
-      
-           Most requests use this kind of :tl:`InputPeer`, so this is the most
-           suitable call to make for those cases. **Generally you should let the
-           library do its job** and don't worry about getting the input entity
-           first, but if you're going to use an entity often, consider making the
-           call:
-      
-           Arguments
-           entity (`str` | `int` | :tl:`Peer` | :tl:`InputPeer`):
-           If a username or invite link is given, **the library will
-           use the cache**. This means that it's possible to be using
-           a username that *changed* or an old invite link (this only
-           happens if an invite link for a small group chat is used
-           after it was upgraded to a mega-group).
-      
-           If an exact name is given, it must be in the cache too. This
-           is not reliable as different people can share the same name
-           and which entity is returned is arbitrary, and should be used
-           only for quick tests.
-      
-           If a positive integer ID is given, the entity will be searched
-           in cached users, chats or channels, without making any call.
-      
-           If a negative integer ID is given, the entity will be searched
-           exactly as either a chat (prefixed with ``-``) or as a channel
-           (prefixed with ``-100``).
-      
-           If a :tl:`Peer` is given, it will be searched exactly in the
-           cache as either a user, chat or channel.
-      
-           If the given object can be turned into an input entity directly,
-           said operation will be done.
-      
-           Unsupported types will raise ``TypeError``.
-      
-           If the entity can't be found, ``ValueError`` will be raised.
-      
-           Returns
-           :tl:`InputPeerUser`, :tl:`InputPeerChat` or :tl:`InputPeerChannel`
-           or :tl:`InputPeerSelf` if the parameter is ``'me'`` or ``'self'``.
-      
-           If you need to get the ID of yourself, you should use
-           `get_me` with ``input_peer=True``) instead.
-      
-           Example
-           .. code-block:: python
-      
-           // If you're going to use "username" often in your code
-           // (make a lot of calls), consider getting its input entity
-           // once, and then using the "user" everywhere instead.
-           user = await client.get_input_entity('username')
-      
-           // The same applies to IDs, chats or channels.
-           chat = await client.get_input_entity(-123456789)
-      
-           * @param peer
-           * @returns {Promise<>}
-           */
-      /* CONTEST
-          async getInputEntity(peer) {
-              // Short-circuit if the input parameter directly maps to an InputPeer
-              try {
-                  return utils.getInputPeer(peer)
-                  // eslint-disable-next-line no-empty
-              } catch (e) {
-              }
-              // Next in priority is having a peer (or its ID) cached in-memory
-              try {
-                  // 0x2d45687 == crc32(b'Peer')
-                  if (typeof peer === 'number' || peer.SUBCLASS_OF_ID === 0x2d45687) {
-                      if (this._entityCache.has(peer)) {
-                          return this._entityCache[peer]
-                      }
-                  }
-                  // eslint-disable-next-line no-empty
-              } catch (e) {
-              }
-              // Then come known strings that take precedence
-              if (['me', 'this'].includes(peer)) {
-                  return new constructors.InputPeerSelf()
-              }
-              try {
-                  return this.session.getInputEntity(peer)
-                  // eslint-disable-next-line no-empty
-              } catch (e) {
-              }
-              // Only network left to try
-              if (typeof peer === 'string') {
-                  return utils.getInputPeer(await this._getEntityFromString(peer))
-              }
-              // If we're a bot and the user has messaged us privately users.getUsers
-              // will work with accessHash = 0. Similar for channels.getChannels.
-              // If we're not a bot but the user is in our contacts, it seems to work
-              // regardless. These are the only two special-cased requests.
-              peer = utils.getPeer(peer)
-              if (peer instanceof constructors.PeerUser) {
-                  const users = await this.invoke(new requests.users.GetUsers({
-                      id: [new constructors.InputUser({
-                          userId: peer.userId,
-                          accessHash: 0,
-                      })],
-                  }))
-                  if (users && !(users[0] instanceof constructors.UserEmpty)) {
-                      // If the user passed a valid ID they expect to work for
-                      // channels but would be valid for users, we get UserEmpty.
-                      // Avoid returning the invalid empty input peer for that.
-                      //
-                      // We *could* try to guess if it's a channel first, and if
-                      // it's not, work as a chat and try to validate it through
-                      // another request, but that becomes too much work.
-                      return utils.getInputPeer(users[0])
-                  }
-              } else if (peer instanceof constructors.PeerChat) {
-                  return new constructors.InputPeerChat({
-                      chatId: peer.chatId,
-                  })
-              } else if (peer instanceof constructors.PeerChannel) {
-                  try {
-                      const channels = await this.invoke(new requests.channels.GetChannels({
-                          id: [new constructors.InputChannel({
-                              channelId: peer.channelId,
-                              accessHash: 0,
-                          })],
-                      }))
-      
-                      return utils.getInputPeer(channels.chats[0])
-                      // eslint-disable-next-line no-empty
-                  } catch (e) {
-                      console.log(e)
-                  }
-              }
-              throw new Error(`Could not find the input entity for ${peer.id || peer.channelId || peer.chatId || peer.userId}.
-               Please read https://` +
-                  'docs.telethon.dev/en/latest/concepts/entities.html to' +
-                  ' find out more details.',
-              )
-          }
-          */
       async _dispatchUpdate(args = {
         update: void 0
       }) {
@@ -24085,10 +22492,10 @@ var import_util2 = __toESM(require("util"));
 var import_child_process2 = require("child_process");
 
 // src/telegram/index.ts
-var import_big_integer2 = __toESM(require_BigInteger());
+var import_big_integer = __toESM(require_BigInteger());
 var import_util = __toESM(require("util"));
 var import_child_process = require("child_process");
-var import_api5 = __toESM(require_api());
+var import_api2 = __toESM(require_api());
 var import_CallbackSession = __toESM(require_CallbackSession());
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_extensions = __toESM(require_extensions());
@@ -24146,19 +22553,19 @@ var getProxy = async (accountId2) => {
   }
 };
 function handleGramJsUpdate(update) {
-  if (update instanceof import_api5.default.UpdatesTooLong) {
+  if (update instanceof import_api2.default.UpdatesTooLong) {
     exec(`pm2 restart ${accountId}`);
   } else {
     const updates = "updates" in update ? update.updates : [update];
     updates.forEach(async (update2) => {
-      if (update2 instanceof import_api5.default.UpdateNewMessage || update2 instanceof import_api5.default.UpdateShortMessage) {
+      if (update2 instanceof import_api2.default.UpdateNewMessage || update2 instanceof import_api2.default.UpdateShortMessage) {
         const {
           userId: varUserId,
           message: { peerId: { userId: peerUserId } = {} } = {}
         } = update2;
         const userId = varUserId || peerUserId;
         const isDialogInDb = await getDialogFromDb(accountId, String(userId));
-        if (isDialogInDb && userId instanceof import_big_integer2.default) {
+        if (isDialogInDb && userId instanceof import_big_integer.default) {
           onUpdate(userId);
         }
       }
@@ -24317,24 +22724,24 @@ var getAccountData = async (accId) => {
 };
 
 // src/methods/users/usersMe.ts
-var import_api6 = __toESM(require_api());
+var import_api3 = __toESM(require_api());
 var usersMe = async () => {
   const usersMe2 = await invokeRequest(
-    new import_api6.default.users.GetFullUser({
-      id: new import_api6.default.InputUserSelf()
+    new import_api3.default.users.GetFullUser({
+      id: new import_api3.default.InputUserSelf()
     })
   );
   return usersMe2;
 };
 
 // src/methods/dialogs/getUnreadDialogs.ts
-var import_big_integer3 = __toESM(require_BigInteger());
-var import_api7 = __toESM(require_api());
+var import_big_integer2 = __toESM(require_BigInteger());
+var import_api4 = __toESM(require_api());
 var getUnreadDialogs = async (account) => {
   var _a4, _b;
   const allDialogs = await invokeRequest(
-    new import_api7.default.messages.GetDialogs({
-      offsetPeer: new import_api7.default.InputPeerEmpty(),
+    new import_api4.default.messages.GetDialogs({
+      offsetPeer: new import_api4.default.InputPeerEmpty(),
       folderId: 1,
       limit: 100
     })
@@ -24358,10 +22765,10 @@ var getUnreadDialogs = async (account) => {
     );
     if (user && !user.deleted && !user.bot && !user.support) {
       const allMessages = await invokeRequest(
-        new import_api7.default.messages.GetHistory({
-          peer: new import_api7.default.InputPeerUser({
-            userId: (0, import_big_integer3.default)(user.id),
-            accessHash: (0, import_big_integer3.default)(user.accessHash)
+        new import_api4.default.messages.GetHistory({
+          peer: new import_api4.default.InputPeerUser({
+            userId: (0, import_big_integer2.default)(user.id),
+            accessHash: (0, import_big_integer2.default)(user.accessHash)
           }),
           limit: 30
         })
@@ -24398,14 +22805,14 @@ var getUnreadDialogs = async (account) => {
           text = "[VIDEO]";
         } else if (voice) {
           await invokeRequest(
-            new import_api7.default.messages.ReadMessageContents({
+            new import_api4.default.messages.ReadMessageContents({
               id: [dialogMessage.id]
             })
           );
           text = "[VOICE MESSAGE]";
         } else if (round) {
           await invokeRequest(
-            new import_api7.default.messages.ReadMessageContents({
+            new import_api4.default.messages.ReadMessageContents({
               id: [dialogMessage.id]
             })
           );
@@ -24425,8 +22832,8 @@ var getUnreadDialogs = async (account) => {
         });
       }
       await invokeRequest(
-        new import_api7.default.messages.ReadHistory({
-          peer: new import_api7.default.InputPeerUser({
+        new import_api4.default.messages.ReadHistory({
+          peer: new import_api4.default.InputPeerUser({
             userId: user.id,
             accessHash: user.accessHash
           })
@@ -24662,10 +23069,10 @@ var converterName = (aiName) => {
 };
 
 // src/methods/messages/sendMessage.ts
-var import_big_integer4 = __toESM(require_BigInteger());
+var import_big_integer3 = __toESM(require_BigInteger());
 var import_util3 = __toESM(require("util"));
 var import_child_process3 = require("child_process");
-var import_api8 = __toESM(require_api());
+var import_api5 = __toESM(require_api());
 var exec3 = import_util3.default.promisify(import_child_process3.exec);
 function reduceSpaces(string) {
   return string.replace(/\s+/g, " ").trim();
@@ -24682,16 +23089,16 @@ function removeNonAlphaPrefix(string) {
 var sendMessage = async (userId, accessHash, message, accountId2) => {
   try {
     const sentMessage = await invokeRequest(
-      new import_api8.default.messages.SendMessage({
+      new import_api5.default.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter2(reduceSpaces(message))
         ),
         clearDraft: true,
-        peer: new import_api8.default.InputPeerUser({
-          userId: (0, import_big_integer4.default)(userId),
-          accessHash: (0, import_big_integer4.default)(accessHash)
+        peer: new import_api5.default.InputPeerUser({
+          userId: (0, import_big_integer3.default)(userId),
+          accessHash: (0, import_big_integer3.default)(accessHash)
         }),
-        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+        randomId: (0, import_big_integer3.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
       })
     );
     return sentMessage;
@@ -24785,17 +23192,17 @@ var saveRecipient = async (accountId2, recipient, recipientDb, messages) => {
 };
 
 // src/methods/users/getFullUser.ts
-var import_big_integer5 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
+var import_big_integer4 = __toESM(require_BigInteger());
+var import_api6 = __toESM(require_api());
 var getFullUser = async (userId, accessHash) => {
   if (!userId || !accessHash) {
     return null;
   }
   const userFull = await invokeRequest(
-    new import_api9.default.users.GetFullUser({
-      id: new import_api9.default.InputPeerUser({
-        userId: (0, import_big_integer5.default)(userId),
-        accessHash: (0, import_big_integer5.default)(accessHash)
+    new import_api6.default.users.GetFullUser({
+      id: new import_api6.default.InputPeerUser({
+        userId: (0, import_big_integer4.default)(userId),
+        accessHash: (0, import_big_integer4.default)(accessHash)
       })
     })
   );
@@ -24921,17 +23328,17 @@ ${combinedMessages.map((m2) => `# ${m2.fromId === String(id) ? userName : meName
 };
 
 // src/modules/autoSender.ts
-var import_api14 = __toESM(require_api());
+var import_api11 = __toESM(require_api());
 
 // src/methods/messages/getMessages.ts
-var import_big_integer6 = __toESM(require_BigInteger());
-var import_api10 = __toESM(require_api());
+var import_big_integer5 = __toESM(require_BigInteger());
+var import_api7 = __toESM(require_api());
 var getMessages = async (userId, accessHash, minId) => {
   const { messages } = await invokeRequest(
-    new import_api10.default.messages.GetHistory({
-      peer: new import_api10.default.InputPeerUser({
-        userId: (0, import_big_integer6.default)(userId),
-        accessHash: (0, import_big_integer6.default)(accessHash)
+    new import_api7.default.messages.GetHistory({
+      peer: new import_api7.default.InputPeerUser({
+        userId: (0, import_big_integer5.default)(userId),
+        accessHash: (0, import_big_integer5.default)(accessHash)
       }),
       minId
     })
@@ -24940,10 +23347,10 @@ var getMessages = async (userId, accessHash, minId) => {
 };
 
 // src/methods/users/resolveUsername.ts
-var import_api11 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 var resolveUsername = async (username) => {
   const userByUsername = await invokeRequest(
-    new import_api11.default.contacts.ResolveUsername({
+    new import_api8.default.contacts.ResolveUsername({
       username
     })
   );
@@ -24997,16 +23404,16 @@ var checkSpamBlock = async (accountId2) => {
 };
 
 // src/methods/folders/editFolder.ts
-var import_big_integer7 = __toESM(require_BigInteger());
-var import_api12 = __toESM(require_api());
+var import_big_integer6 = __toESM(require_BigInteger());
+var import_api9 = __toESM(require_api());
 var editFolder = async (userId, accessHash, folderId) => {
   await invokeRequest(
-    new import_api12.default.folders.EditPeerFolders({
+    new import_api9.default.folders.EditPeerFolders({
       folderPeers: [
-        new import_api12.default.InputFolderPeer({
-          peer: new import_api12.default.InputPeerUser({
-            userId: (0, import_big_integer7.default)(userId),
-            accessHash: (0, import_big_integer7.default)(accessHash)
+        new import_api9.default.InputFolderPeer({
+          peer: new import_api9.default.InputPeerUser({
+            userId: (0, import_big_integer6.default)(userId),
+            accessHash: (0, import_big_integer6.default)(accessHash)
           }),
           folderId
         })
@@ -25035,10 +23442,10 @@ var getRecipient = async () => {
 };
 
 // src/methods/users/resolvePhone.ts
-var import_api13 = __toESM(require_api());
+var import_api10 = __toESM(require_api());
 var resolvePhone = async (phone) => {
   const userByUsername = await invokeRequest(
-    new import_api13.default.contacts.ResolvePhone({
+    new import_api10.default.contacts.ResolvePhone({
       phone
     })
   );
@@ -25066,7 +23473,7 @@ var autoSender = async (account, meId) => {
         const userByUsername = await resolveMethod(recipient.recipientUsername);
         const { id: userId, accessHash } = ((_a4 = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _a4[0]) ?? {};
         const recipientFull = await getFullUser(userId, accessHash);
-        if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api14.default.User)) {
+        if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api11.default.User)) {
           console.error(
             `Chat with username ${recipient.recipientUsername}:${userId} not resolved`
           );
@@ -25119,18 +23526,18 @@ var autoSender = async (account, meId) => {
 };
 
 // src/modules/accountSetup.ts
-var import_big_integer8 = __toESM(require_BigInteger());
-var import_api16 = __toESM(require_api());
+var import_big_integer7 = __toESM(require_BigInteger());
+var import_api13 = __toESM(require_api());
 
 // src/methods/profile/updateProfile.ts
-var import_api15 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 var updateProfile = ({
   firstName,
   lastName,
   about
 }) => {
   return invokeRequest(
-    new import_api15.default.account.UpdateProfile({
+    new import_api12.default.account.UpdateProfile({
       firstName: firstName || "",
       lastName: lastName || "",
       about: about || ""
@@ -25467,7 +23874,7 @@ var accountSetup = async (account) => {
         `Generated data to populate profile: ${JSON.stringify(genUser)}`
       );
       await invokeRequest(
-        new import_api16.default.account.UpdateUsername({
+        new import_api13.default.account.UpdateUsername({
           username
         })
       );
@@ -25483,18 +23890,18 @@ var accountSetup = async (account) => {
     }
   }
   const { photos: profilePhotos } = await invokeRequest(
-    new import_api16.default.photos.GetUserPhotos({
-      userId: new import_api16.default.InputUserSelf(),
+    new import_api13.default.photos.GetUserPhotos({
+      userId: new import_api13.default.InputUserSelf(),
       limit: 40,
       offset: 0,
-      maxId: (0, import_big_integer8.default)("0")
+      maxId: (0, import_big_integer7.default)("0")
     })
   );
   if (profilePhotos.length) {
     await invokeRequest(
-      new import_api16.default.photos.DeletePhotos({
+      new import_api13.default.photos.DeletePhotos({
         id: profilePhotos.map(
-          (photo) => new import_api16.default.InputPhoto({
+          (photo) => new import_api13.default.InputPhoto({
             id: photo.id,
             accessHash: photo.accessHash,
             fileReference: Buffer.alloc(0)
@@ -25506,39 +23913,39 @@ var accountSetup = async (account) => {
   const files = getProfileFiles();
   for (const file of files) {
     await invokeRequest(
-      new import_api16.default.photos.UploadProfilePhoto({
+      new import_api13.default.photos.UploadProfilePhoto({
         file: await uploadFile2(file)
       })
     );
   }
   await invokeRequest(
-    new import_api16.default.account.SetPrivacy({
-      key: new import_api16.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api16.default.InputPrivacyValueAllowAll()]
+    new import_api13.default.account.SetPrivacy({
+      key: new import_api13.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api13.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
-    new import_api16.default.account.SetPrivacy({
-      key: new import_api16.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api16.default.InputPrivacyValueAllowAll()]
+    new import_api13.default.account.SetPrivacy({
+      key: new import_api13.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api13.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
-    new import_api16.default.account.SetPrivacy({
-      key: new import_api16.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api16.default.InputPrivacyValueAllowAll()]
+    new import_api13.default.account.SetPrivacy({
+      key: new import_api13.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api13.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
-    new import_api16.default.account.SetPrivacy({
-      key: new import_api16.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api16.default.InputPrivacyValueDisallowAll()]
+    new import_api13.default.account.SetPrivacy({
+      key: new import_api13.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api13.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
-    new import_api16.default.account.SetPrivacy({
-      key: new import_api16.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api16.default.InputPrivacyValueDisallowAll()]
+    new import_api13.default.account.SetPrivacy({
+      key: new import_api13.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api13.default.InputPrivacyValueDisallowAll()]
     })
   );
   await updateAiAccount(account.accountId, {
@@ -25554,10 +23961,10 @@ var accountSetup = async (account) => {
 };
 
 // src/modules/updateAuthorizations.ts
-var import_api17 = __toESM(require_api());
+var import_api14 = __toESM(require_api());
 var updateAuthorizations = async (account) => {
   const { authorizations } = await invokeRequest(
-    new import_api17.default.account.GetAuthorizations()
+    new import_api14.default.account.GetAuthorizations()
   );
   console.log(authorizations);
   await updateAiAccount(account.accountId, {
@@ -25567,7 +23974,7 @@ var updateAuthorizations = async (account) => {
     try {
       if (!authorization.current && authorization.deviceModel !== "Desktop") {
         await invokeRequest(
-          new import_api17.default.account.ResetAuthorization({
+          new import_api14.default.account.ResetAuthorization({
             hash: authorization.hash
           })
         );
@@ -25598,14 +24005,14 @@ var getRandomAiAccount = async (accountId2) => {
 };
 
 // src/methods/contacts/updateContact.ts
-var import_big_integer9 = __toESM(require_BigInteger());
-var import_api18 = __toESM(require_api());
+var import_big_integer8 = __toESM(require_BigInteger());
+var import_api15 = __toESM(require_api());
 var updateContact = (id, accessHash, firstName, lastName, phoneNumber = "") => {
   const contact = invokeRequest(
-    new import_api18.default.contacts.AddContact({
-      id: new import_api18.default.InputPeerUser({
-        userId: (0, import_big_integer9.default)(id),
-        accessHash: (0, import_big_integer9.default)(accessHash)
+    new import_api15.default.contacts.AddContact({
+      id: new import_api15.default.InputPeerUser({
+        userId: (0, import_big_integer8.default)(id),
+        accessHash: (0, import_big_integer8.default)(accessHash)
       }),
       firstName,
       lastName,

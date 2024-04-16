@@ -6,7 +6,6 @@ const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
-const MAX_TIMEOUT = 30000;
 
 class PromisedWebSockets {
     constructor(disconnectedCallback) {
@@ -121,15 +120,6 @@ class PromisedWebSockets {
 
                 reject(new Error('WebSocket connection timeout'));
                 throw new Error('WebSocket connection timeout')
-                this.resolveRead(false);
-                this.closed = true;
-                if (this.disconnectedCallback) {
-                    this.disconnectedCallback();
-                }
-                this.client.close();
-                this.timeout *= 2;
-                this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
-                timeout = undefined;
             }, this.timeout);
 
         });
