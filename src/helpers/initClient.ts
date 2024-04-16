@@ -5,14 +5,11 @@ import { Account } from "../@types/Account";
 
 import { init } from "../telegram";
 
-import { setupProxy } from "../methods/proxy/setupProxy";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
 const exec = util.promisify(childExec);
 
 export const initClient = async (account: Account, onUpdate: any) => {
-  await setupProxy(account.accountId);
-
   try {
     await init(account, onUpdate);
   } catch (e: any) {

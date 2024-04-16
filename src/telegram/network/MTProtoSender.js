@@ -1,10 +1,8 @@
 const { RPCError } = require('../errors');
 
-const MtProtoPlainSender = require('./MTProtoPlainSender');
 const MTProtoState = require('./MTProtoState');
 const Helpers = require('../Helpers');
 const AuthKey = require('../crypto/AuthKey');
-const { doAuthentication } = require('./Authenticator');
 const RPCResult = require('../tl/core/RPCResult');
 const MessageContainer = require('../tl/core/MessageContainer');
 const GZIPPacked = require('../tl/core/GZIPPacked');
@@ -372,30 +370,8 @@ class MTProtoSender {
             await connection.connect();
             this._log.debug('Connection success!');
         }
-
         if (!this.authKey.getKey()) {
-            const plain = new MtProtoPlainSender(connection, this._log);
-            this._log.debug('New auth_key attempt ...');
-            const res = await doAuthentication(plain, this._log);
-            this._log.debug('Generated new auth_key successfully');
-            await this.authKey.setKey(res.authKey);
-
-            this._state.timeOffset = res.timeOffset;
-
-            if (this._updateCallback) {
-
-                this._updateCallback(new UpdateServerTimeOffset(this._state.timeOffset));
-            }
-
-            /**
-             * This is *EXTREMELY* important since we don't control
-             * external references to the authorization key, we must
-             * notify whenever we change it. This is crucial when we
-             * switch to different data centers.
-             */
-            if (this._authKeyCallback) {
-                await this._authKeyCallback(this.authKey, this._dcId);
-            }
+            throw new Error('Not found auth key')
         } else {
             this._authenticated = true;
             this._log.debug('Already have an auth key ...');

@@ -290,7 +290,6 @@ function isArrayLike(obj) {
 }
 */
 
-// Taken from https://stackoverflow.com/questions/18638900/javascript-crc32/18639999#18639999
 function makeCRCTable() {
     let c;
     const crcTable = [];

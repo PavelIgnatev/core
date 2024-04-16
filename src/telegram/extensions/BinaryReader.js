@@ -17,7 +17,6 @@ class BinaryReader {
     // region Reading
 
     // "All numbers are written as little endian."
-    // https://core.telegram.org/mtproto
     /**
      * Reads a single byte value.
      */

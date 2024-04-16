@@ -1,6 +1,7 @@
 import BigInt from "big-integer";
 import util from "util";
 import { exec as childExec } from "child_process";
+// import proxy from "node-global-proxy";
 
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
@@ -20,6 +21,33 @@ GramJsLogger.setLevel("warn");
 let accountId: string;
 let client: TelegramClient;
 let onUpdate: any;
+
+export const getProxy = async (accountId: string) => {
+  while (true) {
+    try {
+      const response = await fetch(
+        `${process.env.BACKEND_URL}/proxy/${accountId}`
+      );
+      const proxy = await response.json();
+
+      if (
+        proxy &&
+        proxy?.server &&
+        proxy?.port &&
+        proxy?.login &&
+        proxy?.password
+      ) {
+        return proxy;
+      } else {
+        console.log("Proxy for account not found");
+        await new Promise((res) => setTimeout(res, 10000));
+      }
+    } catch (error) {
+      console.log(`Proxy Error: ${error}`);
+      await new Promise((res) => setTimeout(res, 1500));
+    }
+  }
+};
 
 export function handleGramJsUpdate(update: any) {
   if (update instanceof GramJs.UpdatesTooLong) {
@@ -49,7 +77,6 @@ export function handleGramJsUpdate(update: any) {
 
 export async function init(accountData: Account, _onUpdate: any) {
   const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
-
   const keys: Record<string, string> = {};
   onUpdate = _onUpdate;
 
@@ -77,6 +104,10 @@ export async function init(accountData: Account, _onUpdate: any) {
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {});
+
+  const { server, port, login, password } = await getProxy(accountId);
+  // process.env.GLOBAL_AGENT_HTTP_PROXY = `http://${login}:${password}@${server}:${port}`;
+  // console.log(process.env.GLOBAL_AGENT_HTTP_PROXY);
 
   client = new TelegramClient(
     session,
@@ -118,7 +149,7 @@ export async function init(accountData: Account, _onUpdate: any) {
 
 export async function invokeRequest(request: any) {
   try {
-    const randomDelay = Math.floor(Math.random() * 8000) + 2000;
+    const randomDelay = Math.floor(Math.random() * 500) + 2000;
     console.log(
       `Random delay ${randomDelay}ms before action execution: ${request.className}`
     );

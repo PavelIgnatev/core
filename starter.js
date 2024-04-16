@@ -3,7 +3,7 @@ const exec = util.promisify(require("child_process").exec);
 
 async function getAccounts() {
   try {
-    const response = await fetch("http://localhost:5050/accounts/ids");
+    const response = await fetch(`${process.env.BACKEND_URL}/accounts/ids`);
     if (!response.ok) {
       throw new Error(`Failed to retrieve accounts: ${response.statusText}`);
     }

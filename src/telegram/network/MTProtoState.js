@@ -31,13 +31,6 @@ class MTProtoState {
      the concept of "copying" sessions with the unnecessary entities or
      updates state for these connections doesn't make sense.
 
-     While it would be possible to have a `MTProtoPlainState` that does no
-     encryption so that it was usable through the `MTProtoLayer` and thus
-     avoid the need for a `MTProtoPlainSender`, the `MTProtoLayer` is more
-     focused to efficiency and this state is also more advanced (since it
-     supports gzipping and invoking after other message IDs). There are too
-     many methods that would be needed to make it convenient to use for the
-     authentication process, at which point the `MTProtoPlainSender` is better
      * @param authKey
      * @param loggers
      * @param isCall
@@ -235,7 +228,6 @@ class MTProtoState {
         } else {
             body = new IGE(key, iv).decryptIge(this._isCall ? body.slice(16) : body.slice(24));
         }
-        // https://core.telegram.org/mtproto/security_guidelines
         // Sections "checking sha256 hash" and "message length"
 
         const ourKey = this._isCall
@@ -274,7 +266,6 @@ class MTProtoState {
             const containerLen = reader.readInt(); // msgLen for the inner object, padding ignored
             const diff = body.length - containerLen;
             // We want to check if it's between 12 and 1024
-            // https://core.telegram.org/mtproto/security_guidelines#checking-message-length
             if (diff < 12 || diff > 1024) {
                 throw new SecurityError('Server replied with the wrong message padding');
             }

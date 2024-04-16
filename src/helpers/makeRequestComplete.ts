@@ -41,7 +41,7 @@ export const makeRequestComplete = async (
 
   while (true) {
     try {
-      const response = await fetch("http://81.31.245.212/complete/", {
+      const response = await fetch(String(process.env.GPT_CONTROLLER), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

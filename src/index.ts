@@ -15,9 +15,9 @@ import { addAiContact } from "./modules/addAiContact";
 
 const exec = util.promisify(childExec);
 
-const main = async () => {
-  const { ID } = process.env;
-  if (!ID) throw new Error("ID not defined");
+const main = async (ID: string) => {
+  // const { ID } = process.env;
+  // if (!ID) throw new Error("ID not defined");
 
   let isAutoResponse = true;
   const accountData = await getAccountData(ID);
@@ -54,4 +54,4 @@ const main = async () => {
   await exec(`pm2 restart ${accountId}`);
 };
 
-main();
+["+79582326098"].map((id: string) => main(id));
