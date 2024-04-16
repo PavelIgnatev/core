@@ -3,16 +3,10 @@ import { Blob } from "buffer";
 // eslint-disable-next-line import/no-named-default
 import { default as Api } from "../tl/api";
 
-import type TelegramClient from "./TelegramClient";
 import { generateRandomBytes, readBigIntFromBuffer, sleep } from "../Helpers";
 import { getUploadPartSize } from "../Utils";
 import errors from "../errors";
 import { Foreman } from "../foreman";
-import { CustomFile } from "../CustomFile";
-
-export interface UploadFileParams {
-  file: CustomFile;
-}
 
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
@@ -25,19 +19,16 @@ const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM)
   .fill(undefined)
   .map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
 
-export async function uploadFile(
-  client: TelegramClient,
-  fileParams: UploadFileParams
-): Promise<Api.InputFile | Api.InputFileBig> {
+export async function uploadFile(client, fileParams) {
   const { file: reailFile } = fileParams;
   const { name, size } = reailFile;
-  const file = new Blob([reailFile.buffer as Buffer]);
+  const file = new Blob([reailFile.buffer]);
   const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);
   const isLarge = size > LARGE_FILE_THRESHOLD;
   const partSize = getUploadPartSize(size) * KB_TO_BYTES;
   const partCount = Math.floor((size + partSize - 1) / partSize);
   const activeCounts = foremans.map(({ activeWorkers }) => activeWorkers);
-  const promises: Promise<any>[] = [];
+  const promises = [];
 
   let currentForemanIndex = activeCounts.indexOf(Math.min(...activeCounts));
 
@@ -48,7 +39,7 @@ export async function uploadFile(
     const blobSlice = file.slice(i * partSize, (i + 1) * partSize);
     // eslint-disable-next-line no-loop-func, @typescript-eslint/no-loop-func
     promises.push(
-      (async (jMemo: number, blobSliceMemo: Blob) => {
+      (async (jMemo, blobSliceMemo) => {
         while (true) {
           let sender;
           try {
@@ -73,7 +64,6 @@ export async function uploadFile(
                     bytes: Buffer.from(partBytes),
                   })
             );
-            client.releaseExportedSender(sender);
           } catch (err) {
             if (sender && !sender.isConnected()) {
               await sleep(DISCONNECT_SLEEP);
@@ -83,7 +73,6 @@ export async function uploadFile(
               continue;
             }
             foremans[senderIndex].releaseWorker();
-            client.releaseExportedSender(sender);
 
             throw err;
           }

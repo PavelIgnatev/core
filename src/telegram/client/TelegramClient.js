@@ -20,8 +20,6 @@ const RequestState = require("../network/RequestState");
 const Deferred = require("../Deferred").default;
 
 const DEFAULT_DC_ID = 2;
-const EXPORTED_SENDER_RECONNECT_TIMEOUT = 1000; // 1 sec
-const EXPORTED_SENDER_RELEASE_TIMEOUT = 30000; // 30 sec
 
 const PING_INTERVAL = 3000; // 3 sec
 const PING_TIMEOUT = 5000; // 5 sec
@@ -36,9 +34,6 @@ const PING_WAKE_UP_TIMEOUT = 3000; // 3 sec
 const PING_WAKE_UP_WARNING_TIMEOUT = 1000; // 1 sec
 
 const PING_DISCONNECT_DELAY = 60000; // 1 min
-
-// All types
-const sizeTypes = ["u", "v", "w", "y", "d", "x", "c", "m", "b", "a", "s", "f"];
 
 class FallbackClass {
   constructor() {}
@@ -164,7 +159,6 @@ class TelegramClient {
     // These will be set later
     this._config = undefined;
     this.phoneCodeHashes = [];
-    this._exportedSenderPromises = {};
     this._exportedSenderRefCounter = {};
     this._waitingForAuthKey = {};
     this._exportedSenderReleaseTimeouts = {};
@@ -199,10 +193,7 @@ class TelegramClient {
         retryMainConnectionDelay: this._retryMainConnectionDelay,
         autoReconnect: this._autoReconnect,
         connectTimeout: this._timeout,
-        authKeyCallback: this._authKeyCallback.bind(this),
         updateCallback: this._handleUpdate.bind(this),
-        getShouldDebugExportedSenders:
-          this.getShouldDebugExportedSenders.bind(this),
         isMainSender: true,
       });
     }
@@ -267,11 +258,6 @@ class TelegramClient {
         this._args.useWSS ? 443 : 80
       );
     }
-  }
-
-
-  getShouldDebugExportedSenders() {
-    return this._shouldDebugExportedSenders;
   }
 
   async _updateLoop() {
@@ -339,16 +325,10 @@ class TelegramClient {
         this._sender.reconnect();
       }
 
-      // We need to send some content-related request at least hourly
-      // for Telegram to keep delivering updates, otherwise they will
-      // just stop even if we're connected. Do so every 30 minutes.
-
       if (Date.now() - this._lastRequest > 30 * 60 * 1000) {
         try {
           await this.pingCallback();
-        } catch (e) {
-          // we don't care about errors here
-        }
+        } catch {}
 
         lastPongAt = undefined;
       }
@@ -356,360 +336,16 @@ class TelegramClient {
     await this.disconnect();
   }
 
-  /**
-   * Disconnects from the Telegram server
-   * @returns {Promise<void>}
-   */
-  async disconnect() {
-    if (this._sender) {
-      await this._sender.disconnect();
-    }
-
-    await Promise.all(
-      Object.values(this._exportedSenderPromises)
-        .map((promises) => {
-          return Object.values(promises).map((promise) => {
-            return (
-              promise &&
-              promise.then((sender) => {
-                if (sender) {
-                  return sender.disconnect();
-                }
-                return undefined;
-              })
-            );
-          });
-        })
-        .flat()
-    );
-
-    Object.values(this._exportedSenderReleaseTimeouts).forEach((timeouts) => {
-      Object.values(timeouts).forEach((releaseTimeout) => {
-        clearTimeout(releaseTimeout);
-      });
-    });
-
-    this._exportedSenderRefCounter = {};
-    this._exportedSenderPromises = {};
-    this._waitingForAuthKey = {};
+  getSender() {
+    return Promise.resolve(this._sender);
   }
-
-  /**
-   * Disconnects all senders and removes all handlers
-   * @returns {Promise<void>}
-   */
-  async destroy() {
-    this._destroyed = true;
-
-    try {
-      await this.disconnect();
-      this._sender.destroy();
-    } catch (err) {
-      // Do nothing
-    }
-
-    this.session.delete();
-    this._eventBuilders = [];
-  }
-
-  async _switchDC(newDc) {
-    this._log.info(`Reconnecting to new data center ${newDc}`);
-    const DC = utils.getDC(newDc);
-    this.session.setDC(newDc, DC.ipAddress, DC.port);
-    // authKey's are associated with a server, which has now changed
-    // so it's not valid anymore. Set to None to force recreating it.
-    await this._sender.authKey.setKey(undefined);
-    this.session.setAuthKey(undefined);
-    this._isSwitchingDc = true;
-    await this.disconnect();
-    this._sender = undefined;
-    return this.connect();
-  }
-
-  _authKeyCallback(authKey, dcId) {
-    this.session.setAuthKey(authKey, dcId);
-  }
-
-  // endregion
-  // export region
-
-  async _cleanupExportedSender(dcId, index) {
-    if (this.session.dcId !== dcId) {
-      this.session.setAuthKey(undefined, dcId);
-    }
-    // eslint-disable-next-line no-console
-    if (this._shouldDebugExportedSenders)
-      console.log(`🧹 Cleanup idx=${index} dcId=${dcId}`);
-    const sender = await this._exportedSenderPromises[dcId][index];
-    delete this._exportedSenderPromises[dcId][index];
-    delete this._exportedSenderRefCounter[dcId][index];
-    await sender.disconnect();
-  }
-
-  async _cleanupExportedSenders(dcId) {
-    const promises = Object.values(this._exportedSenderPromises[dcId]);
-    if (!promises.length) {
-      return;
-    }
-
-    if (this.session.dcId !== dcId) {
-      this.session.setAuthKey(undefined, dcId);
-    }
-
-    this._exportedSenderPromises[dcId] = {};
-    this._exportedSenderRefCounter[dcId] = {};
-
-    await Promise.all(
-      promises.map(async (promise) => {
-        const sender = await promise;
-        await sender.disconnect();
-      })
-    );
-  }
-
-  async _connectSender(sender, dcId, index, isPremium = false) {
-    // if we don't already have an auth key we want to use normal DCs not -1
-    let hasAuthKey = Boolean(sender.authKey.getKey());
-    let firstConnectResolver;
-
-    if (!hasAuthKey) {
-      if (this._waitingForAuthKey[dcId]) {
-        await this._waitingForAuthKey[dcId];
-
-        const authKey = this.session.getAuthKey(dcId);
-        await sender.authKey.setKey(authKey.getKey());
-        hasAuthKey = Boolean(sender.authKey.getKey());
-      } else {
-        this._waitingForAuthKey[dcId] = new Promise((resolve) => {
-          firstConnectResolver = resolve;
-        });
-      }
-    }
-
-    const dc = utils.getDC(dcId, hasAuthKey);
-
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      try {
-        await sender.connect(
-          new this._connection(
-            dc.ipAddress,
-            dc.port,
-            dcId,
-            this._log,
-            this._args.testServers,
-            // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
-            hasAuthKey ? isPremium : false
-          ),
-          undefined,
-          new this._fallbackConnection(
-            dc.ipAddress,
-            dc.port,
-            dcId,
-            this._log,
-            this._args.testServers,
-            hasAuthKey ? isPremium : false
-          )
-        );
-
-        if (this.session.dcId !== dcId && !sender._authenticated) {
-          this._log.info(
-            `Exporting authorization for data center ${dc.ipAddress}`
-          );
-          const auth = await this.invoke(
-            new requests.auth.ExportAuthorization({ dcId })
-          );
-
-          const req = this._initWith(
-            new requests.auth.ImportAuthorization({
-              id: auth.id,
-              bytes: auth.bytes,
-            })
-          );
-          await sender.send(req);
-          sender._authenticated = true;
-        }
-
-        sender.dcId = dcId;
-        sender.userDisconnected = false;
-
-        if (firstConnectResolver) {
-          firstConnectResolver();
-          delete this._waitingForAuthKey[dcId];
-        }
-
-        if (this._shouldDebugExportedSenders) {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `✅ Connected to exported sender idx=${index} dc=${dcId}`
-          );
-        }
-
-        return sender;
-      } catch (err) {
-        if (this._shouldDebugExportedSenders) {
-          // eslint-disable-next-line no-console
-          console.error(`☠️ ERROR! idx=${index} dcId=${dcId} ${err.message}`);
-        }
-        // eslint-disable-next-line no-console
-        console.error(err);
-
-        await Helpers.sleep(1000);
-        await sender.disconnect();
-      }
-    }
-  }
-
-  releaseExportedSender(sender) {
-    const dcId = sender._dcId;
-    const index = sender._senderIndex;
-
-    if (!this._exportedSenderRefCounter[dcId]) return;
-    if (!this._exportedSenderRefCounter[dcId][index]) return;
-
-    this._exportedSenderRefCounter[dcId][index] -= 1;
-
-    if (this._exportedSenderRefCounter[dcId][index] <= 0) {
-      if (!this._exportedSenderReleaseTimeouts[dcId])
-        this._exportedSenderReleaseTimeouts[dcId] = {};
-
-      this._exportedSenderReleaseTimeouts[dcId][index] = setTimeout(() => {
-        // eslint-disable-next-line no-console
-        if (this._shouldDebugExportedSenders)
-          console.log(`[CC] [idx=${index} dcId=${dcId}] 🚪 Release`);
-        sender.disconnect();
-        this._exportedSenderReleaseTimeouts[dcId][index] = undefined;
-        this._exportedSenderPromises[dcId][index] = undefined;
-      }, EXPORTED_SENDER_RELEASE_TIMEOUT);
-    }
-  }
-
-  async _borrowExportedSender(
-    dcId,
-    shouldReconnect,
-    existingSender,
-    index,
-    isPremium
-  ) {
-    if (this._additionalDcsDisabled) {
-      return undefined;
-    }
-
-    const i = index || 0;
-
-    if (!this._exportedSenderPromises[dcId])
-      this._exportedSenderPromises[dcId] = {};
-    if (!this._exportedSenderRefCounter[dcId])
-      this._exportedSenderRefCounter[dcId] = {};
-
-    if (!this._exportedSenderPromises[dcId][i] || shouldReconnect) {
-      if (this._shouldDebugExportedSenders) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `🕒 Connecting to exported sender idx=${i} dc=${dcId}` +
-            ` ${shouldReconnect ? "(reconnect)" : ""}`
-        );
-      }
-      this._exportedSenderRefCounter[dcId][i] = 0;
-      this._exportedSenderPromises[dcId][i] = this._connectSender(
-        existingSender || this._createExportedSender(dcId, i),
-        dcId,
-        index,
-        isPremium
-      );
-    }
-
-    let sender;
-    try {
-      sender = await this._exportedSenderPromises[dcId][i];
-
-      if (!sender.isConnected()) {
-        if (sender.isConnecting) {
-          await Helpers.sleep(EXPORTED_SENDER_RECONNECT_TIMEOUT);
-          return this._borrowExportedSender(dcId, false, sender, i, isPremium);
-        } else {
-          return this._borrowExportedSender(dcId, true, sender, i, isPremium);
-        }
-      }
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
-
-      return this._borrowExportedSender(dcId, true, undefined, i, isPremium);
-    }
-
-    this._exportedSenderRefCounter[dcId][i] += 1;
-    if (!this._exportedSenderReleaseTimeouts[dcId])
-      this._exportedSenderReleaseTimeouts[dcId] = {};
-    if (this._exportedSenderReleaseTimeouts[dcId][i]) {
-      clearTimeout(this._exportedSenderReleaseTimeouts[dcId][i]);
-      this._exportedSenderReleaseTimeouts[dcId][i] = undefined;
-    }
-
-    return sender;
-  }
-
-  _createExportedSender(dcId, index) {
-    return new MTProtoSender(this.session.getAuthKey(dcId), {
-      logger: this._log,
-      dcId,
-      senderIndex: index,
-      retries: this._connectionRetries,
-      retriesToFallback: this._connectionRetriesToFallback,
-      delay: this._retryDelay,
-      retryMainConnectionDelay: this._retryMainConnectionDelay,
-      shouldForceHttpTransport: this._shouldForceHttpTransport,
-      shouldAllowHttpTransport: this._shouldAllowHttpTransport,
-      autoReconnect: this._autoReconnect,
-      connectTimeout: this._timeout,
-      authKeyCallback: this._authKeyCallback.bind(this),
-      isMainSender: dcId === this.session.dcId,
-      isExported: true,
-      getShouldDebugExportedSenders:
-        this.getShouldDebugExportedSenders.bind(this),
-      onConnectionBreak: () => this._cleanupExportedSender(dcId, index),
-    });
-  }
-
-  getSender(dcId, index, isPremium) {
-    return dcId
-      ? this._borrowExportedSender(dcId, undefined, undefined, index, isPremium)
-      : Promise.resolve(this._sender);
-  }
-
-  _pickFileSize(sizes, sizeType) {
-    if (!sizeType || !sizes || !sizes.length) {
-      return undefined;
-    }
-    const indexOfSize = sizeTypes.indexOf(sizeType);
-    let size;
-    for (let i = indexOfSize; i < sizeTypes.length; i++) {
-      size = sizes.find((s) => s.type === sizeTypes[i]);
-      if (size) {
-        return size;
-      }
-    }
-    return undefined;
-  }
-
-
-  // region Invoking Telegram request
-  /**
-   * Invokes a MTProtoRequest (sends and receives it) and returns its result
-   * @param request
-   * @param dcId Optional dcId to use when sending the request
-   * @param abortSignal Optional AbortSignal to cancel the request
-   * @param shouldRetryOnTimeout Whether to retry the request if it times out
-   * @returns {Promise}
-   */
 
   async invoke(request) {
     if (request.classType !== "request") {
       throw new Error("You can only invoke MTProtoRequests");
     }
 
-    const isExported = undefined !== undefined;
-    let sender = !isExported ? this._sender : await this.getSender(undefined);
+    let sender = this._sender;
     this._lastRequest = Date.now();
 
     await this._connectedDeferred.promise;
@@ -722,7 +358,6 @@ class TelegramClient {
       try {
         const result = await state.promise;
         state.finished.resolve();
-        if (isExported) this.releaseExportedSender(sender);
         return result;
       } catch (e) {
         if (
@@ -743,7 +378,6 @@ class TelegramClient {
             await sleep(e.seconds * 1000);
           } else {
             state.finished.resolve();
-            if (isExported) this.releaseExportedSender(sender);
             throw e;
           }
         } else if (
@@ -751,21 +385,7 @@ class TelegramClient {
           e instanceof errors.NetworkMigrateError ||
           e instanceof errors.UserMigrateError
         ) {
-          this._log.info(`Phone migrated to ${e.newDc}`);
-          const shouldRaise =
-            e instanceof errors.PhoneMigrateError ||
-            e instanceof errors.NetworkMigrateError;
-          if (
-            shouldRaise &&
-            (await await this.invoke(new Api.updates.GetState()))
-          ) {
-            state.finished.resolve();
-            if (isExported) this.releaseExportedSender(sender);
-            throw e;
-          }
-          await this._switchDC(e.newDc);
-          if (isExported) this.releaseExportedSender(sender);
-          sender = this._sender;
+          throw new Error(`Phone migrated to ${e.newDc}`);
         } else if (e instanceof errors.MsgWaitError) {
           // We need to resend this after the old one was confirmed.
           await state.isReady();
@@ -778,34 +398,16 @@ class TelegramClient {
         } else if (e instanceof errors.TimedOutError) {
         } else {
           state.finished.resolve();
-          if (isExported) this.releaseExportedSender(sender);
           throw e;
         }
       }
 
       state.resetPromise();
     }
-    if (isExported) this.releaseExportedSender(sender);
     throw new Error(`Request was unsuccessful ${attempt} time(s)`);
   }
 
-  async getMe() {
-    try {
-      return (
-        await this.invoke(
-          new requests.users.GetUsers({
-            id: [new constructors.InputUserSelf()],
-          })
-        )
-      )[0];
-    } catch (e) {
-      this._log.warn("error while getting me");
-      this._log.warn(e);
-    }
-    return undefined;
-  }
-
-  async start(authParams) {
+  async start() {
     if (!this.isConnected()) {
       await this.connect();
     }

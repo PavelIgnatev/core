@@ -67,13 +67,12 @@ class MTProtoSender {
         shouldAllowHttpTransport: false,
         autoReconnect: true,
         connectTimeout: undefined,
-        authKeyCallback: undefined,
         updateCallback: undefined,
         autoReconnectCallback: undefined,
         isMainSender: undefined,
         onConnectionBreak: undefined,
         isExported: undefined,
-        getShouldDebugExportedSenders: undefined,
+
     };
 
     /**
@@ -95,14 +94,12 @@ class MTProtoSender {
         this._retryMainConnectionDelay = args.retryMainConnectionDelay;
         this._autoReconnect = args.autoReconnect;
         this._connectTimeout = args.connectTimeout;
-        this._authKeyCallback = args.authKeyCallback;
         this._updateCallback = args.updateCallback;
         this._autoReconnectCallback = args.autoReconnectCallback;
         this._isMainSender = args.isMainSender;
         this._isExported = args.isExported;
         this._onConnectionBreak = args.onConnectionBreak;
         this._isFallback = false;
-        this._getShouldDebugExportedSenders = args.getShouldDebugExportedSenders;
 
         /**
          * whether we disconnected ourself or telegram did it.
@@ -182,13 +179,8 @@ class MTProtoSender {
 
     // Public API
 
-    logWithIndexCallback(level) {
-        return (...args) => {
-            if (!this._getShouldDebugExportedSenders
-                || !this._getShouldDebugExportedSenders()) return;
-            // eslint-disable-next-line no-console
-            console[level](`[${this._isExported ? `idx=${this._senderIndex} ` : 'M '}dcId=${this._dcId}]`, ...args);
-        };
+    logWithIndexCallback() {
+        return () => null;
     }
 
     logWithIndex = {
