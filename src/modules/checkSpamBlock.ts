@@ -3,8 +3,8 @@ import { getMessages } from "../methods/messages/getMessages";
 import { resolveUsername } from "../methods/users/resolveUsername";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const checkSpamBlock = async (accountId: string) => {
-  const result = await resolveUsername("spambot");
+export const checkSpamBlock = async (client: any, accountId: string) => {
+  const result = await resolveUsername(client, "spambot");
 
   const { id: userId, accessHash, username } = result?.users?.[0] ?? {};
 
@@ -14,6 +14,7 @@ export const checkSpamBlock = async (accountId: string) => {
   }
 
   const sentMessage = await sendMessage(
+    client,
     userId,
     accessHash,
     "/start",
@@ -25,7 +26,7 @@ export const checkSpamBlock = async (accountId: string) => {
     return true;
   }
 
-  const messages = await getMessages(userId, accessHash, maxId);
+  const messages = await getMessages(client, userId, accessHash, maxId);
   if (!messages?.[0]) {
     console.error("Messages from SpamBot not defined");
     return true;

@@ -8,10 +8,11 @@ import { updateProfile } from "../methods/profile/updateProfile";
 import { generateUser } from "../helpers/generateUser";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
 
-import { invokeRequest, uploadFile } from "../telegram";
-import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const accountSetup = async (account: Account) => {
+import { updateAiAccount } from "../methods/accounts/updateAiAccount";
+import { uploadFile } from "../telegram/client/uploadFile";
+
+export const accountSetup = async (client: any, account: Account) => {
   if (account.setuped) {
     console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
     return;
@@ -27,13 +28,13 @@ export const accountSetup = async (account: Account) => {
         `Generated data to populate profile: ${JSON.stringify(genUser)}`
       );
 
-      await invokeRequest(
+      await client.invoke(
         new GramJs.account.UpdateUsername({
           username,
         })
       );
 
-      await updateProfile({
+      await updateProfile(client, {
         firstName,
         lastName,
         about: "",
@@ -47,7 +48,7 @@ export const accountSetup = async (account: Account) => {
     }
   }
 
-  const { photos: profilePhotos } = await invokeRequest(
+  const { photos: profilePhotos } = await client.invoke(
     new GramJs.photos.GetUserPhotos({
       userId: new GramJs.InputUserSelf(),
       limit: 40,
@@ -57,7 +58,7 @@ export const accountSetup = async (account: Account) => {
   );
 
   if (profilePhotos.length) {
-    await invokeRequest(
+    await client.invoke(
       new GramJs.photos.DeletePhotos({
         id: profilePhotos.map(
           (photo: GramJs.Photo) =>
@@ -74,42 +75,42 @@ export const accountSetup = async (account: Account) => {
   const files = getProfileFiles();
 
   for (const file of files) {
-    await invokeRequest(
+    await client.invoke(
       new GramJs.photos.UploadProfilePhoto({
-        file: await uploadFile(file),
+        file: await uploadFile(client, file),
       })
     );
   }
 
-  await invokeRequest(
+  await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyStatusTimestamp(),
       rules: [new GramJs.InputPrivacyValueAllowAll()],
     })
   );
 
-  await invokeRequest(
+  await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyProfilePhoto(),
       rules: [new GramJs.InputPrivacyValueAllowAll()],
     })
   );
 
-  await invokeRequest(
+  await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneNumber(),
       rules: [new GramJs.InputPrivacyValueAllowAll()],
     })
   );
 
-  await invokeRequest(
+  await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyChatInvite(),
       rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
 
-  await invokeRequest(
+  await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneCall(),
       rules: [new GramJs.InputPrivacyValueDisallowAll()],

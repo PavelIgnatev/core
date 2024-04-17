@@ -40,16 +40,8 @@ class AbridgedPacketCodec extends PacketCodec {
     }
 }
 
-/**
- * This is the mode with the lowest overhead, as it will
- * only require 1 byte if the packet length is less than
- * 508 bytes (127 << 2, which is very common).
- */
-class ConnectionTCPAbridged extends Connection {
-    PacketCodecClass = AbridgedPacketCodec;
-}
+
 
 module.exports = {
-    ConnectionTCPAbridged,
     AbridgedPacketCodec,
 };

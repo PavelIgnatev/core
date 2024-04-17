@@ -1,15 +1,17 @@
 import GramJs from "../telegram/tl/api";
 
-import { invokeRequest } from "../telegram";
 import { Account } from "../@types/Account";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const updateAuthorizations = async (account: Account) => {
-  const { authorizations } = await invokeRequest(
+export const updateAuthorizations = async (
+  client: any,
+  account: Account
+) => {
+  const { authorizations } = await client.invoke(
     new GramJs.account.GetAuthorizations()
   );
 
-  console.log(authorizations)
+  console.log(authorizations);
   await updateAiAccount(account.accountId, {
     authorizations,
   });
@@ -17,7 +19,7 @@ export const updateAuthorizations = async (account: Account) => {
   for (const authorization of authorizations) {
     try {
       if (!authorization.current && authorization.deviceModel !== "Desktop") {
-        await invokeRequest(
+        await client.invoke(
           new GramJs.account.ResetAuthorization({
             hash: authorization.hash,
           })

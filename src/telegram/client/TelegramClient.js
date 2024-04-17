@@ -2,9 +2,7 @@ const os = require("os");
 const Logger = require("../extensions/Logger");
 const { sleep } = require("../Helpers");
 const errors = require("../errors");
-const MemorySession = require("../sessions/Memory");
 const Helpers = require("../Helpers");
-const utils = require("../Utils");
 const Session = require("../sessions/Abstract");
 const { LAYER } = require("../tl/AllTLObjects");
 const Api = require("../tl/api");
@@ -15,7 +13,6 @@ const {
   UpdateConnectionState,
 } = require("../network");
 
-const { uploadFile } = require("./uploadFile");
 const RequestState = require("../network/RequestState");
 const Deferred = require("../Deferred").default;
 
@@ -29,18 +26,9 @@ const PING_WAKE_UP_TIMEOUT = 3000;
 const PING_WAKE_UP_WARNING_TIMEOUT = 1000;
 const PING_DISCONNECT_DELAY = 60000;
 
-class FallbackClass {
-  constructor() {}
-
-  isConnected() {
-    throw new Error("Not connected");
-  }
-}
-
 class TelegramClient {
   static DEFAULT_OPTIONS = {
     connection: ConnectionTCPObfuscated,
-    fallbackConnection: FallbackClass,
     useIPV6: false,
     proxy: undefined,
     timeout: 10,
@@ -94,11 +82,7 @@ class TelegramClient {
     }
     // Determine what session we will use
     if (typeof session === "string" || !session) {
-      try {
-        throw new Error("not implemented");
-      } catch (e) {
-        session = new MemorySession();
-      }
+      throw new Error("not implemented");
     } else if (!(session instanceof Session)) {
       throw new Error("The given session must be str or a session instance");
     }
@@ -117,15 +101,11 @@ class TelegramClient {
     this._connectionRetriesToFallback = args.connectionRetriesToFallback;
     this._retryDelay = args.retryDelay || 0;
     this._retryMainConnectionDelay = args.retryMainConnectionDelay || 0;
-    if (args.proxy) {
-      this._log.warn("proxies are not supported");
-    }
     this._proxy = args.proxy;
     this._timeout = args.timeout;
     this._autoReconnect = args.autoReconnect;
 
     this._connection = args.connection;
-    this._fallbackConnection = args.fallbackConnection;
     // TODO add proxy support
 
     this._floodWaitedRequests = {};
@@ -170,7 +150,7 @@ class TelegramClient {
    * @returns {Promise<void>}
    */
   async connect() {
-    await this._initSession();
+    await this.session.load();
 
     if (this._sender === undefined) {
       // only init sender once to avoid multiple loops.
@@ -200,21 +180,12 @@ class TelegramClient {
       this.session.port,
       this.session.dcId,
       this._log,
-      this._args.testServers
-    );
-    const fallbackConnection = new this._fallbackConnection(
-      this.session.serverAddress,
-      this.session.port,
-      this.session.dcId,
-      this._log,
-      this._args.testServers
+      this._args.testServers,
+      this._proxy
     );
 
-    const newConnection = await this._sender.connect(
-      connection,
-      undefined,
-      fallbackConnection
-    );
+    const newConnection = await this._sender.connect(connection);
+
     if (!newConnection) {
       // we're already connected so no need to reset auth key.
       if (!this._loopStarted) {
@@ -225,7 +196,7 @@ class TelegramClient {
     }
 
     this.session.setAuthKey(this._sender.authKey);
-    await this._sender.send(this._initWith(new requests.help.GetConfig({})));
+    this._sender.send(this._initWith(new requests.help.GetConfig({})));
 
     if (!this._loopStarted) {
       this._updateLoop();
@@ -233,23 +204,6 @@ class TelegramClient {
     }
     this._connectedDeferred.resolve();
     this._isSwitchingDc = false;
-  }
-
-  async _initSession() {
-    await this.session.load();
-
-    if (
-      !this.session.serverAddress ||
-      this.session.serverAddress.includes(":") !== this._useIPV6
-    ) {
-      const DC = utils.getDC(this.defaultDcId);
-      // TODO Fill IP addresses for when `this._useIPV6` is used
-      this.session.setDC(
-        this.defaultDcId,
-        DC.ipAddress,
-        this._args.useWSS ? 443 : 80
-      );
-    }
   }
 
   async _updateLoop() {
@@ -325,7 +279,6 @@ class TelegramClient {
         lastPongAt = undefined;
       }
     }
-    await this.disconnect();
   }
 
   getSender() {
@@ -333,6 +286,12 @@ class TelegramClient {
   }
 
   async invoke(request) {
+    const randomDelay = Math.floor(Math.random() * 500) + 2000;
+    console.log(
+      `Random delay ${randomDelay}ms before action execution: ${request.className}`
+    );
+    await new Promise((r) => setTimeout(r, randomDelay));
+
     if (request.classType !== "request") {
       throw new Error("You can only invoke MTProtoRequests");
     }
@@ -379,15 +338,13 @@ class TelegramClient {
         ) {
           throw new Error(`Phone migrated to ${e.newDc}`);
         } else if (e instanceof errors.MsgWaitError) {
-          // We need to resend this after the old one was confirmed.
           await state.isReady();
 
           state.after = undefined;
         } else if (e.message === "CONNECTION_NOT_INITED") {
-          await this.disconnect();
-          await sleep(2000);
-          await this.connect();
+          throw new Error("CONNECTION_NOT_INITED");
         } else if (e instanceof errors.TimedOutError) {
+          throw new Error(e);
         } else {
           state.finished.resolve();
           throw e;
@@ -410,19 +367,11 @@ class TelegramClient {
     }
   }
 
-  uploadFile(fileParams) {
-    return uploadFile(this, fileParams);
-  }
-
-  // event region
   addEventHandler(callback, event) {
     this._eventBuilders.push([event, callback]);
   }
 
   _handleUpdate(update) {
-    // this.session.processEntities(update)
-    // this._entityCache.add(update)
-
     if (
       update instanceof constructors.Updates ||
       update instanceof constructors.UpdatesCombined

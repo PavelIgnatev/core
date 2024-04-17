@@ -27,15 +27,15 @@ const main = async () => {
     throw new Error("Insufficient number of parameters to start");
   }
 
-  await initClient(accountData, () => (isAutoResponse = true));
+  const client = await initClient(accountData, () => (isAutoResponse = true));
 
-  await updateAuthorizations(accountData);
-  await accountSetup(accountData);
+  await updateAuthorizations(client, accountData);
+  await accountSetup(client, accountData);
 
   const {
     fullUser: { id: meFullUserId },
     users,
-  } = await usersMe();
+  } = await usersMe(client);
   const meFullUser = users[0];
 
   for (let i = 0; i < 60; i++) {
@@ -43,11 +43,11 @@ const main = async () => {
 
     if (isAutoResponse) {
       isAutoResponse = false;
-      await autoResponse(accountData, meFullUser);
+      await autoResponse(client, accountData, meFullUser);
     }
 
-    await addAiContact(accountData);
-    await autoSender(accountData, String(meFullUserId));
+    await addAiContact(client, accountData);
+    await autoSender(client, accountData, String(meFullUserId));
     await new Promise((res) => setTimeout(res, 60000));
   }
 
@@ -55,4 +55,3 @@ const main = async () => {
 };
 
 main()
-// ["+79582326098"].map((id: string) => main(id));

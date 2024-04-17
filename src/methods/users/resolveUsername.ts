@@ -1,8 +1,7 @@
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
-export const resolveUsername = async (username: string) => {
-  const userByUsername = await invokeRequest(
+export const resolveUsername = async (client: any, username: string) => {
+  const userByUsername = await client.invoke(
     new GramJs.contacts.ResolveUsername({
       username,
     })

@@ -1,16 +1,16 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
-export const updateContact = (
+export const updateContact = async (
+  client: any,
   id: string,
   accessHash: string,
   firstName: string,
   lastName: string,
   phoneNumber: string = ""
 ) => {
-  const contact = invokeRequest(
+  const contact = await client.invoke(
     new GramJs.contacts.AddContact({
       id: new GramJs.InputPeerUser({
         userId: BigInt(id),

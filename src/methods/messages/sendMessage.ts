@@ -3,7 +3,6 @@ import util from "util";
 import { exec as childExec } from "child_process";
 
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
 const exec = util.promisify(childExec);
 
@@ -24,13 +23,14 @@ function removeNonAlphaPrefix(string: string) {
 }
 
 export const sendMessage = async (
+  client: any,
   userId: string,
   accessHash: string,
   message: string,
   accountId: string
 ) => {
   try {
-    const sentMessage = await invokeRequest(
+    const sentMessage = await client.invoke(
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))

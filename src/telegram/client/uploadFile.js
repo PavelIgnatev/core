@@ -19,8 +19,7 @@ const foremans = Array(MAX_CONCURRENT_CONNECTIONS_PREMIUM)
   .fill(undefined)
   .map(() => new Foreman(MAX_WORKERS_PER_CONNECTION));
 
-export async function uploadFile(client, fileParams) {
-  const { file: reailFile } = fileParams;
+export async function uploadFile(client, reailFile) {
   const { name, size } = reailFile;
   const file = new Blob([reailFile.buffer]);
   const fileId = readBigIntFromBuffer(generateRandomBytes(8), true, true);

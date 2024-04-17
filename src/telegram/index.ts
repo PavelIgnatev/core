@@ -1,14 +1,12 @@
 import BigInt from "big-integer";
 import util from "util";
 import { exec as childExec } from "child_process";
-import { bootstrap } from "global-agent";
 
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
 import TelegramClient from "./client/TelegramClient";
 
 import { Logger as GramJsLogger } from "./extensions/index";
-import { CustomFile } from "./CustomFile";
 import { Account } from "../@types/Account";
 import { getDialogFromDb } from "../methods/dialogs/getDialogFromDb";
 
@@ -17,10 +15,6 @@ const DEFAULT_PLATFORM = "Unknown platform";
 const exec = util.promisify(childExec);
 
 GramJsLogger.setLevel("warn");
-
-let accountId: string;
-let client: TelegramClient;
-let onUpdate: any;
 
 export const getProxy = async (accountId: string) => {
   while (true) {
@@ -49,38 +43,9 @@ export const getProxy = async (accountId: string) => {
   }
 };
 
-export function handleGramJsUpdate(update: any) {
-  if (update instanceof GramJs.UpdatesTooLong) {
-    exec(`pm2 restart ${accountId}`);
-  } else {
-    const updates = "updates" in update ? update.updates : [update];
-    updates.forEach(async (update: any) => {
-      if (
-        update instanceof GramJs.UpdateNewMessage ||
-        update instanceof GramJs.UpdateShortMessage
-      ) {
-        const {
-          userId: varUserId,
-          message: { peerId: { userId: peerUserId } = {} as any } = {},
-        } = update as any;
-        const userId = varUserId || peerUserId;
-
-        const isDialogInDb = await getDialogFromDb(accountId, String(userId));
-
-        if (isDialogInDb && userId instanceof BigInt) {
-          onUpdate(userId);
-        }
-      }
-    });
-  }
-}
-
-export async function init(accountData: Account, _onUpdate: any) {
+export async function init(accountData: Account, onUpdate: any) {
   const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
   const keys: Record<string, string> = {};
-  onUpdate = _onUpdate;
-
-  accountId = accountData.accountId;
 
   if (dc1) {
     keys["1"] = dc1;
@@ -104,12 +69,12 @@ export async function init(accountData: Account, _onUpdate: any) {
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {});
+  const { server, port, login, password } = await getProxy(
+    accountData.accountId
+  );
+  const proxy = `http://${login}:${password}@${server}:${port}`;
 
-  const { server, port, login, password } = await getProxy(accountId);
-  process.env.GLOBAL_AGENT_HTTP_PROXY = `http://${login}:${password}@${server}:${port}`;
-
-  bootstrap();
-  client = new TelegramClient(
+  const client = new TelegramClient(
     session,
     2496,
     "8da85b0d5bfe62527e5b244c209159c3",
@@ -125,31 +90,49 @@ export async function init(accountData: Account, _onUpdate: any) {
       testServers: false,
       dcId: undefined,
       langCode: "en",
+      proxy,
     }
   );
 
+  if (!client) {
+    throw new Error("Client not inited");
+  }
+
   await client.start();
 
-  client.addEventHandler(handleGramJsUpdate, {
-    build: (update: object) => update,
-  });
-}
+  client.addEventHandler(
+    (update: any) => {
+      if (update instanceof GramJs.UpdatesTooLong) {
+        exec(`pm2 restart ${accountData.accountId}`);
+      } else {
+        const updates = "updates" in update ? update.updates : [update];
+        updates.forEach(async (update: any) => {
+          if (
+            update instanceof GramJs.UpdateNewMessage ||
+            update instanceof GramJs.UpdateShortMessage
+          ) {
+            const {
+              userId: varUserId,
+              message: { peerId: { userId: peerUserId } = {} as any } = {},
+            } = update as any;
+            const userId = varUserId || peerUserId;
 
-export async function invokeRequest(request: any) {
-  try {
-    const randomDelay = Math.floor(Math.random() * 8000) + 2000;
-    console.log(
-      `Random delay ${randomDelay}ms before action execution: ${request.className}`
-    );
-    await new Promise((r) => setTimeout(r, randomDelay));
+            const isDialogInDb = await getDialogFromDb(
+              accountData.accountId,
+              String(userId)
+            );
 
-    const result = await client.invoke(request);
-    return result;
-  } catch (err: any) {
-    throw err;
-  }
-}
+            if (isDialogInDb && userId instanceof BigInt) {
+              onUpdate(userId);
+            }
+          }
+        });
+      }
+    },
+    {
+      build: (update: object) => update,
+    }
+  );
 
-export function uploadFile(file: CustomFile) {
-  return client.uploadFile({ file });
+  return client;
 }

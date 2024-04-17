@@ -1,16 +1,18 @@
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
-export const updateProfile = ({
-  firstName,
-  lastName,
-  about,
-}: {
-  firstName?: string;
-  lastName?: string;
-  about?: string;
-}) => {
-  return invokeRequest(
+export const updateProfile = (
+  client: any,
+  {
+    firstName,
+    lastName,
+    about,
+  }: {
+    firstName?: string;
+    lastName?: string;
+    about?: string;
+  }
+) => {
+  return client.invoke(
     new GramJs.account.UpdateProfile({
       firstName: firstName || "",
       lastName: lastName || "",

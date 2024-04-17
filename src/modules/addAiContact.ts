@@ -5,7 +5,7 @@ import { getRandomAiAccount } from "../methods/accounts/getRandomAiAccount";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 import { updateContact } from "../methods/contacts/updateContact";
 
-export const addAiContact = async (account: Account) => {
+export const addAiContact = async (client: any, account: Account) => {
   try {
     const aiContactCount = account.aiContactCount || 0;
     if (aiContactCount > 100) {
@@ -18,7 +18,7 @@ export const addAiContact = async (account: Account) => {
     if (currentTime >= aiRemainingTime) {
       try {
         const { username } = await getRandomAiAccount(account.accountId);
-        const userByUsername = await resolveUsername(username);
+        const userByUsername = await resolveUsername(client, username);
         const {
           id: userId,
           accessHash,
@@ -35,6 +35,7 @@ export const addAiContact = async (account: Account) => {
         }
 
         await updateContact(
+          client,
           userId,
           accessHash,
           userFirstName,
@@ -63,6 +64,6 @@ export const addAiContact = async (account: Account) => {
       `ADD AI CONTACT: The next addition of a random bot to contacts will be in ${aiRemainingTime}`
     );
   } catch (error) {
-    console.error(`Auto sender error: ${error}`);
+    console.error(`Add Ai Contact: ${error}`);
   }
 };

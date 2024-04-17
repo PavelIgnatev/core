@@ -1,8 +1,7 @@
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
-export const usersMe = async () => {
-  const usersMe = await invokeRequest(
+export const usersMe = async (client: any) => {
+  const usersMe = await client.invoke(
     new GramJs.users.GetFullUser({
       id: new GramJs.InputUserSelf(),
     })

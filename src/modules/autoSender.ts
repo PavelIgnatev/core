@@ -12,13 +12,13 @@ import { resolveUsername } from "../methods/users/resolveUsername";
 import { resolvePhone } from "../methods/users/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
 
-export const autoSender = async (account: Account, meId: string) => {
+export const autoSender = async (client: any, account: Account, meId: string) => {
   try {
     const currentTime = new Date();
     let remainingTime = new Date(account.remainingTime || currentTime);
 
     if (currentTime >= remainingTime) {
-      const spamBlockDate = await checkSpamBlock(account.accountId);
+      const spamBlockDate = await checkSpamBlock(client, account.accountId);
       if (spamBlockDate) {
         return;
       }
@@ -33,9 +33,9 @@ export const autoSender = async (account: Account, meId: string) => {
         const resolveMethod = recipient.recipientUsername.includes("+")
           ? resolvePhone
           : resolveUsername;
-        const userByUsername = await resolveMethod(recipient.recipientUsername);
+        const userByUsername = await resolveMethod(client, recipient.recipientUsername);
         const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-        const recipientFull = await getFullUser(userId, accessHash);
+        const recipientFull = await getFullUser(client, userId, accessHash);
 
         if (
           !userId ||
@@ -50,12 +50,14 @@ export const autoSender = async (account: Account, meId: string) => {
         }
 
         const sentFirstMessage = await sendMessage(
+          client,
           userId,
           accessHash,
           recipient.firstMessage,
           account.accountId
         );
         const sentSecondMessage = await sendMessage(
+          client,
           userId,
           accessHash,
           recipient.secondMessage,
@@ -64,7 +66,7 @@ export const autoSender = async (account: Account, meId: string) => {
         console.log(
           `Sending messages to user ${recipient.recipientUsername}:${userId} was successful!`
         );
-        await editFolder(userId, accessHash, 1);
+        await editFolder(client, userId, accessHash, 1);
         console.log(
           `Added a chat with user ${recipient.recipientUsername}:${userId} to the archive`
         );

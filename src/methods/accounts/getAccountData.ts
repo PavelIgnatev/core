@@ -14,7 +14,7 @@ export const getAccountData = async (accId: string) => {
       const data = await response.json();
       return data;
     } catch (error) {
-      console.error(error);
+      console.error(`Get Account Date: ${error}`);
       await new Promise((res) => setTimeout(res, 1500));
     }
   }

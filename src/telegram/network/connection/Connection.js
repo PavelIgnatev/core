@@ -15,22 +15,21 @@ const AsyncQueue = require("../../extensions/AsyncQueue");
 class Connection {
   PacketCodecClass = undefined;
 
-  constructor(ip, port, dcId, loggers, testServers, isPremium) {
+  constructor(ip, port, dcId, loggers, testServers, proxy) {
     this._ip = ip;
     this._port = port;
     this._dcId = dcId;
     this._log = loggers;
     this._testServers = testServers;
-    this._isPremium = isPremium;
+    this._isPremium = undefined;
     this._connected = false;
     this._sendTask = undefined;
     this._recvTask = undefined;
     this._codec = undefined;
-    this._obfuscation = undefined; // TcpObfuscated and MTProxy
+    this._obfuscation = undefined; 
     this._sendArray = new AsyncQueue();
     this._recvArray = new AsyncQueue();
-    // this.socket = new PromiseSocket(new Socket())
-
+    this._proxy = proxy
     this.shouldLongPoll = false;
     this.socket = new PromisedWebSockets(this.disconnectCallback.bind(this));
   }
@@ -49,11 +48,9 @@ class Connection {
     await this.socket.connect(
       this._port,
       this._ip,
-      this._testServers,
-      this._isPremium
+      this._proxy
     );
     this._log.debug("Finished connecting");
-    // await this.socket.connect({host: this._ip, port: this._port});
     await this._initConn();
   }
 

@@ -1,14 +1,14 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
 export const getMessages = async (
+  client: any,
   userId: string,
   accessHash: string,
   minId?: number
 ) => {
-  const { messages } = await invokeRequest(
+  const { messages } = await client.invoke(
     new GramJs.messages.GetHistory({
       peer: new GramJs.InputPeerUser({
         userId: BigInt(userId),

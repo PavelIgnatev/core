@@ -508,24 +508,6 @@ function resolveId(markedId) {
  * @private
  */
 
-/* CONTEST
-
-function _getEntityPair(entityId, entities, cache, getInputPeer = getInputPeer) {
-    const entity = entities.get(entityId)
-    let inputEntity = cache[entityId]
-    if (inputEntity === undefined) {
-        try {
-            inputEntity = getInputPeer(inputEntity)
-        } catch (e) {
-            inputEntity = null
-        }
-    }
-    return {
-        entity,
-        inputEntity
-    }
-}
-*/
 
 function getMessageId(message) {
     if (message === undefined) {

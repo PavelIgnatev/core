@@ -82,7 +82,6 @@ class MTProtoSender {
     constructor(authKey, opts) {
         const args = { ...MTProtoSender.DEFAULT_OPTIONS, ...opts };
         this._connection = undefined;
-        this._fallbackConnection = undefined;
         this._shouldForceHttpTransport = args.shouldForceHttpTransport;
         this._shouldAllowHttpTransport = args.shouldAllowHttpTransport;
         this._log = args.logger;
@@ -191,27 +190,19 @@ class MTProtoSender {
     };
 
     getConnection() {
-        return this._isFallback ? this._fallbackConnection : this._connection;
+        return this._connection;
     }
 
-    /**
-     * Connects to the specified given connection using the given auth key.
-     * @param connection
-     * @param [force]
-     * @param fallbackConnection
-     * @returns {Promise<boolean>}
-     */
-    async connect(connection, force, fallbackConnection) {
+    async connect(connection) {
         this.userDisconnected = false;
 
-        if (this._user_connected && !force) {
+        if (this._user_connected) {
             this._log.info('User is already connected!');
             return false;
         }
         this.isConnecting = true;
         this._isFallback = this._shouldForceHttpTransport && this._shouldAllowHttpTransport;
         this._connection = connection;
-        this._fallbackConnection = fallbackConnection;
 
         for (let attempt = 0; attempt < this._retries + this._retriesToFallback; attempt++) {
             try {
@@ -247,31 +238,7 @@ class MTProtoSender {
     }
 
     async tryReconnectToMain() {
-        if (!this.isConnecting && this._isFallback && !this._isReconnectingToMain && !this.isReconnecting
-            && !this._shouldForceHttpTransport && !this._isExported) {
-            this._log.debug('Trying to reconnect to main connection');
-            this._isReconnectingToMain = true;
-            try {
-                await this._connection.connect();
-                this._log.info('Reconnected to main connection');
-                this.logWithIndex.warn('Reconnected to main connection');
-                this.isReconnecting = true;
-                await this._disconnect(this._fallbackConnection);
-                await this.connect(this._connection, true, this._fallbackConnection);
-                this.isReconnecting = false;
-                this._isReconnectingToMain = false;
-            } catch (e) {
-                this.isReconnecting = false;
-                this._isReconnectingToMain = false;
-                this._log.error(
-                    `Failed to reconnect to main connection, retrying in ${this._retryMainConnectionDelay}ms`,
-                );
-                await Helpers.sleep(this._retryMainConnectionDelay);
-                void this.tryReconnectToMain();
-            }
-        } else {
-            await Helpers.sleep(this._retryMainConnectionDelay);
-        }
+        throw new Error('Reconnect')
     }
 
     isConnected() {
@@ -332,21 +299,6 @@ class MTProtoSender {
 
     addStateToQueue(state) {
         this._send_queue.append(state);
-    }
-
-    async sendBeacon(request) {
-        if (!this._user_connected) {
-            throw new Error('Cannot send requests while disconnected');
-        }
-        const state = new RequestState(request, undefined);
-        const data = await this._send_queue.getBeacon(state);
-        const encryptedData = await this._state.encryptMessageData(data);
-
-        postMessage({
-            type: 'sendBeacon',
-            data: encryptedData,
-            url: this._fallbackConnection.href,
-        });
     }
 
     /**
@@ -432,18 +384,6 @@ class MTProtoSender {
 
             data = await this._state.encryptMessageData(data);
 
-            try {
-                await this._fallbackConnection.send(data);
-            } catch (e) {
-                this._log.error(e);
-                this._log.info('Connection closed while sending data');
-                this._long_poll_loop_handle = undefined;
-                this.isSendingLongPoll = false;
-                if (!this.userDisconnected) {
-                    this.reconnect();
-                }
-                return;
-            }
 
             this.isSendingLongPoll = false;
             this.checkLongPoll();
@@ -1019,58 +959,9 @@ class MTProtoSender {
     }
 
     reconnect() {
-        if (this._user_connected && !this.isReconnecting) {
-            this.isReconnecting = true;
-            // TODO Should we set this?
-            // this._user_connected = false
-            // we want to wait a second between each reconnect try to not flood the server with reconnects
-            // in case of internal server issues.
-            Helpers.sleep(1000)
-                .then(() => {
-                    this.logWithIndex.log('Reconnecting...');
-                    this._log.info('Started reconnecting');
-                    this._reconnect();
-                });
-        }
+        throw new Error('Reconnect')
     }
 
-    async _reconnect() {
-        this._log.debug('Closing current connection...');
-        try {
-            this.logWithIndex.warn('[Reconnect] Closing current connection...');
-            await this._disconnect(this.getConnection());
-        } catch (err) {
-            this._log.warn(err);
-        }
-
-        this._send_queue.append(undefined);
-        this._state.reset();
-
-        // For some reason reusing existing connection caused stuck requests
-        const newConnection = new this._connection.constructor(
-            this._connection._ip,
-            this._connection._port,
-            this._connection._dcId,
-            this._connection._log,
-            this._connection._testServers,
-        );
-        const newFallbackConnection = new this._fallbackConnection.constructor(
-            this._connection._ip,
-            this._connection._port,
-            this._connection._dcId,
-            this._connection._log,
-            this._connection._testServers,
-        );
-        await this.connect(newConnection, true, newFallbackConnection);
-
-        this.isReconnecting = false;
-        this._send_queue.prepend(this._pending_state.values());
-        this._pending_state.clear();
-
-        if (this._autoReconnectCallback) {
-            await this._autoReconnectCallback();
-        }
-    }
 }
 
 module.exports = MTProtoSender;

@@ -1,14 +1,14 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 
 export const editFolder = async (
+  client: any,
   userId: string,
   accessHash: string,
   folderId: number
 ) => {
-  await invokeRequest(
+  await client.invoke(
     new GramJs.folders.EditPeerFolders({
       folderPeers: [
         new GramJs.InputFolderPeer({

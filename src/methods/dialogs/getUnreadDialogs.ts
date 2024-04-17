@@ -1,12 +1,11 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../telegram/tl/api";
-import { invokeRequest } from "../../telegram";
 import { getDialogFromDb } from "./getDialogFromDb";
 import { Account } from "../../@types/Account";
 
-export const getUnreadDialogs = async (account: Account) => {
-  const allDialogs = await invokeRequest(
+export const getUnreadDialogs = async (client: any, account: Account) => {
+  const allDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
       folderId: 1,
@@ -19,7 +18,7 @@ export const getUnreadDialogs = async (account: Account) => {
   }
 
   const unreadDialogs = [];
-  const unansweredMessagesIds = allDialogs.messages 
+  const unansweredMessagesIds = allDialogs.messages
     .filter((message: GramJs.Message) => !message.out)
     .map((message: GramJs.Message & { peerId: GramJs.PeerUser }) =>
       String(message.peerId.userId)
@@ -39,7 +38,7 @@ export const getUnreadDialogs = async (account: Account) => {
     );
 
     if (user && !user.deleted && !user.bot && !user.support) {
-      const allMessages = await invokeRequest(
+      const allMessages = await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
             userId: BigInt(user.id),
@@ -86,14 +85,14 @@ export const getUnreadDialogs = async (account: Account) => {
         } else if (video) {
           text = "[VIDEO]";
         } else if (voice) {
-          await invokeRequest(
+          await client.invoke(
             new GramJs.messages.ReadMessageContents({
               id: [dialogMessage.id],
             })
           );
           text = "[VOICE MESSAGE]";
         } else if (round) {
-          await invokeRequest(
+          await client.invoke(
             new GramJs.messages.ReadMessageContents({
               id: [dialogMessage.id],
             })
@@ -115,7 +114,7 @@ export const getUnreadDialogs = async (account: Account) => {
         });
       }
 
-      await invokeRequest(
+      await client.invoke(
         new GramJs.messages.ReadHistory({
           peer: new GramJs.InputPeerUser({
             userId: user.id,

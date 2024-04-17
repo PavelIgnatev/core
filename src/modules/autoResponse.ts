@@ -33,10 +33,11 @@ const getCombinedMessages = (messages: Message[]) => {
 };
 
 export const autoResponse = async (
+  client: any,
   account: Account,
   meFullUser: GramJs.User
 ) => {
-  const unreadDialogs = await getUnreadDialogs(account);
+  const unreadDialogs = await getUnreadDialogs(client, account);
 
   for (const dialog of unreadDialogs) {
     const { firstName: meFirstName = "" } = meFullUser;
@@ -60,7 +61,7 @@ export const autoResponse = async (
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const meName = converterName(meFirstName);
 
-    const recipientFull = await getFullUser(id, accessHash);
+    const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
       return;
@@ -102,6 +103,7 @@ ${combinedMessages
       currentStage === 2 ? part : null
     );
     const sentResponseMessage = await sendMessage(
+      client,
       id,
       accessHash,
       responseMessage,
@@ -118,6 +120,7 @@ ${combinedMessages
     if (currentStage === 1 && addedQuestion) {
       const question = generateRandomString(addedQuestion);
       const sentAddedQuestion = await sendMessage(
+        client,
         id,
         accessHash,
         question,
@@ -134,6 +137,7 @@ ${combinedMessages
     if (currentStage === 2 && secondAddedQuestion) {
       const question = generateRandomString(secondAddedQuestion);
       const sentSecondAddedQuestion = await sendMessage(
+        client,
         id,
         accessHash,
         question,

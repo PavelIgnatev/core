@@ -11,7 +11,9 @@ const exec = util.promisify(childExec);
 
 export const initClient = async (account: Account, onUpdate: any) => {
   try {
-    await init(account, onUpdate);
+    const client = await init(account, onUpdate);
+
+    return client;
   } catch (e: any) {
     console.log(e.message);
 
