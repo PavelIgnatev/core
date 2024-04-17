@@ -267,28 +267,7 @@ function bufferXor(a, b) {
     return Buffer.from(res);
 }
 
-/**
- * Checks if the obj is an array
- * @param obj
- * @returns {boolean}
- */
-/*
-CONTEST
-we do'nt support array requests anyway
-function isArrayLike(obj) {
-    if (!obj) return false
-    const l = obj.length
-    if (typeof l != 'number' || l < 0) return false
-    if (Math.floor(l) !== l) return false
-    // fast check
-    if (l > 0 && !(l - 1 in obj)) return false
-    // more complete check (optional)
-    for (let i = 0; i < l; ++i) {
-        if (!(i in obj)) return false
-    }
-    return true
-}
-*/
+
 
 function makeCRCTable() {
     let c;
@@ -328,7 +307,6 @@ module.exports = {
     mod,
     crc32,
     generateRandomBytes,
-    // calcKey,
     generateKeyDataFromNonce,
     sha1,
     sha256,
@@ -337,7 +315,6 @@ module.exports = {
     getRandomInt,
     sleep,
     getByteArray,
-    // isArrayLike,
     toSignedLittleBuffer,
     convertToLittle,
     bufferXor,

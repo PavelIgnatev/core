@@ -20,20 +20,14 @@ const RequestState = require("../network/RequestState");
 const Deferred = require("../Deferred").default;
 
 const DEFAULT_DC_ID = 2;
-
-const PING_INTERVAL = 3000; // 3 sec
-const PING_TIMEOUT = 5000; // 5 sec
+const PING_INTERVAL = 3000;
+const PING_TIMEOUT = 5000;
 const PING_FAIL_ATTEMPTS = 3;
-const PING_FAIL_INTERVAL = 100; // ms
-
-// An unusually long interval is a sign of returning from background mode...
-const PING_INTERVAL_TO_WAKE_UP = 5000; // 5 sec
-// ... so we send a quick "wake-up" ping to confirm than connection was dropped ASAP
-const PING_WAKE_UP_TIMEOUT = 3000; // 3 sec
-// We also send a warning to the user even a bit more quickly
-const PING_WAKE_UP_WARNING_TIMEOUT = 1000; // 1 sec
-
-const PING_DISCONNECT_DELAY = 60000; // 1 min
+const PING_FAIL_INTERVAL = 100;
+const PING_INTERVAL_TO_WAKE_UP = 5000;
+const PING_WAKE_UP_TIMEOUT = 3000;
+const PING_WAKE_UP_WARNING_TIMEOUT = 1000;
+const PING_DISCONNECT_DELAY = 60000;
 
 class FallbackClass {
   constructor() {}
@@ -70,7 +64,6 @@ class TelegramClient {
     dcId: DEFAULT_DC_ID,
     shouldAllowHttpTransport: false,
     shouldForceHttpTransport: false,
-    shouldDebugExportedSenders: false,
   };
 
   /**
@@ -93,7 +86,6 @@ class TelegramClient {
     this._useIPV6 = args.useIPV6;
     this._shouldForceHttpTransport = args.shouldForceHttpTransport;
     this._shouldAllowHttpTransport = args.shouldAllowHttpTransport;
-    this._shouldDebugExportedSenders = args.shouldDebugExportedSenders;
     // this._entityCache = new Set()
     if (typeof args.baseLogger === "string") {
       this._log = new Logger();
@@ -419,7 +411,7 @@ class TelegramClient {
   }
 
   uploadFile(fileParams) {
-    return uploadFile(this, fileParams, this._shouldDebugExportedSenders);
+    return uploadFile(this, fileParams);
   }
 
   // event region

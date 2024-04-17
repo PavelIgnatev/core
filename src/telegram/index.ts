@@ -1,7 +1,7 @@
 import BigInt from "big-integer";
 import util from "util";
 import { exec as childExec } from "child_process";
-// import proxy from "node-global-proxy";
+import { bootstrap } from "global-agent";
 
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
@@ -106,9 +106,9 @@ export async function init(accountData: Account, _onUpdate: any) {
   const session = new CallbackSession(sessionData, () => {});
 
   const { server, port, login, password } = await getProxy(accountId);
-  // process.env.GLOBAL_AGENT_HTTP_PROXY = `http://${login}:${password}@${server}:${port}`;
-  // console.log(process.env.GLOBAL_AGENT_HTTP_PROXY);
+  process.env.GLOBAL_AGENT_HTTP_PROXY = `http://${login}:${password}@${server}:${port}`;
 
+  bootstrap();
   client = new TelegramClient(
     session,
     2496,
@@ -128,19 +128,7 @@ export async function init(accountData: Account, _onUpdate: any) {
     }
   );
 
-  await client.start({
-    phoneNumber: () => Promise.reject(),
-    phoneCode: () => Promise.reject(),
-    password: () => Promise.reject(),
-    firstAndLastNames: () => Promise.reject(),
-    qrCode: () => Promise.reject(),
-    onError: () => {},
-    webAuthTokenFailed: () => {},
-    initialMethod: "qrCode",
-    shouldThrowIfUnauthorized: Boolean(sessionData),
-    webAuthToken: undefined,
-    mockScenario: undefined,
-  });
+  await client.start();
 
   client.addEventHandler(handleGramJsUpdate, {
     build: (update: object) => update,
@@ -149,7 +137,7 @@ export async function init(accountData: Account, _onUpdate: any) {
 
 export async function invokeRequest(request: any) {
   try {
-    const randomDelay = Math.floor(Math.random() * 500) + 2000;
+    const randomDelay = Math.floor(Math.random() * 8000) + 2000;
     console.log(
       `Random delay ${randomDelay}ms before action execution: ${request.className}`
     );
