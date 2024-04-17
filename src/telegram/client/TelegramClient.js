@@ -286,7 +286,7 @@ class TelegramClient {
   }
 
   async invoke(request) {
-    const randomDelay = Math.floor(Math.random() * 500) + 2000;
+    const randomDelay = Math.floor(Math.random() * 10000) + 2000;
     console.log(
       `Random delay ${randomDelay}ms before action execution: ${request.className}`
     );
