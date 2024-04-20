@@ -36,7 +36,7 @@ const main = async (ID: string) => {
       } = await usersMe(client);
       const meFullUser = users[0];
 
-      for (let i = 0; i < 60; i++) {
+      for (let i = 0; i < 2; i++) {
         const accountData = await getAccountData(ID);
 
         if (isAutoResponse) {
