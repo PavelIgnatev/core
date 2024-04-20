@@ -1,13 +1,9 @@
-import util from "util";
-import { exec as childExec } from "child_process";
-
 import { Account } from "../@types/Account";
 
 import { init } from "../telegram";
 
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-const exec = util.promisify(childExec);
 
 export const initClient = async (account: Account, onUpdate: any) => {
   try {
@@ -30,7 +26,7 @@ export const initClient = async (account: Account, onUpdate: any) => {
       ].includes(e.message)
     ) {
       await updateAiAccount(account.accountId, { banned: true });
-      await exec(`pm2 stop ${account.accountId}`);
+      throw new Error("Global Error");
     }
   }
 };

@@ -1,10 +1,6 @@
 import BigInt from "big-integer";
-import util from "util";
-import { exec as childExec } from "child_process";
 
 import GramJs from "../../telegram/tl/api";
-
-const exec = util.promisify(childExec);
 
 function reduceSpaces(string: string) {
   return string.replace(/\s+/g, " ").trim();
@@ -64,6 +60,6 @@ export const sendMessage = async (
       });
     }
 
-    await exec(`pm2 stop ${accountId}`);
+    throw new Error("Global Error");
   }
 };

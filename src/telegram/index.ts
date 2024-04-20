@@ -1,7 +1,4 @@
 import BigInt from "big-integer";
-import util from "util";
-import { exec as childExec } from "child_process";
-
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
 import TelegramClient from "./client/TelegramClient";
@@ -12,7 +9,6 @@ import { getDialogFromDb } from "../methods/dialogs/getDialogFromDb";
 
 const DEFAULT_USER_AGENT = "Unknown UserAgent";
 const DEFAULT_PLATFORM = "Unknown platform";
-const exec = util.promisify(childExec);
 
 GramJsLogger.setLevel("warn");
 
@@ -81,7 +77,9 @@ export async function init(accountData: Account, onUpdate: any) {
     {
       deviceModel: userAgent || DEFAULT_USER_AGENT,
       systemVersion: platform || DEFAULT_PLATFORM,
-      appVersion: `10.14.9 A`,
+      appVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
+        Math.random() * 10
+      )}.${Math.floor(Math.random() * 10)} A`,
       useWSS: true,
       additionalDcsDisabled: false,
       shouldDebugExportedSenders: undefined,
@@ -103,7 +101,7 @@ export async function init(accountData: Account, onUpdate: any) {
   client.addEventHandler(
     (update: any) => {
       if (update instanceof GramJs.UpdatesTooLong) {
-        exec(`pm2 restart ${accountData.accountId}`);
+        throw new Error("Updates too long");
       } else {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update: any) => {
