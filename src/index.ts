@@ -67,3 +67,4 @@ const main = async (ID: string) => {
 getAccountsIds().then((ids) =>
   ids.forEach((id: string) => promises.push(main(id)))
 );
+Promise.all(promises).then(() => process.exit(1));
