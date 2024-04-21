@@ -231,13 +231,13 @@ class MTProtoSender {
         this.isConnecting = false;
 
         if (this._isFallback && !this._shouldForceHttpTransport) {
-            void this.tryReconnectToMain();
+            this.tryReconnectToMain();
         }
 
         return true;
     }
 
-    async tryReconnectToMain() {
+    tryReconnectToMain() {
         throw new Error('Reconnect')
     }
 
