@@ -68,7 +68,11 @@ export async function init(accountData: Account, onUpdate: any) {
   const { server, port, login, password } = await getProxy(
     accountData.accountId
   );
+  if(!server || !port || !login || !password) {
+    throw new Error('ОШИБКА ПРОКСИ!')
+  }
   const proxy = `http://${login}:${password}@${server}:${port}`;
+
 
   const client = new TelegramClient(
     session,
