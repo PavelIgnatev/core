@@ -72,7 +72,7 @@ export async function init(accountData: Account, onUpdate: any) {
     throw new Error("ОШИБКА ПРОКСИ!");
   }
   const proxy = `http://${login}:${password}@${server}:${port}`;
-  console.log(accountData.accountId, proxy);
+  console.log(`К аккаунту ${accountData.accountId} применено прокси: ${proxy}`);
 
   const client = new TelegramClient(
     session,

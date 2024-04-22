@@ -15,6 +15,8 @@ export const updateAuthorizations = async (
     authorizations,
   });
 
+  console.log(authorizations)
+
   for (const authorization of authorizations) {
     try {
       if (!authorization.current && authorization.deviceModel !== "Desktop") {
@@ -31,3 +33,4 @@ export const updateAuthorizations = async (
     "UPDATE AUTHORIZATIONS: authorization in the account was successful, authorization data is saved in the database"
   );
 };
+

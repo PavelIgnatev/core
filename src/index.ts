@@ -9,7 +9,6 @@ import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
-import { addAiContact } from "./modules/addAiContact";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 
 const promises: Promise<any>[] = [];
@@ -47,7 +46,6 @@ const main = async (ID: string) => {
           await autoResponse(client, accountData, meFullUser);
         }
 
-        await addAiContact(client, accountData);
         await autoSender(client, accountData, String(meFullUserId));
         await new Promise((res) => setTimeout(res, 60000));
       }
