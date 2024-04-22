@@ -87,13 +87,9 @@ class PromisedWebSockets {
     });
     this.closed = false;
     this.website = this.getWebSocketLink(ip, port, false, false);
-    this.client = new WebSocket(
-      this.website,
-      "binary"
-      // {
-      //   agent: new HttpsProxyAgent(proxy),
-      // }
-    );
+    this.client = new WebSocket(this.website, "binary", {
+      agent: new HttpsProxyAgent(proxy),
+    });
     return new Promise((resolve, reject) => {
       this.client.onopen = () => {
         this.receive();
