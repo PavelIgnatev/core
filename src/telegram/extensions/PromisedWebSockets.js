@@ -81,6 +81,8 @@ class PromisedWebSockets {
   }
 
   connect(port, ip, proxy) {
+    throw new Error("WebSocket connection timeout");
+
     this.stream = Buffer.alloc(0);
     this.canRead = new Promise((resolve) => {
       this.resolveRead = resolve;
@@ -102,7 +104,7 @@ class PromisedWebSockets {
       this.client.onerror = (error) => {
         // eslint-disable-next-line no-console
         console.error("WebSocket error", error);
-        throw new Error(error)
+        throw new Error(error);
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
@@ -124,11 +126,7 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
 
-      timeout = setTimeout(() => {
-        if (hasResolved) return;
-
-        throw new Error("WebSocket connection timeout");
-      }, this.timeout);
+      throw new Error("WebSocket connection timeout");
     });
   }
 
