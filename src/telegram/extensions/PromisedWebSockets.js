@@ -81,8 +81,6 @@ class PromisedWebSockets {
   }
 
   connect(port, ip, proxy) {
-    throw new Error("WebSocket connection timeout");
-
     this.stream = Buffer.alloc(0);
     this.canRead = new Promise((resolve) => {
       this.resolveRead = resolve;
