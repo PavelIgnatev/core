@@ -124,7 +124,11 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
 
-      throw new Error("WebSocket connection timeout");
+      timeout = setTimeout(() => {
+        if (!hasResolved) {
+          throw new Error("WebSocket connection timeout");
+        }
+      }, this.timeout);
     });
   }
 
