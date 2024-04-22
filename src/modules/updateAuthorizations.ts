@@ -11,7 +11,6 @@ export const updateAuthorizations = async (
     new GramJs.account.GetAuthorizations()
   );
 
-  console.log(authorizations);
   await updateAiAccount(account.accountId, {
     authorizations,
   });
