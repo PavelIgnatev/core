@@ -91,20 +91,14 @@ class PromisedWebSockets {
       agent: new HttpsProxyAgent(proxy),
     });
     return new Promise((resolve, reject) => {
-      let hasResolved = false;
-      let timeout;
       this.client.onopen = () => {
         this.receive();
         resolve(this);
-        hasResolved = true;
-        if (timeout) clearTimeout(timeout);
       };
       this.client.onerror = (error) => {
         // eslint-disable-next-line no-console
         console.error("WebSocket error", error);
         throw new Error(error);
-        hasResolved = true;
-        if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
         const { code, reason, wasClean } = event;
@@ -120,15 +114,9 @@ class PromisedWebSockets {
         if (this.disconnectedCallback) {
           this.disconnectedCallback();
         }
-        hasResolved = true;
-        if (timeout) clearTimeout(timeout);
+        throw new Error("WebSocket connection timeout");
       };
 
-      timeout = setTimeout(() => {
-        if (!hasResolved) {
-          throw new Error("WebSocket connection timeout");
-        }
-      }, this.timeout);
     });
   }
 
