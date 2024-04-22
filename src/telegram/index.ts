@@ -27,6 +27,7 @@ export const getProxy = async (accountId: string) => {
         proxy?.login &&
         proxy?.password
       ) {
+        console.log(proxy)
         return proxy;
       } else {
         console.log("Proxy for account not found");
@@ -68,11 +69,15 @@ export async function init(accountData: Account, onUpdate: any) {
   const { server, port, login, password } = await getProxy(
     accountData.accountId
   );
+  console.log(await getProxy(
+    accountData.accountId
+  ),     accountData.accountId
+  )
   if(!server || !port || !login || !password) {
     throw new Error('ОШИБКА ПРОКСИ!')
   }
   const proxy = `http://${login}:${password}@${server}:${port}`;
-
+  console.log(proxy)
 
   const client = new TelegramClient(
     session,
