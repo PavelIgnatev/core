@@ -231,14 +231,10 @@ class MTProtoSender {
         this.isConnecting = false;
 
         if (this._isFallback && !this._shouldForceHttpTransport) {
-            this.tryReconnectToMain();
+            throw new Error('Reconnect 2')
         }
 
         return true;
-    }
-
-    tryReconnectToMain() {
-        throw new Error('Reconnect')
     }
 
     isConnected() {
@@ -482,7 +478,7 @@ class MTProtoSender {
                 this._log.info('Connection closed while sending data');
                 this._send_loop_handle = undefined;
                 if (!this.userDisconnected) {
-                    this.reconnect();
+                    throw new Error('Reconnect 3')
                 }
                 return;
             } finally {
@@ -523,7 +519,7 @@ class MTProtoSender {
                 if (!this.userDisconnected) {
                     this._log.error(e);
                     this._log.warn('Connection closed while receiving data');
-                    this.reconnect();
+                    throw new Error('Reconnect 4')
                 }
                 this._recv_loop_handle = undefined;
                 return;
@@ -551,14 +547,14 @@ class MTProtoSender {
                         // reconnecting should be enough usually
                         // since the data we sent and received is probably wrong now.
                         this._log.warn(`Invalid buffer ${e.code} for dc ${this._dcId}`);
-                        this.reconnect();
+                        throw new Error('Reconnect 7')
                     }
                     this._recv_loop_handle = undefined;
                     return;
                 } else {
                     this._log.error('Unhandled error while receiving data');
                     this._log.error(e);
-                    this.reconnect();
+                    throw new Error('Reconnect 5')
                     this._recv_loop_handle = undefined;
                     return;
                 }
@@ -958,9 +954,6 @@ class MTProtoSender {
     _handleMsgAll(message) {
     }
 
-    reconnect() {
-        throw new Error('Reconnect')
-    }
 
 }
 

@@ -261,13 +261,6 @@ class TelegramClient {
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn(err);
-
-        lastPongAt = undefined;
-
-        if (this._sender.isReconnecting || this._isSwitchingDc) {
-          continue;
-        }
-        this._sender.reconnect();
       }
 
       if (Date.now() - this._lastRequest > 30 * 60 * 1000) {

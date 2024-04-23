@@ -11,9 +11,34 @@ import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { resolveUsername } from "../methods/users/resolveUsername";
 import { resolvePhone } from "../methods/users/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
+import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const autoSender = async (client: any, account: Account, meId: string) => {
+export const generateRandomTime = () => {
+  const minTime = 3600000 * 0.1;
+  const maxTime = 3600000 * 1;
+
+  const randomTime =
+    Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
+  const currentTime = new Date();
+  const futureTime = new Date(currentTime.getTime() + randomTime);
+  return futureTime;
+};
+
+export const autoSender = async (
+  client: any,
+  account: Account,
+  meId: string
+) => {
   try {
+    if (!account.remainingTime) {
+      const remainingTime = generateRandomTime();
+      await updateAiAccount(account.accountId, {
+        remainingTime,
+      });
+      console.log(`Remaing time not defined, new remaining time - ${remainingTime}`);
+      return;
+    }
+
     const currentTime = new Date();
     let remainingTime = new Date(account.remainingTime || currentTime);
 
@@ -33,7 +58,10 @@ export const autoSender = async (client: any, account: Account, meId: string) =>
         const resolveMethod = recipient.recipientUsername.includes("+")
           ? resolvePhone
           : resolveUsername;
-        const userByUsername = await resolveMethod(client, recipient.recipientUsername);
+        const userByUsername = await resolveMethod(
+          client,
+          recipient.recipientUsername
+        );
         const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
         const recipientFull = await getFullUser(client, userId, accessHash);
 

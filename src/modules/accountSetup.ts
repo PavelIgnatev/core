@@ -8,7 +8,6 @@ import { updateProfile } from "../methods/profile/updateProfile";
 import { generateUser } from "../helpers/generateUser";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
 
-
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 import { uploadFile } from "../telegram/client/uploadFile";
 
@@ -123,8 +122,6 @@ export const accountSetup = async (client: any, account: Account) => {
     messageCount: 0,
     banned: false,
     lastProcessedBy: new Date(),
-    remainingTime: new Date(),
-    aiRemainingTime: new Date(),
   });
 
   console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
