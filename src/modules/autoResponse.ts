@@ -1,4 +1,4 @@
-import GramJs from "../telegram/tl/api";
+import GramJs from "../gramjs/tl/api";
 
 import { getUnreadDialogs } from "../methods/dialogs/getUnreadDialogs";
 import { Account } from "../@types/Account";

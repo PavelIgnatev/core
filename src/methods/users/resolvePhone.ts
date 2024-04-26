@@ -1,4 +1,4 @@
-import GramJs from "../../telegram/tl/api";
+import GramJs from "../../gramjs/tl/api";
 
 export const resolvePhone = async (client: any, phone: string) => {
   const userByUsername = await client.invoke(

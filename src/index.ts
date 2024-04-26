@@ -10,6 +10,7 @@ import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
+import { setOffline } from "./methods/accounts/setOffline";
 
 const promises: Promise<any>[] = [];
 
@@ -39,6 +40,10 @@ const main = async (ID: string) => {
       const meFullUser = users[0];
 
       for (let i = 0; i < 30; i++) {
+        if (i % 5 === 0) {
+          await setOffline(client, false);
+        }
+
         const accountData = await getAccountData(ID);
 
         if (isAutoResponse) {

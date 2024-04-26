@@ -1,9 +1,8 @@
 import { Account } from "../@types/Account";
 
-import { init } from "../telegram";
+import { init } from "../gramjs";
 
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
-
 
 export const initClient = async (account: Account, onUpdate: any) => {
   try {
@@ -11,8 +10,6 @@ export const initClient = async (account: Account, onUpdate: any) => {
 
     return client;
   } catch (e: any) {
-    console.log(e.message);
-
     if (
       [
         "USER_DEACTIVATED_BAN",
@@ -23,10 +20,14 @@ export const initClient = async (account: Account, onUpdate: any) => {
         "SESSION_EXPIRED",
         "AUTH_KEY_PERM_EMPTY",
         "AUTH_KEY_DUPLICATED",
+        // TODO: пофиксить как-то
+        "SESSION_PASSWORD_NEEDED"
       ].includes(e.message)
     ) {
       await updateAiAccount(account.accountId, { banned: true });
       throw new Error("Global Error");
     }
+
+    throw new Error(e.message);
   }
 };

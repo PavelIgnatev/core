@@ -2,14 +2,14 @@ import BigInt from "big-integer";
 
 import { Account } from "../@types/Account";
 
-import GramJs from "../telegram/tl/api";
+import GramJs from "../gramjs/tl/api";
 
 import { updateProfile } from "../methods/profile/updateProfile";
 import { generateUser } from "../helpers/generateUser";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
 
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
-import { uploadFile } from "../telegram/client/uploadFile";
+import { uploadFile } from "../gramjs/client/uploadFile";
 
 export const accountSetup = async (client: any, account: Account) => {
   if (account.setuped) {

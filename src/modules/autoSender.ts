@@ -1,4 +1,4 @@
-import GramJs from "../telegram/tl/api";
+import GramJs from "../gramjs/tl/api";
 
 import { Account } from "../@types/Account";
 
@@ -27,7 +27,7 @@ export const generateRandomTime = () => {
 export const autoSender = async (
   client: any,
   account: Account,
-  meId: string
+  meId: string,
 ) => {
   try {
     if (!account.remainingTime) {

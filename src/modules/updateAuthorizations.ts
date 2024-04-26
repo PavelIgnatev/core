@@ -1,4 +1,4 @@
-import GramJs from "../telegram/tl/api";
+import GramJs from "../gramjs/tl/api";
 
 import { Account } from "../@types/Account";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
@@ -15,7 +15,7 @@ export const updateAuthorizations = async (
     authorizations,
   });
 
-  console.log(authorizations)
+  // console.log(authorizations)
 
   for (const authorization of authorizations) {
     try {

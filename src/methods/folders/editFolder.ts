@@ -1,6 +1,6 @@
 import BigInt from "big-integer";
 
-import GramJs from "../../telegram/tl/api";
+import GramJs from "../../gramjs/tl/api";
 
 export const editFolder = async (
   client: any,

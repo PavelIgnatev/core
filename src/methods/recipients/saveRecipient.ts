@@ -1,4 +1,4 @@
-import GramJs from "../../telegram/tl/api";
+import GramJs from "../../gramjs/tl/api";
 
 import { Dialogue } from "../../@types/Dialogue";
 

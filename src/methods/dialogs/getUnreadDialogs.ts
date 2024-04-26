@@ -1,6 +1,6 @@
 import BigInt from "big-integer";
 
-import GramJs from "../../telegram/tl/api";
+import GramJs from "../../gramjs/tl/api";
 import { getDialogFromDb } from "./getDialogFromDb";
 import { Account } from "../../@types/Account";
 

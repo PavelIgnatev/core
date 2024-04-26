@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-import { CustomFile } from "../../telegram/CustomFile";
+import { CustomFile } from "../../gramjs/CustomFile";
 
 export const getProfileFiles = () => {
   let files: string[] = [];
