@@ -24,6 +24,7 @@ export const initClient = async (account: Account, onUpdate: any) => {
         "SESSION_PASSWORD_NEEDED"
       ].includes(e.message)
     ) {
+      console.error(account.accountId, e.message)
       await updateAiAccount(account.accountId, { banned: true });
       throw new Error("Global Error");
     }
