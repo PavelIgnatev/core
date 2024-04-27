@@ -21,11 +21,14 @@ export const initClient = async (account: Account, onUpdate: any) => {
         "AUTH_KEY_PERM_EMPTY",
         "AUTH_KEY_DUPLICATED",
         // TODO: пофиксить как-то
-        "SESSION_PASSWORD_NEEDED"
+        "SESSION_PASSWORD_NEEDED",
       ].includes(e.message)
     ) {
-      console.error(account.accountId, e.message)
-      await updateAiAccount(account.accountId, { banned: true });
+      console.error(account.accountId, e.message);
+      await updateAiAccount(account.accountId, {
+        banned: true,
+        reason: e.message,
+      });
       throw new Error("Global Error");
     }
 
