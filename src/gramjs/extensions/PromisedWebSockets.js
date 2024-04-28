@@ -69,28 +69,24 @@ class PromisedWebSockets {
         return toReturn;
     }
 
-    getWebSocketLink(ip, port, testServers, isPremium) {
+    getWebSocketLink(ip, port) {
         if (port === 443) {
-            return `wss://${ip}:${port}/apiws${testServers ? "_test" : ""}${
-                isPremium ? "_premium" : ""
-            }`;
+            return `wss://${ip}:${port}/apiws`;
         } else {
-            return `ws://${ip}:${port}/apiws${testServers ? "_test" : ""}${
-                isPremium ? "_premium" : ""
-            }`;
+            return `ws://${ip}:${port}/apiws`;
         }
     }
 
-    connect(port, ip, testServers = false, isPremium = false) {
+    connect(port, ip) {
         this.stream = Buffer.alloc(0);
         this.canRead = new Promise((resolve) => {
             this.resolveRead = resolve;
         });
         this.closed = false;
-        this.website = this.getWebSocketLink(ip, port, testServers, isPremium);
+        this.website = this.getWebSocketLink(ip, port);
         this.client = new WebSocket(this.website, "binary", {
             agent: new HttpsProxyAgent(
-                "http://FLcce8DLtJacFF73Cf-res-ANY:eqIQrzeGpRj09Yj@gw.thunderproxies.net:5959"
+                "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
             ),
         });
         return new Promise((resolve, reject) => {

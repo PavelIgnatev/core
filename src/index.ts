@@ -67,8 +67,15 @@ const main = async (ID: string) => {
   }
 };
 
-getAccountsIds().then((ids) => {
-  ids.forEach((id: string) => promises.push(main(id)));
+// getAccountsIds().then((ids) => {
+[
+  "+447529621062",
+  "+447529621063",
+  "+447529621089",
+  "0e495973-2537-4d5d-9e8f-530d5e428591-25906032-uk-test-50",
+  "112829314-rus-support",
+  "112834951-rus-support",
+].forEach((id: string) => promises.push(main(id)));
 
-  Promise.all(promises).then(() => process.exit(1));
-});
+Promise.all(promises).then(() => process.exit(1));
+// });
