@@ -47,10 +47,10 @@ const main = async (ID: string) => {
 
         const accountData = await getAccountData(ID);
 
-        if (isAutoResponse) {
-          isAutoResponse = false;
-          await autoResponse(client, accountData, meFullUser);
-        }
+        // if (isAutoResponse) {
+        //   isAutoResponse = false;
+        //   await autoResponse(client, accountData, meFullUser);
+        // }
 
         await autoSender(client, accountData, String(meFullUserId));
         await new Promise((res) => setTimeout(res, 60000));
