@@ -11,6 +11,7 @@ import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
+import { updateAiAccount } from "./methods/accounts/updateAiAccount";
 
 const promises: Promise<any>[] = [];
 
@@ -62,20 +63,20 @@ const main = async (ID: string) => {
         break;
       }
 
+      if (e.message.includes("Stopped")) {
+        await updateAiAccount(ID, {
+          stopped: true,
+        });
+        break;
+      }
+
       await new Promise((res) => setTimeout(res, 5000));
     }
   }
 };
 
-// getAccountsIds().then((ids) => {
-[
-  "+447529621062",
-  "+447529621063",
-  "+447529621089",
-  "0e495973-2537-4d5d-9e8f-530d5e428591-25906032-uk-test-50",
-  "112829314-rus-support",
-  "112834951-rus-support",
-].forEach((id: string) => promises.push(main(id)));
+getAccountsIds().then((ids) => {
+  ids.forEach((id: string) => promises.push(main(id)));
 
-Promise.all(promises).then(() => process.exit(1));
-// });
+  Promise.all(promises).then(() => process.exit(1));
+});

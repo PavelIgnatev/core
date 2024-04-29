@@ -1,6 +1,7 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../gramjs/tl/api";
+import { sendToBot } from "../../helpers/sendToBot";
 
 function reduceSpaces(string: string) {
   return string.replace(/\s+/g, " ").trim();
@@ -42,23 +43,11 @@ export const sendMessage = async (
 
     return sentMessage;
   } catch (e: any) {
-    const token = "6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo";
-    const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-
-    for (const chatId of ["483779758", "324820826"]) {
-      await fetch(sendMessageUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: `Error: ${JSON.stringify(
-            e.message
-          )}\nAccountId: ${accountId}.\nUserId: ${userId}\nMessage: ${message}.`,
-        }),
-      });
-    }
+    await sendToBot(
+      `Error: ${JSON.stringify(
+        e.message
+      )}\nAccountId: ${accountId}.\nUserId: ${userId}\nMessage: ${message}.`
+    );
 
     throw new Error("Global Error");
   }

@@ -12,6 +12,8 @@ import { resolveUsername } from "../methods/users/resolveUsername";
 import { resolvePhone } from "../methods/users/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
+import { sendToBot } from "../helpers/sendToBot";
+import { muteNotification } from "../methods/notifications/muteNotification";
 
 export const generateRandomTime = () => {
   const minTime = 3600000 * 0.1;
@@ -27,7 +29,7 @@ export const generateRandomTime = () => {
 export const autoSender = async (
   client: any,
   account: Account,
-  meId: string,
+  meId: string
 ) => {
   try {
     if (!account.remainingTime) {
@@ -35,7 +37,9 @@ export const autoSender = async (
       await updateAiAccount(account.accountId, {
         remainingTime,
       });
-      console.log(`Remaing time not defined, new remaining time - ${remainingTime}`);
+      console.log(
+        `Remaing time not defined, new remaining time - ${remainingTime}`
+      );
       return;
     }
 
@@ -77,6 +81,15 @@ export const autoSender = async (
           return;
         }
 
+        const { self, deleted, bot, support, scam, fake } =
+          userByUsername.users[0];
+        if (self || deleted || bot || support || scam || fake) {
+          const errorMessage = `First goy: ${recipient.recipientUsername}:${userId}:${self}:${deleted}:${bot}:${support}:${scam}:${fake}`;
+          console.log(errorMessage, userByUsername.users[0]);
+          await sendToBot(errorMessage);
+          return;
+        }
+
         const sentFirstMessage = await sendMessage(
           client,
           userId,
@@ -95,8 +108,9 @@ export const autoSender = async (
           `Sending messages to user ${recipient.recipientUsername}:${userId} was successful!`
         );
         await editFolder(client, userId, accessHash, 1);
+        await muteNotification(client, userId, accessHash, 2147483647);
         console.log(
-          `Added a chat with user ${recipient.recipientUsername}:${userId} to the archive`
+          `Added a chat with user ${recipient.recipientUsername}:${userId} to the archive and muted`
         );
 
         await saveRecipient(account.accountId, recipientFull, recipient, [
@@ -112,7 +126,7 @@ export const autoSender = async (
             fromId: String(meId),
             date: Math.round(Date.now() / 1000),
           },
-        ]);
+        ], 'create');
       } catch (error) {
         console.log(`Error when sending a message to a user: ${error}`);
       }

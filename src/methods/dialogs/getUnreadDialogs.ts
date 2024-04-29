@@ -37,7 +37,15 @@ export const getUnreadDialogs = async (client: any, account: Account) => {
       (user: GramJs.User) => String(user.id) === unansweredDialogId
     );
 
-    if (user && !user.deleted && !user.bot && !user.support) {
+    if (
+      user &&
+      !user.deleted &&
+      !user.bot &&
+      !user.support &&
+      !user.self &&
+      !user.scam &&
+      !user.fake
+    ) {
       const allMessages = await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({

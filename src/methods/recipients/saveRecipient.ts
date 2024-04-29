@@ -6,7 +6,8 @@ export const saveRecipient = async (
   accountId: string,
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue,
-  messages: { id: number; text: string; fromId: string; date: number }[]
+  messages: { id: number; text: string; fromId: string; date: number }[], 
+  status: 'create' | 'update'
 ) => {
   const {
     id: recipientId,
@@ -30,6 +31,7 @@ export const saveRecipient = async (
     recipientBio: about,
     recipientPhone: phone || recipientPhone || null,
     messages: messages,
+    status,
   };
 
   console.log("Data before saving:", data);

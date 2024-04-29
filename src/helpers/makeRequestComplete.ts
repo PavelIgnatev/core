@@ -1,3 +1,11 @@
+import { CohereClient } from "cohere-ai";
+import { ChatMessage } from "cohere-ai/api";
+import { sendToBot } from "./sendToBot";
+
+const cohere = new CohereClient({
+  token: "hJIpmKJXnn6XqAF9v2izCkQR1sw3fEPth3CVFBkv",
+});
+
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -6,6 +14,16 @@ function removeQuestionAndExclamationSentences(text: string) {
   const pattern = /[^.!?]*(?:[!?])/g;
   const result = text.replace(pattern, "");
   return result.trim();
+}
+
+function hasMixedLanguageWords(str: string) {
+  const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
+  return mixedPattern.test(str);
+}
+
+function containsChinese(text: string) {
+  const chineseRegex = /[\u4e00-\u9fa5]/;
+  return chineseRegex.test(text);
 }
 
 function countSentences(paragraph: string) {
@@ -22,13 +40,23 @@ function countSentences(paragraph: string) {
 }
 
 export const makeRequestComplete = async (
-  prompt: string,
+  preamble: string,
   disableLink: boolean = false,
   deleteQuestion: boolean = false,
   minimalProposalLength: number = 1,
-  part: string | null = null
+  part: string | null = null,
+  chatHistory: ChatMessage[],
+  groupId: string,
+  accountId: string
 ): Promise<string> => {
-  console.log(`Текущий промпт перед генерацией: ${prompt}`);
+  const lastDialog = chatHistory.pop();
+
+  console.log(
+    `Текущий промпт перед генерацией: ${preamble}; Текущая история диалога: ${JSON.stringify(
+      chatHistory
+    )}; Последнее сообщение от собеседника: ${lastDialog?.message}`
+  );
+
   console.log("Дополнительные фильтры:");
   console.log(`Удаление ссылки: ${disableLink ? "включено" : "выключено"}`);
   console.log(`Удаление вопроса: ${deleteQuestion ? "включено" : "выключено"}`);
@@ -38,24 +66,36 @@ export const makeRequestComplete = async (
   console.log(
     `Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`
   );
+  const generations = [];
+  const errors = [];
 
-  while (true) {
+  for (let i = 0; i < 5; i++) {
     try {
-      const response = await fetch(String(process.env.GPT_CONTROLLER), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
+      if (!lastDialog) {
+        throw new Error("Last Message not defined");
+      }
+
+      const { text: data } = await cohere.chat({
+        preamble,
+        chatHistory,
+        k: 300,
+        temperature: 1,
+        promptTruncation: "OFF",
+        model: "command-r",
+        message: lastDialog.message,
       });
 
-      const data = await response.text();
+      generations.push(data);
 
       if (!data.trim()) {
         throw new Error("Пустое сообщение");
       }
 
-      let message = data.replace(/\n/g, "").replace(/['"`]/g, "").trim();
+      let message = data
+        .replace(/\n/g, "")
+        .replace(/['"`]/g, "")
+        .replace(/!/g, ".")
+        .trim();
 
       let pattern =
         /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
@@ -77,14 +117,14 @@ export const makeRequestComplete = async (
           .replace(part, "[LINKTOGOAL]");
       }
 
-      if (deleteQuestion && (message.includes("?") || message.includes("!"))) {
+      if (deleteQuestion && message.includes("?")) {
         console.log(`part: ${part}`);
         console.log(
-          `\x1b[4mПотенциальное сообщение до удаления вопроса или восклицательного предложения:\x1b[0m \x1b[36m${message}\x1b[0m`
+          `\x1b[4mПотенциальное сообщение до удаления вопроса:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
         message = removeQuestionAndExclamationSentences(message);
         console.log(
-          `\x1b[4mПотенциальное сообщение после удаления вопроса или восклицательного предложения:\x1b[0m \x1b[36m${message}\x1b[0m`
+          `\x1b[4mПотенциальное сообщение после удаления вопроса:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
       }
 
@@ -100,26 +140,16 @@ export const makeRequestComplete = async (
         message.includes("]") ||
         message.includes("{") ||
         message.includes("}") ||
-        message.includes(")") ||
-        message.includes(")") ||
-        message.includes("*") ||
         message.includes("<") ||
-        message.includes(">")
+        message.includes(">") ||
+        message.includes("(") ||
+        message.includes(")") ||
+        message.includes("*")
       ) {
         console.log(
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
         throw new Error("В ответе содержатся подозрительные символы");
-      }
-
-      if (
-        message.includes("online") ||
-        message.includes("всего несколько минут")
-      ) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error("В ответе содержится подозрительное слово");
       }
 
       const varMessage = capitalizeFirstLetter(
@@ -209,32 +239,40 @@ export const makeRequestComplete = async (
         );
       }
 
-      if (message.length > 325) {
-        console.log(
-          `Начинаю генерацию нового сообщения, текущая длина сообщения: ${message.length}`
-        );
+      if (hasMixedLanguageWords(message)) {
         console.log(
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
+        throw new Error(`Потенциальное сообщение содержит англо-русские слова`);
+      }
 
-        const newMessaage = await makeRequestComplete(
-          `СООБЩЕНИЕ ДО: '''${message}'''\n СООБЩЕНИЕ ПОСЛЕ СОКРАЩЕНИЯ ДО 275 СИМВОЛОВ (формат СООБЩЕНИЕ ПОСЛЕ СОКРАЩЕНИЯ должен полностью соответствовать формату СООБЩЕНИЕ ДО):`,
-          disableLink,
-          deleteQuestion,
-          minimalProposalLength,
-          part
-        );
-
+      if (containsChinese(message)) {
         console.log(
-          `Сгенерировано новое сообщение: ${newMessaage}, длина нового сообщения ${newMessaage.length}`
+          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
-
-        return newMessaage;
+        throw new Error(`Потенциальное сообщение содержит китайские слова`);
       }
 
       return varMessage;
     } catch (error: any) {
       console.log(`Ошибка запроса. ${error.message}`);
+      errors.push(error.message);
     }
   }
+
+  await sendToBot(`!!!GPT GENERATION ERROR!!!
+GROUP ID: ${groupId}
+ACCOUNT ID: ${accountId}
+_____________
+GENERATIONS:
+${generations.map((g, i) => `${i + 1}: ${g}`).join("\n")}
+ERRORS:
+${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
+_____________
+Удаление ссылки: ${disableLink ? "включено" : "выключено"}
+Удаление вопроса: ${deleteQuestion ? "включено" : "выключено"}
+Минимальное количество сообщений в ответе: ${minimalProposalLength}
+Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`);
+
+  throw new Error("Stopped");
 };

@@ -11,6 +11,7 @@ import { sendMessage } from "../methods/messages/sendMessage";
 import { getGroupId } from "../methods/groupId/getGroupId";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
+import { sendToBot } from "../helpers/sendToBot";
 
 type Message = { id: number; text: string; fromId: string; date: number };
 
@@ -53,6 +54,12 @@ export const autoResponse = async (
     const groupId = await getGroupId(dialogGroupId);
     const combinedMessages = getCombinedMessages(messages);
 
+    const chatHistory = messages
+      .map((m: { id: number; text: string; fromId: string; date: number }) => ({
+        role: m.fromId === String(id) ? "USER" : "CHATBOT",
+        message: m.text,
+      }))
+      .slice(-9);
     const currentStage = combinedMessages.filter(
       (m) => m.fromId === String(id)
     ).length;
@@ -60,6 +67,11 @@ export const autoResponse = async (
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const meName = converterName(meFirstName);
+
+    if (currentStage > 15) {
+      console.log(`MAXIMUM STAGE in ${account.accountId}:${id}`);
+      continue;
+    }
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
@@ -75,32 +87,34 @@ export const autoResponse = async (
         part = "",
         addedQuestion = "",
         secondAddedQuestion = "",
+        styleGuide = "",
       },
     } = groupId || { offer: {} };
 
     let promptGoal = "";
-    if (currentStage > 1) {
-      promptGoal = `ЦЕЛЬ ДЛЯ '${meName}': ответить на последнее сообщениe пользователя '${userName}' c обязательным акцентом на привлечение внимания '${userName}' к предложению из 'ОПИСАНИЕ ПРЕДЛОЖЕНИЯ'.`;
+    if (currentStage === 1) {
+      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}', с акцентом, направленным на привлечение внимания '${userName}' к описанному выше предложению.`;
     }
-    if (currentStage === 2) {
-      promptGoal = `ЦЕЛЬ ДЛЯ '${meName}': ответить на последнее сообщениe пользователя '${userName}'. ${goal}`;
+    if (currentStage >= 2) {
+      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}'. ${goal}`;
     }
 
     const responseMessage = await makeRequestComplete(
       `
-ТВОЕ ИМЯ: ${meName};
-РОЛЬ '${meName}': ${aiRole};
-ОПИСАНИЕ ПРЕДЛОЖЕНИЯ: ${companyDescription};
-'''${promptGoal}'''
-${combinedMessages
-  .map((m) => `# ${m.fromId === String(id) ? userName : meName}: ${m.text}`)
-  .join("\n")
-  .slice(-4000)}
-# ${meName}:`,
+## Context
+Вы - '${meName}' (мужчина). Вы ранее инициировали общение с собеседником '${userName}' в мессенджере Telegram с целью предложить услугу компании, сотрудником которой вы являетесь. Вы - ${aiRole}. ${companyDescription}. Контакт собеседника '${userName}' был найден в одном из чатов Telegram, точной информации в каком именно нету.;
+## Style Guide
+${styleGuide}
+
+## Task
+${promptGoal}`,
       currentStage === 1,
-      true,
+      currentStage <= 2,
       currentStage <= 2 ? 2 : 1,
-      currentStage === 2 ? part : null
+      currentStage === 2 ? part : null,
+      chatHistory,
+      groupId,
+      account.accountId
     );
     const sentResponseMessage = await sendMessage(
       client,
@@ -151,6 +165,12 @@ ${combinedMessages
       });
     }
 
-    await saveRecipient(account.accountId, recipientFull, dialog, messages);
+    await saveRecipient(
+      account.accountId,
+      recipientFull,
+      dialog,
+      messages,
+      "update"
+    );
   }
 };
