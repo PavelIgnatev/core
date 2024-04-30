@@ -49,6 +49,10 @@ export const sendMessage = async (
       )}\nAccountId: ${accountId}.\nUserId: ${userId}\nMessage: ${message}.`
     );
 
+    if (e.message === "PEER_FLOOD") {
+      throw new Error("Stopped");
+    }
+
     throw new Error("Global Error");
   }
 };
