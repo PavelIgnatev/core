@@ -111,7 +111,7 @@ ${promptGoal}`,
       currentStage === 1,
       currentStage <= 2,
       currentStage <= 2 ? 2 : 1,
-      null,
+      currentStage === 2 ? part : null,
       chatHistory,
       groupId,
       account.accountId
