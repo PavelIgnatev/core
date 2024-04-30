@@ -274,5 +274,9 @@ _____________
 Минимальное количество сообщений в ответе: ${minimalProposalLength}
 Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`);
 
+  if (generations[0]) {
+    return generations[0];
+  }
+
   throw new Error("Stopped");
 };
