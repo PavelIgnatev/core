@@ -139,6 +139,10 @@ class TelegramClient {
 
         this._connection = args.connection;
         this._fallbackConnection = args.fallbackConnection;
+        if (typeof args.proxyIndex !== "number") {
+            throw new Error("Proxy Index not defined");
+        }
+        this._proxyIndex = args.proxyIndex;
         // TODO add proxy support
 
         this._floodWaitedRequests = {};
@@ -206,6 +210,7 @@ class TelegramClient {
                 getShouldDebugExportedSenders:
                     this.getShouldDebugExportedSenders.bind(this),
                 isMainSender: true,
+                proxyIndex: this._proxyIndex,
             });
         }
         // set defaults vars
@@ -219,14 +224,18 @@ class TelegramClient {
             this.session.port,
             this.session.dcId,
             this._log,
-            this._args.testServers
+            this._args.testServers,
+            false,
+            this._proxyIndex
         );
         const fallbackConnection = new this._fallbackConnection(
             this.session.serverAddress,
             this.session.port,
             this.session.dcId,
             this._log,
-            this._args.testServers
+            this._args.testServers,
+            false,
+            this._proxyIndex
         );
 
         const newConnection = await this._sender.connect(
@@ -530,6 +539,7 @@ class TelegramClient {
         // eslint-disable-next-line no-constant-condition
         while (true) {
             try {
+
                 await sender.connect(
                     new this._connection(
                         dc.ipAddress,
@@ -537,8 +547,8 @@ class TelegramClient {
                         dcId,
                         this._log,
                         this._args.testServers,
-                        // Premium DCs are not stable for obtaining auth keys, so need to we first connect to regular ones
-                        hasAuthKey ? isPremium : false
+                        false,
+                        this._proxyIndex
                     ),
                     undefined,
                     new this._fallbackConnection(
@@ -547,7 +557,8 @@ class TelegramClient {
                         dcId,
                         this._log,
                         this._args.testServers,
-                        hasAuthKey ? isPremium : false
+                        hasAuthKey ? isPremium : false,
+                        this._proxyIndex
                     )
                 );
 
@@ -733,6 +744,7 @@ class TelegramClient {
             updateCallback: this._handleUpdate.bind(this),
             getShouldDebugExportedSenders:
                 this.getShouldDebugExportedSenders.bind(this),
+            proxyIndex: this._proxyIndex,
             onConnectionBreak: () => this._cleanupExportedSender(dcId, index),
         });
     }

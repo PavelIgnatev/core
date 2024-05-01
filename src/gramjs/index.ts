@@ -12,7 +12,11 @@ const DEFAULT_PLATFORM = "Unknown platform";
 
 Logger.setLevel("warn");
 
-export async function init(accountData: Account, onUpdate: any) {
+export async function init(
+    accountData: Account,
+    proxyIndex: number,
+    onUpdate: any
+) {
     const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
     const keys: Record<string, string> = {};
 
@@ -57,6 +61,7 @@ export async function init(accountData: Account, onUpdate: any) {
             testServers: false,
             dcId: undefined,
             langCode: "en",
+            proxyIndex,
         }
     );
 

@@ -15,7 +15,7 @@ import { updateAiAccount } from "./methods/accounts/updateAiAccount";
 
 const promises: Promise<any>[] = [];
 
-const main = async (ID: string) => {
+const main = async (ID: string, proxyIndex: number) => {
   while (true) {
     try {
       let isAutoResponse = true;
@@ -28,6 +28,7 @@ const main = async (ID: string) => {
 
       const client = await initClient(
         accountData,
+        proxyIndex,
         () => (isAutoResponse = true)
       );
 
@@ -75,10 +76,12 @@ const main = async (ID: string) => {
   }
 };
 
-getAccountsIds().then((ids) => {
-ids.forEach(
-  (id: string) => promises.push(main(id))
-);
+getAccountsIds().then((accounts) => {
+  accounts.forEach((account: any, index: number) => {
+    if (!account.banned && !account.stopped) {
+      promises.push(main(account.accountId, index + 1));
+    }
+  });
 
-Promise.all(promises).then(() => process.exit(1));
+  Promise.all(promises).then(() => process.exit(1));
 });

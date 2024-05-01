@@ -64,6 +64,7 @@ class HttpStream {
         testServers = false,
         isPremium = false
     ) {
+        console.error("HTTP CONNECT");
         this.stream = [];
         this.canRead = new Promise((resolve, reject) => {
             this.resolveRead = resolve;

@@ -77,16 +77,23 @@ class PromisedWebSockets {
         }
     }
 
-    connect(port, ip) {
+    connect(port, ip, proxyIndex) {
+        if (typeof proxyIndex !== "number") {
+            throw new Error("Proxy index not defined");
+        }
+
         this.stream = Buffer.alloc(0);
         this.canRead = new Promise((resolve) => {
             this.resolveRead = resolve;
         });
         this.closed = false;
         this.website = this.getWebSocketLink(ip, port);
+
         this.client = new WebSocket(this.website, "binary", {
             agent: new HttpsProxyAgent(
-                "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
+                proxyIndex > 20
+                    ? "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
+                    : "http://16969440-res-country-RU:epu5wwwso@109.236.93.143:11177"
             ),
         });
         return new Promise((resolve, reject) => {

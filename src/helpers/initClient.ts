@@ -4,9 +4,9 @@ import { init } from "../gramjs";
 
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const initClient = async (account: Account, onUpdate: any) => {
+export const initClient = async (account: Account, proxyIndex: number, onUpdate: any) => {
   try {
-    const client = await init(account, onUpdate);
+    const client = await init(account, proxyIndex, onUpdate);
 
     return client;
   } catch (e: any) {

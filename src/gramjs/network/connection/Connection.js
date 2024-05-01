@@ -1,6 +1,6 @@
-const PromisedWebSockets = require('../../extensions/PromisedWebSockets');
-const HttpStream = require('../../extensions/HttpStream').default;
-const AsyncQueue = require('../../extensions/AsyncQueue');
+const PromisedWebSockets = require("../../extensions/PromisedWebSockets");
+const HttpStream = require("../../extensions/HttpStream").default;
+const AsyncQueue = require("../../extensions/AsyncQueue");
 
 /**
  * The `Connection` class is a wrapper around ``asyncio.open_connection``.
@@ -16,7 +16,7 @@ const AsyncQueue = require('../../extensions/AsyncQueue');
 class Connection {
     PacketCodecClass = undefined;
 
-    constructor(ip, port, dcId, loggers, testServers, isPremium) {
+    constructor(ip, port, dcId, loggers, testServers, isPremium, proxyIndex) {
         this._ip = ip;
         this._port = port;
         this._dcId = dcId;
@@ -27,13 +27,15 @@ class Connection {
         this._sendTask = undefined;
         this._recvTask = undefined;
         this._codec = undefined;
-        this._obfuscation = undefined; // TcpObfuscated and MTProxy
+        this._obfuscation = undefined; 
         this._sendArray = new AsyncQueue();
         this._recvArray = new AsyncQueue();
-        // this.socket = new PromiseSocket(new Socket())
+        this._proxyIndex = proxyIndex;
 
         this.shouldLongPoll = false;
-        this.socket = new PromisedWebSockets(this.disconnectCallback.bind(this));
+        this.socket = new PromisedWebSockets(
+            this.disconnectCallback.bind(this)
+        );
     }
 
     isConnected() {
@@ -45,11 +47,10 @@ class Connection {
     }
 
     async _connect() {
-        this._log.debug('Connecting');
+        this._log.debug("Connecting");
         this._codec = new this.PacketCodecClass(this);
-        await this.socket.connect(this._port, this._ip, this._testServers, this._isPremium);
-        this._log.debug('Finished connecting');
-        // await this.socket.connect({host: this._ip, port: this._port});
+        await this.socket.connect(this._port, this._ip, this._proxyIndex);
+        this._log.debug("Finished connecting");
         await this._initConn();
     }
 
@@ -77,7 +78,7 @@ class Connection {
 
     async send(data) {
         if (!this._connected) {
-            throw new Error('Not connected');
+            throw new Error("Not connected");
         }
         await this._sendArray.push(data);
     }
@@ -90,7 +91,7 @@ class Connection {
                 return result;
             }
         }
-        throw new Error('Not connected');
+        throw new Error("Not connected");
     }
 
     async _sendLoop() {
@@ -105,7 +106,7 @@ class Connection {
                 await this._send(data);
             }
         } catch (e) {
-            this._log.info('The server closed the connection while sending');
+            this._log.info("The server closed the connection while sending");
         }
     }
 
@@ -115,10 +116,10 @@ class Connection {
             try {
                 data = await this._recv();
                 if (!data) {
-                    throw new Error('no data received');
+                    throw new Error("no data received");
                 }
             } catch (e) {
-                this._log.info('connection closed');
+                this._log.info("connection closed");
                 // await this._recvArray.push()
 
                 this.disconnect();
@@ -144,7 +145,10 @@ class Connection {
     }
 
     toString() {
-        return `${this._ip}:${this._port}/${this.constructor.name.replace('Connection', '')}`;
+        return `${this._ip}:${this._port}/${this.constructor.name.replace(
+            "Connection",
+            ""
+        )}`;
     }
 }
 
@@ -172,7 +176,7 @@ class PacketCodec {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     encodePacket(data) {
-        throw new Error('Not Implemented');
+        throw new Error("Not Implemented");
 
         // Override
     }
@@ -180,16 +184,21 @@ class PacketCodec {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     readPacket(reader) {
         // override
-        throw new Error('Not Implemented');
+        throw new Error("Not Implemented");
     }
 }
 
 class HttpConnection extends Connection {
-    constructor(ip, port, dcId, loggers, testServers, isPremium) {
-        super(ip, port, dcId, loggers, testServers, isPremium);
+    constructor(ip, port, dcId, loggers, testServers, isPremium, proxyIndex) {
+        super(ip, port, dcId, loggers, testServers, isPremium, proxyIndex);
         this.shouldLongPoll = true;
         this.socket = new HttpStream(this.disconnectCallback.bind(this));
-        this.href = HttpStream.getURL(this._ip, this._port, this._testServers, this._isPremium);
+        this.href = HttpStream.getURL(
+            this._ip,
+            this._port,
+            this._testServers,
+            this._isPremium
+        );
     }
 
     send(data) {
@@ -201,9 +210,14 @@ class HttpConnection extends Connection {
     }
 
     async _connect() {
-        this._log.debug('Connecting');
-        await this.socket.connect(this._port, this._ip, this._testServers, this._isPremium);
-        this._log.debug('Finished connecting');
+        this._log.debug("Connecting");
+        await this.socket.connect(
+            this._port,
+            this._ip,
+            this._testServers,
+            this._isPremium
+        );
+        this._log.debug("Finished connecting");
     }
 
     async connect() {
