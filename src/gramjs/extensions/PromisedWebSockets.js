@@ -91,9 +91,7 @@ class PromisedWebSockets {
 
         this.client = new WebSocket(this.website, "binary", {
             agent: new HttpsProxyAgent(
-                proxyIndex > 20
-                    ? "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
-                    : "http://16969440-res-country-RU:epu5wwwso@109.236.93.143:11177"
+                "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
             ),
         });
         return new Promise((resolve, reject) => {
