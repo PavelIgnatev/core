@@ -4,9 +4,26 @@ import { init } from "../gramjs";
 
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const initClient = async (account: Account, proxyIndex: number, onUpdate: any) => {
+export const initClient = async (
+  account: Account,
+  proxyIndex: number,
+  onUpdate: any
+) => {
   try {
-    const client = await init(account, proxyIndex, onUpdate);
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("Global Error"));
+      }, 90000);
+    });
+
+    const client = await Promise.race([
+      init(account, proxyIndex, onUpdate),
+      timeoutPromise,
+    ]);
+
+    if (!client) {
+      throw new Error("Global Error");
+    }
 
     return client;
   } catch (e: any) {
@@ -20,7 +37,6 @@ export const initClient = async (account: Account, proxyIndex: number, onUpdate:
         "SESSION_EXPIRED",
         "AUTH_KEY_PERM_EMPTY",
         "AUTH_KEY_DUPLICATED",
-        // TODO: пофиксить как-то
         "SESSION_PASSWORD_NEEDED",
       ].includes(e.message)
     ) {
