@@ -12,7 +12,7 @@ export const initClient = async (
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error("Global Error"));
+        reject(new Error("Global Error (timeout)"));
       }, 90000);
     });
 
@@ -22,7 +22,7 @@ export const initClient = async (
     ]);
 
     if (!client) {
-      throw new Error("Global Error");
+      throw new Error("Global Error (client not inited)");
     }
 
     return client;
