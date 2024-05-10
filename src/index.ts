@@ -86,12 +86,12 @@ const main = async (ID: string, proxyIndex: number) => {
   }
 };
 
-// getAccountsIds().then((accounts) => {
-["447435654794-626de1"].forEach((account: any, index: number) => {
-  // if (!account.banned && !account.stopped) {
-  promises.push(main("447435654794-626de1", 0 + 1));
-  // }
-});
+getAccountsIds().then((accounts) => {
+  accounts.forEach((account: any, index: number) => {
+    if (!account.banned && !account.stopped) {
+      promises.push(main(account.accountId, index + 1));
+    }
+  });
 
-Promise.all(promises).then(() => process.exit(1));
-// });
+  Promise.all(promises).then(() => process.exit(1));
+});
