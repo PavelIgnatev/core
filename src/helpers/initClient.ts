@@ -36,7 +36,6 @@ export const initClient = async (
         "SESSION_REVOKED",
         "SESSION_EXPIRED",
         "AUTH_KEY_PERM_EMPTY",
-        "AUTH_KEY_DUPLICATED",
         "SESSION_PASSWORD_NEEDED",
       ].includes(e.message)
     ) {
