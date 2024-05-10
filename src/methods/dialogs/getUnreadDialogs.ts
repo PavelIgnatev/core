@@ -17,6 +17,8 @@ export const getUnreadDialogs = async (client: any, account: Account) => {
     return [];
   }
 
+  console.log(allDialogs?.dialogs)
+
   const unreadDialogs = [];
   const unansweredMessagesIds = allDialogs.messages
     .filter((message: GramJs.Message) => !message.out)

@@ -1,5 +1,4 @@
 import "dotenv/config";
-import util from "util";
 
 import { initClient } from "./helpers/initClient";
 
@@ -13,9 +12,6 @@ import { updateAuthorizations } from "./modules/updateAuthorizations";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
 import { updateAiAccount } from "./methods/accounts/updateAiAccount";
-import { sendToBot } from "./helpers/sendToBot";
-
-const exec = util.promisify(require("child_process").exec);
 
 const promises: Promise<any>[] = [];
 
@@ -63,12 +59,6 @@ const main = async (ID: string, proxyIndex: number) => {
       return;
     } catch (e: any) {
       console.error(`MAIN ERROR (${ID}): ${e.message}`);
-
-      if (e.message.includes("AUTH_KEY_DUPLICATED")) {
-        await sendToBot(`!!!AUTH_KEY_DUPLICATED!!!
-ВСЕ ПРОЦЕССЫ ОСТАНОВЛЕНЫ НАХУЙ! `);
-        await exec("pm2 kill");
-      }
 
       if (e.message.includes("Global Error")) {
         break;
