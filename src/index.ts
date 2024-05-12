@@ -65,7 +65,12 @@ const main = async (ID: string, proxyIndex: number) => {
       console.error(`MAIN ERROR (${ID}): ${e.message}`);
 
       if (e.message.includes("AUTH_KEY_DUPLICATED")) {
+        await updateAiAccount(ID, {
+          banned: true,
+          reason: "AUTH_KEY_DUPLICATED",
+        });
         await sendToBot(`!!!AUTH_KEY_DUPLICATED!!!
+ID: ${ID}
 ВСЕ ПРОЦЕССЫ ОСТАНОВЛЕНЫ НАХУЙ! `);
         await exec("pm2 kill");
       }
@@ -88,10 +93,10 @@ const main = async (ID: string, proxyIndex: number) => {
 
 getAccountsIds().then((accounts) => {
   accounts.forEach((account: any, index: number) => {
-  if (!account.banned && !account.stopped) {
-    promises.push(main(account.accountId, index + 1));
-  }
-});
+    if (!account.banned && !account.stopped) {
+      promises.push(main(account.accountId, index + 1));
+    }
+  });
 
-Promise.all(promises).then(() => process.exit(1));
+  Promise.all(promises).then(() => process.exit(1));
 });
