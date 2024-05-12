@@ -4,7 +4,7 @@ import GramJs from "../../gramjs/tl/api";
 import { getDialogFromDb } from "./getDialogFromDb";
 import { Account } from "../../@types/Account";
 
-export const getUnreadDialogs = async (client: any, account: Account) => {
+export const getDialogs = async (client: any, account: Account) => {
   const allDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
@@ -17,9 +17,8 @@ export const getUnreadDialogs = async (client: any, account: Account) => {
     return [];
   }
 
-  console.log(allDialogs?.dialogs)
-
   const unreadDialogs = [];
+  const pingedDialogs = [];
   const unansweredMessagesIds = allDialogs.messages
     .filter((message: GramJs.Message) => !message.out)
     .map((message: GramJs.Message & { peerId: GramJs.PeerUser }) =>
@@ -33,8 +32,27 @@ export const getUnreadDialogs = async (client: any, account: Account) => {
   const allUnansweredDialogsIds = [
     ...new Set([...unansweredMessagesIds, ...unansweredDialogsIds]),
   ];
+  // const pingedDialogsIds = allDialogs.messages
+  //   .filter((message: GramJs.Message & { peerId: GramJs.PeerUser }) => {
+  //     if (
+  //       message.out &&
+  //       Math.round(Date.now() / 1000) - message.date > 0 &&
+  //       // Math.round(Date.now() / 1000) - message.date < 3600 * 24 &&
+  //       !allUnansweredDialogsIds.includes(String(message.peerId.userId))
+  //     ) {
+  //       return true;
+  //     }
 
-  for (const unansweredDialogId of allUnansweredDialogsIds) {
+  //     return false;
+  //   })
+  //   .map((message: GramJs.Message & { peerId: GramJs.PeerUser }) =>
+  //     String(message.peerId.userId)
+  //   );
+
+  for (const unansweredDialogId of [
+    ...allUnansweredDialogsIds,
+    // ...pingedDialogsIds,
+  ]) {
     const user = allDialogs.users.find(
       (user: GramJs.User) => String(user.id) === unansweredDialogId
     );
@@ -133,14 +151,20 @@ export const getUnreadDialogs = async (client: any, account: Account) => {
         })
       );
 
-      unreadDialogs.push({
+      const dialogData = {
         ...user,
         ...dialogDb,
         groupId,
         messages: dialogMessages,
-      });
+      };
+
+      if (allUnansweredDialogsIds.includes(unansweredDialogId)) {
+        unreadDialogs.push(dialogData);
+      } else {
+        pingedDialogs.push(dialogData);
+      }
     }
   }
 
-  return unreadDialogs;
+  return [unreadDialogs, pingedDialogs];
 };

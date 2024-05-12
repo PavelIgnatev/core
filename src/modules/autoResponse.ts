@@ -1,6 +1,6 @@
 import GramJs from "../gramjs/tl/api";
 
-import { getUnreadDialogs } from "../methods/dialogs/getUnreadDialogs";
+import { getDialogs } from "../methods/dialogs/getDialogs";
 import { Account } from "../@types/Account";
 
 import { makeRequestComplete } from "../helpers/makeRequestComplete";
@@ -11,7 +11,6 @@ import { sendMessage } from "../methods/messages/sendMessage";
 import { getGroupId } from "../methods/groupId/getGroupId";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
-import { sendToBot } from "../helpers/sendToBot";
 
 type Message = { id: number; text: string; fromId: string; date: number };
 
@@ -38,7 +37,7 @@ export const autoResponse = async (
   account: Account,
   meFullUser: GramJs.User
 ) => {
-  const unreadDialogs = await getUnreadDialogs(client, account);
+  const [unreadDialogs, pingedDialogs] = await getDialogs(client, account);
 
   for (const dialog of unreadDialogs) {
     const { firstName: meFirstName = "" } = meFullUser;
@@ -173,4 +172,51 @@ ${promptGoal}`,
       "update"
     );
   }
+
+  // for (const dialog of pingedDialogs) {
+  //   const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
+  //   const groupId = await getGroupId(dialogGroupId);
+  //   const combinedMessages = getCombinedMessages(messages);
+
+  //   const currentStage = combinedMessages.filter(
+  //     (m) => m.fromId === String(id)
+  //   ).length;
+
+  //   // if (currentStage !== 2) {
+  //   //   continue;
+  //   // }
+
+  //   const recipientFull = await getFullUser(client, id, accessHash);
+  //   if (!recipientFull) {
+  //     console.error(`Chat with username ${id} not resolved`);
+  //     return;
+  //   }
+
+  //   const {
+  //     offer: { ping = "хуеглот епта" },
+  //   } = groupId || { offer: {} };
+
+  //   const sentPingMessage = await sendMessage(
+  //     client,
+  //     id,
+  //     accessHash,
+  //     ping,
+  //     account.accountId
+  //   );
+
+  //   messages.push({
+  //     id: sentPingMessage.id,
+  //     text: ping,
+  //     fromId: String(meFullUser.id),
+  //     date: Math.round(Date.now() / 1000),
+  //   });
+
+  //   await saveRecipient(
+  //     account.accountId,
+  //     recipientFull,
+  //     dialog,
+  //     messages,
+  //     "update"
+  //   );
+  // }
 };

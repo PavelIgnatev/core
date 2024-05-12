@@ -1,4 +1,6 @@
 import "dotenv/config";
+import util from "util";
+import { exec as childExec } from "child_process";
 
 import { initClient } from "./helpers/initClient";
 
@@ -12,7 +14,9 @@ import { updateAuthorizations } from "./modules/updateAuthorizations";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
 import { updateAiAccount } from "./methods/accounts/updateAiAccount";
+import { sendToBot } from "./helpers/sendToBot";
 
+const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
 
 const main = async (ID: string, proxyIndex: number) => {
@@ -60,6 +64,12 @@ const main = async (ID: string, proxyIndex: number) => {
     } catch (e: any) {
       console.error(`MAIN ERROR (${ID}): ${e.message}`);
 
+      if (e.message.includes("AUTH_KEY_DUPLICATED")) {
+        await sendToBot(`!!!AUTH_KEY_DUPLICATED!!!
+ВСЕ ПРОЦЕССЫ ОСТАНОВЛЕНЫ НАХУЙ! `);
+        await exec("pm2 kill");
+      }
+
       if (e.message.includes("Global Error")) {
         break;
       }
@@ -78,10 +88,10 @@ const main = async (ID: string, proxyIndex: number) => {
 
 getAccountsIds().then((accounts) => {
   accounts.forEach((account: any, index: number) => {
-    if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId, index + 1));
-    }
-  });
+  if (!account.banned && !account.stopped) {
+    promises.push(main(account.accountId, index + 1));
+  }
+});
 
-  Promise.all(promises).then(() => process.exit(1));
+Promise.all(promises).then(() => process.exit(1));
 });
