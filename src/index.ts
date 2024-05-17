@@ -98,5 +98,10 @@ getAccountsIds().then((accounts) => {
     }
   });
 
-  Promise.all(promises).then(() => process.exit(1));
+  Promise.all(promises).then(async () => {
+    await sendToBot(`____________________________
+all proccess done
+____________________________`);
+    process.exit(1);
+  });
 });
