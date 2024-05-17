@@ -1,11 +1,16 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../gramjs/tl/api";
-import { getDialogFromDb } from "./getDialogFromDb";
+import { getDialogDB } from "./getDialogDB";
 import { Account } from "../../@types/Account";
+import { getPingDialogsDB } from "./getPingDialogsDB";
+import { Dialogue } from "../../@types/Dialogue";
+
+type Message = GramJs.Message & { peerId: GramJs.PeerUser };
+type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
 
 export const getDialogs = async (client: any, account: Account) => {
-  const allDialogs = await client.invoke(
+  const clientDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
       folderId: 1,
@@ -13,58 +18,39 @@ export const getDialogs = async (client: any, account: Account) => {
     })
   );
 
-  if (!allDialogs?.users?.length) {
+  if (!clientDialogs?.users?.length) {
     return [];
   }
 
-  const unreadDialogs = [];
-  const pingedDialogs = [];
-  const unansweredMessagesIds = allDialogs.messages
-    .filter((message: GramJs.Message) => !message.out)
-    .map((message: GramJs.Message & { peerId: GramJs.PeerUser }) =>
-      String(message.peerId.userId)
-    );
-  const unansweredDialogsIds = allDialogs.dialogs
-    .filter((dialog: GramJs.Dialog) => dialog.unreadCount !== 0)
-    .map((dialog: GramJs.Dialog & { peer: GramJs.PeerUser }) =>
-      String(dialog.peer.userId)
-    );
-  const allUnansweredDialogsIds = [
-    ...new Set([...unansweredMessagesIds, ...unansweredDialogsIds]),
-  ];
-  // const pingedDialogsIds = allDialogs.messages
-  //   .filter((message: GramJs.Message & { peerId: GramJs.PeerUser }) => {
-  //     if (
-  //       message.out &&
-  //       Math.round(Date.now() / 1000) - message.date > 0 &&
-  //       // Math.round(Date.now() / 1000) - message.date < 3600 * 24 &&
-  //       !allUnansweredDialogsIds.includes(String(message.peerId.userId))
-  //     ) {
-  //       return true;
-  //     }
+  const pingDialogsDB = await getPingDialogsDB(account.accountId);
 
-  //     return false;
-  //   })
-  //   .map((message: GramJs.Message & { peerId: GramJs.PeerUser }) =>
-  //     String(message.peerId.userId)
-  //   );
+  const clientMessagesIds = clientDialogs.messages
+    .filter((m: Message) => !m.out)
+    .map((m: Message) => String(m.peerId.userId));
+  const clientDialogsIds = clientDialogs.dialogs
+    .filter((d: Dialog) => d.unreadCount !== 0)
+    .map((d: Dialog) => String(d.peer.userId));
 
-  for (const unansweredDialogId of [
-    ...allUnansweredDialogsIds,
-    // ...pingedDialogsIds,
-  ]) {
-    const user = allDialogs.users.find(
-      (user: GramJs.User) => String(user.id) === unansweredDialogId
+  const dialogs = [];
+  const pingDialogs = [];
+  const dialogIds = [...new Set([...clientMessagesIds, ...clientDialogsIds])];
+  const pingDialogIds = pingDialogsDB
+    .map((d: Dialogue) => String(d.recipientId))
+    .filter((d: string) => !dialogIds.includes(d));
+
+  for (const dialogId of [...dialogIds, ...pingDialogIds]) {
+    const user = clientDialogs.users.find(
+      (u: GramJs.User) => String(u.id) === dialogId
     );
 
     if (
       user &&
+      user.status &&
       !user.deleted &&
       !user.bot &&
       !user.support &&
       !user.self &&
-      !user.scam &&
-      !user.fake
+      !(user.status instanceof GramJs.UserStatusEmpty)
     ) {
       const allMessages = await client.invoke(
         new GramJs.messages.GetHistory({
@@ -80,10 +66,7 @@ export const getDialogs = async (client: any, account: Account) => {
         continue;
       }
 
-      const dialogDb = await getDialogFromDb(
-        account.accountId,
-        String(user.id)
-      );
+      const dialogDb = await getDialogDB(account.accountId, String(user.id));
 
       const { messages: dialogMessages = [], groupId = 12343207729 } =
         dialogDb || {};
@@ -108,24 +91,17 @@ export const getDialogs = async (client: any, account: Account) => {
           text = "[FORWARDED MESSAGE]";
         } else if (dialogMessage.message) {
           text = dialogMessage.message;
-        } else if (photo) {
-          text = "[PHOTO]";
-        } else if (video) {
-          text = "[VIDEO]";
-        } else if (voice) {
+        } else if (voice || round) {
           await client.invoke(
             new GramJs.messages.ReadMessageContents({
               id: [dialogMessage.id],
             })
           );
           text = "[VOICE MESSAGE]";
-        } else if (round) {
-          await client.invoke(
-            new GramJs.messages.ReadMessageContents({
-              id: [dialogMessage.id],
-            })
-          );
-          text = "[VIDEO-VOICE MESSAGE]";
+        } else if (photo) {
+          text = "[PHOTO]";
+        } else if (video) {
+          text = "[VIDEO]";
         } else if (document) {
           text = "[DOCUMENT]";
         } else if (spoiler) {
@@ -150,21 +126,19 @@ export const getDialogs = async (client: any, account: Account) => {
           }),
         })
       );
-
       const dialogData = {
         ...user,
         ...dialogDb,
         groupId,
         messages: dialogMessages,
       };
-
-      if (allUnansweredDialogsIds.includes(unansweredDialogId)) {
-        unreadDialogs.push(dialogData);
+      if (dialogIds.includes(dialogId)) {
+        dialogs.push(dialogData);
       } else {
-        pingedDialogs.push(dialogData);
+        pingDialogs.push(dialogData);
       }
     }
   }
 
-  return [unreadDialogs, pingedDialogs];
+  return [dialogs, pingDialogs];
 };

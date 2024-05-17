@@ -11,35 +11,18 @@ import { sendMessage } from "../methods/messages/sendMessage";
 import { getGroupId } from "../methods/groupId/getGroupId";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
-
-type Message = { id: number; text: string; fromId: string; date: number };
-
-const getCombinedMessages = (messages: Message[]) => {
-  const combinedMessages = [];
-  for (let i = 0; i < messages.length; i++) {
-    const curr = { ...messages[i] };
-    if (combinedMessages.length > 0) {
-      const lastItem = combinedMessages[combinedMessages.length - 1];
-      if (lastItem.fromId === curr.fromId) {
-        lastItem.text += "." + curr.text;
-      } else {
-        combinedMessages.push(curr);
-      }
-    } else {
-      combinedMessages.push(curr);
-    }
-  }
-  return combinedMessages;
-};
+import { getCombinedMessages } from "../helpers/getCombinedMessages";
+import { sendToBot } from "../helpers/sendToBot";
+import { makeRequestGpt } from "../helpers/makeRequestGpt";
 
 export const autoResponse = async (
   client: any,
   account: Account,
   meFullUser: GramJs.User
 ) => {
-  const [unreadDialogs, pingedDialogs] = await getDialogs(client, account);
+  const [dialogs, pingDialogs] = await getDialogs(client, account);
 
-  for (const dialog of unreadDialogs) {
+  for (const dialog of dialogs) {
     const { firstName: meFirstName = "" } = meFullUser;
     const {
       id,
@@ -58,7 +41,7 @@ export const autoResponse = async (
         role: m.fromId === String(id) ? "USER" : "CHATBOT",
         message: m.text,
       }))
-      .slice(-9);
+      .slice(-15);
     const currentStage = combinedMessages.filter(
       (m) => m.fromId === String(id)
     ).length;
@@ -173,50 +156,68 @@ ${promptGoal}`,
     );
   }
 
-  // for (const dialog of pingedDialogs) {
-  //   const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
-  //   const groupId = await getGroupId(dialogGroupId);
-  //   const combinedMessages = getCombinedMessages(messages);
+  for (const dialog of pingDialogs) {
+    const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
 
-  //   const currentStage = combinedMessages.filter(
-  //     (m) => m.fromId === String(id)
-  //   ).length;
+    const recipientFull = await getFullUser(client, id, accessHash);
+    if (!recipientFull) {
+      await sendToBot(
+        `Ну не смогли пингануть пользователя ${id}, хотя до этого норм было`
+      );
+      console.error(`Chat with username ${id} not resolved, maybe banned`);
+      return;
+    }
+    const {
+      firstName = "",
+      lastName = "",
+      username = "",
+    } = recipientFull?.users?.[0] || {};
+    const { about = "" } = recipientFull.fullUser;
 
-  //   // if (currentStage !== 2) {
-  //   //   continue;
-  //   // }
+    const chatHistory = messages
+      .map((m: { id: number; text: string; fromId: string; date: number }) => ({
+        role: m.fromId === String(id) ? "USER" : "CHATBOT",
+        message: m.text,
+      }))
+      .slice(-15) as Array<{ role: "USER" | "CHATBOT"; message: string }>;
+    const pingMessage = await makeRequestGpt(
+      `## CONTEXT
+Данные о собеседнике: ${firstName} ${lastName}, ${about}, ${username}
+      
+## DIALOG
+${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}
 
-  //   const recipientFull = await getFullUser(client, id, accessHash);
-  //   if (!recipientFull) {
-  //     console.error(`Chat with username ${id} not resolved`);
-  //     return;
-  //   }
 
-  //   const {
-  //     offer: { ping = "хуеглот епта" },
-  //   } = groupId || { offer: {} };
+## TASK
+Сгенерировать короткое и четкое сообщение-напоминание для собеседника USER с информацией о том, что ты очень ждешь ответа на последниий вопрос, для тебя это очень важно. Обратись к собеседнику по имени (на русском) в случае, если его можно будет получить из данных о собеседнике.`,
+      dialogGroupId,
+      account.accountId
+    );
 
-  //   const sentPingMessage = await sendMessage(
-  //     client,
-  //     id,
-  //     accessHash,
-  //     ping,
-  //     account.accountId
-  //   );
+    const sentPingMessage = await sendMessage(
+      client,
+      id,
+      accessHash,
+      pingMessage,
+      account.accountId
+    );
 
-  //   messages.push({
-  //     id: sentPingMessage.id,
-  //     text: ping,
-  //     fromId: String(meFullUser.id),
-  //     date: Math.round(Date.now() / 1000),
-  //   });
+    messages.push({
+      id: sentPingMessage.id,
+      text: pingMessage,
+      fromId: String(meFullUser.id),
+      date: Math.round(Date.now() / 1000),
+    });
 
-  //   await saveRecipient(
-  //     account.accountId,
-  //     recipientFull,
-  //     dialog,
-  //     messages,
-  //     "update"
-  //   );
-  // }
+    await saveRecipient(
+      account.accountId,
+      recipientFull,
+      dialog,
+      messages,
+      "update",
+      { ping: true }
+    );
+
+    await sendToBot(`Отправил пинг: ${pingMessage}`);
+  }
 };

@@ -5,7 +5,7 @@ import TelegramClient from "./client/TelegramClient";
 
 import { Logger } from "./extensions/index";
 import { Account } from "../@types/Account";
-import { getDialogFromDb } from "../methods/dialogs/getDialogFromDb";
+import { getDialogDB } from "../methods/dialogs/getDialogDB";
 
 const DEFAULT_USER_AGENT = "Unknown UserAgent";
 const DEFAULT_PLATFORM = "Unknown platform";
@@ -20,21 +20,11 @@ export async function init(
     const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
     const keys: Record<string, string> = {};
 
-    if (dc1) {
-        keys["1"] = dc1;
-    }
-    if (dc2) {
-        keys["2"] = dc2;
-    }
-    if (dc3) {
-        keys["3"] = dc3;
-    }
-    if (dc4) {
-        keys["4"] = dc4;
-    }
-    if (dc5) {
-        keys["5"] = dc5;
-    }
+    if (dc1) keys["1"] = dc1;
+    if (dc2) keys["2"] = dc2;
+    if (dc3) keys["3"] = dc3;
+    if (dc4) keys["4"] = dc4;
+    if (dc5) keys["5"] = dc5;
 
     const sessionData = {
         mainDcId: Number(dcId),
@@ -105,7 +95,7 @@ export async function init(
                         } = update as any;
                         const userId = varUserId || peerUserId;
 
-                        const isDialogInDb = await getDialogFromDb(
+                        const isDialogInDb = await getDialogDB(
                             accountData.accountId,
                             String(userId)
                         );

@@ -81,12 +81,8 @@ export const autoSender = async (
           return;
         }
 
-        const { self, deleted, bot, support, scam, fake } =
-          userByUsername.users[0];
-        if (self || deleted || bot || support || scam || fake) {
-          const errorMessage = `First goy: ${recipient.recipientUsername}:${userId}:${self}:${deleted}:${bot}:${support}:${scam}:${fake}`;
-          console.log(errorMessage, userByUsername.users[0]);
-          await sendToBot(errorMessage);
+        const { self, deleted, bot, support } = userByUsername.users[0];
+        if (self || deleted || bot || support) {
           return;
         }
 
@@ -113,20 +109,26 @@ export const autoSender = async (
           `Added a chat with user ${recipient.recipientUsername}:${userId} to the archive and muted`
         );
 
-        await saveRecipient(account.accountId, recipientFull, recipient, [
-          {
-            id: sentFirstMessage.id,
-            text: recipient.firstMessage,
-            fromId: String(meId),
-            date: Math.round(Date.now() / 1000),
-          },
-          {
-            id: sentSecondMessage.id,
-            text: recipient.secondMessage,
-            fromId: String(meId),
-            date: Math.round(Date.now() / 1000),
-          },
-        ], 'create');
+        await saveRecipient(
+          account.accountId,
+          recipientFull,
+          recipient,
+          [
+            {
+              id: sentFirstMessage.id,
+              text: recipient.firstMessage,
+              fromId: String(meId),
+              date: Math.round(Date.now() / 1000),
+            },
+            {
+              id: sentSecondMessage.id,
+              text: recipient.secondMessage,
+              fromId: String(meId),
+              date: Math.round(Date.now() / 1000),
+            },
+          ],
+          "create"
+        );
       } catch (error) {
         console.log(`Error when sending a message to a user: ${error}`);
       }

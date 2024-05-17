@@ -1,10 +1,13 @@
-import { CohereClient } from "cohere-ai";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
+
 import { ChatMessage } from "cohere-ai/api";
 import { sendToBot } from "./sendToBot";
 
-const cohere = new CohereClient({
-  token: "hJIpmKJXnn6XqAF9v2izCkQR1sw3fEPth3CVFBkv",
-});
+const httpsAgent = new HttpsProxyAgent(
+  "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
+);
+const paxios = axios.create({ httpsAgent });
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -75,21 +78,31 @@ export const makeRequestComplete = async (
         throw new Error("Last Message not defined");
       }
 
-      const { text: data } = await cohere.chat({
-        preamble,
-        chatHistory,
-        k: 300,
-        temperature: 1,
-        promptTruncation: "OFF",
-        model: "command-r",
-        message: lastDialog.message,
-      });
+      const {
+        data: { text: data },
+      } = await paxios.post(
+        "https://api.cohere.com/chat",
+        {
+          model: "command-r",
+          k: 300,
+          temperature: 1,
+          promptTruncation: "OFF",
+          preamble,
+          chatHistory,
+          message: lastDialog.message,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer hJIpmKJXnn6XqAF9v2izCkQR1sw3fEPth3CVFBkv",
+          },
+        }
+      );
 
-      generations.push(data);
-
-      if (!data.trim()) {
+      if (!data || !data.trim()) {
         throw new Error("Пустое сообщение");
       }
+      generations.push(data);
 
       let message = data
         .replace(/\n/g, "")

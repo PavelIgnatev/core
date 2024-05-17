@@ -1,13 +1,15 @@
 import GramJs from "../../gramjs/tl/api";
 
 import { Dialogue } from "../../@types/Dialogue";
+import { getCombinedMessages } from "../../helpers/getCombinedMessages";
 
 export const saveRecipient = async (
   accountId: string,
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue,
-  messages: { id: number; text: string; fromId: string; date: number }[], 
-  status: 'create' | 'update'
+  messages: { id: number; text: string; fromId: string; date: number }[],
+  status: "create" | "update",
+  addedData: Record<string, unknown> = {}
 ) => {
   const {
     id: recipientId,
@@ -31,7 +33,9 @@ export const saveRecipient = async (
     recipientBio: about,
     recipientPhone: phone || recipientPhone || null,
     messages: messages,
+    step: getCombinedMessages(messages).length,
     status,
+    ...addedData,
   };
 
   console.log("Data before saving:", data);

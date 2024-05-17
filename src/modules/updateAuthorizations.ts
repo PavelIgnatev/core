@@ -12,7 +12,7 @@ export const updateAuthorizations = async (client: any, account: Account) => {
     authorizations,
     banned: false,
     reason: null,
-    // stopped: false,
+    stopped: false,
   });
 
   for (const authorization of authorizations) {

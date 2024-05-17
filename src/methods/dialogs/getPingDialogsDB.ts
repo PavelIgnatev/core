@@ -1,15 +1,12 @@
-export const getDialogFromDb = async (
-  accountId: string,
-  recipientId: string
-) => {
+export const getPingDialogsDB = async (accountId: string) => {
   while (true) {
     try {
       const response = await fetch(
-        `${process.env.BACKEND_URL}/dialogues/${accountId}/${recipientId}`
+        `${process.env.BACKEND_URL}/dialogues/ping/${accountId}`
       );
       if (!response.ok) {
         throw new Error(
-          `Failed to retrieve dialog data for account #${accountId}/${recipientId}`
+          `Failed to retrieve ping dialogs data for account #${accountId}`
         );
       }
 

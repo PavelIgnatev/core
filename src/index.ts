@@ -72,7 +72,7 @@ const main = async (ID: string, proxyIndex: number) => {
         await sendToBot(`!!!AUTH_KEY_DUPLICATED!!!
 ID: ${ID}
 ВСЕ ПРОЦЕССЫ ОСТАНОВЛЕНЫ НАХУЙ! `);
-        await exec("pm2 kill");
+        await exec("pm2 kill telegram");
       }
 
       if (e.message.includes("Global Error")) {
