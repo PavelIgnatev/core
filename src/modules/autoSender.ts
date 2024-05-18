@@ -12,7 +12,6 @@ import { resolveUsername } from "../methods/users/resolveUsername";
 import { resolvePhone } from "../methods/users/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
-import { sendToBot } from "../helpers/sendToBot";
 import { muteNotification } from "../methods/notifications/muteNotification";
 
 export const generateRandomTime = () => {
@@ -53,7 +52,7 @@ export const autoSender = async (
       }
 
       try {
-        const recipient = await getRecipient();
+        const recipient = await getRecipient(account.accountId);
         console.log("Generated data to send:", recipient);
         console.log(
           `Start sending messages to user ${recipient.recipientUsername}`

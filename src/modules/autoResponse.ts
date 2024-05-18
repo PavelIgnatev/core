@@ -218,6 +218,6 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}
       { ping: true }
     );
 
-    await sendToBot(`Отправил пинг: ${pingMessage}`);
+    await sendToBot(`Отправил пинг для ${id}: ${pingMessage}`);
   }
 };

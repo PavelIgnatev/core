@@ -1,4 +1,4 @@
-export const getRecipient = async () => {
+export const getRecipient = async (accountId: string) => {
   while (true) {
     try {
       const response = await fetch(`${process.env.BACKEND_URL}/recipient`);
@@ -17,7 +17,7 @@ export const getRecipient = async () => {
         return user;
       }
     } catch (error) {
-      console.log(`Recipient User Error: ${error}`);
+      console.log(`Recipient User Error (${accountId}): ${error}`);
       await new Promise((res) => setTimeout(res, 1500));
     }
   }
