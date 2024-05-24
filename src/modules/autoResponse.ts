@@ -225,7 +225,5 @@ ${chatHistory
       "update",
       { ping: true }
     );
-
-    await sendToBot(`Отправил пинг для ${id}: ${pingMessage}`);
   }
 };
