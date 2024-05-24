@@ -54,6 +54,7 @@ export const autoSender = async (
     }
 
     const recipient = await getRecipient(account.accountId);
+    let recipientUserId;
     console.log("User data before writing:", recipient);
     console.log(`Start sending messages to user ${recipient.username}`);
 
@@ -78,6 +79,8 @@ export const autoSender = async (
         await saveErrorRecipient(recipient.username);
         return;
       }
+
+      recipientUserId = userId
 
       const {
         self,
@@ -152,7 +155,7 @@ export const autoSender = async (
         "create"
       );
     } catch (e: any) {
-      await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
+      await sendToBot(`Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`);
 
       await saveErrorRecipient(recipient.username);
 
