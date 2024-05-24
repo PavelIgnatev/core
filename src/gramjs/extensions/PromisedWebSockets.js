@@ -105,7 +105,6 @@ class PromisedWebSockets {
             };
             this.client.onerror = (error) => {
                 // eslint-disable-next-line no-console
-                // console.error("WebSocket error", error);
                 reject(error);
                 hasResolved = true;
                 if (timeout) clearTimeout(timeout);

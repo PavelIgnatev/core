@@ -62,17 +62,15 @@ const main = async (ID: string, proxyIndex: number) => {
       }
       return;
     } catch (e: any) {
-      console.error(`MAIN ERROR (${ID}): ${e.message}`);
+      console.error(`MAIN ERROR (${ID}): ${e.message}; ${new Date()}`);
 
       if (e.message.includes("AUTH_KEY_DUPLICATED")) {
         await updateAiAccount(ID, {
           banned: true,
           reason: "AUTH_KEY_DUPLICATED",
         });
-        await sendToBot(`!!!AUTH_KEY_DUPLICATED!!!
-ID: ${ID}
-ВСЕ ПРОЦЕССЫ ОСТАНОВЛЕНЫ НАХУЙ! `);
-        await exec("pm2 kill telegram");
+        await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
+        await exec("pm2 kill");
       }
 
       if (e.message.includes("Global Error")) {
@@ -91,17 +89,23 @@ ID: ${ID}
   }
 };
 
-getAccountsIds().then((accounts) => {
-  accounts.forEach((account: any, index: number) => {
-    if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId, index + 1));
-    }
-  });
+// getAccountsIds().then((accounts) => {
+[
+  {
+    accountId: "73f381d7-f4a3-4265-b235-4d3b32aaf133-25906032-uk-test-50",
+    banned: false,
+    stopped: false,
+  },
+].forEach((account: any, index: number) => {
+  if (!account.banned && !account.stopped) {
+    promises.push(main(account.accountId, index + 1));
+  }
+});
 
-  Promise.all(promises).then(async () => {
-    await sendToBot(`____________________________
+Promise.all(promises).then(async () => {
+  await sendToBot(`____________________________
 all proccess done
 ____________________________`);
-    process.exit(1);
-  });
+  process.exit(1);
 });
+// });

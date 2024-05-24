@@ -41,7 +41,7 @@ export const saveRecipient = async (
   console.log("Data before saving:", data);
 
   try {
-    const response = await fetch(`${process.env.BACKEND_URL}/recipient`, {
+    const response = await fetch(`${process.env.RECIPIENT_URL}`, {
       method: "POST",
       body: JSON.stringify(data),
       headers: {
