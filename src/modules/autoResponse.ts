@@ -21,9 +21,10 @@ export const autoResponse = async (
   meFullUser: GramJs.User
 ) => {
   const [dialogs, pingDialogs] = await getDialogs(client, account);
+  const { firstName: meFirstName = "" } = meFullUser;
+  const meName = converterName(meFirstName);
 
   for (const dialog of dialogs) {
-    const { firstName: meFirstName = "" } = meFullUser;
     const {
       id,
       accessHash,
@@ -48,7 +49,6 @@ export const autoResponse = async (
     const userName = `${firstName} ${lastName}`
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
-    const meName = converterName(meFirstName);
 
     if (currentStage > 15) {
       console.log(`MAXIMUM STAGE in ${account.accountId}:${id}`);
@@ -178,16 +178,26 @@ ${promptGoal}`,
         message: m.text,
       }))
       .slice(-15) as Array<{ role: "USER" | "CHATBOT"; message: string }>;
+    const userName = `${firstName} ${lastName}`
+      .trim()
+      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const pingMessage = await makeRequestGpt(
       `## CONTEXT
-Данные о собеседнике: ${firstName} ${lastName}, ${about}, ${username}
+Данные о USER: ${userName}, ${about}, ${username}
       
 ## DIALOG
-${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}
+${chatHistory
+  .map(
+    (chat) =>
+      `${chat.role} (${chat.role === "CHATBOT" ? meName : userName}): ${
+        chat.message
+      }`
+  )
+  .join("\n")}
 
 
 ## TASK
-Сгенерировать короткое и четкое сообщение-напоминание для собеседника USER с информацией о том, что ты очень ждешь ответа на последниий вопрос, для тебя это очень важно. Обратись к собеседнику по имени (на русском) в случае, если его можно будет получить из данных о собеседнике.`,
+Сгенерировать короткое и четкое сообщение-напоминание для собеседника USER (${userName}) с информацией о том, что ты очень ждешь ответа на последниий вопрос, для тебя это очень важно. Обратись к собеседнику по имени (на русском) в случае, если его можно будет получить из данных о собеседнике.`,
       dialogGroupId,
       account.accountId
     );
