@@ -75,19 +75,19 @@ export const autoResponse = async (
 
     let promptGoal = "";
     if (currentStage === 1) {
-      promptGoal = `Reply to the latest post by USER '${userName}', with an emphasis aimed at drawing '${userName}'s attention to the sentence described above`;
+      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}', с акцентом, направленным на привлечение внимания '${userName}' к описанному выше предложению.`;
     }
     if (currentStage >= 2) {
-      promptGoal = `Reply to the last post by USER '${userName}'. ${goal}`;
+      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}'. ${goal}`;
     }
 
     const responseMessage = await makeRequestComplete(
       `
 ## Context
-You are '${meName}' (male). You have previously initiated a conversation with the interlocutor '${userName}' in Telegram messenger to offer a service to the company you are an employee of. You are ${aiRole}. ${companyDescription}. The contact of the interlocutor '${userName}' was found in one of the Telegram chat rooms, the exact information about which chat room is not available;
+Вы - '${meName}' (мужчина). Вы ранее инициировали общение с собеседником '${userName}' в мессенджере Telegram с целью предложить услугу компании, сотрудником которой вы являетесь. Вы - ${aiRole}. ${companyDescription}. Контакт собеседника '${userName}' был найден в одном из чатов Telegram, точной информации в каком именно нету.
 
 ## Style Guide
-${styleGuide}. Response Language - Russian.
+${styleGuide}.
 
 ## Task
 ${promptGoal}`,
