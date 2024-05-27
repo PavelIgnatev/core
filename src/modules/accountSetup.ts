@@ -1,15 +1,15 @@
 import BigInt from "big-integer";
 
+import GramJs from "../gramjs/tl/api";
+import { uploadFile } from "../gramjs/client/uploadFile";
+
 import { Account } from "../@types/Account";
 
-import GramJs from "../gramjs/tl/api";
+import { generateUser } from "../helpers/generateUser";
 
 import { updateProfile } from "../methods/profile/updateProfile";
-import { generateUser } from "../helpers/generateUser";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
-
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
-import { uploadFile } from "../gramjs/client/uploadFile";
 
 export const accountSetup = async (client: any, account: Account) => {
   if (account.setuped) {

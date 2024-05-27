@@ -1,6 +1,7 @@
 import GramJs from "../gramjs/tl/api";
 
 import { Account } from "../@types/Account";
+
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
 export const updateAuthorizations = async (client: any, account: Account) => {
@@ -12,7 +13,6 @@ export const updateAuthorizations = async (client: any, account: Account) => {
     authorizations,
     banned: false,
     reason: null,
-    // stopped: false,
   });
 
   for (const authorization of authorizations) {

@@ -4,6 +4,9 @@ import { Account } from "../@types/Account";
 
 import { checkSpamBlock } from "./checkSpamBlock";
 
+import { generateRandomString } from "../helpers/generateRandomString";
+import { sendToBot } from "../helpers/sendToBot";
+
 import { sendMessage } from "../methods/messages/sendMessage";
 import { editFolder } from "../methods/folders/editFolder";
 import { getRecipient } from "../methods/recipients/getRecipient";
@@ -14,8 +17,6 @@ import { getFullUser } from "../methods/users/getFullUser";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 import { muteNotification } from "../methods/notifications/muteNotification";
 import { saveErrorRecipient } from "../methods/recipients/saveErrorRecipient";
-import { generateRandomString } from "../helpers/generateRandomString";
-import { sendToBot } from "../helpers/sendToBot";
 
 export const generateRandomTime = () => {
   const minTime = 3600000 * 0.1;
