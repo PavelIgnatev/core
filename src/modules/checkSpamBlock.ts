@@ -27,6 +27,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
   }
 
   const messages = await getMessages(client, userId, accessHash, maxId);
+  console.log(messages)
   if (!messages?.[0]) {
     console.error("Messages from SpamBot not defined");
     return true;

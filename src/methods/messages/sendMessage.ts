@@ -49,6 +49,6 @@ export const sendMessage = async (
       )}\nAccountId: ${accountId}.\nUserId: ${userId}\nMessage: ${message}.`
     );
 
-    throw new Error("Global Error");
+    throw new Error(e.message);
   }
 };

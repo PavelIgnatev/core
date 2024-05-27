@@ -12,20 +12,20 @@ export const updateAuthorizations = async (client: any, account: Account) => {
     authorizations,
     banned: false,
     reason: null,
-    stopped: false,
+    // stopped: false,
   });
 
-  for (const authorization of authorizations) {
-    try {
-      if (!authorization.current && authorization.deviceModel !== "Desktop") {
-        await client.invoke(
-          new GramJs.account.ResetAuthorization({
-            hash: authorization.hash,
-          })
-        );
-      }
-    } catch {}
-  }
+  // for (const authorization of authorizations) {
+  //   try {
+  //     if (!authorization.current && authorization.deviceModel !== "Desktop") {
+  //       await client.invoke(
+  //         new GramJs.account.ResetAuthorization({
+  //           hash: authorization.hash,
+  //         })
+  //       );
+  //     }
+  //   } catch {}
+  // }
 
   console.log(
     "UPDATE AUTHORIZATIONS: authorization in the account was successful, authorization data is saved in the database"

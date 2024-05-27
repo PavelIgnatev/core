@@ -1,11 +1,11 @@
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
-
 import { ChatMessage } from "cohere-ai/api";
+
 import { sendToBot } from "./sendToBot";
 
 const httpsAgent = new HttpsProxyAgent(
-  "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
+  "http://Yx1BC6:VCRCs9@196.19.156.21:8000"
 );
 const paxios = axios.create({ httpsAgent });
 
@@ -80,24 +80,15 @@ export const makeRequestComplete = async (
 
       const {
         data: { text: data },
-      } = await paxios.post(
-        "https://api.cohere.com/chat",
-        {
-          model: "command-r",
-          k: 300,
-          temperature: 1,
-          promptTruncation: "OFF",
-          preamble,
-          chatHistory,
-          message: lastDialog.message,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer hJIpmKJXnn6XqAF9v2izCkQR1sw3fEPth3CVFBkv",
-          },
-        }
-      );
+      } = await paxios.post("http://45.93.201.73/chat", {
+        model: "command-r",
+        k: 300,
+        temperature: 1,
+        promptTruncation: "OFF",
+        preamble,
+        chatHistory,
+        message: lastDialog.message,
+      });
 
       if (!data || !data.trim()) {
         throw new Error("Пустое сообщение");

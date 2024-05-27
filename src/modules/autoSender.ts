@@ -80,7 +80,7 @@ export const autoSender = async (
         return;
       }
 
-      recipientUserId = userId
+      recipientUserId = userId;
 
       const {
         self,
@@ -155,9 +155,13 @@ export const autoSender = async (
         "create"
       );
     } catch (e: any) {
-      await sendToBot(`Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`);
+      if (e.message !== "PEER_FLOOD") {
+        await sendToBot(
+          `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`
+        );
 
-      await saveErrorRecipient(recipient.username);
+        await saveErrorRecipient(recipient.username);
+      }
 
       throw new Error("Global Error");
     }
