@@ -1,13 +1,7 @@
 import axios from "axios";
-import { HttpsProxyAgent } from "https-proxy-agent";
 import { ChatMessage } from "cohere-ai/api";
 
 import { sendToBot } from "./sendToBot";
-
-const httpsAgent = new HttpsProxyAgent(
-  "http://Yx1BC6:VCRCs9@196.19.156.21:8000"
-);
-const paxios = axios.create({ httpsAgent });
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -80,7 +74,7 @@ export const makeRequestComplete = async (
 
       const {
         data: { text: data },
-      } = await paxios.post("http://45.93.201.73/chat", {
+      } = await axios.post("http://45.93.201.73/chat", {
         model: "command-r",
         k: 300,
         temperature: 1,

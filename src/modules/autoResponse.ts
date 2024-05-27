@@ -1,19 +1,18 @@
 import GramJs from "../gramjs/tl/api";
 
-import { getDialogs } from "../methods/dialogs/getDialogs";
 import { Account } from "../@types/Account";
 
 import { makeRequestComplete } from "../helpers/makeRequestComplete";
+import { makeRequestGpt } from "../helpers/makeRequestGpt";
 import { generateRandomString } from "../helpers/generateRandomString";
 import { converterName } from "../helpers/converterName";
+import { getCombinedMessages } from "../helpers/getCombinedMessages";
 
 import { sendMessage } from "../methods/messages/sendMessage";
 import { getGroupId } from "../methods/groupId/getGroupId";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
-import { getCombinedMessages } from "../helpers/getCombinedMessages";
-import { sendToBot } from "../helpers/sendToBot";
-import { makeRequestGpt } from "../helpers/makeRequestGpt";
+import { getDialogs } from "../methods/dialogs/getDialogs";
 
 export const autoResponse = async (
   client: any,
