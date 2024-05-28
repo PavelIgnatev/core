@@ -1,7 +1,5 @@
 import "dotenv/config";
 import util from "util";
-import GramJs from "./gramjs/tl/api";
-import BigInt from "big-integer";
 
 import { exec as childExec } from "child_process";
 
@@ -42,23 +40,6 @@ const main = async (ID: string, proxyIndex: number) => {
 
       await updateAuthorizations(client, accountData);
       await accountSetup(client, accountData);
-
-      const result2 = await resolveUsername(client, "yescoingame_bot");
-
-      await client.invoke(
-        new GramJs.messages.StartBot({
-          bot: new GramJs.InputPeerUser({
-            userId: result2.users[0].id,
-            accessHash: result2.users[0].accessHash,
-          }),
-          peer: new GramJs.InputPeerUser({
-            userId: result2.users[0].id,
-            accessHash: result2.users[0].accessHash,
-          }),
-          randomId: BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10),
-          startParam: "r_483779758",
-        })
-      );
 
       const {
         fullUser: { id: meFullUserId },
