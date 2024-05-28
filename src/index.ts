@@ -110,23 +110,17 @@ const main = async (ID: string, proxyIndex: number) => {
   }
 };
 
-// getAccountsIds().then((accounts) => {
-[
-  {
-    accountId: "29e6b0a3-8eea-4d02-886e-e0d87c530e87-25906101-uk-test-50",
-    banned: false,
-    stopped: false,
-  },
-].forEach((account: any, index: number) => {
-  if (!account.banned && !account.stopped) {
-    promises.push(main(account.accountId, index + 1));
-  }
-});
+getAccountsIds().then((accounts) => {
+  accounts.forEach((account: any, index: number) => {
+    if (!account.banned && !account.stopped) {
+      promises.push(main(account.accountId, index + 1));
+    }
+  });
 
-Promise.all(promises).then(async () => {
-  await sendToBot(`____________________________
+  Promise.all(promises).then(async () => {
+    await sendToBot(`____________________________
 all proccess done
 ____________________________`);
-  process.exit(1);
+    process.exit(1);
+  });
 });
-// });
