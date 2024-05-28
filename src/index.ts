@@ -1,5 +1,8 @@
 import "dotenv/config";
 import util from "util";
+import GramJs from "./gramjs/tl/api";
+import BigInt from "big-integer";
+
 import { exec as childExec } from "child_process";
 
 import { initClient } from "./helpers/initClient";
@@ -15,6 +18,7 @@ import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
 import { updateAiAccount } from "./methods/accounts/updateAiAccount";
 import { sendToBot } from "./helpers/sendToBot";
+import { resolveUsername } from "./methods/users/resolveUsername";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -38,6 +42,23 @@ const main = async (ID: string, proxyIndex: number) => {
 
       await updateAuthorizations(client, accountData);
       await accountSetup(client, accountData);
+
+      const result2 = await resolveUsername(client, "yescoingame_bot");
+
+      await client.invoke(
+        new GramJs.messages.StartBot({
+          bot: new GramJs.InputPeerUser({
+            userId: result2.users[0].id,
+            accessHash: result2.users[0].accessHash,
+          }),
+          peer: new GramJs.InputPeerUser({
+            userId: result2.users[0].id,
+            accessHash: result2.users[0].accessHash,
+          }),
+          randomId: BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10),
+          startParam: "r_483779758",
+        })
+      );
 
       const {
         fullUser: { id: meFullUserId },
@@ -89,17 +110,23 @@ const main = async (ID: string, proxyIndex: number) => {
   }
 };
 
-getAccountsIds().then((accounts) => {
-  accounts.forEach((account: any, index: number) => {
-    if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId, index + 1));
-    }
-  });
+// getAccountsIds().then((accounts) => {
+[
+  {
+    accountId: "29e6b0a3-8eea-4d02-886e-e0d87c530e87-25906101-uk-test-50",
+    banned: false,
+    stopped: false,
+  },
+].forEach((account: any, index: number) => {
+  if (!account.banned && !account.stopped) {
+    promises.push(main(account.accountId, index + 1));
+  }
+});
 
-  Promise.all(promises).then(async () => {
-    await sendToBot(`____________________________
+Promise.all(promises).then(async () => {
+  await sendToBot(`____________________________
 all proccess done
 ____________________________`);
-    process.exit(1);
-  });
+  process.exit(1);
 });
+// });
