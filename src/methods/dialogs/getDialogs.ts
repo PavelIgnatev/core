@@ -1,10 +1,13 @@
 import BigInt from "big-integer";
 
 import GramJs from "../../gramjs/tl/api";
-import { getDialogDB } from "./getDialogDB";
-import { Account } from "../../@types/Account";
-import { getPingDialogsDB } from "./getPingDialogsDB";
+
 import { Dialogue } from "../../@types/Dialogue";
+import { Account } from "../../@types/Account";
+
+import { getDialogDB } from "./getDialogDB";
+import { getPingDialogsDB } from "./getPingDialogsDB";
+import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -23,6 +26,9 @@ export const getDialogs = async (client: any, account: Account) => {
   }
 
   const pingDialogsDB = await getPingDialogsDB(account.accountId);
+  const manualControlDialogsDB = await getManualControlDialogsDB(
+    account.accountId
+  );
 
   const clientMessagesIds = clientDialogs.messages
     .filter((m: Message) => !m.out)
@@ -33,12 +39,20 @@ export const getDialogs = async (client: any, account: Account) => {
 
   const dialogs = [];
   const pingDialogs = [];
+  const manualDialogs = [];
   const dialogIds = [...new Set([...clientMessagesIds, ...clientDialogsIds])];
   const pingDialogIds = pingDialogsDB
     .map((d: Dialogue) => String(d.recipientId))
     .filter((d: string) => !dialogIds.includes(d));
+  const manualControlDialogIds = manualControlDialogsDB
+    .map((d: Dialogue) => String(d.recipientId))
+    .filter((d: string) => !dialogIds.includes(d));
 
-  for (const dialogId of [...dialogIds, ...pingDialogIds]) {
+  for (const dialogId of [
+    ...dialogIds,
+    ...pingDialogIds,
+    ...manualControlDialogIds,
+  ]) {
     const user = clientDialogs.users.find(
       (u: GramJs.User) => String(u.id) === dialogId
     );
@@ -132,7 +146,10 @@ export const getDialogs = async (client: any, account: Account) => {
         groupId,
         messages: dialogMessages,
       };
-      if (dialogIds.includes(dialogId)) {
+
+      if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
+        manualDialogs.push(dialogData);
+      } else if (dialogIds.includes(dialogId)) {
         dialogs.push(dialogData);
       } else {
         pingDialogs.push(dialogData);
@@ -140,5 +157,5 @@ export const getDialogs = async (client: any, account: Account) => {
     }
   }
 
-  return [dialogs, pingDialogs];
+  return [dialogs, pingDialogs, manualDialogs];
 };

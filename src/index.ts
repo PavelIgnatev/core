@@ -16,7 +16,6 @@ import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
 import { updateAiAccount } from "./methods/accounts/updateAiAccount";
 import { sendToBot } from "./helpers/sendToBot";
-import { resolveUsername } from "./methods/users/resolveUsername";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];

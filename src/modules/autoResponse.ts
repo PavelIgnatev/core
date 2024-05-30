@@ -19,7 +19,10 @@ export const autoResponse = async (
   account: Account,
   meFullUser: GramJs.User
 ) => {
-  const [dialogs, pingDialogs] = await getDialogs(client, account);
+  const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
+    client,
+    account
+  );
   const { firstName: meFirstName = "" } = meFullUser;
   const meName = converterName(meFirstName);
 
@@ -223,6 +226,42 @@ ${chatHistory
       messages,
       "update",
       { ping: true }
+    );
+  }
+
+  for (const dialog of manualControlDialogs) {
+    const { id, accessHash, messages, managerMessage } = dialog;
+
+    const recipientFull = await getFullUser(client, id, accessHash);
+    if (!recipientFull) {
+      console.error(`Chat with username ${id} not resolved, maybe banned`);
+      return;
+    }
+
+    if (managerMessage) {
+      const sentManagerMessage = await sendMessage(
+        client,
+        id,
+        accessHash,
+        managerMessage,
+        account.accountId
+      );
+
+      messages.push({
+        id: sentManagerMessage.id,
+        text: managerMessage,
+        fromId: String(meFullUser.id),
+        date: Math.round(Date.now() / 1000),
+      });
+    }
+
+    await saveRecipient(
+      account.accountId,
+      recipientFull,
+      dialog,
+      messages,
+      "update",
+      { managerMessage: null }
     );
   }
 };
