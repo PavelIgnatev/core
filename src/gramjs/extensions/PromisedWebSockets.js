@@ -91,7 +91,7 @@ class PromisedWebSockets {
 
         this.client = new WebSocket(this.website, "binary", {
             agent: new HttpsProxyAgent(
-                "http://gsDIvA0qq3ZaPm67Hm-dc-ANY:FMOC7cexv7V33La@gw.thunderproxies.net:5959"
+                "http://1BBvLNLQYW06Ug66Ac-dc-ANY:T506hsJ4HyQ50Qy@gw.thunderproxy.net:5959"
             ),
         });
         return new Promise((resolve, reject) => {
