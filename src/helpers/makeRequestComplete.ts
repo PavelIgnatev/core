@@ -74,7 +74,7 @@ export const makeRequestComplete = async (
 
       const {
         data: { text: data },
-      } = await axios.post("http://45.93.201.73/chat", {
+      } = await axios.post("http://91.198.220.234/chat", {
         model: "command-r",
         k: 300,
         temperature: 1,
