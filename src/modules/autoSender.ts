@@ -156,7 +156,14 @@ export const autoSender = async (
         "create"
       );
     } catch (e: any) {
-      if (e.message !== "PEER_FLOOD") {
+      if (
+        ![
+          "PEER_FLOOD",
+          "PHONE_NOT_OCCUPIED",
+          "USERNAME_NOT_OCCUPIED",
+          "USERNAME_INVALID",
+        ].includes(e.message)
+      ) {
         await sendToBot(
           `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`
         );

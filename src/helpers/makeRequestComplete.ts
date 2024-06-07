@@ -253,6 +253,8 @@ export const makeRequestComplete = async (
 
       return varMessage;
     } catch (error: any) {
+      await new Promise((res) => setTimeout(res, 2500));
+
       console.log(`Ошибка запроса. ${error.message}`);
       errors.push(error.message);
     }

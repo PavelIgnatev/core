@@ -98,7 +98,7 @@ ${promptGoal}`,
       currentStage <= 2 ? 2 : 1,
       currentStage === 2 ? part : null,
       chatHistory,
-      groupId,
+      dialogGroupId,
       account.accountId
     );
     const sentResponseMessage = await sendMessage(

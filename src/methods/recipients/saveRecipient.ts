@@ -6,7 +6,7 @@ import { getCombinedMessages } from "../../helpers/getCombinedMessages";
 export const saveRecipient = async (
   accountId: string,
   recipient: GramJs.users.UserFull,
-  recipientDb: Dialogue,
+  recipientDb: Dialogue & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: "create" | "update",
   addedData: Record<string, unknown> = {}
@@ -22,13 +22,23 @@ export const saveRecipient = async (
     fullUser: { about },
   } = recipient;
 
-  const { groupId, recipientUsername, recipientPhone } = recipientDb;
+  const {
+    groupId,
+    recipientUsername,
+    username: varSecondUsername,
+    recipientPhone,
+  } = recipientDb;
 
   const data = {
     groupId,
     accountId,
     recipientId: String(recipientId),
-    recipientUsername: (username || recipientUsername || "").toLowerCase(),
+    recipientUsername: (
+      username ||
+      recipientUsername ||
+      varSecondUsername ||
+      ""
+    ).toLowerCase(),
     recipientTitle: `${firstName} ${lastName}`.trim(),
     recipientBio: about,
     recipientPhone: phone || recipientPhone || null,
