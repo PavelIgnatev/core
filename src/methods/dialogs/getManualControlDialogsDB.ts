@@ -15,7 +15,7 @@ export const getManualControlDialogsDB = async (accountId: string) => {
 
         return data;
       } catch {
-        return null;
+        return [];
       }
     } catch (error) {
       console.error(error);

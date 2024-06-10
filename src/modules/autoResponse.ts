@@ -261,7 +261,7 @@ ${chatHistory
       dialog,
       messages,
       "update",
-      { managerMessage: null }
+      { managerMessage: null, viewed: false }
     );
   }
 };

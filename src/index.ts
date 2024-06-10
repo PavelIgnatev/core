@@ -4,18 +4,19 @@ import util from "util";
 import { exec as childExec } from "child_process";
 
 import { initClient } from "./helpers/initClient";
+import { sendToBot } from "./helpers/sendToBot";
 
 import { getAccountData } from "./methods/accounts/getAccountData";
 import { usersMe } from "./methods/users/usersMe";
+import { getAccountsIds } from "./methods/accounts/getAccountsIds";
+import { setOffline } from "./methods/accounts/setOffline";
+import { updateAiAccount } from "./methods/accounts/updateAiAccount";
+import { getManualControlDialogsDB } from "./methods/dialogs/getManualControlDialogsDB";
 
 import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 import { updateAuthorizations } from "./modules/updateAuthorizations";
-import { getAccountsIds } from "./methods/accounts/getAccountsIds";
-import { setOffline } from "./methods/accounts/setOffline";
-import { updateAiAccount } from "./methods/accounts/updateAiAccount";
-import { sendToBot } from "./helpers/sendToBot";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -52,8 +53,11 @@ const main = async (ID: string, proxyIndex: number) => {
         }
 
         const accountData = await getAccountData(ID);
+        const manualControlDialogsDB = await getManualControlDialogsDB(
+          accountId
+        );
 
-        if (isAutoResponse) {
+        if (isAutoResponse || manualControlDialogsDB.length > 0) {
           isAutoResponse = false;
           await autoResponse(client, accountData, meFullUser);
         }
@@ -72,17 +76,17 @@ const main = async (ID: string, proxyIndex: number) => {
         });
         await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
         await exec("pm2 kill");
-      }
-
-      if (e.message.includes("Global Error")) {
+      } else if (e.message.includes("Global Error")) {
         break;
-      }
-
-      if (e.message.includes("Stopped")) {
+      } else if (e.message.includes("Stopped")) {
         await updateAiAccount(ID, {
           stopped: true,
         });
         break;
+      } else {
+        await sendToBot(
+          `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
+        );
       }
 
       await new Promise((res) => setTimeout(res, 5000));
