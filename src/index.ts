@@ -58,6 +58,13 @@ const main = async (ID: string, proxyIndex: number) => {
         );
 
         if (isAutoResponse || manualControlDialogsDB.length > 0) {
+          if (manualControlDialogsDB.length > 0) {
+            await sendToBot(
+              `Зашел в проверку по manual, ${manualControlDialogsDB
+                .map((d: any) => d.managerMessage)
+                .join("\n")}`
+            );
+          }
           isAutoResponse = false;
           await autoResponse(client, accountData, meFullUser);
         }
