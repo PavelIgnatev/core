@@ -56,7 +56,8 @@ const main = async (ID: string, proxyIndex: number) => {
         // const manualControlDialogsDB = await getManualControlDialogsDB(
         //   accountId
         // );
-
+        //|| manualControlDialogsDB.length > 0
+        
         if (isAutoResponse) {
           isAutoResponse = false;
           await autoResponse(client, accountData, meFullUser);
