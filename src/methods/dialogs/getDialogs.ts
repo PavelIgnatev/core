@@ -93,7 +93,8 @@ export const getDialogs = async (client: any, account: Account) => {
       } = dialogDb || {};
 
       if (blocked) {
-        await await client.invoke(
+        await sendToBot(`блокируем типа ${account.accountId}:${user.id}`);
+        await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
               userId: BigInt(user.id),
@@ -186,7 +187,7 @@ export const getDialogs = async (client: any, account: Account) => {
       await saveBlockedRecipient(account.accountId, dialogId);
 
       if (user && user.id && user.accessHash) {
-        await await client.invoke(
+        await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
               userId: BigInt(user.id),
