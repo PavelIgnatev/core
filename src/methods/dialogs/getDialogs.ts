@@ -82,6 +82,11 @@ export const getDialogs = async (client: any, account: Account) => {
       );
 
       if (!allMessages?.messages?.length) {
+        await saveBlockedRecipient(
+          account.accountId,
+          dialogId,
+          "messages-length"
+        );
         continue;
       }
 
@@ -183,7 +188,11 @@ export const getDialogs = async (client: any, account: Account) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      await saveBlockedRecipient(account.accountId, dialogId);
+      await saveBlockedRecipient(
+        account.accountId,
+        dialogId,
+        "user-not-resolved"
+      );
 
       if (
         user &&

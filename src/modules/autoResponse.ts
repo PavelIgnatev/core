@@ -55,14 +55,14 @@ export const autoResponse = async (
 
     if (currentStage > 15) {
       console.log(`MAXIMUM STAGE in ${account.accountId}:${id}`);
-      await saveBlockedRecipient(account.accountId, id);
+      await saveBlockedRecipient(account.accountId, id, "dialogs-max-stage");
       continue;
     }
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(account.accountId, id);
+      await saveBlockedRecipient(account.accountId, id, "dialogs-not-resolved");
       continue;
     }
 
@@ -168,7 +168,7 @@ ${promptGoal}`,
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(account.accountId, id);
+      await saveBlockedRecipient(account.accountId, id, "ping-not-resolved");
       continue;
     }
     const {
@@ -239,7 +239,11 @@ ${chatHistory
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(account.accountId, id);
+      await saveBlockedRecipient(
+        account.accountId,
+        id,
+        "manuual-control-dialogs-not-resolved"
+      );
       continue;
     }
 

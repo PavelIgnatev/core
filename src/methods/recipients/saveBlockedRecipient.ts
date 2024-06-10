@@ -10,10 +10,11 @@ const blockedData = {
 
 export const saveBlockedRecipient = async (
   accountId: string,
-  recipientId: string
+  recipientId: string,
+  reason: string
 ) => {
   await sendToBot(
-    `Блокировка пользователем (возможно и администратором) на аккаунте ${accountId}:${recipientId}`
+    `Блокировка пользователя (${reason}) на аккаунте ${accountId}:${recipientId}`
   );
 
   console.log("Data before saving:", blockedData);
@@ -21,7 +22,7 @@ export const saveBlockedRecipient = async (
   try {
     const response = await fetch(`${process.env.RECIPIENT_URL}`, {
       method: "POST",
-      body: JSON.stringify({ accountId, recipientId, ...blockedData }),
+      body: JSON.stringify({ accountId, recipientId, reason, ...blockedData }),
       headers: {
         "Content-Type": "application/json",
       },
