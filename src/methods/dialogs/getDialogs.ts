@@ -56,7 +56,11 @@ export const getDialogs = async (client: any, account: Account) => {
     .map((d: Dialogue) => String(d.recipientId))
     .filter((d: string) => !dialogIds.includes(d));
 
-  for (const dialogId of [...dialogIds, ...pingDialogIds, 891372805]) {
+  for (const dialogId of [
+    ...dialogIds,
+    ...pingDialogIds,
+    ...manualControlDialogIds,
+  ]) {
     const user = clientDialogs.users.find(
       (u: GramJs.User) => String(u.id) === dialogId
     );
