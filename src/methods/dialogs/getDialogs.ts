@@ -54,7 +54,11 @@ export const getDialogs = async (client: any, account: Account) => {
     ...dialogIds,
     ...pingDialogIds,
     ...manualControlDialogIds,
-  ].filter((d: string) => d !== "undefined")) {
+  ]) {
+    if (!dialogId || dialogId === "undefined") {
+      continue;
+    }
+
     const user = clientDialogs.users.find(
       (u: GramJs.User) => String(u.id) === dialogId
     );
