@@ -53,18 +53,18 @@ const main = async (ID: string, proxyIndex: number) => {
         }
 
         const accountData = await getAccountData(ID);
-        const manualControlDialogsDB = await getManualControlDialogsDB(
-          accountId
-        );
-
-        if (isAutoResponse || manualControlDialogsDB.length > 0) {
-          if (manualControlDialogsDB.length > 0) {
-            await sendToBot(
-              `Зашел в проверку по manual, ${ID}: ${manualControlDialogsDB
-                .map((d: any) => d.managerMessage)
-                .join("\n")}`
-            );
-          }
+        // const manualControlDialogsDB = await getManualControlDialogsDB(
+        //   accountId
+        // );
+        //manualControlDialogsDB.length > 0
+        if (isAutoResponse) {
+          // if (manualControlDialogsDB.length > 0) {
+          //   await sendToBot(
+          //     `Зашел в проверку по manual, ${ID}: ${manualControlDialogsDB
+          //       .map((d: any) => d.managerMessage)
+          //       .join("\n")}`
+          //   );
+          // }
           isAutoResponse = false;
           await autoResponse(client, accountData, meFullUser);
         }
