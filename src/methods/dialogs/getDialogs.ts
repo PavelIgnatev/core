@@ -93,7 +93,6 @@ export const getDialogs = async (client: any, account: Account) => {
       } = dialogDb || {};
 
       if (blocked) {
-        await sendToBot(`блокируем типа ${account.accountId}:${user.id}`);
         await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
@@ -184,11 +183,12 @@ export const getDialogs = async (client: any, account: Account) => {
         pingDialogs.push(dialogData);
       }
     } else {
+      if(!dialogId) {
+        await sendToBot(`sadsadas ${dialogIds.join('\n')};${pingDialogIds.join('\n')};${manualControlDialogIds.join('\n')}`)
+      }
       await saveBlockedRecipient(account.accountId, dialogId);
 
       if (user && user.id && user.accessHash) {
-        await sendToBot(`блокируем типа 2 ${account.accountId}:${user.id}`);
-
         await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
@@ -206,8 +206,6 @@ export const getDialogs = async (client: any, account: Account) => {
             revoke: true,
           })
         );
-      } else {
-        await sendToBot(`у типа юзер не найден ${account.accountId}:${user.id}`);
       }
     }
   }
