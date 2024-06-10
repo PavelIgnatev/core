@@ -64,7 +64,6 @@ export const getDialogs = async (client: any, account: Account) => {
 
     if (
       user &&
-      user.status &&
       !user.deleted &&
       !user.bot &&
       !user.support &&
@@ -191,7 +190,9 @@ export const getDialogs = async (client: any, account: Account) => {
       await saveBlockedRecipient(
         account.accountId,
         dialogId,
-        `user-not-resolved;Status:${String(user.status)};Deleted:${user.deleted};Bot:${user.bot};Support:${user.support};Self:${user.self}`
+        `user-not-resolved;Status:${String(user?.status)};Deleted:${
+          user?.deleted
+        };Bot:${user?.bot};Support:${user?.support};Self:${user?.self}`
       );
 
       if (
