@@ -1,3 +1,5 @@
+import { sendToBot } from "../../helpers/sendToBot";
+
 const blockedData = {
   blocked: true,
   stopped: true,
@@ -10,6 +12,10 @@ export const saveBlockedRecipient = async (
   accountId: string,
   recipientId: string
 ) => {
+  await sendToBot(
+    `Блокировка пользователем (возможно и администратором) на аккаунте ${accountId}:${recipientId}`
+  );
+
   console.log("Data before saving:", blockedData);
 
   try {
