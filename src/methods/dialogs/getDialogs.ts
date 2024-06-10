@@ -8,19 +8,11 @@ import { Account } from "../../@types/Account";
 import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
-import { saveMiniRecipient } from "../recipients/saveMiniRecipient";
+import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
 import { sendToBot } from "../../helpers/sendToBot";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
-
-const blockedData = {
-  blocked: true,
-  stopped: true,
-  viewed: false,
-  managerMessage: null,
-  status: "mini-update",
-};
 
 export const getDialogs = async (client: any, account: Account) => {
   const clientDialogs = await client.invoke(
@@ -90,7 +82,6 @@ export const getDialogs = async (client: any, account: Account) => {
         await sendToBot(
           `all messages messages length < 0 error ${account.accountId}:${user.id}`
         );
-        await saveMiniRecipient(account.accountId, dialogId, blockedData);
         continue;
       }
 
@@ -175,7 +166,27 @@ export const getDialogs = async (client: any, account: Account) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      await saveMiniRecipient(account.accountId, dialogId, blockedData);
+      await saveBlockedRecipient(account.accountId, dialogId);
+      
+      if (user && user.id && user.accessHash) {
+        await await client.invoke(
+          new GramJs.contacts.Block({
+            id: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+          })
+        );
+        await client.invoke(
+          new GramJs.messages.DeleteHistory({
+            peer: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+            revoke: true,
+          })
+        );
+      }
     }
   }
 

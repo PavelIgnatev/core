@@ -1,14 +1,21 @@
-export const saveMiniRecipient = async (
+const blockedData = {
+  blocked: true,
+  stopped: true,
+  viewed: false,
+  managerMessage: null,
+  status: "mini-update",
+};
+
+export const saveBlockedRecipient = async (
   accountId: string,
-  recipientId: string,
-  data: Record<string, unknown> = {}
+  recipientId: string
 ) => {
-  console.log("Data before saving:", data);
+  console.log("Data before saving:", blockedData);
 
   try {
     const response = await fetch(`${process.env.RECIPIENT_URL}`, {
       method: "POST",
-      body: JSON.stringify({ accountId, recipientId, ...data }),
+      body: JSON.stringify({ accountId, recipientId, ...blockedData }),
       headers: {
         "Content-Type": "application/json",
       },
