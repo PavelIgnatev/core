@@ -61,6 +61,7 @@ export const getDialogs = async (client: any, account: Account) => {
 
     if (
       user &&
+      user.id &&
       user.status &&
       !user.deleted &&
       !user.bot &&
@@ -79,9 +80,6 @@ export const getDialogs = async (client: any, account: Account) => {
       );
 
       if (!allMessages?.messages?.length) {
-        await sendToBot(
-          `all messages messages length < 0 error ${account.accountId}:${user.id}`
-        );
         continue;
       }
 
@@ -183,9 +181,6 @@ export const getDialogs = async (client: any, account: Account) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      if(!dialogId) {
-        await sendToBot(`sadsadas ${dialogIds.join('\n')};${pingDialogIds.join('\n')};${manualControlDialogIds.join('\n')}`)
-      }
       await saveBlockedRecipient(account.accountId, dialogId);
 
       if (user && user.id && user.accessHash) {
