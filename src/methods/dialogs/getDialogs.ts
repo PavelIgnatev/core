@@ -9,6 +9,7 @@ import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
 import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
+import { sendToBot } from "../../helpers/sendToBot";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -179,6 +180,9 @@ export const getDialogs = async (client: any, account: Account) => {
         pingDialogs.push(dialogData);
       }
     } else {
+      await sendToBot(
+        `Добавляю хуесоса в блокировку ${account.accountId}:${dialogId}`
+      );
       await saveBlockedRecipient(account.accountId, dialogId);
 
       if (
