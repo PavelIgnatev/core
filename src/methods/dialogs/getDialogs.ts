@@ -18,7 +18,7 @@ export const getDialogs = async (client: any, account: Account) => {
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
       folderId: 1,
-      limit: 30,
+      limit: 100,
     })
   );
 
