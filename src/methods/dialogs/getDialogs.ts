@@ -9,7 +9,6 @@ import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
 import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
-import { sendToBot } from "../../helpers/sendToBot";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -90,7 +89,6 @@ export const getDialogs = async (client: any, account: Account) => {
       } = dialogDb || {};
 
       if (blocked) {
-        await sendToBot('ручная блокировка нахуй!')
         await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
