@@ -9,6 +9,7 @@ import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
 import { saveMiniRecipient } from "../recipients/saveMiniRecipient";
+import { sendToBot } from "../../helpers/sendToBot";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -90,10 +91,18 @@ export const getDialogs = async (client: any, account: Account) => {
       }
 
       const dialogDb = await getDialogDB(account.accountId, String(user.id));
-      const { messages: dialogMessages = [], groupId = 12343207729 } =
-        dialogDb || {};
+      const {
+        messages: dialogMessages = [],
+        groupId = 12343207729,
+        blocked,
+      } = dialogDb || {};
 
-      console.log(dialogDb);
+      if (blocked) {
+        await sendToBot(
+          `Надо блокировать а не отвечать, чела не заблокировали ${account.accountId}:${user.id}`
+        );
+        continue;
+      }
 
       for (const dialogMessage of allMessages.messages.reverse()) {
         if (dialogMessages.find((m: any) => m.id === dialogMessage.id)) {
