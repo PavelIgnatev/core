@@ -53,12 +53,11 @@ const main = async (ID: string, proxyIndex: number) => {
         }
 
         const accountData = await getAccountData(ID);
-        // const manualControlDialogsDB = await getManualControlDialogsDB(
-        //   accountId
-        // );
-        //|| manualControlDialogsDB.length > 0
-        
-        if (isAutoResponse) {
+        const manualControlDialogsDB = await getManualControlDialogsDB(
+          accountId
+        );
+
+        if (isAutoResponse || manualControlDialogsDB.length > 0) {
           isAutoResponse = false;
           await autoResponse(client, accountData, meFullUser);
         }
