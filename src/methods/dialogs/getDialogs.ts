@@ -19,7 +19,7 @@ export const getDialogs = async (client: any, account: Account) => {
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
       folderId: 1,
-      limit: 100,
+      limit: 30,
     })
   );
 
@@ -90,6 +90,7 @@ export const getDialogs = async (client: any, account: Account) => {
       } = dialogDb || {};
 
       if (blocked) {
+        await sendToBot('ручная блокировка нахуй!')
         await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({
