@@ -181,7 +181,11 @@ export const getDialogs = async (client: any, account: Account) => {
       }
     } else {
       await sendToBot(
-        `Добавляю хуесоса в блокировку ${account.accountId}:${dialogId}`
+        `Добавляю хуесоса в блокировку ${
+          account.accountId
+        }:${dialogId};${pingDialogIds.join("\n")};${dialogIds.join(
+          "\n"
+        )};${manualControlDialogIds.join("\n")};User: ${JSON.stringify(user)}`
       );
       await saveBlockedRecipient(account.accountId, dialogId);
 
