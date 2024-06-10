@@ -8,9 +8,17 @@ import { Account } from "../../@types/Account";
 import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
+import { saveMiniRecipient } from "../recipients/saveMiniRecipient";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
+
+const blockedData = {
+  blocked: true,
+  stopped: true,
+  managerMessage: null,
+  status: "mini-update",
+};
 
 export const getDialogs = async (client: any, account: Account) => {
   const clientDialogs = await client.invoke(
@@ -48,11 +56,7 @@ export const getDialogs = async (client: any, account: Account) => {
     .map((d: Dialogue) => String(d.recipientId))
     .filter((d: string) => !dialogIds.includes(d));
 
-  for (const dialogId of [
-    ...dialogIds,
-    ...pingDialogIds,
-    ...manualControlDialogIds,
-  ]) {
+  for (const dialogId of [...dialogIds, ...pingDialogIds, 891372805]) {
     const user = clientDialogs.users.find(
       (u: GramJs.User) => String(u.id) === dialogId
     );
@@ -77,13 +81,15 @@ export const getDialogs = async (client: any, account: Account) => {
       );
 
       if (!allMessages?.messages?.length) {
+        await saveMiniRecipient(account.accountId, dialogId, blockedData);
         continue;
       }
 
       const dialogDb = await getDialogDB(account.accountId, String(user.id));
-
       const { messages: dialogMessages = [], groupId = 12343207729 } =
         dialogDb || {};
+
+      console.log(dialogDb);
 
       for (const dialogMessage of allMessages.messages.reverse()) {
         if (dialogMessages.find((m: any) => m.id === dialogMessage.id)) {
@@ -154,6 +160,8 @@ export const getDialogs = async (client: any, account: Account) => {
       } else {
         pingDialogs.push(dialogData);
       }
+    } else {
+      await saveMiniRecipient(account.accountId, dialogId, blockedData);
     }
   }
 
