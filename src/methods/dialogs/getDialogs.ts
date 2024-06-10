@@ -185,7 +185,7 @@ export const getDialogs = async (client: any, account: Account) => {
       }
     } else {
       await sendToBot(
-        `Блокировка пользователем (возможно и администратором) на аккаунте ${account.accountId}`
+        `Блокировка пользователем (возможно и администратором) на аккаунте ${account.accountId}:${dialogId}`
       );
       await saveBlockedRecipient(account.accountId, dialogId);
 
