@@ -13,6 +13,7 @@ import { getGroupId } from "../methods/groupId/getGroupId";
 import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
 import { getDialogs } from "../methods/dialogs/getDialogs";
+import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient";
 
 export const autoResponse = async (
   client: any,
@@ -54,13 +55,15 @@ export const autoResponse = async (
 
     if (currentStage > 15) {
       console.log(`MAXIMUM STAGE in ${account.accountId}:${id}`);
+      await saveBlockedRecipient(account.accountId, id);
       continue;
     }
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      return;
+      await saveBlockedRecipient(account.accountId, id);
+      continue;
     }
 
     const {
@@ -165,7 +168,8 @@ ${promptGoal}`,
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved, maybe banned`);
-      return;
+      await saveBlockedRecipient(account.accountId, id);
+      continue;
     }
     const {
       firstName = "",
@@ -234,8 +238,9 @@ ${chatHistory
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
-      console.error(`Chat with username ${id} not resolved, maybe banned`);
-      return;
+      console.error(`Chat with username ${id} not resolved`);
+      await saveBlockedRecipient(account.accountId, id);
+      continue;
     }
 
     if (managerMessage) {
