@@ -190,7 +190,7 @@ export const getDialogs = async (client: any, account: Account) => {
       await saveBlockedRecipient(
         account.accountId,
         dialogId,
-        `user-not-resolved;Status:${String(user?.status)};Deleted:${
+        `user-not-resolved;User:${user};Status:${String(user?.status)};Deleted:${
           user?.deleted
         };Bot:${user?.bot};Support:${user?.support};Self:${user?.self}`
       );
