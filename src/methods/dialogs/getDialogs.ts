@@ -61,7 +61,6 @@ export const getDialogs = async (client: any, account: Account) => {
 
     if (
       user &&
-      user.id &&
       user.status &&
       !user.deleted &&
       !user.bot &&
@@ -91,23 +90,29 @@ export const getDialogs = async (client: any, account: Account) => {
       } = dialogDb || {};
 
       if (blocked) {
-        await client.invoke(
-          new GramJs.contacts.Block({
-            id: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-          })
-        );
-        await client.invoke(
-          new GramJs.messages.DeleteHistory({
-            peer: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-            revoke: true,
-          })
-        );
+        try {
+          await client.invoke(
+            new GramJs.contacts.Block({
+              id: new GramJs.InputPeerUser({
+                userId: BigInt(user.id),
+                accessHash: BigInt(user.accessHash),
+              }),
+            })
+          );
+          await client.invoke(
+            new GramJs.messages.DeleteHistory({
+              peer: new GramJs.InputPeerUser({
+                userId: BigInt(user.id),
+                accessHash: BigInt(user.accessHash),
+              }),
+              revoke: true,
+            })
+          );
+        } catch (e: any) {
+          await sendToBot(
+            `Errorr 2: ${e.message}; User: ${JSON.stringify(user)}`
+          );
+        }
         continue;
       }
 
@@ -184,23 +189,29 @@ export const getDialogs = async (client: any, account: Account) => {
       await saveBlockedRecipient(account.accountId, dialogId);
 
       if (user && user.id && user.accessHash) {
-        await client.invoke(
-          new GramJs.contacts.Block({
-            id: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-          })
-        );
-        await client.invoke(
-          new GramJs.messages.DeleteHistory({
-            peer: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-            revoke: true,
-          })
-        );
+        try {
+          await client.invoke(
+            new GramJs.contacts.Block({
+              id: new GramJs.InputPeerUser({
+                userId: BigInt(user.id),
+                accessHash: BigInt(user.accessHash),
+              }),
+            })
+          );
+          await client.invoke(
+            new GramJs.messages.DeleteHistory({
+              peer: new GramJs.InputPeerUser({
+                userId: BigInt(user.id),
+                accessHash: BigInt(user.accessHash),
+              }),
+              revoke: true,
+            })
+          );
+        } catch (e: any) {
+          await sendToBot(
+            `Errorr: ${e.message}; User: ${JSON.stringify(user)}`
+          );
+        }
       }
     }
   }
