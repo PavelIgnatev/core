@@ -17,6 +17,7 @@ type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
 const blockedData = {
   blocked: true,
   stopped: true,
+  viewed: false,
   managerMessage: null,
   status: "mini-update",
 };
@@ -86,6 +87,9 @@ export const getDialogs = async (client: any, account: Account) => {
       );
 
       if (!allMessages?.messages?.length) {
+        await sendToBot(
+          `all messages messages length < 0 error ${account.accountId}:${user.id}`
+        );
         await saveMiniRecipient(account.accountId, dialogId, blockedData);
         continue;
       }
@@ -94,13 +98,10 @@ export const getDialogs = async (client: any, account: Account) => {
       const {
         messages: dialogMessages = [],
         groupId = 12343207729,
-        blocked,
+        blocked = false,
       } = dialogDb || {};
 
       if (blocked) {
-        await sendToBot(
-          `Надо блокировать а не отвечать, чела не заблокировали ${account.accountId}:${user.id}`
-        );
         continue;
       }
 
