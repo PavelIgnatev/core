@@ -45,10 +45,12 @@ export const getDialogs = async (client: any, account: Account) => {
   const dialogIds = [...new Set([...clientMessagesIds, ...clientDialogsIds])];
   const pingDialogIds = pingDialogsDB
     .map((d: Dialogue) => String(d.recipientId))
-    .filter((d: string) => !dialogIds.includes(d));
+    .filter((d: string) => !dialogIds.includes(d))
+    .filter((e) => e !== "undefined");
   const manualControlDialogIds = manualControlDialogsDB
     .map((d: Dialogue) => String(d.recipientId))
-    .filter((d: string) => !dialogIds.includes(d));
+    .filter((d: string) => !dialogIds.includes(d))
+    .filter((e) => e !== "undefined");
 
   for (const dialogId of [
     ...dialogIds,
