@@ -18,7 +18,7 @@ export const getDialogDB = async (
 
         return data;
       } catch {
-        return null;
+        return [];
       }
     } catch (error) {
       console.error(error);

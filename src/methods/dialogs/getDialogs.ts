@@ -216,6 +216,18 @@ export const getDialogs = async (client: any, account: Account) => {
           })
         );
       }
+
+      if (user && user.id && user.accessHash && user.self) {
+        await client.invoke(
+          new GramJs.messages.DeleteHistory({
+            peer: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+            revoke: true,
+          })
+        );
+      }
     }
   }
 
