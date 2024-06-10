@@ -167,7 +167,7 @@ ${promptGoal}`,
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
-      console.error(`Chat with username ${id} not resolved, maybe banned`);
+      console.error(`Chat with username ${id} not resolved`);
       await saveBlockedRecipient(account.accountId, id);
       continue;
     }
