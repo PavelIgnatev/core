@@ -6,7 +6,7 @@ import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
 export const initClient = async (
   account: Account,
-  proxyIndex: number,
+  accountId: string,
   onUpdate: any
 ) => {
   try {
@@ -17,7 +17,7 @@ export const initClient = async (
     });
 
     const client = await Promise.race([
-      init(account, proxyIndex, onUpdate),
+      init(account, accountId, onUpdate),
       timeoutPromise,
     ]);
 

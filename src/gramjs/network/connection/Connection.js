@@ -16,7 +16,7 @@ const AsyncQueue = require("../../extensions/AsyncQueue");
 class Connection {
     PacketCodecClass = undefined;
 
-    constructor(ip, port, dcId, loggers, testServers, isPremium, proxyIndex) {
+    constructor(ip, port, dcId, loggers, testServers, isPremium, accountId) {
         this._ip = ip;
         this._port = port;
         this._dcId = dcId;
@@ -30,7 +30,7 @@ class Connection {
         this._obfuscation = undefined; 
         this._sendArray = new AsyncQueue();
         this._recvArray = new AsyncQueue();
-        this._proxyIndex = proxyIndex;
+        this._accountId = accountId;
 
         this.shouldLongPoll = false;
         this.socket = new PromisedWebSockets(
@@ -49,7 +49,7 @@ class Connection {
     async _connect() {
         this._log.debug("Connecting");
         this._codec = new this.PacketCodecClass(this);
-        await this.socket.connect(this._port, this._ip, this._proxyIndex);
+        await this.socket.connect(this._port, this._ip, this._accountId);
         this._log.debug("Finished connecting");
         await this._initConn();
     }
@@ -189,8 +189,8 @@ class PacketCodec {
 }
 
 class HttpConnection extends Connection {
-    constructor(ip, port, dcId, loggers, testServers, isPremium, proxyIndex) {
-        super(ip, port, dcId, loggers, testServers, isPremium, proxyIndex);
+    constructor(ip, port, dcId, loggers, testServers, isPremium, accountId) {
+        super(ip, port, dcId, loggers, testServers, isPremium, accountId);
         this.shouldLongPoll = true;
         this.socket = new HttpStream(this.disconnectCallback.bind(this));
         this.href = HttpStream.getURL(

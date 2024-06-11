@@ -6,70 +6,63 @@ import { exec as childExec } from "child_process";
 import { initClient } from "./helpers/initClient";
 import { sendToBot } from "./helpers/sendToBot";
 
-import { getAccountData } from "./methods/accounts/getAccountData";
+import { getFullAccount } from "./methods/accounts/getFullAccount";
 import { usersMe } from "./methods/users/usersMe";
 import { getAccountsIds } from "./methods/accounts/getAccountsIds";
 import { setOffline } from "./methods/accounts/setOffline";
 import { updateAiAccount } from "./methods/accounts/updateAiAccount";
-import { getManualControlDialogsDB } from "./methods/dialogs/getManualControlDialogsDB";
 
 import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
-import { updateAuthorizations } from "./modules/updateAuthorizations";
+import { clearAuthorizations } from "./modules/clearAuthorizations";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
 
-const main = async (ID: string, proxyIndex: number) => {
+const main = async (ID: string) => {
   while (true) {
     try {
       let isAutoResponse = true;
-      const accountData = await getAccountData(ID);
-      const { dcId, platform, userAgent, accountId } = accountData;
+      const account = await getFullAccount(ID);
+      const {
+        accountId,
+        dcId,
+        platform,
+        userAgent,
+        firstName,
+        setuped = false,
+        id,
+      } = account;
 
-      if (![dcId, platform, userAgent, accountId].every(Boolean)) {
+      if (![accountId, dcId, platform, userAgent, firstName].every(Boolean)) {
         throw new Error("Insufficient number of parameters to start");
       }
 
       const client = await initClient(
-        accountData,
-        proxyIndex,
+        account,
+        ID,
         () => (isAutoResponse = true)
       );
 
-      await updateAuthorizations(client, accountData);
-      await accountSetup(client, accountData);
+      await clearAuthorizations(client);
+      await accountSetup(client, accountId, setuped);
 
-      const {
-        fullUser: { id: meFullUserId },
-        users,
-      } = await usersMe(client);
-      const meFullUser = users[0];
+      const tgAccountId = await usersMe(client, accountId, id);
 
       for (let i = 0; i < 30; i++) {
         if (i % 5 === 0) {
           await setOffline(client, false);
         }
 
-        const accountData = await getAccountData(ID);
-        // const manualControlDialogsDB = await getManualControlDialogsDB(
-        //   accountId
-        // );
-        //manualControlDialogsDB.length > 0
+        const account = await getFullAccount(ID);
+
         if (isAutoResponse) {
-          // if (manualControlDialogsDB.length > 0) {
-          //   await sendToBot(
-          //     `Зашел в проверку по manual, ${ID}: ${manualControlDialogsDB
-          //       .map((d: any) => d.managerMessage)
-          //       .join("\n")}`
-          //   );
-          // }
           isAutoResponse = false;
-          await autoResponse(client, accountData, meFullUser);
+          await autoResponse(client, accountId, tgAccountId, firstName);
         }
 
-        await autoSender(client, accountData, String(meFullUserId));
+        await autoSender(client, accountId, tgAccountId, account.remainingTime);
         await new Promise((res) => setTimeout(res, 60000));
       }
       return;
@@ -102,9 +95,9 @@ const main = async (ID: string, proxyIndex: number) => {
 };
 
 getAccountsIds().then((accounts) => {
-  accounts.forEach((account: any, index: number) => {
+  accounts.forEach((account: any) => {
     if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId, index + 1));
+      promises.push(main(account.accountId));
     }
   });
 

@@ -31,12 +31,13 @@ export const generateRandomTime = () => {
 
 export const autoSender = async (
   client: any,
-  account: Account,
-  meId: string
+  accountId: string,
+  tgAccountId: string,
+  tgRmainingTime?: string
 ) => {
-  if (!account.remainingTime) {
+  if (!tgRmainingTime) {
     const remainingTime = generateRandomTime();
-    await updateAiAccount(account.accountId, {
+    await updateAiAccount(accountId, {
       remainingTime,
     });
     console.log(
@@ -46,15 +47,15 @@ export const autoSender = async (
   }
 
   const currentTime = new Date();
-  let remainingTime = new Date(account.remainingTime || currentTime);
+  let remainingTime = new Date(tgRmainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
-    const spamBlockDate = await checkSpamBlock(client, account.accountId);
+    const spamBlockDate = await checkSpamBlock(client, accountId);
     if (spamBlockDate) {
       return;
     }
 
-    const recipient = await getRecipient(account.accountId);
+    const recipient = await getRecipient(accountId);
     let recipientUserId;
     console.log("User data before writing:", recipient);
     console.log(`Start sending messages to user ${recipient.username}`);
@@ -114,14 +115,14 @@ export const autoSender = async (
         userId,
         accessHash,
         firstMessage,
-        account.accountId
+        accountId
       );
       const sentSecondMessage = await sendMessage(
         client,
         userId,
         accessHash,
         secondMessage,
-        account.accountId
+        accountId
       );
       console.log(
         `Sending messages to user ${recipient.username}:${userId} was successful!`
@@ -132,14 +133,14 @@ export const autoSender = async (
         `Added a chat with user ${recipient.username}:${userId} to the archive and muted`
       );
       await saveRecipient(
-        account.accountId,
+        accountId,
         recipientFull,
         recipient,
         [
           {
             id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
             text: firstMessage,
-            fromId: String(meId),
+            fromId: String(tgAccountId),
             date: Math.round(Date.now() / 1000),
           },
           {
@@ -149,13 +150,14 @@ export const autoSender = async (
                 ? sentSecondMessage.id + 1
                 : Math.floor(Math.random() * 9e5) + 1e5),
             text: secondMessage,
-            fromId: String(meId),
+            fromId: String(tgAccountId),
             date: Math.round(Date.now() / 1000),
           },
         ],
         "create"
       );
     } catch (e: any) {
+      console.log(e.message);
       if (
         ![
           "PEER_FLOOD",
@@ -167,9 +169,8 @@ export const autoSender = async (
         await sendToBot(
           `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`
         );
-
-        await saveErrorRecipient(recipient.username);
       }
+      await saveErrorRecipient(recipient.username); 
 
       throw new Error("Global Error");
     }

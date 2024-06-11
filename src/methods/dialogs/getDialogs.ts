@@ -3,7 +3,6 @@ import BigInt from "big-integer";
 import GramJs from "../../gramjs/tl/api";
 
 import { Dialogue } from "../../@types/Dialogue";
-import { Account } from "../../@types/Account";
 
 import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
@@ -13,7 +12,7 @@ import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
 
-export const getDialogs = async (client: any, account: Account) => {
+export const getDialogs = async (client: any, accountId: string) => {
   const clientDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
@@ -26,10 +25,8 @@ export const getDialogs = async (client: any, account: Account) => {
     return [];
   }
 
-  const pingDialogsDB = await getPingDialogsDB(account.accountId);
-  const manualControlDialogsDB = await getManualControlDialogsDB(
-    account.accountId
-  );
+  const pingDialogsDB = await getPingDialogsDB(accountId);
+  const manualControlDialogsDB = await getManualControlDialogsDB(accountId);
 
   const clientMessagesIds = clientDialogs.messages
     .filter((m: Message) => !m.out)
@@ -81,15 +78,11 @@ export const getDialogs = async (client: any, account: Account) => {
       );
 
       if (!allMessages?.messages?.length) {
-        await saveBlockedRecipient(
-          account.accountId,
-          dialogId,
-          "messages-length"
-        );
+        await saveBlockedRecipient(accountId, dialogId, "messages-length");
         continue;
       }
 
-      const dialogDb = await getDialogDB(account.accountId, String(user.id));
+      const dialogDb = await getDialogDB(accountId, String(user.id));
       const {
         messages: dialogMessages = [],
         groupId = 12343207729,
@@ -188,13 +181,12 @@ export const getDialogs = async (client: any, account: Account) => {
       }
     } else {
       // await saveBlockedRecipient(
-      //   account.accountId,
+      //   accountId,
       //   dialogId,
       //   `user-not-resolved;User:${user};Status:${String(user?.status)};Deleted:${
       //     user?.deleted
       //   };Bot:${user?.bot};Support:${user?.support};Self:${user?.self}`
       // );
-
       // if (
       //   user &&
       //   user.id &&
@@ -222,7 +214,6 @@ export const getDialogs = async (client: any, account: Account) => {
       //     })
       //   );
       // }
-
       // if (user && user.id && user.accessHash && user.self) {
       //   await client.invoke(
       //     new GramJs.messages.DeleteHistory({

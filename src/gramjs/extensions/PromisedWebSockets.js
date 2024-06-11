@@ -77,8 +77,8 @@ class PromisedWebSockets {
         }
     }
 
-    connect(port, ip, proxyIndex) {
-        if (typeof proxyIndex !== "number") {
+    connect(port, ip, accountId) {
+        if (typeof accountId !== "string") {
             throw new Error("Proxy index not defined");
         }
 

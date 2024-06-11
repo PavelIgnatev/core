@@ -3,17 +3,18 @@ import BigInt from "big-integer";
 import GramJs from "../gramjs/tl/api";
 import { uploadFile } from "../gramjs/client/uploadFile";
 
-import { Account } from "../@types/Account";
-
 import { generateUser } from "../helpers/generateUser";
 
 import { updateProfile } from "../methods/profile/updateProfile";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 
-export const accountSetup = async (client: any, account: Account) => {
-  if (account.setuped) {
-    console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
+export const accountSetup = async (
+  client: any,
+  accountId: string,
+  setupped: boolean
+) => {
+  if (setupped) {
     return;
   }
 
@@ -23,9 +24,6 @@ export const accountSetup = async (client: any, account: Account) => {
     try {
       const genUser = generateUser();
       const { firstName, lastName, username } = genUser;
-      console.log(
-        `Generated data to populate profile: ${JSON.stringify(genUser)}`
-      );
 
       await client.invoke(
         new GramJs.account.UpdateUsername({
@@ -116,13 +114,11 @@ export const accountSetup = async (client: any, account: Account) => {
     })
   );
 
-  await updateAiAccount(account.accountId, {
+  await updateAiAccount(accountId, {
     ...user,
     setuped: true,
-    messageCount: 0,
     banned: false,
+    messageCount: 0,
     lastProcessedBy: new Date(),
   });
-
-  console.log("ACCOUNT SETUP: account is fully packaged and ready to go");
 };

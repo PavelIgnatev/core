@@ -14,7 +14,7 @@ Logger.setLevel("warn");
 
 export async function init(
     accountData: Account,
-    proxyIndex: number,
+    accountId: string,
     onUpdate: any
 ) {
     const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
@@ -51,7 +51,7 @@ export async function init(
             testServers: false,
             dcId: undefined,
             langCode: "en",
-            proxyIndex,
+            accountId,
         }
     );
 

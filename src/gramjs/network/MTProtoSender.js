@@ -98,7 +98,7 @@ class MTProtoSender {
         this._isFallback = false;
         this._getShouldDebugExportedSenders =
             args.getShouldDebugExportedSenders;
-        this._proxyIndex = args.proxyIndex;
+        this._accountId = args.accountId;
 
         /**
          * whether we disconnected ourself or telegram did it.
@@ -267,7 +267,7 @@ class MTProtoSender {
                     );
                 }
                 this._log.error(
-                    `(${this._proxyIndex})${
+                    `(${this._accountId}) ${
                         this._isFallback ? "HTTP" : "WebSocket"
                     } connection failed {${err.message}} attempt: ${attempt + 1}`
                 ); 
@@ -1174,7 +1174,7 @@ class MTProtoSender {
             this._connection._log,
             this._connection._testServers,
             false,
-            this._proxyIndex
+            this._accountId
         );
         const newFallbackConnection = new this._fallbackConnection.constructor(
             this._connection._ip,
@@ -1183,7 +1183,7 @@ class MTProtoSender {
             this._connection._log,
             this._connection._testServers,
             false,
-            this._proxyIndex
+            this._accountId
         );
         await this.connect(newConnection, true, newFallbackConnection);
 

@@ -1,4 +1,4 @@
-export const getAccountData = async (accId: string) => {
+export const getFullAccount = async (accId: string) => {
   while (true) {
     try {
       const response = await fetch(

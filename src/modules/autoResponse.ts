@@ -17,15 +17,15 @@ import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient
 
 export const autoResponse = async (
   client: any,
-  account: Account,
-  meFullUser: GramJs.User
+  accountId: string,
+  tgAccountId: string,
+  tgFirstName: string
 ) => {
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
-    account
+    accountId
   );
-  const { firstName: meFirstName = "" } = meFullUser;
-  const meName = converterName(meFirstName);
+  const meName = converterName(tgFirstName);
 
   for (const dialog of dialogs) {
     const {
@@ -54,15 +54,15 @@ export const autoResponse = async (
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
 
     if (currentStage > 15) {
-      console.log(`MAXIMUM STAGE in ${account.accountId}:${id}`);
-      await saveBlockedRecipient(account.accountId, id, "dialogs-max-stage");
+      console.log(`MAXIMUM STAGE in ${accountId}:${id}`);
+      await saveBlockedRecipient(accountId, id, "dialogs-max-stage");
       continue;
     }
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(account.accountId, id, "dialogs-not-resolved");
+      await saveBlockedRecipient(accountId, id, "dialogs-not-resolved");
       continue;
     }
 
@@ -102,20 +102,20 @@ ${promptGoal}`,
       currentStage === 2 ? part : null,
       chatHistory,
       dialogGroupId,
-      account.accountId
+      accountId
     );
     const sentResponseMessage = await sendMessage(
       client,
       id,
       accessHash,
       responseMessage,
-      account.accountId
+      accountId
     );
 
     messages.push({
       id: sentResponseMessage.id,
       text: responseMessage,
-      fromId: String(meFullUser.id),
+      fromId: tgAccountId,
       date: Math.round(Date.now() / 1000),
     });
 
@@ -126,12 +126,12 @@ ${promptGoal}`,
         id,
         accessHash,
         question,
-        account.accountId
+        accountId
       );
       messages.push({
         id: sentAddedQuestion.id,
         text: question,
-        fromId: String(meFullUser.id),
+        fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
     }
@@ -143,23 +143,17 @@ ${promptGoal}`,
         id,
         accessHash,
         question,
-        account.accountId
+        accountId
       );
       messages.push({
         id: sentSecondAddedQuestion.id,
         text: question,
-        fromId: String(meFullUser.id),
+        fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
     }
 
-    await saveRecipient(
-      account.accountId,
-      recipientFull,
-      dialog,
-      messages,
-      "update"
-    );
+    await saveRecipient(accountId, recipientFull, dialog, messages, "update");
   }
 
   for (const dialog of pingDialogs) {
@@ -168,7 +162,7 @@ ${promptGoal}`,
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(account.accountId, id, "ping-not-resolved");
+      await saveBlockedRecipient(accountId, id, "ping-not-resolved");
       continue;
     }
     const {
@@ -205,7 +199,7 @@ ${chatHistory
 ## TASK
 Сгенерировать короткое и четкое сообщение-напоминание для собеседника USER (${userName}) с информацией о том, что ты очень ждешь ответа на последниий вопрос, для тебя это очень важно. Обратись к собеседнику по имени (на русском) в случае, если его можно будет получить из данных о собеседнике.`,
       dialogGroupId,
-      account.accountId
+      accountId
     );
 
     const sentPingMessage = await sendMessage(
@@ -213,24 +207,19 @@ ${chatHistory
       id,
       accessHash,
       pingMessage,
-      account.accountId
+      accountId
     );
 
     messages.push({
       id: sentPingMessage.id,
       text: pingMessage,
-      fromId: String(meFullUser.id),
+      fromId: tgAccountId,
       date: Math.round(Date.now() / 1000),
     });
 
-    await saveRecipient(
-      account.accountId,
-      recipientFull,
-      dialog,
-      messages,
-      "update",
-      { ping: true }
-    );
+    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
+      ping: true,
+    });
   }
 
   for (const dialog of manualControlDialogs) {
@@ -240,7 +229,7 @@ ${chatHistory
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
       await saveBlockedRecipient(
-        account.accountId,
+        accountId,
         id,
         "manuual-control-dialogs-not-resolved"
       );
@@ -253,24 +242,20 @@ ${chatHistory
         id,
         accessHash,
         managerMessage,
-        account.accountId
+        accountId
       );
 
       messages.push({
         id: sentManagerMessage.id,
         text: managerMessage,
-        fromId: String(meFullUser.id),
+        fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
     }
 
-    await saveRecipient(
-      account.accountId,
-      recipientFull,
-      dialog,
-      messages,
-      "update",
-      { managerMessage: null, viewed: false }
-    );
+    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
+      managerMessage: null,
+      viewed: false,
+    });
   }
 };
