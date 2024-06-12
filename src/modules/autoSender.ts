@@ -157,7 +157,6 @@ export const autoSender = async (
         "create"
       );
     } catch (e: any) {
-      console.log(e.message);
       if (
         ![
           "PEER_FLOOD",
