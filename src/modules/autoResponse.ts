@@ -1,7 +1,3 @@
-import GramJs from "../gramjs/tl/api";
-
-import { Account } from "../@types/Account";
-
 import { makeRequestComplete } from "../helpers/makeRequestComplete";
 import { makeRequestGpt } from "../helpers/makeRequestGpt";
 import { generateRandomString } from "../helpers/generateRandomString";
@@ -45,7 +41,8 @@ export const autoResponse = async (
         role: m.fromId === String(id) ? "USER" : "CHATBOT",
         message: m.text,
       }))
-      .slice(-15);
+      .slice(-30);
+
     const currentStage = combinedMessages.filter(
       (m) => m.fromId === String(id)
     ).length;
@@ -70,6 +67,7 @@ export const autoResponse = async (
       offer: {
         aiRole = "",
         companyDescription = "",
+        addedInformation = "",
         goal = "",
         part = "",
         addedQuestion = "",
@@ -80,27 +78,43 @@ export const autoResponse = async (
 
     let promptGoal = "";
     if (currentStage === 1) {
-      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}', с акцентом, направленным на привлечение внимания '${userName}' к описанному выше предложению.`;
+      promptGoal = `Reply to the last message "${userName}" (ROLE USER).`;
     }
     if (currentStage >= 2) {
-      promptGoal = `Ответить на последнее сообщениe пользователя '${userName}'. ${goal}`;
+      promptGoal = `Reply to the last message "${userName}" (ROLE USER). ${goal}.`;
     }
 
-    const responseMessage = await makeRequestComplete(
+    const wresponseMessage = await makeRequestComplete(
       `
-## Context
-Вы - '${meName}' (мужчина). Вы ранее инициировали общение с собеседником '${userName}' в мессенджере Telegram с целью предложить услугу компании, сотрудником которой вы являетесь. Вы - ${aiRole}. ${companyDescription}. Контакт собеседника '${userName}' был найден в одном из чатов Telegram, точной информации в каком именно нету.
+## CONTEXT
+You are "${meName}" (male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available;
 
-## Style Guide
+## STYLE GUIDE
 ${styleGuide}.
 
-## Task
+## INSTRUCTIONS
 ${promptGoal}`,
+      [
+        {
+          title: "YOUR_COMPANY_DESCRIPTION",
+          text: companyDescription,
+        },
+        {
+          title: "YOUR_COMPANY_ADDED_INFORMATION",
+          text: addedInformation,
+        },
+      ],
       currentStage === 1,
       currentStage <= 2,
       currentStage <= 2 ? 2 : 1,
       currentStage === 2 ? part : null,
       chatHistory,
+      dialogGroupId,
+      accountId
+    );
+    const responseMessage = await makeRequestGpt(
+      "AI, I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The answer should only be to RUSSIAN language.",
+      wresponseMessage,
       dialogGroupId,
       accountId
     );
@@ -182,6 +196,7 @@ ${promptGoal}`,
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const pingMessage = await makeRequestGpt(
+      "You act as a function that generates a small reminder message based on the information provided by the user.",
       `## CONTEXT
 Данные о USER: ${userName}, ${about}, ${username}
       

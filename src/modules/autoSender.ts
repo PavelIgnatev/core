@@ -1,7 +1,5 @@
 import GramJs from "../gramjs/tl/api";
 
-import { Account } from "../@types/Account";
-
 import { checkSpamBlock } from "./checkSpamBlock";
 
 import { generateRandomString } from "../helpers/generateRandomString";

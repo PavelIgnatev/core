@@ -13,16 +13,6 @@ function removeQuestionAndExclamationSentences(text: string) {
   return result.trim();
 }
 
-function hasMixedLanguageWords(str: string) {
-  const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
-  return mixedPattern.test(str);
-}
-
-function containsChinese(text: string) {
-  const chineseRegex = /[\u4e00-\u9fa5]/;
-  return chineseRegex.test(text);
-}
-
 function countSentences(paragraph: string) {
   const sentenceEnders = [".", "!", "?"];
   let sentenceCount = 0;
@@ -38,6 +28,7 @@ function countSentences(paragraph: string) {
 
 export const makeRequestComplete = async (
   preamble: string,
+  documents: { title: string; text: string }[],
   disableLink: boolean = false,
   deleteQuestion: boolean = false,
   minimalProposalLength: number = 1,
@@ -75,12 +66,13 @@ export const makeRequestComplete = async (
       const {
         data: { text: data },
       } = await axios.post("http://91.198.220.234/chat", {
-        model: "command-r-plus",
         k: 300,
         temperature: 1,
-        promptTruncation: "OFF",
+        model: "command-r-plus",
+        prompt_truncation: "AUTO_PRESERVE_ORDER",
         preamble,
-        chatHistory,
+        documents,
+        chat_history: chatHistory,
         message: lastDialog.message,
       });
 
@@ -116,7 +108,6 @@ export const makeRequestComplete = async (
       }
 
       if (deleteQuestion && message.includes("?")) {
-        console.log(`part: ${part}`);
         console.log(
           `\x1b[4mПотенциальное сообщение до удаления вопроса:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
@@ -152,46 +143,41 @@ export const makeRequestComplete = async (
 
       const varMessage = capitalizeFirstLetter(
         message
-          .replace("Приветствую! ", "")
           .replace("Приветствую!", "")
-          .replace("Приветствую, ", "")
           .replace("Приветствую,", "")
           .replace("Приветствую", "")
           .replace("приветствую", "")
-          .replace("Привет, ", "")
+
           .replace("Привет,", "")
-          .replace("Привет! ", "")
           .replace("Привет!", "")
-          .replace("Здравствуйте, ", "")
-          .replace("Здравствуйте,", "")
-          .replace("Здравствуйте! ", "")
-          .replace("Здравствуйте!", "")
-          .replace("Здравствуй, ", "")
-          .replace("Здравствуй,", "")
-          .replace("Здравствуй! ", "")
-          .replace("Здравствуй!", "")
-          .replace("Доброе утро, ", "")
-          .replace("Доброе утро,", "")
-          .replace("Доброе утро! ", "")
-          .replace("Доброе утро!", "")
-          .replace("Добрый вечер,", "")
-          .replace("Добрый вечер! ", "")
-          .replace("Добрый вечер!", "")
-          .replace("Добрый день,", "")
-          .replace("Добрый день! ", "")
-          .replace("Добрый день!", "")
           .replace("Привет", "")
-          .replace("Здравствуйте", "")
-          .replace("Здравствуй", "")
-          .replace("Доброе утро", "")
-          .replace("Добрый вечер", "")
-          .replace("Добрый день", "")
           .replace("привет", "")
+
+          .replace("Здравствуйте,", "")
+          .replace("Здравствуйте!", "")
+          .replace("Здравствуйте", "")
           .replace("здравствуйте", "")
+
+          .replace("Здравствуй,", "")
+          .replace("Здравствуй!", "")
+          .replace("Здравствуй", "")
           .replace("здравствуй", "")
+
+          .replace("Доброе утро,", "")
+          .replace("Доброе утро!", "")
+          .replace("Доброе утро", "")
           .replace("доброе утро", "")
+
+          .replace("Добрый вечер,", "")
+          .replace("Добрый вечер!", "")
+          .replace("Добрый вечер", "")
           .replace("добрый вечер", "")
+
+          .replace("Добрый день,", "")
+          .replace("Добрый день!", "")
+          .replace("Добрый день", "")
           .replace("добрый день", "")
+
           .replace("Hi,", "")
           .replace("Hi! ", "")
           .replace("Hi!", "")
@@ -237,20 +223,6 @@ export const makeRequestComplete = async (
         );
       }
 
-      if (hasMixedLanguageWords(message)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(`Потенциальное сообщение содержит англо-русские слова`);
-      }
-
-      if (containsChinese(message)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(`Потенциальное сообщение содержит китайские слова`);
-      }
-
       return varMessage;
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
@@ -260,7 +232,8 @@ export const makeRequestComplete = async (
     }
   }
 
-  await sendToBot(`!!!GPT GENERATION ERROR!!!
+  try {
+    await sendToBot(`!!!GPT GENERATION ERROR!!!
 GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
@@ -273,6 +246,7 @@ _____________
 Удаление вопроса: ${deleteQuestion ? "включено" : "выключено"}
 Минимальное количество сообщений в ответе: ${minimalProposalLength}
 Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`);
+  } catch {}
 
   if (generations[0]) {
     return generations[0];

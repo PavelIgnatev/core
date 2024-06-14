@@ -2,6 +2,9 @@ import axios from "axios";
 
 import { sendToBot } from "./sendToBot";
 
+function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 function hasMixedLanguageWords(str: string) {
   const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
   return mixedPattern.test(str);
@@ -13,13 +16,12 @@ function containsChinese(text: string) {
 }
 
 export const makeRequestGpt = async (
+  preamble: string,
   prompt: string,
   groupId: string,
   accountId: string
 ): Promise<string> => {
-  console.log(
-    `Текущий message перед генерацией: ${prompt}; Текущая история диалога`
-  );
+  console.log(`Preamble: ${preamble}; Message: ${prompt}; `);
 
   const generations = [];
   const errors = [];
@@ -32,7 +34,8 @@ export const makeRequestGpt = async (
         model: "command-r-plus",
         k: 300,
         temperature: 1,
-        promptTruncation: "OFF",
+        prompt_truncation: "AUTO_PRESERVE_ORDER",
+        preamble,
         message: prompt,
       });
 
@@ -46,19 +49,6 @@ export const makeRequestGpt = async (
         .replace(/['"`]/g, "")
         .replace(/!/g, ".")
         .trim();
-
-      let pattern =
-        /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
-      const hasTextLink = message.match(pattern);
-
-      if (hasTextLink) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(
-          "В ответе содержится ссылка на этапе, когда ссылки отправлять запрещено"
-        );
-      }
 
       if (
         message.includes("[") ||
@@ -91,7 +81,67 @@ export const makeRequestGpt = async (
         throw new Error(`Потенциальное сообщение содержит китайские слова`);
       }
 
-      return message;
+      const varMessage = capitalizeFirstLetter(
+        message
+          .replace("Приветствую!", "")
+          .replace("Приветствую,", "")
+          .replace("Приветствую", "")
+          .replace("приветствую", "")
+
+          .replace("Привет,", "")
+          .replace("Привет!", "")
+          .replace("Привет", "")
+          .replace("привет", "")
+
+          .replace("Здравствуйте,", "")
+          .replace("Здравствуйте!", "")
+          .replace("Здравствуйте", "")
+          .replace("здравствуйте", "")
+
+          .replace("Здравствуй,", "")
+          .replace("Здравствуй!", "")
+          .replace("Здравствуй", "")
+          .replace("здравствуй", "")
+
+          .replace("Доброе утро,", "")
+          .replace("Доброе утро!", "")
+          .replace("Доброе утро", "")
+          .replace("доброе утро", "")
+
+          .replace("Добрый вечер,", "")
+          .replace("Добрый вечер!", "")
+          .replace("Добрый вечер", "")
+          .replace("добрый вечер", "")
+
+          .replace("Добрый день,", "")
+          .replace("Добрый день!", "")
+          .replace("Добрый день", "")
+          .replace("добрый день", "")
+
+          .replace("Hi,", "")
+          .replace("Hi! ", "")
+          .replace("Hi!", "")
+          .replace("Hello,", "")
+          .replace("Hello! ", "")
+          .replace("Hello!", "")
+          .replace("Good morning,", "")
+          .replace("Good morning! ", "")
+          .replace("Good morning!", "")
+          .replace("Good morning", "")
+          .replace("good morning", "")
+          .replace("Good evening,", "")
+          .replace("Good evening! ", "")
+          .replace("Good evening!", "")
+          .replace("Good evening", "")
+          .replace("good evening", "")
+          .replace("Good afternoon,", "")
+          .replace("Good afternoon! ", "")
+          .replace("Good afternoon!", "")
+          .replace("Good afternoon", "")
+          .replace("good afternoon", "")
+      );
+
+      return varMessage;
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
@@ -100,7 +150,8 @@ export const makeRequestGpt = async (
     }
   }
 
-  await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
+  try {
+    await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
 GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
@@ -109,6 +160,7 @@ ${generations.map((g, i) => `${i + 1}: ${g}`).join("\n")}
 ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
 `);
+  } catch {}
 
   if (generations[0]) {
     return generations[0];
