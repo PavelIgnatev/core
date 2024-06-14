@@ -223,7 +223,7 @@ export const makeRequestComplete = async (
         );
       }
 
-      return varMessage;
+      return varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
@@ -249,7 +249,7 @@ _____________
   } catch {}
 
   if (generations[0]) {
-    return generations[0];
+    return generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
   }
 
   throw new Error("Stopped");

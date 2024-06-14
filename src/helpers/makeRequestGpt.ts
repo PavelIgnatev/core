@@ -141,7 +141,7 @@ export const makeRequestGpt = async (
           .replace("good afternoon", "")
       );
 
-      return varMessage;
+      return varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
@@ -163,7 +163,7 @@ ${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
   } catch {}
 
   if (generations[0]) {
-    return generations[0];
+    return generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
   }
 
   throw new Error("Stopped");
