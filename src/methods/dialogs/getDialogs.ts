@@ -88,11 +88,12 @@ export const getDialogs = async (client: any, accountId: string) => {
         messages: dialogMessages = [],
         groupId = 12343207729,
         blocked = false,
+        reason = null
       } = dialogDb || {};
 
       if (blocked) {
         await sendToBot(
-          `Заблокан почему-то;User:${user};Status:${String(
+          `Заблокан почему-то;User:${JSON.stringify(user)};Причина: ${reason};Status:${String(
             user?.status
           )};Deleted:${user?.deleted};Bot:${user?.bot};Support:${
             user?.support
