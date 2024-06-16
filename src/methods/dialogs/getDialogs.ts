@@ -88,18 +88,14 @@ export const getDialogs = async (client: any, accountId: string) => {
         messages: dialogMessages = [],
         groupId = 12343207729,
         blocked = false,
-        reason = null
+        reason = null,
       } = dialogDb || {};
 
       if (blocked) {
         await sendToBot(
-          `Заблокан почему-то;User:${JSON.stringify(user)};Причина: ${reason};Status:${String(
-            user?.status
-          )};Deleted:${user?.deleted};Bot:${user?.bot};Support:${
-            user?.support
-          };Self:${user?.self};IDS:${dialogIds.join("/")}:${pingDialogIds.join(
-            "/"
-          )}:${manualControlDialogIds.join("/")}`
+          `Блокировка пользователя User:${JSON.stringify(
+            user
+          )}; Причина: ${reason};`
         );
         await client.invoke(
           new GramJs.contacts.Block({
@@ -191,17 +187,7 @@ export const getDialogs = async (client: any, accountId: string) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      await saveBlockedRecipient(
-        accountId,
-        dialogId,
-        `user-not-resolved;User:${user};Status:${String(
-          user?.status
-        )};Deleted:${user?.deleted};Bot:${user?.bot};Support:${
-          user?.support
-        };Self:${user?.self};IDS:${dialogIds.join("/")}:${pingDialogIds.join(
-          "/"
-        )}:${manualControlDialogIds.join("/")}`
-      );
+      await saveBlockedRecipient(accountId, dialogId, `user-not-resolved`);
 
       if (
         user &&
