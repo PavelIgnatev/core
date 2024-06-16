@@ -8,6 +8,7 @@ import { getDialogDB } from "./getDialogDB";
 import { getPingDialogsDB } from "./getPingDialogsDB";
 import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
 import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
+import { sendToBot } from "../../helpers/sendToBot";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -90,23 +91,32 @@ export const getDialogs = async (client: any, accountId: string) => {
       } = dialogDb || {};
 
       if (blocked) {
-        // await client.invoke(
-        //   new GramJs.contacts.Block({
-        //     id: new GramJs.InputPeerUser({
-        //       userId: BigInt(user.id),
-        //       accessHash: BigInt(user.accessHash),
-        //     }),
-        //   })
-        // );
-        // await client.invoke(
-        //   new GramJs.messages.DeleteHistory({
-        //     peer: new GramJs.InputPeerUser({
-        //       userId: BigInt(user.id),
-        //       accessHash: BigInt(user.accessHash),
-        //     }),
-        //     revoke: true,
-        //   })
-        // );
+        await sendToBot(
+          `Заблокан почему-то;User:${user};Status:${String(
+            user?.status
+          )};Deleted:${user?.deleted};Bot:${user?.bot};Support:${
+            user?.support
+          };Self:${user?.self};IDS:${dialogIds.join("/")}:${pingDialogIds.join(
+            "/"
+          )}:${manualControlDialogIds.join("/")}`
+        );
+        await client.invoke(
+          new GramJs.contacts.Block({
+            id: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+          })
+        );
+        await client.invoke(
+          new GramJs.messages.DeleteHistory({
+            peer: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+            revoke: true,
+          })
+        );
         continue;
       }
 
@@ -180,51 +190,34 @@ export const getDialogs = async (client: any, accountId: string) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      // await saveBlockedRecipient(
-      //   accountId,
-      //   dialogId,
-      //   `user-not-resolved;User:${user};Status:${String(user?.status)};Deleted:${
-      //     user?.deleted
-      //   };Bot:${user?.bot};Support:${user?.support};Self:${user?.self}`
-      // );
-      // if (
-      //   user &&
-      //   user.id &&
-      //   user.accessHash &&
-      //   !user.deleted &&
-      //   !user.bot &&
-      //   !user.support &&
-      //   !user.self
-      // ) {
-      //   await client.invoke(
-      //     new GramJs.contacts.Block({
-      //       id: new GramJs.InputPeerUser({
-      //         userId: BigInt(user.id),
-      //         accessHash: BigInt(user.accessHash),
-      //       }),
-      //     })
-      //   );
-      //   await client.invoke(
-      //     new GramJs.messages.DeleteHistory({
-      //       peer: new GramJs.InputPeerUser({
-      //         userId: BigInt(user.id),
-      //         accessHash: BigInt(user.accessHash),
-      //       }),
-      //       revoke: true,
-      //     })
-      //   );
-      // }
-      // if (user && user.id && user.accessHash && user.self) {
-      //   await client.invoke(
-      //     new GramJs.messages.DeleteHistory({
-      //       peer: new GramJs.InputPeerUser({
-      //         userId: BigInt(user.id),
-      //         accessHash: BigInt(user.accessHash),
-      //       }),
-      //       revoke: true,
-      //     })
-      //   );
-      // }
+      await saveBlockedRecipient(
+        accountId,
+        dialogId,
+        `user-not-resolved;User:${user};Status:${String(
+          user?.status
+        )};Deleted:${user?.deleted};Bot:${user?.bot};Support:${
+          user?.support
+        };Self:${user?.self};IDS:${dialogIds.join("/")}:${pingDialogIds.join(
+          "/"
+        )}:${manualControlDialogIds.join("/")}`
+      );
+
+      if (
+        user &&
+        user.id &&
+        user.accessHash &&
+        (user.deleted || user.bot || user.support || user.self)
+      ) {
+        await client.invoke(
+          new GramJs.messages.DeleteHistory({
+            peer: new GramJs.InputPeerUser({
+              userId: BigInt(user.id),
+              accessHash: BigInt(user.accessHash),
+            }),
+            revoke: true,
+          })
+        );
+      }
     }
   }
 

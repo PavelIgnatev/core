@@ -4,7 +4,7 @@ const blockedData = {
   blocked: true,
   stopped: true,
   viewed: false,
-  managerMessage: null,
+  managerMessage: "",
   status: "mini-update",
 };
 
