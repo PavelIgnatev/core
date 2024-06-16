@@ -50,7 +50,7 @@ export const autoResponse = async (
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
 
-    if (currentStage > 15) {
+    if (currentStage > 25) {
       console.log(`MAXIMUM STAGE in ${accountId}:${id}`);
       await saveBlockedRecipient(accountId, id, "dialogs-max-stage");
       continue;
