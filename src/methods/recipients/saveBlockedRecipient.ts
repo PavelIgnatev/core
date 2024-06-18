@@ -13,25 +13,33 @@ export const saveBlockedRecipient = async (
 ) => {
   console.log("Data before saving:", blockedData);
 
-  try {
-    const response = await fetch(`${process.env.RECIPIENT_URL}`, {
-      method: "POST",
-      body: JSON.stringify({ accountId, recipientId, reason, ...blockedData }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  while (true) {
+    try {
+      const response = await fetch(`${process.env.RECIPIENT_URL}`, {
+        method: "POST",
+        body: JSON.stringify({
+          accountId,
+          recipientId,
+          reason,
+          ...blockedData,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (response.ok) {
-      console.log(
-        `Saved information about the user ${accountId}:${recipientId} in the database!`
-      );
-    } else {
-      console.log(
-        `Information about the user ${accountId}:${recipientId} was not saved in the database, status code: ${response.status}!`
-      );
+      if (response.ok) {
+        console.log(
+          `Saved information about the user ${accountId}:${recipientId} in the database!`
+        );
+        break;
+      } else {
+        console.log(
+          `Information about the user ${accountId}:${recipientId} was not saved in the database, status code: ${response.status}!`
+        );
+      }
+    } catch (error) {
+      console.error("Error occurred while saving recipient (0):", error);
     }
-  } catch (error) {
-    console.error("Error occurred while saving recipient:", error);
   }
 };
