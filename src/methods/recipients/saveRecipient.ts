@@ -64,6 +64,7 @@ export const saveRecipient = async (
         console.log(
           `Saved information about the user ${data.recipientUsername} in the database!`
         );
+        return
       } else {
         console.log(
           `Information about the user ${data.recipientUsername} was not saved in the database, status code: ${response.status}!`

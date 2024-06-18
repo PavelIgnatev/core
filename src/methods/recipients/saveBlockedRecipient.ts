@@ -32,7 +32,7 @@ export const saveBlockedRecipient = async (
         console.log(
           `Saved information about the user ${accountId}:${recipientId} in the database!`
         );
-        break;
+        return
       } else {
         console.log(
           `Information about the user ${accountId}:${recipientId} was not saved in the database, status code: ${response.status}!`

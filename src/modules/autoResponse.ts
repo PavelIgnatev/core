@@ -10,6 +10,7 @@ import { saveRecipient } from "../methods/recipients/saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
 import { getDialogs } from "../methods/dialogs/getDialogs";
 import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient";
+import { getDateNow } from "../helpers/getDateNow";
 
 export const autoResponse = async (
   client: any,
@@ -87,7 +88,7 @@ export const autoResponse = async (
     const wresponseMessage = await makeRequestComplete(
       `
 ## CONTEXT
-You are "${meName}" (male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available;
+You are "${meName}" (male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
 
 ## STYLE GUIDE
 ${styleGuide}.
@@ -113,7 +114,7 @@ ${promptGoal}`,
       accountId
     );
     const responseMessage = await makeRequestGpt(
-      "AI, I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The answer should only be to RUSSIAN language.",
+      `AI, I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message.`,
       wresponseMessage,
       dialogGroupId,
       accountId
@@ -198,7 +199,8 @@ ${promptGoal}`,
     const pingMessage = await makeRequestGpt(
       "You act as a function that generates a small reminder message based on the information provided by the user.",
       `## CONTEXT
-Данные о USER: ${userName}, ${about}, ${username}
+USER DATA: ${userName}, ${about}, ${username};
+Today's date is ${getDateNow()};
       
 ## DIALOG
 ${chatHistory
@@ -212,7 +214,7 @@ ${chatHistory
 
 
 ## TASK
-Сгенерировать короткое и четкое сообщение-напоминание для собеседника USER (${userName}) с информацией о том, что ты очень ждешь ответа на последниий вопрос, для тебя это очень важно. Обратись к собеседнику по имени (на русском) в случае, если его можно будет получить из данных о собеседнике.`,
+Create a short and clear reminder message for the interlocutor USER (${userName}) with information that you are waiting for an answer to the last question, it is very important for you. Address the interlocutor by name if it can be obtained from the interlocutor data. The message should be in Russian, if the dialog is entirely in Russian, and in English, if the dialog is in English.`,
       dialogGroupId,
       accountId
     );
