@@ -11,6 +11,7 @@ import { getFullUser } from "../methods/users/getFullUser";
 import { getDialogs } from "../methods/dialogs/getDialogs";
 import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient";
 import { getDateNow } from "../helpers/getDateNow";
+import { sendToFormBot } from "../helpers/sendToFormBot";
 
 export const autoResponse = async (
   client: any,
@@ -114,11 +115,22 @@ ${promptGoal}`,
       accountId
     );
     const responseMessage = await makeRequestGpt(
-      `AI, I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`,
+      `## CONTEXT
+You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).
+Today's date is ${getDateNow()}.
+
+## STYLE GUIDE
+Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message.
+
+## INSTRUCTIONS
+I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way.`,
       wresponseMessage,
       dialogGroupId,
       accountId
     );
+    await sendToFormBot(`**** AUTO RESPONSE MESSAGE ****
+ДО: ${wresponseMessage}
+ПОСЛЕ: ${responseMessage}`);
     const sentResponseMessage = await sendMessage(
       client,
       id,
@@ -218,6 +230,8 @@ Create a short and clear reminder message for the interlocutor USER (${userName}
       dialogGroupId,
       accountId
     );
+    await sendToFormBot(`**** PING MESSAGE ****
+${pingMessage}`);
 
     const sentPingMessage = await sendMessage(
       client,
