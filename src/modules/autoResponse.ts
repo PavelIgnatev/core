@@ -88,7 +88,7 @@ export const autoResponse = async (
     const wresponseMessage = await makeRequestComplete(
       `
 ## CONTEXT
-You are "${meName}" (male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
+You are "${meName}" (male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
 
 ## STYLE GUIDE
 ${styleGuide}.
