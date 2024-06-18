@@ -1,3 +1,5 @@
+import { sleep } from "../../helpers/sleep";
+
 export const getManualControlDialogsDB = async (accountId: string) => {
   while (true) {
     try {
@@ -17,9 +19,10 @@ export const getManualControlDialogsDB = async (accountId: string) => {
       } catch {
         return [];
       }
-    } catch (error) {
-      console.error(error);
-      await new Promise((res) => setTimeout(res, 1500));
+    } catch (error: any) {
+      console.log(`Get Manul Dialogs Error: ${error.message}`);
+
+      await sleep(3000);
     }
   }
 };

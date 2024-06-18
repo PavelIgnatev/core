@@ -1,3 +1,5 @@
+import { sleep } from "../../helpers/sleep";
+
 export const getFullAccount = async (accId: string) => {
   while (true) {
     try {
@@ -13,9 +15,10 @@ export const getFullAccount = async (accId: string) => {
 
       const data = await response.json();
       return data;
-    } catch (error) {
-      console.error(`Get Account Date: ${error}`);
-      await new Promise((res) => setTimeout(res, 1500));
+    } catch (error: any) {
+      console.error(`Get Account Date: ${error.message}`);
+
+      await sleep(3000);
     }
   }
 };

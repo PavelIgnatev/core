@@ -1,3 +1,5 @@
+import { sleep } from "../../helpers/sleep";
+
 export const saveErrorRecipient = async (username: string) => {
   while (true) {
     try {
@@ -19,8 +21,10 @@ export const saveErrorRecipient = async (username: string) => {
           `Error Information about the user ${username} was not saved in the database, status code: ${response.status}!`
         );
       }
-    } catch (error) {
-      console.error("Error occurred while saving recipient (1):", error);
+    } catch (error: any) {
+      console.error("Error occurred while saving recipient (1):", error.message);
+
+      await sleep(3000);
     }
   }
 };

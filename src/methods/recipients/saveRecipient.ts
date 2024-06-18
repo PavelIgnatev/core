@@ -2,6 +2,7 @@ import GramJs from "../../gramjs/tl/api";
 
 import { Dialogue } from "../../@types/Dialogue";
 import { getCombinedMessages } from "../../helpers/getCombinedMessages";
+import { sleep } from "../../helpers/sleep";
 
 export const saveRecipient = async (
   accountId: string,
@@ -64,14 +65,16 @@ export const saveRecipient = async (
         console.log(
           `Saved information about the user ${data.recipientUsername} in the database!`
         );
-        return
+        return;
       } else {
         console.log(
           `Information about the user ${data.recipientUsername} was not saved in the database, status code: ${response.status}!`
         );
       }
-    } catch (error) {
-      console.error("Error occurred while saving recipient (2):", error);
+    } catch (error: any) {
+      console.error("Error occurred while saving recipient (2):", error.message);
+
+      await sleep(3000);
     }
   }
 };

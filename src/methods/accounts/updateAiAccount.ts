@@ -1,3 +1,5 @@
+import { sleep } from "../../helpers/sleep";
+
 export const updateAiAccount = async (
   accountId: string,
   updatedData: Record<string, unknown>
@@ -20,9 +22,10 @@ export const updateAiAccount = async (
       }
 
       return;
-    } catch (error) {
-      console.log(`Update Ai Account: ${error}`);
-      await new Promise((res) => setTimeout(res, 1500));
+    } catch (error: any) {
+      console.log(`Update Ai Account: ${error.message}`);
+
+      await sleep(3000);
     }
   }
 };

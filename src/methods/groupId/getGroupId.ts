@@ -11,8 +11,9 @@ export const getGroupId = async (groupId: string) => {
 
       const data = await response.json();
       return data;
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.log(`Get GroupId Error: ${error.message}`);
+
       await new Promise((res) => setTimeout(res, 1500));
     }
   }

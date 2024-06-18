@@ -1,7 +1,6 @@
-export const getDialogDB = async (
-  accountId: string,
-  recipientId: string
-) => {
+import { sleep } from "../../helpers/sleep";
+
+export const getDialogDB = async (accountId: string, recipientId: string) => {
   while (true) {
     try {
       const response = await fetch(
@@ -20,9 +19,10 @@ export const getDialogDB = async (
       } catch {
         return [];
       }
-    } catch (error) {
-      console.error(error);
-      await new Promise((res) => setTimeout(res, 1500));
+    } catch (error: any) {
+      console.log(`Get Dialogs Error: ${error.message}`);
+
+      await sleep(3000);
     }
   }
 };

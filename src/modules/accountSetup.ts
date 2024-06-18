@@ -8,6 +8,7 @@ import { generateUser } from "../helpers/generateUser";
 import { updateProfile } from "../methods/profile/updateProfile";
 import { getProfileFiles } from "../methods/files/getProfileFiles";
 import { updateAiAccount } from "../methods/accounts/updateAiAccount";
+import { sleep } from "../helpers/sleep";
 
 export const accountSetup = async (
   client: any,
@@ -42,6 +43,8 @@ export const accountSetup = async (
       break;
     } catch (error: any) {
       console.log(`Error when updating user data: ${error.message}`);
+
+      await sleep(3000);
     }
   }
 

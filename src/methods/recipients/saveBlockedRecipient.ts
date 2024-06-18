@@ -1,3 +1,5 @@
+import { sleep } from "../../helpers/sleep";
+
 const blockedData = {
   blocked: true,
   stopped: true,
@@ -32,14 +34,16 @@ export const saveBlockedRecipient = async (
         console.log(
           `Saved information about the user ${accountId}:${recipientId} in the database!`
         );
-        return
+        return;
       } else {
         console.log(
           `Information about the user ${accountId}:${recipientId} was not saved in the database, status code: ${response.status}!`
         );
       }
-    } catch (error) {
-      console.error("Error occurred while saving recipient (0):", error);
+    } catch (error: any) {
+      console.error("Error occurred while saving recipient (0):", error.message);
+
+      await sleep(3000);
     }
   }
 };

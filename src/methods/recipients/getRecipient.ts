@@ -1,4 +1,5 @@
 import { sendToBot } from "../../helpers/sendToBot";
+import { sleep } from "../../helpers/sleep";
 
 const defaultFirstMessagePrompt = "Здравствуйте!";
 const defaultSecondMessagePrompt =
@@ -26,9 +27,9 @@ export const getRecipient = async (accountId: string) => {
       }
 
       return user;
-    } catch (error) {
-      console.log(`Recipient User Error (${accountId}): ${error}`);
-      await new Promise((res) => setTimeout(res, 1500));
+    } catch (error: any) {
+      console.log(`Recipient User Error (${accountId}): ${error.message}`);
+      await sleep(3000);
     }
   }
 };

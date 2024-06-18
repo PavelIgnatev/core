@@ -7,8 +7,8 @@ export const getAccountsIds = async () => {
     const accounts = await response.json();
     console.log(accounts);
     return accounts;
-  } catch (error) {
-    console.error(`Failed to retrieve accounts: ${error}`);
+  } catch (error: any) {
+    console.error(`Failed to retrieve accounts: ${error.message}`);
     return [];
   }
 };
