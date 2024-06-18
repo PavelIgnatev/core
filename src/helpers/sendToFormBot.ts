@@ -2,7 +2,7 @@ export const sendToFormBot = async (text: string) => {
   const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
-  for (const chatId of ["483779758", "324820826"]) {
+  for (const chatId of ["483779758", "324820826", "6957002018"]) {
     await fetch(sendMessageUrl, {
       method: "POST",
       headers: {
