@@ -16,7 +16,7 @@ export const getFullAccount = async (accId: string) => {
       const data = await response.json();
       return data;
     } catch (error: any) {
-      console.error(`Get Account Date: ${error.message}`);
+      console.error(`Get Account Date ${accId}: ${error.message}`);
 
       await sleep(3000);
     }
