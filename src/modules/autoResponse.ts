@@ -246,7 +246,7 @@ ${chatHistory
       await saveBlockedRecipient(
         accountId,
         id,
-        "manuual-control-dialogs-not-resolved"
+        "manual-control-dialogs-not-resolved"
       );
       continue;
     }
