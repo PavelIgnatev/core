@@ -216,7 +216,7 @@ I need you to rephrase the message while keeping its original meaning, structure
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const pingMessage = await makeRequestGpt(
-      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If available, address the interlocutor by name (in ${language}) from their USER DATA. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
+      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
       `## STYLE GUIDE
 Maximum length of reminder message 100 characters
 
