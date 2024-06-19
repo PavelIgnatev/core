@@ -33,6 +33,7 @@ export const autoResponse = async (
       groupId: dialogGroupId,
       firstName,
       lastName = "",
+      language = "RUSSIAN",
     } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
@@ -92,7 +93,7 @@ export const autoResponse = async (
 You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
 
 ## STYLE GUIDE
-${styleGuide}.
+${styleGuide}. RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
 ${promptGoal}`,
@@ -120,10 +121,10 @@ You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).
 Today's date is ${getDateNow()}.
 
 ## STYLE GUIDE
-Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message.
+Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
-I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way.`,
+I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. RESPONSE LANGUAGE: ${language}.`,
       wresponseMessage,
       dialogGroupId,
       accountId
@@ -184,7 +185,13 @@ I need you to rephrase the message while keeping its original meaning, structure
   }
 
   for (const dialog of pingDialogs) {
-    const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
+    const {
+      id,
+      accessHash,
+      messages,
+      groupId: dialogGroupId,
+      language = "RUSSIAN",
+    } = dialog;
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
@@ -192,12 +199,12 @@ I need you to rephrase the message while keeping its original meaning, structure
       await saveBlockedRecipient(accountId, id, "ping-not-resolved");
       continue;
     }
+
     const {
       firstName = "",
       lastName = "",
       username = "",
     } = recipientFull?.users?.[0] || {};
-    const { about = "" } = recipientFull.fullUser;
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
@@ -209,24 +216,13 @@ I need you to rephrase the message while keeping its original meaning, structure
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
     const pingMessage = await makeRequestGpt(
-      "You act as a function that generates a small reminder message based on the information provided by the user.",
-      `## CONTEXT
-USER DATA: ${userName}, ${about}, ${username};
+      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If available, address the interlocutor by name (in ${language}) from their USER DATA. LANGUAGE RESPONSE: ${language}.`,
+      `## USER DATA
+USER: ${userName}, ${username};
 Today's date is ${getDateNow()};
       
 ## DIALOG
-${chatHistory
-  .map(
-    (chat) =>
-      `${chat.role} (${chat.role === "CHATBOT" ? meName : userName}): ${
-        chat.message
-      }`
-  )
-  .join("\n")}
-
-
-## TASK
-Create a short and clear reminder message for the interlocutor USER (${userName}) with information that you are waiting for an answer to the last question, it is very important for you. Address the interlocutor by name if it can be obtained from the interlocutor data. The message should be in Russian, if the dialog is entirely in Russian, and in English, if the dialog is in English.`,
+${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
       dialogGroupId,
       accountId
     );
