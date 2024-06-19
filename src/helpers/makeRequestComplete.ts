@@ -38,7 +38,6 @@ export const makeRequestComplete = async (
   accountId: string
 ): Promise<string> => {
   const lastDialog = chatHistory.pop();
-  console.log(preamble)
   console.log(
     `Текущий промпт перед генерацией: ${preamble}; Текущая история диалога: ${JSON.stringify(
       chatHistory
