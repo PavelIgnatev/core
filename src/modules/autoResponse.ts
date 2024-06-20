@@ -13,6 +13,29 @@ import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient
 import { getDateNow } from "../helpers/getDateNow";
 import { sendToFormBot } from "../helpers/sendToFormBot";
 
+const gptRequestWrapper = async (
+  language: string,
+  message: string,
+  dialogGroupId: string,
+  accountId: string,
+  addedContextString = ""
+) => {
+  return await makeRequestGpt(
+    `## CONTEXT
+${addedContextString}
+Today's date is ${getDateNow()}.
+
+## STYLE GUIDE
+Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
+
+## INSTRUCTIONS
+I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. RESPONSE LANGUAGE: ${language}.`,
+    message,
+    dialogGroupId,
+    accountId
+  );
+};
+
 export const autoResponse = async (
   client: any,
   accountId: string,
@@ -23,7 +46,6 @@ export const autoResponse = async (
     client,
     accountId
   );
-  const meName = converterName(tgFirstName);
 
   for (const dialog of dialogs) {
     const {
@@ -35,6 +57,9 @@ export const autoResponse = async (
       lastName = "",
       language = "RUSSIAN",
     } = dialog;
+
+    const meName =
+      language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
 
     const groupId = await getGroupId(dialogGroupId);
     const combinedMessages = getCombinedMessages(messages);
@@ -115,20 +140,14 @@ ${promptGoal}`,
       dialogGroupId,
       accountId
     );
-    const responseMessage = await makeRequestGpt(
-      `## CONTEXT
-You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).
-Today's date is ${getDateNow()}.
-
-## STYLE GUIDE
-Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
-
-## INSTRUCTIONS
-I need you to rephrase the message while keeping its original meaning, structure, and number of characters. Ensure that the resulting message remains the same length as the original and conveys the same message in a unique way. RESPONSE LANGUAGE: ${language}.`,
+    const responseMessage = await gptRequestWrapper(
+      language,
       wresponseMessage,
       dialogGroupId,
-      accountId
+      accountId,
+      `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
     );
+
     await sendToFormBot(`**** AUTO RESPONSE MESSAGE ****
 ДО: ${wresponseMessage}
 ПОСЛЕ: ${responseMessage}`);
@@ -148,7 +167,17 @@ I need you to rephrase the message while keeping its original meaning, structure
     });
 
     if (currentStage === 1 && addedQuestion) {
-      const question = generateRandomString(addedQuestion);
+      const genQuestion = generateRandomString(addedQuestion);
+      const question = await gptRequestWrapper(
+        language,
+        genQuestion,
+        dialogGroupId,
+        accountId,
+        `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
+      );
+      await sendToFormBot(`**** FIRST ADDED QUESTION ****
+ДО: ${genQuestion}
+ПОСЛЕ: ${question}`);
       const sentAddedQuestion = await sendMessage(
         client,
         id,
@@ -165,7 +194,17 @@ I need you to rephrase the message while keeping its original meaning, structure
     }
 
     if (currentStage === 2 && secondAddedQuestion) {
-      const question = generateRandomString(secondAddedQuestion);
+      const genQuestion = generateRandomString(secondAddedQuestion);
+      const question = await gptRequestWrapper(
+        language,
+        genQuestion,
+        dialogGroupId,
+        accountId,
+        `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
+      );
+      await sendToFormBot(`**** SECOND ADDED QUESTION ****
+ДО: ${genQuestion}
+ПОСЛЕ: ${question}`);
       const sentSecondAddedQuestion = await sendMessage(
         client,
         id,
@@ -215,7 +254,7 @@ I need you to rephrase the message while keeping its original meaning, structure
     const userName = `${firstName} ${lastName}`
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
-    const pingMessage = await makeRequestGpt(
+    const genPingMessage = await makeRequestGpt(
       `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
       `## STYLE GUIDE
 Maximum length of reminder message 100 characters
@@ -229,8 +268,15 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
       dialogGroupId,
       accountId
     );
+    const pingMessage = await gptRequestWrapper(
+      language,
+      genPingMessage,
+      dialogGroupId,
+      accountId
+    );
     await sendToFormBot(`**** PING MESSAGE ****
-${pingMessage}`);
+ДО: ${genPingMessage}
+ПОСЛЕ: ${pingMessage}`);
 
     const sentPingMessage = await sendMessage(
       client,
