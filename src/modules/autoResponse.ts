@@ -168,26 +168,17 @@ ${promptGoal}`,
 
     if (currentStage === 1 && addedQuestion) {
       const genQuestion = generateRandomString(addedQuestion);
-      const question = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId,
-        `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
-      );
-      await sendToFormBot(`**** FIRST ADDED QUESTION ****
-ДО: ${genQuestion}
-ПОСЛЕ: ${question}`);
+
       const sentAddedQuestion = await sendMessage(
         client,
         id,
         accessHash,
-        question,
+        genQuestion,
         accountId
       );
       messages.push({
         id: sentAddedQuestion.id,
-        text: question,
+        text: genQuestion,
         fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
@@ -195,26 +186,17 @@ ${promptGoal}`,
 
     if (currentStage === 2 && secondAddedQuestion) {
       const genQuestion = generateRandomString(secondAddedQuestion);
-      const question = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId,
-        `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
-      );
-      await sendToFormBot(`**** SECOND ADDED QUESTION ****
-ДО: ${genQuestion}
-ПОСЛЕ: ${question}`);
+
       const sentSecondAddedQuestion = await sendMessage(
         client,
         id,
         accessHash,
-        question,
+        genQuestion,
         accountId
       );
       messages.push({
         id: sentSecondAddedQuestion.id,
-        text: question,
+        text: genQuestion,
         fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
