@@ -88,15 +88,9 @@ export const getDialogs = async (client: any, accountId: string) => {
         messages: dialogMessages = [],
         groupId = 12343207729,
         blocked = false,
-        reason = null,
       } = dialogDb || {};
 
       if (blocked) {
-        await sendToBot(
-          `Блокировка пользователя User:${JSON.stringify(
-            user
-          )}; Причина: ${reason};`
-        );
         await client.invoke(
           new GramJs.contacts.Block({
             id: new GramJs.InputPeerUser({

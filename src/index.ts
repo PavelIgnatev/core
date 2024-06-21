@@ -95,11 +95,11 @@ const main = async (ID: string) => {
 };
 
 getAccountsIds().then((accounts) => {
-  accounts.forEach((account: any) => {
-    if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId));
-    }
-  });
+  // accounts.forEach((account: any) => {
+  // if (!account.banned && !account.stopped) {
+  promises.push(main("447940317447-2026167-eng"));
+  // }
+  // });
 
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________

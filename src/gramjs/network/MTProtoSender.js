@@ -696,7 +696,7 @@ class MTProtoSender {
                     // A step while decoding had the incorrect data. This message
                     // should not be considered safe and it should be ignored.
                     this._log.warn(
-                        `Security error while unpacking a received message: ${e}`
+                        `(${this._accountId})Security error while unpacking a received message: ${e}`
                     );
                     continue;
                 } else if (e instanceof InvalidBufferError) {
