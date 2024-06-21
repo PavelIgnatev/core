@@ -13,10 +13,11 @@ import { sleep } from "../helpers/sleep";
 export const accountSetup = async (
   client: any,
   accountId: string,
-  setupped: boolean
+  setupped: boolean,
+  firstName?: string
 ) => {
   if (setupped) {
-    return;
+    return firstName as string;
   }
 
   let user;
@@ -124,4 +125,6 @@ export const accountSetup = async (
     messageCount: 0,
     lastProcessedBy: new Date(),
   });
+
+  return user.firstName;
 };

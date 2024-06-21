@@ -30,12 +30,12 @@ const main = async (ID: string) => {
         dcId,
         platform,
         userAgent,
-        firstName,
         setuped = false,
         id,
+        firstName,
       } = account;
 
-      if (![accountId, dcId, platform, userAgent, firstName].every(Boolean)) {
+      if (![accountId, dcId, platform, userAgent].every(Boolean)) {
         throw new Error("Insufficient number of parameters to start");
       }
 
@@ -46,8 +46,13 @@ const main = async (ID: string) => {
       );
 
       await clearAuthorizations(client);
-      await accountSetup(client, accountId, setuped);
 
+      const tgFirstName = await accountSetup(
+        client,
+        accountId,
+        setuped,
+        firstName
+      );
       const tgAccountId = await usersMe(client, accountId, id);
 
       for (let i = 0; i < 30; i++) {
@@ -59,7 +64,7 @@ const main = async (ID: string) => {
 
         if (isAutoResponse) {
           isAutoResponse = false;
-          await autoResponse(client, accountId, tgAccountId, firstName);
+          await autoResponse(client, accountId, tgAccountId, tgFirstName);
         }
 
         await autoSender(client, accountId, tgAccountId, account.remainingTime);
