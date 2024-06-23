@@ -209,7 +209,7 @@ ${promptGoal}`,
 
     const groupId = await getGroupId(dialogGroupId);
     const recipientFull = await getFullUser(client, id, accessHash);
-    if (!recipientFull || !groupId) {
+    if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
       await saveBlockedRecipient(accountId, id, "ping-not-resolved");
       continue;
