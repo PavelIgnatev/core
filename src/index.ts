@@ -15,7 +15,6 @@ import { updateAiAccount } from "./methods/accounts/updateAiAccount";
 import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
-import { clearAuthorizations } from "./modules/clearAuthorizations";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -44,8 +43,6 @@ const main = async (ID: string) => {
         ID,
         () => (isAutoResponse = true)
       );
-
-      await clearAuthorizations(client);
 
       const tgFirstName = await accountSetup(
         client,

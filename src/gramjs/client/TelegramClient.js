@@ -14,7 +14,7 @@ const {
     UpdateConnectionState,
     HttpConnection,
 } = require("../network");
-const { authFlow, checkAuthorization } = require("./auth");
+const { clearAuthorizations } = require("./auth");
 const { uploadFile } = require("./uploadFile");
 const { updateTwoFaSettings, getTmpPassword } = require("./2fa");
 const RequestState = require("../network/RequestState");
@@ -852,39 +852,14 @@ class TelegramClient {
         this.isPremium = isPremium;
     }
 
-    async getMe() {
-        try {
-            return (
-                await this.invoke(
-                    new requests.users.GetUsers({
-                        id: [new constructors.InputUserSelf()],
-                    })
-                )
-            )[0];
-        } catch (e) {
-            this._log.warn("error while getting me");
-            this._log.warn(e);
-        }
-        return undefined;
-    }
-
-    async start(authParams) {
+    async start() {
         if (!this.isConnected()) {
             await this.connect();
         }
 
-        if (
-            await checkAuthorization(this, authParams.shouldThrowIfUnauthorized)
-        ) {
+        if (await clearAuthorizations(this)) {
             return;
         }
-
-        const apiCredentials = {
-            apiId: this.apiId,
-            apiHash: this.apiHash,
-        };
-
-        await authFlow(this, apiCredentials, authParams);
     }
 
     uploadFile(fileParams) {
@@ -905,9 +880,6 @@ class TelegramClient {
     }
 
     _handleUpdate(update) {
-        // this.session.processEntities(update)
-        // this._entityCache.add(update)
-
         if (
             update instanceof constructors.Updates ||
             update instanceof constructors.UpdatesCombined
@@ -932,88 +904,6 @@ class TelegramClient {
         };
         this._dispatchUpdate(args);
     }
-
-    // endregion
-
-    // region private methods
-
-    /**
-     Gets a full entity from the given string, which may be a phone or
-     a username, and processes all the found entities on the session.
-     The string may also be a user link, or a channel/chat invite link.
-
-     This method has the side effect of adding the found users to the
-     session database, so it can be queried later without API calls,
-     if this option is enabled on the session.
-
-     Returns the found entity, or raises TypeError if not found.
-     * @param string {string}
-     * @returns {Promise<void>}
-     * @private
-     */
-    /* CONTEST
-    async _getEntityFromString(string) {
-        const phone = utils.parsePhone(string)
-        if (phone) {
-            try {
-                for (const user of (await this.invoke(
-                    new requests.contacts.GetContacts(0))).users) {
-                    if (user.phone === phone) {
-                        return user
-                    }
-                }
-            } catch (e) {
-                if (e.message === 'BOT_METHOD_INVALID') {
-                    throw new Error('Cannot get entity by phone number as a ' +
-                        'bot (try using integer IDs, not strings)')
-                }
-                throw e
-            }
-        } else if (['me', 'this'].includes(string.toLowerCase())) {
-            return this.getMe()
-        } else {
-            const { username, isJoinChat } = utils.parseUsername(string)
-            if (isJoinChat) {
-                const invite = await this.invoke(new requests.messages.CheckChatInvite({
-                    'hash': username,
-                }))
-                if (invite instanceof constructors.ChatInvite) {
-                    throw new Error('Cannot get entity from a channel (or group) ' +
-                        'that you are not part of. Join the group and retry',
-                    )
-                } else if (invite instanceof constructors.ChatInviteAlready) {
-                    return invite.chat
-                }
-            } else if (username) {
-                try {
-                    const result = await this.invoke(
-                        new requests.contacts.ResolveUsername(username))
-                    const pid = utils.getPeerId(result.peer, false)
-                    if (result.peer instanceof constructors.PeerUser) {
-                        for (const x of result.users) {
-                            if (x.id === pid) {
-                                return x
-                            }
-                        }
-                    } else {
-                        for (const x of result.chats) {
-                            if (x.id === pid) {
-                                return x
-                            }
-                        }
-                    }
-                } catch (e) {
-                    if (e.message === 'USERNAME_NOT_OCCUPIED') {
-                        throw new Error(`No user has "${username}" as username`)
-                    }
-                    throw e
-                }
-            }
-        }
-        throw new Error(`Cannot find any entity corresponding to "${string}"`)
-    }
-    */
-    // endregion
 
     // users region
     /**

@@ -59,24 +59,7 @@ export async function init(
         throw new Error("Client not inited");
     }
 
-    await client.start({
-        initialMethod: "qrCode",
-        shouldThrowIfUnauthorized: true,
-        webAuthToken: undefined,
-        mockScenario: undefined,
-
-        phoneNumber: () => Promise.resolve(""),
-        phoneCode: () => Promise.resolve(""),
-        password: () => Promise.resolve(""),
-        firstAndLastNames: () => Promise.resolve() as any,
-        qrCode: () => Promise.resolve(),
-        onError: (e) =>
-            console.log(
-                `Start ${accountData.accountId} account error: ${e.message}`
-            ),
-        webAuthTokenFailed: () =>
-            console.log(`Web Auth Token Failed ${accountData.accountId}`),
-    });
+    await client.start();
 
     client.addEventHandler(
         (update: any) => {

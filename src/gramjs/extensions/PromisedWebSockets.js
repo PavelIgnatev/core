@@ -11,13 +11,6 @@ const MAX_TIMEOUT = 30000;
 
 class PromisedWebSockets {
     constructor(disconnectedCallback) {
-        /* CONTEST
-        this.isBrowser = typeof process === 'undefined' ||
-            process.type === 'renderer' ||
-            process.browser === true ||
-            process.__nwjs
-
-         */
         this.client = undefined;
         this.closed = true;
         this.disconnectedCallback = disconnectedCallback;
