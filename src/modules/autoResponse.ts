@@ -55,11 +55,7 @@ export const autoResponse = async (
       groupId: dialogGroupId,
       firstName,
       lastName = "",
-      language = "RUSSIAN",
     } = dialog;
-
-    const meName =
-      language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
 
     const groupId = await getGroupId(dialogGroupId);
     const combinedMessages = getCombinedMessages(messages);
@@ -101,8 +97,11 @@ export const autoResponse = async (
         addedQuestion = "",
         secondAddedQuestion = "",
         styleGuide = "",
+        language = "RUSSIAN",
       },
     } = groupId || { offer: {} };
+    const meName =
+      language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
 
     let promptGoal = "";
     if (currentStage === 1) {
@@ -148,7 +147,7 @@ ${promptGoal}`,
       `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
     );
 
-    await sendToFormBot(`**** AUTO RESPONSE MESSAGE ****
+    await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
 ДО: ${wresponseMessage}
 ПОСЛЕ: ${responseMessage}`);
     const sentResponseMessage = await sendMessage(
@@ -206,16 +205,11 @@ ${promptGoal}`,
   }
 
   for (const dialog of pingDialogs) {
-    const {
-      id,
-      accessHash,
-      messages,
-      groupId: dialogGroupId,
-      language = "RUSSIAN",
-    } = dialog;
+    const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
 
+    const groupId = await getGroupId(dialogGroupId);
     const recipientFull = await getFullUser(client, id, accessHash);
-    if (!recipientFull) {
+    if (!recipientFull || !groupId) {
       console.error(`Chat with username ${id} not resolved`);
       await saveBlockedRecipient(accountId, id, "ping-not-resolved");
       continue;
@@ -226,6 +220,10 @@ ${promptGoal}`,
       lastName = "",
       username = "",
     } = recipientFull?.users?.[0] || {};
+
+    const {
+      offer: { language = "RUSSIAN" },
+    } = groupId || { offer: {} };
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
@@ -251,7 +249,7 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
       accountId
     );
 
-    await sendToFormBot(`**** PING MESSAGE ****
+    await sendToFormBot(`**** PING MESSAGE (${language}) ****
 ${pingMessage}`);
 
     const sentPingMessage = await sendMessage(
