@@ -79,19 +79,16 @@ const main = async (ID: string) => {
         await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
         await exec("pm2 kill");
       } else if (e.message.includes("Global Error")) {
-        break;
       } else if (e.message.includes("Stopped")) {
         await updateAiAccount(ID, {
           stopped: true,
         });
-        break;
       } else {
         await sendToBot(
           `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
         );
       }
-
-      await new Promise((res) => setTimeout(res, 5000));
+      break;
     }
   }
 };
