@@ -72,12 +72,6 @@ class HttpStream {
         });
         this.url = HttpStream.getURL(ip, port, testServers, isPremium);
 
-        // await fetch(this.url, {
-        //     method: 'POST',
-        //     body: Buffer.from([]),
-        //     mode: 'cors',
-        //     signal: AbortSignal.timeout(REQUEST_TIMEOUT),
-        // });
 
         this.isClosed = false;
     }

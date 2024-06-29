@@ -3,14 +3,13 @@ import util from "util";
 
 import { exec as childExec } from "child_process";
 
+import { getAccountById, getAccounts, updateAccountById } from "./db/accounts";
+
 import { initClient } from "./helpers/initClient";
 import { sendToBot } from "./helpers/sendToBot";
 
-import { getFullAccount } from "./methods/accounts/getFullAccount";
 import { usersMe } from "./methods/users/usersMe";
-import { getAccountsIds } from "./methods/accounts/getAccountsIds";
-import { setOffline } from "./methods/accounts/setOffline";
-import { updateAiAccount } from "./methods/accounts/updateAiAccount";
+import { setOffline } from "./methods/account/setOffline";
 
 import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
@@ -23,7 +22,14 @@ const main = async (ID: string) => {
   while (true) {
     try {
       let isAutoResponse = true;
-      const account = await getFullAccount(ID);
+      const account = await getAccountById(ID);
+
+      if (!account) {
+        await sendToBot(`Account from getAccountById by id ${ID} not defined`);
+
+        return;
+      }
+
       const {
         accountId,
         dcId,
@@ -57,7 +63,14 @@ const main = async (ID: string) => {
           await setOffline(client, false);
         }
 
-        const account = await getFullAccount(ID);
+        const account = await getAccountById(ID);
+        if (!account) {
+          await sendToBot(
+            `Account from getAccountById by id ${ID} not defined`
+          );
+
+          return;
+        }
 
         if (isAutoResponse) {
           isAutoResponse = false;
@@ -72,7 +85,7 @@ const main = async (ID: string) => {
       console.error(`MAIN ERROR (${ID}): ${e.message}; ${new Date()}`);
 
       if (e.message.includes("AUTH_KEY_DUPLICATED")) {
-        await updateAiAccount(ID, {
+        await updateAccountById(ID, {
           banned: true,
           reason: "AUTH_KEY_DUPLICATED",
         });
@@ -80,7 +93,7 @@ const main = async (ID: string) => {
         await exec("pm2 kill");
       } else if (e.message.includes("Global Error")) {
       } else if (e.message.includes("Stopped")) {
-        await updateAiAccount(ID, {
+        await updateAccountById(ID, {
           stopped: true,
         });
       } else {
@@ -92,12 +105,9 @@ const main = async (ID: string) => {
     }
   }
 };
-
-getAccountsIds().then((accounts) => {
-  accounts.forEach((account: any) => {
-    if (!account.banned && !account.stopped) {
-      promises.push(main(account.accountId));
-    }
+getAccounts().then((accounts) => {
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
   });
 
   Promise.all(promises).then(async () => {

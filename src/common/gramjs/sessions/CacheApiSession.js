@@ -10,7 +10,7 @@ class CacheApiSession extends StorageSession {
         return cache.delete(request);
     }
 
-    async _fetchFromCache() {
+    async _fromCache() {
         const request = new Request(this._storageKey);
         const cache = await self.caches.open(CACHE_NAME);
         const cached = await cache.match(request);

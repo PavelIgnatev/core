@@ -1,8 +1,8 @@
 import { Account } from "../@types/Account";
 
-import { init } from "../gramjs";
+import { init } from "../common/gramjs";
 
-import { updateAiAccount } from "../methods/accounts/updateAiAccount";
+import { updateAccountById } from "../db/accounts";
 
 export const initClient = async (
   account: Account,
@@ -40,7 +40,7 @@ export const initClient = async (
       ].includes(e.message)
     ) {
       console.error(account.accountId, e.message);
-      await updateAiAccount(account.accountId, {
+      await updateAccountById(account.accountId, {
         banned: true,
         reason: e.message,
       });

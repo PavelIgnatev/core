@@ -5,7 +5,7 @@ class LocalStorageSession extends StorageSession {
         return localStorage.removeItem(this._storageKey);
     }
 
-    _fetchFromCache() {
+    _fromCache() {
         return localStorage.getItem(this._storageKey);
     }
 

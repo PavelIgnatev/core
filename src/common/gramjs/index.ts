@@ -1,11 +1,12 @@
 import BigInt from "big-integer";
+
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
 import TelegramClient from "./client/TelegramClient";
 
+import { getDialogue } from "../../db/dialogues";
 import { Logger } from "./extensions/index";
-import { Account } from "../@types/Account";
-import { getDialogDB } from "../methods/dialogs/getDialogDB";
+import { Account } from "../../@types/Account";
 
 const DEFAULT_USER_AGENT = "Unknown UserAgent";
 const DEFAULT_PLATFORM = "Unknown platform";
@@ -78,7 +79,7 @@ export async function init(
                         } = update as any;
                         const userId = varUserId || peerUserId;
 
-                        const isDialogInDb = await getDialogDB(
+                        const isDialogInDb = await getDialogue(
                             accountData.accountId,
                             String(userId)
                         );

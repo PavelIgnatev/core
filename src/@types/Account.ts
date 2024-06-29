@@ -11,6 +11,8 @@ export interface Account {
   userAgent: string;
   platform: string;
 
+  id?: string;
+
   firstName?: string;
   lastName?: string;
   username?: string;
@@ -20,8 +22,7 @@ export interface Account {
   banned?: boolean;
   setuped?: boolean;
 
-  remainingTime?: Date;
-  aiRemainingTime?: Date;
+  remainingTime?: string;
 
   lastProcessedBy?: Date;
 }

@@ -37,7 +37,7 @@ class StorageSession extends MemorySession {
         }
 
         try {
-            const json = await this._fetchFromCache();
+            const json = await this._fromCache();
             const {
                 mainDcId,
                 keys,
@@ -166,7 +166,7 @@ class StorageSession extends MemorySession {
     }
 
     // @abstract
-    _fetchFromCache() {
+    _fromCache() {
         throw new Error('Not Implemented');
     }
 

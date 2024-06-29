@@ -1,6 +1,4 @@
 export interface Dialogue {
-  _id?: string;
-
   groupId: number;
   accountId: string;
   recipientId: string;
@@ -8,10 +6,11 @@ export interface Dialogue {
   recipientTitle: string;
   recipientBio: string | null;
   recipientPhone: string | null;
-  messages: Array<string>;
+  messages: Array<{ id: number; text: string; fromId: string; date: number }>;
 
   viewed?: boolean;
   blocked?: boolean;
 
-  dateCreated: Date;
+  dateCreated?: Date;
+  dateUpdated?: Date;
 }

@@ -1,4 +1,4 @@
-import GramJs from "../../gramjs/tl/api";
+import GramJs from "../../common/gramjs/tl/api";
 
 export const resolveUsername = async (client: any, username: string) => {
   const userByUsername = await client.invoke(

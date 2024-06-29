@@ -8,7 +8,7 @@ class IdbSession extends StorageSession {
         return idb.del(`${CACHE_NAME}:${this._storageKey}`);
     }
 
-    _fetchFromCache() {
+    _fromCache() {
         return idb.get(`${CACHE_NAME}:${this._storageKey}`);
     }
 

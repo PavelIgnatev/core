@@ -1,7 +1,8 @@
 import { sendMessage } from "../methods/messages/sendMessage";
 import { getMessages } from "../methods/messages/getMessages";
-import { resolveUsername } from "../methods/users/resolveUsername";
-import { updateAiAccount } from "../methods/accounts/updateAiAccount";
+import { resolveUsername } from "../methods/contacts/resolveUsername";
+
+import { updateAccountById } from "../db/accounts";
 
 export const checkSpamBlock = async (client: any, accountId: string) => {
   const result = await resolveUsername(client, "spambot");
@@ -36,7 +37,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
 
   if (message.includes("no limits are currently applied")) {
     console.log(`Account #${accountId} is clean from spamblock`);
-    await updateAiAccount(accountId, {
+    await updateAccountById(accountId, {
       spamBlockDate: null,
     });
     return false;
@@ -54,7 +55,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
   nextDay.setDate(currentDate.getDate() + 1);
 
   console.log(`The account has a spamblock to ${spamBlockDate}`);
-  await updateAiAccount(accountId, {
+  await updateAccountById(accountId, {
     remainingTime: String(nextDay),
     spamBlockDate,
   });

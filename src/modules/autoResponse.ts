@@ -3,15 +3,16 @@ import { makeRequestGpt } from "../helpers/makeRequestGpt";
 import { generateRandomString } from "../helpers/generateRandomString";
 import { converterName } from "../helpers/converterName";
 import { getCombinedMessages } from "../helpers/getCombinedMessages";
-
-import { sendMessage } from "../methods/messages/sendMessage";
-import { getGroupId } from "../methods/groupId/getGroupId";
-import { saveRecipient } from "../methods/recipients/saveRecipient";
-import { getFullUser } from "../methods/users/getFullUser";
-import { getDialogs } from "../methods/dialogs/getDialogs";
-import { saveBlockedRecipient } from "../methods/recipients/saveBlockedRecipient";
 import { getDateNow } from "../helpers/getDateNow";
 import { sendToFormBot } from "../helpers/sendToFormBot";
+
+import { sendMessage } from "../methods/messages/sendMessage";
+import { saveRecipient } from "./saveRecipient";
+import { getFullUser } from "../methods/users/getFullUser";
+import { getDialogs } from "./getDialogs";
+
+import { getGroupId } from "../db/groupId";
+import { updateBlockedDialogue } from "../db/dialogues";
 
 const gptRequestWrapper = async (
   language: string,
@@ -76,14 +77,14 @@ export const autoResponse = async (
 
     if (currentStage > 25) {
       console.log(`MAXIMUM STAGE in ${accountId}:${id}`);
-      await saveBlockedRecipient(accountId, id, "dialogs-max-stage");
+      await updateBlockedDialogue(accountId, id, "dialogs-max-stage");
       continue;
     }
 
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(accountId, id, "dialogs-not-resolved");
+      await updateBlockedDialogue(accountId, id, "dialogs-not-resolved");
       continue;
     }
 
@@ -211,7 +212,7 @@ ${promptGoal}`,
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(accountId, id, "ping-not-resolved");
+      await updateBlockedDialogue(accountId, id, "ping-not-resolved");
       continue;
     }
 
@@ -278,7 +279,7 @@ ${pingMessage}`);
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       console.error(`Chat with username ${id} not resolved`);
-      await saveBlockedRecipient(
+      await updateBlockedDialogue(
         accountId,
         id,
         "manual-control-dialogs-not-resolved"

@@ -1,8 +1,13 @@
-import GramJs from "../../gramjs/tl/api";
+import GramJs from "../common/gramjs/tl/api";
 
-import { Dialogue } from "../../@types/Dialogue";
-import { getCombinedMessages } from "../../helpers/getCombinedMessages";
-import { sleep } from "../../helpers/sleep";
+import { Dialogue } from "../@types/Dialogue";
+
+import { getCombinedMessages } from "../helpers/getCombinedMessages";
+import { sleep } from "../helpers/sleep";
+
+import { updateDialogue } from "../db/dialogues";
+import { incrementMessageCount, updateAccountById } from "../db/accounts";
+import { incrementCurrentCount } from "../db/groupId";
 
 export const saveRecipient = async (
   accountId: string,
@@ -41,11 +46,10 @@ export const saveRecipient = async (
       ""
     ).toLowerCase(),
     recipientTitle: `${firstName} ${lastName}`.trim(),
-    recipientBio: about,
+    recipientBio: about || "",
     recipientPhone: phone || recipientPhone || null,
     messages: messages,
     step: getCombinedMessages(messages).length,
-    status,
     ...addedData,
   };
 
@@ -53,26 +57,21 @@ export const saveRecipient = async (
 
   while (true) {
     try {
-      const response = await fetch(`${process.env.RECIPIENT_URL}`, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
+      await updateDialogue(data);
+      await updateAccountById(accountId, {
+        remainingTime: new Date(new Date().getTime() + 21600000),
       });
 
-      if (response.ok) {
-        console.log(
-          `Saved information about the user ${data.recipientUsername} in the database!`
-        );
-        return;
-      } else {
-        console.log(
-          `Information about the user ${data.recipientUsername} was not saved in the database, status code: ${response.status}!`
-        );
+      if (status === "create") {
+        await incrementMessageCount(accountId);
+        await incrementCurrentCount(groupId);
       }
+      break;
     } catch (error: any) {
-      console.error("Error occurred while saving recipient (2):", error.message);
+      console.error(
+        "Error occurred while saving recipient (2):",
+        error.message
+      );
 
       await sleep(3000);
     }

@@ -1,5 +1,6 @@
-import GramJs from "../../gramjs/tl/api";
-import { updateAiAccount } from "../accounts/updateAiAccount";
+import GramJs from "../../common/gramjs/tl/api";
+
+import { updateAccountById } from "../../db/accounts";
 
 export const usersMe = async (
   client: any,
@@ -13,7 +14,7 @@ export const usersMe = async (
       })
     );
 
-    await updateAiAccount(accountId, {
+    await updateAccountById(accountId, {
       id: String(usersMe.fullUser.id),
     });
 

@@ -1,14 +1,15 @@
 import BigInt from "big-integer";
 
-import GramJs from "../../gramjs/tl/api";
+import GramJs from "../common/gramjs/tl/api";
 
-import { Dialogue } from "../../@types/Dialogue";
+import { Dialogue } from "../@types/Dialogue";
 
-import { getDialogDB } from "./getDialogDB";
-import { getPingDialogsDB } from "./getPingDialogsDB";
-import { getManualControlDialogsDB } from "./getManualControlDialogsDB";
-import { saveBlockedRecipient } from "../recipients/saveBlockedRecipient";
-import { sendToBot } from "../../helpers/sendToBot";
+import {
+  getDialogue,
+  getManualControlDialogues,
+  getPingDialogues,
+  updateBlockedDialogue,
+} from "../db/dialogues";
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -26,8 +27,8 @@ export const getDialogs = async (client: any, accountId: string) => {
     return [];
   }
 
-  const pingDialogsDB = await getPingDialogsDB(accountId);
-  const manualControlDialogsDB = await getManualControlDialogsDB(accountId);
+  const pingDialogsDB = await getPingDialogues(accountId);
+  const manualControlDialogsDB = await getManualControlDialogues(accountId);
 
   const clientMessagesIds = clientDialogs.messages
     .filter((m: Message) => !m.out)
@@ -79,11 +80,11 @@ export const getDialogs = async (client: any, accountId: string) => {
       );
 
       if (!allMessages?.messages?.length) {
-        await saveBlockedRecipient(accountId, dialogId, "messages-length");
+        await updateBlockedDialogue(accountId, dialogId, "messages-length");
         continue;
       }
 
-      const dialogDb = await getDialogDB(accountId, String(user.id));
+      const dialogDb = await getDialogue(accountId, String(user.id));
       const {
         messages: dialogMessages = [],
         groupId = 12343207729,
@@ -181,7 +182,7 @@ export const getDialogs = async (client: any, accountId: string) => {
         pingDialogs.push(dialogData);
       }
     } else {
-      await saveBlockedRecipient(accountId, dialogId, `user-not-resolved`);
+      await updateBlockedDialogue(accountId, dialogId, `user-not-resolved`);
 
       if (
         user &&

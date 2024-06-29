@@ -1,6 +1,8 @@
-import GramJs from "../gramjs/tl/api";
+import GramJs from "../common/gramjs/tl/api";
 
 import { checkSpamBlock } from "./checkSpamBlock";
+
+import { updateAccountById } from "../db/accounts";
 
 import { generateRandomString } from "../helpers/generateRandomString";
 import { sendToBot } from "../helpers/sendToBot";
@@ -8,17 +10,16 @@ import { sendToBot } from "../helpers/sendToBot";
 import { sendMessage } from "../methods/messages/sendMessage";
 import { editFolder } from "../methods/folders/editFolder";
 import { getRecipient } from "../methods/recipients/getRecipient";
-import { saveRecipient } from "../methods/recipients/saveRecipient";
-import { resolveUsername } from "../methods/users/resolveUsername";
-import { resolvePhone } from "../methods/users/resolvePhone";
+import { saveRecipient } from "./saveRecipient";
+import { resolveUsername } from "../methods/contacts/resolveUsername";
+import { resolvePhone } from "../methods/contacts/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
-import { updateAiAccount } from "../methods/accounts/updateAiAccount";
-import { muteNotification } from "../methods/notifications/muteNotification";
-import { saveErrorRecipient } from "../methods/recipients/saveErrorRecipient";
+import { muteNotification } from "../methods/account/muteNotification";
+import { updateFailedMessage } from "../db/messages";
 
 export const generateRandomTime = () => {
-  const minTime = 3600000 * 0.1;
-  const maxTime = 3600000 * 1;
+  const minTime = 360000;
+  const maxTime = 3600000;
 
   const randomTime =
     Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
@@ -35,7 +36,7 @@ export const autoSender = async (
 ) => {
   if (!tgRmainingTime) {
     const remainingTime = generateRandomTime();
-    await updateAiAccount(accountId, {
+    await updateAccountById(accountId, {
       remainingTime,
     });
     console.log(
@@ -76,7 +77,7 @@ export const autoSender = async (
           `Chat with username ${recipient.username}:${userId} not resolved`
         );
 
-        await saveErrorRecipient(recipient.username);
+        await updateFailedMessage(recipient.username);
         return;
       }
 
@@ -94,7 +95,7 @@ export const autoSender = async (
         return;
       }
       if (deleted || bot || support || contactRequirePremium || botBusiness) {
-        await saveErrorRecipient(recipient.username);
+        await updateFailedMessage(recipient.username);
 
         return;
       }
@@ -167,8 +168,12 @@ export const autoSender = async (
           `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`
         );
       }
-      await saveErrorRecipient(recipient.username); 
 
+      if (e.message.includes("PEER_FLOOD")) {
+        throw new Error("Stopped");
+      }
+
+      await updateFailedMessage(recipient.username);
       throw new Error("Global Error");
     }
   }

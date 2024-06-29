@@ -1,14 +1,15 @@
 import BigInt from "big-integer";
 
-import GramJs from "../gramjs/tl/api";
-import { uploadFile } from "../gramjs/client/uploadFile";
+import GramJs from "../common/gramjs/tl/api";
+import { uploadFile } from "../common/gramjs/client/uploadFile";
+
+import { updateAccountById } from "../db/accounts";
 
 import { generateUser } from "../helpers/generateUser";
-
-import { updateProfile } from "../methods/profile/updateProfile";
-import { getProfileFiles } from "../methods/files/getProfileFiles";
-import { updateAiAccount } from "../methods/accounts/updateAiAccount";
 import { sleep } from "../helpers/sleep";
+
+import { updateProfile } from "../methods/account/updateProfile";
+import { getProfileFiles } from "../helpers/getProfileFiles";
 
 export const accountSetup = async (
   client: any,
@@ -118,7 +119,7 @@ export const accountSetup = async (
     })
   );
 
-  await updateAiAccount(accountId, {
+  await updateAccountById(accountId, {
     ...user,
     setuped: true,
     banned: false,
