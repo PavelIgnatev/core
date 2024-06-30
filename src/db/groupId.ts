@@ -24,6 +24,7 @@ export const incrementCurrentCount = async (groupId: number) => {
     { groupId },
     {
       $inc: { currentCount: 1 },
+      dateUpdated: new Date(),
     }
   );
 };
