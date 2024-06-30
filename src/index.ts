@@ -106,9 +106,11 @@ const main = async (ID: string) => {
   }
 };
 getAccounts().then((accounts) => {
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+
+  promises.push(main("447940317447-2026167-eng"));
+
+  // });
 
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________
