@@ -50,34 +50,34 @@ const main = async (ID: string) => {
         () => (isAutoResponse = true)
       );
 
-      const tgFirstName = await accountSetup(
-        client,
-        accountId,
-        setuped,
-        firstName
-      );
-      const tgAccountId = await usersMe(client, accountId, id);
+      // const tgFirstName = await accountSetup(
+      //   client,
+      //   accountId,
+      //   setuped,
+      //   firstName
+      // );
+      // const tgAccountId = await usersMe(client, accountId, id);
 
       for (let i = 0; i < 30; i++) {
-        if (i % 5 === 0) {
-          await setOffline(client, false);
-        }
+        // if (i % 5 === 0) {
+        //   await setOffline(client, false);
+        // }
 
-        const account = await getAccountById(ID);
-        if (!account) {
-          await sendToBot(
-            `Account from getAccountById by id ${ID} not defined`
-          );
+        // const account = await getAccountById(ID);
+        // if (!account) {
+        //   await sendToBot(
+        //     `Account from getAccountById by id ${ID} not defined`
+        //   );
 
-          return;
-        }
+        //   return;
+        // }
 
-        if (isAutoResponse) {
-          isAutoResponse = false;
-          await autoResponse(client, accountId, tgAccountId, tgFirstName);
-        }
+        // if (isAutoResponse) {
+        //   isAutoResponse = false;
+        //   await autoResponse(client, accountId, tgAccountId, tgFirstName);
+        // }
 
-        await autoSender(client, accountId, tgAccountId, account.remainingTime);
+        // await autoSender(client, accountId, tgAccountId, account.remainingTime);
         await new Promise((res) => setTimeout(res, 60000));
       }
       return;
