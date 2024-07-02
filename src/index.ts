@@ -60,7 +60,7 @@ const main = async (ID: string) => {
 
       for (let i = 0; i < 30; i++) {
         // if (i % 5 === 0) {
-        //   await setOffline(client, false);
+          await setOffline(client, false);
         // }
 
         // const account = await getAccountById(ID);
