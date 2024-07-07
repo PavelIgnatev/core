@@ -32,8 +32,8 @@ ${addedContextString}
 Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
-I need you to paraphrase a message, preserving its original meaning, structure and number of characters. Make sure that the resulting message is the same length as the original and conveys the same message in a unique way. ANSWER LANGUAGE: ${language}. Check that the result does not contain any words other than ${language} (except proper names).`,
-    message,
+I need you to paraphrase a message (which is inside ''''), preserving its original meaning, structure and number of characters. Make sure that the resulting message is the same length as the original and conveys the same message in a unique way. ANSWER LANGUAGE: ${language}. Check that the result does not contain any words other than ${language} (except proper names).`,
+    `A message where the wording needs to be changed: ''''${message}''''`,
     dialogGroupId,
     accountId,
     part
