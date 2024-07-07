@@ -19,7 +19,8 @@ export const makeRequestGpt = async (
   preamble: string,
   prompt: string,
   groupId: string,
-  accountId: string
+  accountId: string,
+  part: string | null = ""
 ): Promise<string> => {
   console.log(`Preamble: ${preamble}; Message: ${prompt}; `);
 
@@ -41,7 +42,7 @@ export const makeRequestGpt = async (
 
       if (!data || !data.trim()) {
         throw new Error("Пустое сообщение");
-      } 
+      }
       generations.push(data);
 
       let message = data
@@ -140,6 +141,15 @@ export const makeRequestGpt = async (
           .replace("Good afternoon", "")
           .replace("good afternoon", "")
       );
+
+      if (part && !message.includes(part)) {
+        console.log(
+          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
+        );
+        throw new Error(
+          `Потенциальное сообщение не содержит часть ${part}, хотя должно`
+        );
+      }
 
       return varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
     } catch (error: any) {

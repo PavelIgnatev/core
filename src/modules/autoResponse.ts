@@ -19,7 +19,8 @@ const gptRequestWrapper = async (
   message: string,
   dialogGroupId: string,
   accountId: string,
-  addedContextString = ""
+  addedContextString = "",
+  part: string = ""
 ) => {
   return await makeRequestGpt(
     `## CONTEXT
@@ -34,7 +35,8 @@ Avoid including unnecessary greetings and third-party characters like: [],{},{},
 I need you to paraphrase a message, preserving its original meaning, structure and number of characters. Make sure that the resulting message is the same length as the original and conveys the same message in a unique way. ANSWER LANGUAGE: ${language}. Check that the result does not contain any words other than ${language} (except proper names).`,
     message,
     dialogGroupId,
-    accountId
+    accountId,
+    part
   );
 };
 
@@ -146,7 +148,8 @@ ${promptGoal}`,
       wresponseMessage,
       dialogGroupId,
       accountId,
-      `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`
+      `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`,
+      currentStage === 2 ? part : null
     );
 
     await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
@@ -248,7 +251,8 @@ Today's date is ${getDateNow()};
 ## DIALOG
 ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
       dialogGroupId,
-      accountId
+      accountId,
+      null
     );
 
     await sendToFormBot(`**** PING MESSAGE (${language}) ****
