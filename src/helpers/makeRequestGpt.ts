@@ -33,8 +33,9 @@ export const makeRequestGpt = async (
         data: { text: data },
       } = await axios.post("http://91.198.220.234/chat", {
         model: "command-r-plus",
-        k: 10,
-        temperature: 0.4,
+        k: 0,
+        p: 0.99,
+        temperature: 1,
         prompt_truncation: "AUTO_PRESERVE_ORDER",
         preamble,
         message: prompt,
