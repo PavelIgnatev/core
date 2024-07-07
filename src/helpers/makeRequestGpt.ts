@@ -41,7 +41,7 @@ export const makeRequestGpt = async (
 
       if (!data || !data.trim()) {
         throw new Error("Пустое сообщение");
-      }
+      } 
       generations.push(data);
 
       let message = data

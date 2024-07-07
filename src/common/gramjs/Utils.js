@@ -186,12 +186,7 @@ function getInputUser(entity) {
         return getInputUser(entity.user)
     }
 
-    if (entity instanceof constructors.InputPeerUser) {
-        return new constructors.InputUser({
-            userId: entity.userId,
-            accessHash: entity.accessHash
-        })
-    }
+ 
 
     _raiseCastFail(entity, 'InputUser')
 }
@@ -394,14 +389,11 @@ function getPeer(peer) {
         } else if (peer instanceof constructors.ChannelFull) {
             return new constructors.PeerChannel({ channelId: peer.id })
         }
-        if (peer.SUBCLASS_OF_ID === 0x7d7c6f86 || peer.SUBCLASS_OF_ID === 0xd9c7fc18) {
-            // ChatParticipant, ChannelParticipant
-            return new constructors.PeerUser({ userId: peer.userId })
-        }
+
         peer = getInputPeer(peer, false, false)
 
         if (peer instanceof constructors.InputPeerUser) {
-            return new constructors.PeerUser({ userId: peer.userId })
+
         } else if (peer instanceof constructors.InputPeerChat) {
             return new constructors.PeerChat({ chatId: peer.chatId })
         } else if (peer instanceof constructors.InputPeerChannel) {
@@ -449,7 +441,7 @@ function getPeerId(peer, addMark = true) {
         _raiseCastFail(peer, 'int')
     }
     if (peer instanceof constructors.PeerUser) {
-        return peer.userId
+
     } else if (peer instanceof constructors.PeerChat) {
         // Check in case the user mixed things up to avoid blowing up
         if (!(0 < peer.chatId <= 0x7fffffff)) {

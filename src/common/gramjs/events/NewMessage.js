@@ -35,8 +35,6 @@ class NewMessage extends EventBuilder {
                 id: update.id,
                 // Note that to_id/from_id complement each other in private
                 // messages, depending on whether the message was outgoing.
-                toId: new constructors.PeerUser(update.out ? update.userId : thisId),
-                fromId: update.out ? thisId : update.userId,
                 message: update.message,
                 date: update.date,
                 fwdFrom: update.fwdFrom,
@@ -68,9 +66,7 @@ class NewMessage extends EventBuilder {
         // This makes it consistent with official client's appearance.
         const ori = event.message
         if (ori.toId instanceof constructors.PeerUser) {
-            if (ori.fromId === ori.toId.userId && !ori.fwdFrom) {
-                event.message.out = true
-            }
+
         }
         return event
     }
