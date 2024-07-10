@@ -11,19 +11,19 @@ export const getRecipient = async (accountId: string) => {
       const response = await fetch(`${process.env.RECIPIENT_URL}`);
       const user = await response.json();
 
-      if (!user?.offer || !user?.groupId || !user?.username) {
+      if (!user?.groupId || !user?.username) {
         await sendToBot(
-          `При генерации recipient произошла ошибка: ${JSON.stringify(
-            user?.offer
-          )}:${user?.groupId}:${user?.username}`
+          `При генерации recipient произошла ошибка: ${JSON.stringify(user)}:${
+            user?.groupId
+          }:${user?.username}`
         );
       }
 
-      if (!user.offer.firstMessagePrompt) {
-        user.offer.firstMessagePrompt = defaultFirstMessagePrompt;
+      if (!user.firstMessagePrompt) {
+        user.firstMessagePrompt = defaultFirstMessagePrompt;
       }
-      if (!user.offer.secondMessagePrompt) {
-        user.offer.secondMessagePrompt = defaultSecondMessagePrompt;
+      if (!user.secondMessagePrompt) {
+        user.secondMessagePrompt = defaultSecondMessagePrompt;
       }
 
       return user;

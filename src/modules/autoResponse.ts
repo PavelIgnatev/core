@@ -92,18 +92,16 @@ export const autoResponse = async (
     }
 
     const {
-      offer: {
-        aiRole = "",
-        companyDescription = "",
-        addedInformation = "",
-        goal = "",
-        part = "",
-        addedQuestion = "",
-        secondAddedQuestion = "",
-        styleGuide = "",
-        language = "RUSSIAN",
-      },
-    } = groupId || { offer: {} };
+      aiRole = "",
+      companyDescription = "",
+      addedInformation = "",
+      goal = "",
+      part = "",
+      addedQuestion = "",
+      secondAddedQuestion = "",
+      styleGuide = "",
+      language = "RUSSIAN",
+    } = groupId || ({} as any);
     const meName =
       language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
 

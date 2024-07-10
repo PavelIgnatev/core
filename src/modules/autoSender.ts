@@ -100,12 +100,8 @@ export const autoSender = async (
         return;
       }
 
-      const firstMessage = generateRandomString(
-        recipient.offer.firstMessagePrompt
-      );
-      const secondMessage = generateRandomString(
-        recipient.offer.secondMessagePrompt
-      );
+      const firstMessage = generateRandomString(recipient.firstMessagePrompt);
+      const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       console.log(
         `First Message: ${firstMessage}; Second Message: ${secondMessage}`
       );
