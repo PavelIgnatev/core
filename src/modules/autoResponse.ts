@@ -224,9 +224,7 @@ ${promptGoal}`,
       username = "",
     } = recipientFull?.users?.[0] || {};
 
-    const {
-      offer: { language = "RUSSIAN" },
-    } = groupId || { offer: {} };
+    const { language } = groupId || { language: "RUSSIAN" };
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
