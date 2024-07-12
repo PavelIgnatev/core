@@ -107,22 +107,27 @@ export const autoResponse = async (
 
     let promptGoal = "";
     if (currentStage === 1) {
-      promptGoal = `Reply to the last message "${userName}" (ROLE USER).`;
+      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
     }
     if (currentStage >= 2) {
-      promptGoal = `Reply to the last message "${userName}" (ROLE USER). ${goal}.`;
+      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER). ${goal}.!!!!`;
     }
-
+    
+    const parted = currentStage === 2 && part ? part : null;
     const wresponseMessage = await makeRequestComplete(
       `
 ## CONTEXT
 You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
 
 ## STYLE GUIDE
-${styleGuide}. RESPONSE LANGUAGE: ${language}.
+${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc.  RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
-${promptGoal}`,
+${promptGoal} ${
+        parted
+          ? `!!!!A mandatory part that should definitely be in the answer: ${part}!!!!`
+          : ""
+      }`,
       [
         {
           title: "YOUR_COMPANY_DESCRIPTION",
