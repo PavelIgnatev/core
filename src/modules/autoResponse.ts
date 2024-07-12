@@ -32,7 +32,7 @@ ${addedContextString}
 Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
-I need you to paraphrase a message (which is inside ''''), preserving its original meaning, structure and number of characters. Make sure that the resulting message is the same length as the original and conveys the same message in a unique way. ANSWER LANGUAGE: ${language}. Check that the result does not contain any words other than ${language} (except proper names).`,
+I need you to paraphrase a message (which is inside '''') while maintaining its original meaning, structure, and character count. Make sure the resulting message is the same length as the original, and conveys the same thought in a unique but similar way to the original message. RESPONSE LANGUAGE: ${language}. Make sure that the result does not contain any words other than ${language} (except for proper names).`,
     `A message where the wording needs to be changed: ''''${message}''''`,
     dialogGroupId,
     accountId,
@@ -104,7 +104,7 @@ export const autoResponse = async (
     } = groupId || ({} as any);
     const meName =
       language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
-
+    
     let promptGoal = "";
     if (currentStage === 1) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
@@ -120,7 +120,7 @@ export const autoResponse = async (
 You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
 
 ## STYLE GUIDE
-${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc.  RESPONSE LANGUAGE: ${language}.
+${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. RESPONSE LANGUAGE: ${language}.
 
 ## INSTRUCTIONS
 ${promptGoal} ${
