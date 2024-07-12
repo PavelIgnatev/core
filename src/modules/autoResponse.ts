@@ -104,7 +104,7 @@ export const autoResponse = async (
     } = groupId || ({} as any);
     const meName =
       language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
-    
+
     let promptGoal = "";
     if (currentStage === 1) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
@@ -180,7 +180,7 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        '!Use "YOU" politely, because you dont know the gender of the person youre talking to!'
+        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). Use 'YOU' when addressing the person you are talking to because their gender is unknown`
       );
 
       const sentAddedQuestion = await sendMessage(
@@ -209,7 +209,7 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        '!Use "YOU" politely, because you dont know the gender of the person youre talking to.!'
+        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). Use 'YOU' when addressing the person you are talking to because their gender is unknown`
       );
       const sentSecondAddedQuestion = await sendMessage(
         client,
