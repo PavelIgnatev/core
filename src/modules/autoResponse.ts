@@ -180,7 +180,7 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). Use 'YOU' when addressing the person you are talking to because their gender is unknown`
+        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
       );
 
       const sentAddedQuestion = await sendMessage(
@@ -209,7 +209,7 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). Use 'YOU' when addressing the person you are talking to because their gender is unknown`
+        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
       );
       const sentSecondAddedQuestion = await sendMessage(
         client,
