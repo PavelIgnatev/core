@@ -112,7 +112,7 @@ export const autoResponse = async (
     if (currentStage >= 2) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER). ${goal}.!!!!`;
     }
-    
+
     const parted = currentStage === 2 && part ? part : null;
     const wresponseMessage = await makeRequestComplete(
       `
@@ -175,38 +175,58 @@ ${promptGoal} ${
 
     if (currentStage === 1 && addedQuestion) {
       const genQuestion = generateRandomString(addedQuestion);
+      const genAddedQuestion = await gptRequestWrapper(
+        language,
+        genQuestion,
+        dialogGroupId,
+        accountId
+      );
 
       const sentAddedQuestion = await sendMessage(
         client,
         id,
         accessHash,
-        genQuestion,
+        genAddedQuestion,
         accountId
       );
       messages.push({
         id: sentAddedQuestion.id,
-        text: genQuestion,
+        text: genAddedQuestion,
         fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
+
+      await sendToFormBot(`**** FIRST ADDED MESSAGE (${language}) ****
+ДО: ${genQuestion}
+ПОСЛЕ: ${genAddedQuestion}`);
     }
 
     if (currentStage === 2 && secondAddedQuestion) {
       const genQuestion = generateRandomString(secondAddedQuestion);
-
+      const genAddedQuestion = await gptRequestWrapper(
+        language,
+        genQuestion,
+        dialogGroupId,
+        accountId
+      );
       const sentSecondAddedQuestion = await sendMessage(
         client,
         id,
         accessHash,
-        genQuestion,
+        genAddedQuestion,
         accountId
       );
+
       messages.push({
         id: sentSecondAddedQuestion.id,
-        text: genQuestion,
+        text: genAddedQuestion,
         fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
+
+      await sendToFormBot(`**** SECOND ADDED MESSAGE (${language}) ****
+ДО: ${genQuestion}
+ПОСЛЕ: ${genAddedQuestion}`);
     }
 
     await saveRecipient(accountId, recipientFull, dialog, messages, "update");
