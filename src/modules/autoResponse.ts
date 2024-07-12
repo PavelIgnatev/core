@@ -179,7 +179,8 @@ ${promptGoal} ${
         language,
         genQuestion,
         dialogGroupId,
-        accountId
+        accountId,
+        '!Use "YOU" politely, because you dont know the gender of the person youre talking to!'
       );
 
       const sentAddedQuestion = await sendMessage(
@@ -207,7 +208,8 @@ ${promptGoal} ${
         language,
         genQuestion,
         dialogGroupId,
-        accountId
+        accountId,
+        '!Use "YOU" politely, because you dont know the gender of the person youre talking to.!'
       );
       const sentSecondAddedQuestion = await sendMessage(
         client,
