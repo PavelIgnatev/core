@@ -69015,16 +69015,24 @@ async function init(accountData, accountId2, onUpdate) {
               );
               onUpdate(userId);
             } else {
-              console.log(
-                `[${accountData.accountId}]`,
-                (0, import_safe2.yellow)(`Update handler: "${update2.className}"`)
-              );
+              if (update2.className !== "UpdateConnectionState") {
+                console.log(
+                  `[${accountData.accountId}]`,
+                  (0, import_safe2.yellow)(
+                    `Update handler: "${update2.className}"`
+                  )
+                );
+              }
             }
           } else {
-            console.log(
-              `[${accountData.accountId}]`,
-              (0, import_safe2.yellow)(`Update handler: "${update2.className}"`)
-            );
+            if (update2.className !== "UpdateConnectionState") {
+              console.log(
+                `[${accountData.accountId}]`,
+                (0, import_safe2.yellow)(
+                  `Update handler: "${update2.className}"`
+                )
+              );
+            }
           }
         });
       }

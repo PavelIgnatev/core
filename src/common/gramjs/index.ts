@@ -95,16 +95,24 @@ export async function init(
 
                             onUpdate(userId);
                         } else {
-                            console.log(
-                                `[${accountData.accountId}]`,
-                                yellow(`Update handler: "${update.className}"`)
-                            );
+                            if (update.className !== "UpdateConnectionState") {
+                                console.log(
+                                    `[${accountData.accountId}]`,
+                                    yellow(
+                                        `Update handler: "${update.className}"`
+                                    )
+                                );
+                            }
                         }
                     } else {
-                        console.log(
-                            `[${accountData.accountId}]`,
-                            yellow(`Update handler: "${update.className}"`)
-                        );
+                        if (update.className !== "UpdateConnectionState") {
+                            console.log(
+                                `[${accountData.accountId}]`,
+                                yellow(
+                                    `Update handler: "${update.className}"`
+                                )
+                            );
+                        }
                     }
                 });
             }
