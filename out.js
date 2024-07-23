@@ -70967,11 +70967,11 @@ var main = async (ID) => {
         )
       );
     }
-    await client.destroy();
-    delete accountsInWork[ID];
     if (setOnlineInterval) {
       clearInterval(setOnlineInterval);
     }
+    await client.destroy();
+    delete accountsInWork[ID];
     return;
   } catch (e2) {
     if (setOnlineInterval) {

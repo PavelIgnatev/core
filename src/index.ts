@@ -108,11 +108,12 @@ const main = async (ID: string) => {
       );
     }
 
-    await client.destroy();
-    delete accountsInWork[ID];
     if (setOnlineInterval) {
       clearInterval(setOnlineInterval);
     }
+    await client.destroy();
+    delete accountsInWork[ID];
+
     return;
   } catch (e: any) {
     if (setOnlineInterval) {
