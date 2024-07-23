@@ -1,4 +1,5 @@
 import axios from "axios";
+import { red } from "colors/safe";
 
 export const sendToFormBot = async (text: string) => {
   const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
@@ -15,7 +16,7 @@ export const sendToFormBot = async (text: string) => {
         })
       )
     );
-  } catch (error) {
-    console.error("Error sending message to bot:", error);
+  } catch (error: any) {
+    console.log(red(`Error sending message to bot: ${error.message}`));
   }
 };

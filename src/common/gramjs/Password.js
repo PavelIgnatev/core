@@ -22,7 +22,6 @@ const SIZE_FOR_HASH = 256;
 /*
 We don't support changing passwords yet
 function checkPrimeAndGoodCheck(prime, g) {
-    console.error('Unsupported function `checkPrimeAndGoodCheck` call. Arguments:', prime, g)
 
     const goodPrimeBitsCount = 2048
     if (prime < 0 || prime.bitLength() !== goodPrimeBitsCount) {

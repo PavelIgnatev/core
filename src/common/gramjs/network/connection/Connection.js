@@ -1,6 +1,7 @@
 const PromisedWebSockets = require("../../extensions/PromisedWebSockets");
 const HttpStream = require("../../extensions/HttpStream").default;
 const AsyncQueue = require("../../extensions/AsyncQueue");
+const { red } = require("colors/safe");
 
 /**
  * The `Connection` class is a wrapper around ``asyncio.open_connection``.
@@ -20,14 +21,13 @@ class Connection {
         this._ip = ip;
         this._port = port;
         this._dcId = dcId;
-        this._log = loggers;
         this._testServers = testServers;
         this._isPremium = isPremium;
         this._connected = false;
         this._sendTask = undefined;
         this._recvTask = undefined;
         this._codec = undefined;
-        this._obfuscation = undefined; 
+        this._obfuscation = undefined;
         this._sendArray = new AsyncQueue();
         this._recvArray = new AsyncQueue();
         this._accountId = accountId;
@@ -47,10 +47,10 @@ class Connection {
     }
 
     async _connect() {
-        this._log.debug("Connecting");
+        console.log(`[${this._accountId}] Connecting`);
         this._codec = new this.PacketCodecClass(this);
         await this.socket.connect(this._port, this._ip, this._accountId);
-        this._log.debug("Finished connecting");
+        console.log(`[${this._accountId}] Finished connecting`);
         await this._initConn();
     }
 
@@ -106,7 +106,9 @@ class Connection {
                 await this._send(data);
             }
         } catch (e) {
-            this._log.info("The server closed the connection while sending");
+            console.log(
+                `[${this._accountId}] The server closed the connection while sending: ${e.message}`
+            );
         }
     }
 
@@ -119,8 +121,7 @@ class Connection {
                     throw new Error("no data received");
                 }
             } catch (e) {
-                this._log.info("connection closed");
-                // await this._recvArray.push()
+                console.log(red(`[${this._accountId}] connection closed`));
 
                 this.disconnect();
                 return;
@@ -210,14 +211,14 @@ class HttpConnection extends Connection {
     }
 
     async _connect() {
-        this._log.debug("Connecting");
+        console.log(`[${this._accountId}] Connecting`);
         await this.socket.connect(
             this._port,
             this._ip,
             this._testServers,
             this._isPremium
         );
-        this._log.debug("Finished connecting");
+        console.log(`[${this._accountId}] Finished connecting`);
     }
 
     async connect() {

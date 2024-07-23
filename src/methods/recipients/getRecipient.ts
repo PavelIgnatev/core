@@ -1,3 +1,4 @@
+import { red } from "colors/safe";
 import { sendToBot } from "../../helpers/sendToBot";
 import { sleep } from "../../helpers/sleep";
 
@@ -26,9 +27,9 @@ export const getRecipient = async (accountId: string) => {
         user.secondMessagePrompt = defaultSecondMessagePrompt;
       }
 
-      return user;
+      return user
     } catch (error: any) {
-      console.log(`Recipient User Error (${accountId}): ${error.message}`);
+      console.log(red(`[${accountId}] Get recipient error: ${error.message}`));
       await sleep(3000);
     }
   }

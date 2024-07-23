@@ -1,21 +1,26 @@
-const MessageContainer = require('../tl/core/MessageContainer');
-const TLMessage = require('../tl/core/TLMessage');
-const BinaryWriter = require('./BinaryWriter');
+const { red } = require("colors/safe");
+
+const MessageContainer = require("../tl/core/MessageContainer");
+const TLMessage = require("../tl/core/TLMessage");
+const BinaryWriter = require("./BinaryWriter");
 
 const USE_INVOKE_AFTER_WITH = new Set([
-    'messages.SendMessage', 'messages.SendMedia', 'messages.SendMultiMedia',
-    'messages.ForwardMessages', 'messages.SendInlineBotResult',
+    "messages.SendMessage",
+    "messages.SendMedia",
+    "messages.SendMultiMedia",
+    "messages.ForwardMessages",
+    "messages.SendInlineBotResult",
 ]);
 
 class MessagePacker {
-    constructor(state, logger) {
+    constructor(state, logger, accountId) {
         this._state = state;
         this._queue = [];
         this._pendingStates = [];
-        this._ready = new Promise(((resolve) => {
+        this._ready = new Promise((resolve) => {
             this.setReady = resolve;
-        }));
-        this._log = logger;
+        });
+        this._accountId = accountId;
     }
 
     values() {
@@ -33,7 +38,11 @@ class MessagePacker {
             if (atStart) {
                 // Assign `after` for the previously first `USE_INVOKE_AFTER_WITH` request
                 for (let i = 0; i < this._queue.length; i++) {
-                    if (USE_INVOKE_AFTER_WITH.has(this._queue[i]?.request.className)) {
+                    if (
+                        USE_INVOKE_AFTER_WITH.has(
+                            this._queue[i]?.request.className
+                        )
+                    ) {
                         this._queue[i].after = state;
                         break;
                     }
@@ -41,7 +50,11 @@ class MessagePacker {
             } else {
                 // Assign after for the previous `USE_INVOKE_AFTER_WITH` request
                 for (let i = this._queue.length - 1; i >= 0; i--) {
-                    if (USE_INVOKE_AFTER_WITH.has(this._queue[i]?.request.className)) {
+                    if (
+                        USE_INVOKE_AFTER_WITH.has(
+                            this._queue[i]?.request.className
+                        )
+                    ) {
                         state.after = this._queue[i];
                         break;
                     }
@@ -59,15 +72,15 @@ class MessagePacker {
             this.setReady(true);
         }
 
-        // 1658238041=MsgsAck, we don't care about MsgsAck here because they never resolve anyway.
         if (state && state.request.CONSTRUCTOR_ID !== 1658238041) {
             this._pendingStates.push(state);
             state.promise
                 // Using finally causes triggering `unhandledrejection` event
-                .catch(() => {
-                })
+                .catch(() => {})
                 .finally(() => {
-                    this._pendingStates = this._pendingStates.filter((s) => s !== state);
+                    this._pendingStates = this._pendingStates.filter(
+                        (s) => s !== state
+                    );
                 });
         }
     }
@@ -96,25 +109,31 @@ class MessagePacker {
                 afterId = state.after.msgId;
             }
             state.msgId = await this._state.writeDataAsMessage(
-                buffer, state.data, state.request.classType === 'request', afterId,
+                buffer,
+                state.data,
+                state.request.classType === "request",
+                afterId
             );
-            this._log.debug(`Assigned msgId = ${state.msgId} to ${state.request.className
-            || state.request.constructor.name}`);
 
             return buffer.getValue();
         }
-        this._log.warn(`Message payload for ${state.request.className
-        || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`);
-        state.reject('Request Payload is too big');
+        console.log(
+            red(
+                `[${accountId}] Message payload for ${
+                    state.request.className || state.request.constructor.name
+                } is too long ${state.data.length} and cannot be sent`
+            )
+        );
+        state.reject("Request Payload is too big");
 
         return undefined;
     }
 
     async wait() {
         if (!this._queue.length) {
-            this._ready = new Promise(((resolve) => {
+            this._ready = new Promise((resolve) => {
                 this.setReady = resolve;
-            }));
+            });
             await this._ready;
         }
     }
@@ -130,14 +149,17 @@ class MessagePacker {
         const batch = [];
         let size = 0;
 
-        while (this._queue.length && batch.length <= MessageContainer.MAXIMUM_LENGTH) {
+        while (
+            this._queue.length &&
+            batch.length <= MessageContainer.MAXIMUM_LENGTH
+        ) {
             const state = this._queue.shift();
             if (!state) {
                 continue;
             }
 
             if (state.abortSignal?.aborted) {
-                state.reject(new Error('Request aborted'));
+                state.reject(new Error("Request aborted"));
                 continue;
             }
 
@@ -148,10 +170,12 @@ class MessagePacker {
                     afterId = state.after.msgId;
                 }
                 state.msgId = await this._state.writeDataAsMessage(
-                    buffer, state.data, state.request.classType === 'request', afterId,
+                    buffer,
+                    state.data,
+                    state.request.classType === "request",
+                    afterId
                 );
-                this._log.debug(`Assigned msgId = ${state.msgId} to ${state.request.className
-                || state.request.constructor.name}`);
+
                 batch.push(state);
                 continue;
             }
@@ -161,9 +185,12 @@ class MessagePacker {
                 break;
             }
 
-            this._log.warn(`Message payload for ${state.request.className
-            || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`);
-            state.reject('Request Payload is too big');
+            console.log(
+                red(`[${accountId}] Message payload for ${
+                    state.request.className || state.request.constructor.name
+                } is too long ${state.data.length} and cannot be sent`)
+            );
+            state.reject("Request Payload is too big");
             size = 0;
         }
         if (!batch.length) {
@@ -176,7 +203,9 @@ class MessagePacker {
             data = Buffer.concat([b, buffer.getValue()]);
             buffer = new BinaryWriter(Buffer.alloc(0));
             const containerId = await this._state.writeDataAsMessage(
-                buffer, data, false,
+                buffer,
+                data,
+                false
             );
             for (const s of batch) {
                 s.containerId = containerId;

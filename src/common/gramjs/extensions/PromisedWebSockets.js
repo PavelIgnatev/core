@@ -151,6 +151,7 @@ class PromisedWebSockets {
                                   message.data
                               ).arrayBuffer()
                           );
+
                 this.stream = Buffer.concat([this.stream, data]);
                 this.resolveRead(true);
             });

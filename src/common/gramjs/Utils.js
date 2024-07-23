@@ -401,7 +401,6 @@ function getPeer(peer) {
         }
         // eslint-disable-next-line no-empty
     } catch (e) {
-        console.log(e)
     }
     _raiseCastFail(peer, 'peer')
 }

@@ -2,6 +2,7 @@ import BigInt from "big-integer";
 
 import GramJs from "../../common/gramjs/tl/api";
 import { sendToBot } from "../../helpers/sendToBot";
+import { blue, gray } from "colors/safe";
 
 function reduceSpaces(string: string) {
   return string.replace(/\s+/g, " ").trim();
@@ -27,6 +28,12 @@ export const sendMessage = async (
   accountId: string
 ) => {
   try {
+    console.log(
+      `[${accountId}] Send ${gray(message)} to ${blue(
+        `${userId}:${accessHash}`
+      )}`
+    );
+
     const sentMessage = await client.invoke(
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(

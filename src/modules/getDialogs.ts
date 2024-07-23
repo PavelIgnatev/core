@@ -1,3 +1,4 @@
+import { blue, yellow } from "colors/safe";
 import BigInt from "big-integer";
 
 import GramJs from "../common/gramjs/tl/api";
@@ -15,6 +16,8 @@ type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
 
 export const getDialogs = async (client: any, accountId: string) => {
+  console.log(`[${accountId}] Initialize sub module`, yellow('GET DIALOGS'));
+
   const clientDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),

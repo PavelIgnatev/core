@@ -1,7 +1,8 @@
 import axios from "axios";
 import { ChatMessage } from "cohere-ai/api";
+import { blue, gray, red, yellow } from "colors/safe";
 
-import { sendToBot } from "./sendToBot";
+import { sendToBot } from "../helpers/sendToBot";
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -37,29 +38,43 @@ export const makeRequestComplete = async (
   groupId: string,
   accountId: string
 ): Promise<string> => {
+  console.log(`[${accountId}] Initialize sub module`, yellow('MAKE REQUEST COMPLETE'));
+
   const lastDialog = chatHistory.pop();
   console.log(
-    `Текущий промпт перед генерацией: ${preamble}; Текущая история диалога: ${JSON.stringify(
-      chatHistory
-    )}; Последнее сообщение от собеседника: ${lastDialog?.message}`
+    `[${accountId}] Current preamble before generation:`,
+    gray(preamble.replace(/\n/g, ""))
   );
+  console.log(
+    `[${accountId}] Current dialog history [${chatHistory.length}]:`,
+    gray(JSON.stringify(chatHistory))
+  );
+  console.log(
+    `[${accountId}] Last message from interlocutor:`,
+    gray(String(lastDialog?.message).replace(/\n/g, ""))
+  );
+  console.log(`[${accountId}] Additional filters:`);
+  console.log(
+    `[${accountId}] Removing a reference:`,
+    blue(disableLink ? "on" : "off")
+  );
+  console.log(
+    `[${accountId}] Deleting a question:`,
+    blue(deleteQuestion ? "on" : "off")
+  );
+  console.log(
+    `[${accountId}] Minimum number of messages in a reply:`,
+    blue(String(minimalProposalLength))
+  );
+  console.log(`[${accountId}] Part check:`, part ? part : "off");
 
-  console.log("Дополнительные фильтры:");
-  console.log(`Удаление ссылки: ${disableLink ? "включено" : "выключено"}`);
-  console.log(`Удаление вопроса: ${deleteQuestion ? "включено" : "выключено"}`);
-  console.log(
-    `Минимальное количество сообщений в ответе: ${minimalProposalLength}`
-  );
-  console.log(
-    `Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`
-  );
   const generations = [];
   const errors = [];
 
   for (let i = 0; i < 5; i++) {
     try {
       if (!lastDialog) {
-        throw new Error("Last Message not defined");
+        throw new Error("Last dialog message not defined");
       }
 
       const {
@@ -76,7 +91,7 @@ export const makeRequestComplete = async (
       });
 
       if (!data || !data.trim()) {
-        throw new Error("Пустое сообщение");
+        throw new Error("Blank message");
       }
       generations.push(data);
 
@@ -86,16 +101,18 @@ export const makeRequestComplete = async (
         .replace(/!/g, ".")
         .trim();
 
+      console.log(
+        `[${accountId}] Generated message before filters:`,
+        gray(message)
+      );
+
       let pattern =
         /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
       const hasTextLink = message.match(pattern);
 
       if (hasTextLink && disableLink) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
         throw new Error(
-          "В ответе содержится ссылка на этапе, когда ссылки отправлять запрещено"
+          "The reply contains a link at a stage where it is forbidden to send links"
         );
       }
 
@@ -107,13 +124,7 @@ export const makeRequestComplete = async (
       }
 
       if (deleteQuestion && message.includes("?")) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение до удаления вопроса:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
         message = removeQuestionAndExclamationSentences(message);
-        console.log(
-          `\x1b[4mПотенциальное сообщение после удаления вопроса:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
       }
 
       if (part) {
@@ -134,10 +145,7 @@ export const makeRequestComplete = async (
         message.includes(")") ||
         message.includes("*")
       ) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error("В ответе содержатся подозрительные символы");
+        throw new Error("The response contains suspicious characters");
       }
 
       const varMessage = capitalizeFirstLetter(
@@ -201,32 +209,32 @@ export const makeRequestComplete = async (
       );
 
       if (varMessage.length < 60) {
-        throw new Error("Минимальная длина 60 символов");
+        throw new Error("Minimum length 60 characters");
       }
 
       if (minimalProposalLength > countSentences(varMessage)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(
-          `Минимальное количество сообщений - ${minimalProposalLength}`
-        );
+        throw new Error(`Minimal number of messages: ${minimalProposalLength}`);
       }
 
       if (part && !message.includes(part)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
         throw new Error(
-          `Потенциальное сообщение не содержит часть ${part}, хотя должно`
+          `The potential message does not contain the ${part} part, although it should`
         );
       }
 
-      return varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      console.log(
+        `[${accountId}] Generated message after filters:`,
+        gray(nmessage)
+      );
+
+      return nmessage;
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
-      console.log(`Ошибка запроса. ${error.message}`);
+      console.log(
+        red(`[${accountId}] Request Complete Error: ${error.message}`)
+      );
       errors.push(error.message);
     }
   }
@@ -248,7 +256,13 @@ _____________
   } catch {}
 
   if (generations[0]) {
-    return generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    console.log(
+      `[${accountId}] Generated message after filters:`,
+      gray(nmessage)
+    );
+
+    return nmessage;
   }
 
   throw new Error("Stopped");

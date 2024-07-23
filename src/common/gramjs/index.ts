@@ -1,17 +1,16 @@
 import BigInt from "big-integer";
+import { yellow } from "colors/safe";
 
 import GramJs from "./tl/api";
 import CallbackSession from "./sessions/CallbackSession";
 import TelegramClient from "./client/TelegramClient";
 
 import { getDialogue } from "../../db/dialogues";
-import { Logger } from "./extensions/index";
+
 import { Account } from "../../@types/Account";
 
 const DEFAULT_USER_AGENT = "Unknown UserAgent";
 const DEFAULT_PLATFORM = "Unknown platform";
-
-Logger.setLevel("warn");
 
 export async function init(
     accountData: Account,
@@ -85,8 +84,27 @@ export async function init(
                         );
 
                         if (isDialogInDb && userId instanceof BigInt) {
+                            console.log(
+                                `[${accountData.accountId}]`,
+                                yellow(
+                                    `New message "${
+                                        update.message
+                                    }" from user by id#${String(userId)}`
+                                )
+                            );
+
                             onUpdate(userId);
+                        } else {
+                            console.log(
+                                `[${accountData.accountId}]`,
+                                yellow(`Update handler: "${update.className}"`)
+                            );
                         }
+                    } else {
+                        console.log(
+                            `[${accountData.accountId}]`,
+                            yellow(`Update handler: "${update.className}"`)
+                        );
                     }
                 });
             }

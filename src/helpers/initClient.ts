@@ -1,3 +1,4 @@
+import { red } from "colors/safe";
 import { Account } from "../@types/Account";
 
 import { init } from "../common/gramjs";
@@ -39,7 +40,7 @@ export const initClient = async (
         "SESSION_PASSWORD_NEEDED",
       ].includes(e.message)
     ) {
-      console.error(account.accountId, e.message);
+      console.log(red(`[${account.accountId}] ${e.message}`));
       await updateAccountById(account.accountId, {
         banned: true,
         reason: e.message,

@@ -1,5 +1,9 @@
-import { makeRequestComplete } from "../helpers/makeRequestComplete";
-import { makeRequestGpt } from "../helpers/makeRequestGpt";
+import { red, yellow } from "colors/safe";
+
+import { getDialogs } from "./getDialogs";
+import { makeRequestComplete } from "./makeRequestComplete";
+
+import { makeRequestGpt } from "./makeRequestGpt";
 import { generateRandomString } from "../helpers/generateRandomString";
 import { converterName } from "../helpers/converterName";
 import { getCombinedMessages } from "../helpers/getCombinedMessages";
@@ -9,7 +13,6 @@ import { sendToFormBot } from "../helpers/sendToFormBot";
 import { sendMessage } from "../methods/messages/sendMessage";
 import { saveRecipient } from "./saveRecipient";
 import { getFullUser } from "../methods/users/getFullUser";
-import { getDialogs } from "./getDialogs";
 
 import { getGroupId } from "../db/groupId";
 import { updateBlockedDialogue } from "../db/dialogues";
@@ -46,6 +49,8 @@ export const autoResponse = async (
   tgAccountId: string,
   tgFirstName: string
 ) => {
+  console.log(`[${accountId}] Initialize module`, yellow("AUTO RESPONSE"));
+
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
     accountId
@@ -79,14 +84,14 @@ export const autoResponse = async (
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
 
     if (currentStage > 25) {
-      console.log(`MAXIMUM STAGE in ${accountId}:${id}`);
+      console.log(red(`[${accountId}] MAXIMUM STAGE in ${accountId}:${id}`));
       await updateBlockedDialogue(accountId, id, "dialogs-max-stage");
       continue;
     }
 
-    const recipientFull = await getFullUser(client, id, accessHash);
+    const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.error(`Chat with username ${id} not resolved`);
+      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
       await updateBlockedDialogue(accountId, id, "dialogs-not-resolved");
       continue;
     }
@@ -238,9 +243,9 @@ ${promptGoal} ${
     const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
-    const recipientFull = await getFullUser(client, id, accessHash);
+    const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.error(`Chat with username ${id} not resolved`);
+      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
       await updateBlockedDialogue(accountId, id, "ping-not-resolved");
       continue;
     }
@@ -304,9 +309,9 @@ ${pingMessage}`);
   for (const dialog of manualControlDialogs) {
     const { id, accessHash, messages, managerMessage } = dialog;
 
-    const recipientFull = await getFullUser(client, id, accessHash);
+    const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.error(`Chat with username ${id} not resolved`);
+      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
       await updateBlockedDialogue(
         accountId,
         id,

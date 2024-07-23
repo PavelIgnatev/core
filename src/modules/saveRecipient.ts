@@ -1,3 +1,5 @@
+import { red, yellow } from "colors/safe";
+
 import GramJs from "../common/gramjs/tl/api";
 
 import { Dialogue } from "../@types/Dialogue";
@@ -17,6 +19,8 @@ export const saveRecipient = async (
   status: "create" | "update",
   addedData: Record<string, unknown> = {}
 ) => {
+  console.log(`[${accountId}] Initialize sub module`, yellow("SAVE RECIPIENT"));
+
   const {
     id: recipientId,
     phone,
@@ -53,8 +57,6 @@ export const saveRecipient = async (
     ...addedData,
   };
 
-  console.log("Data before saving:", data);
-
   while (true) {
     try {
       await updateDialogue(data);
@@ -66,11 +68,16 @@ export const saveRecipient = async (
         await incrementMessageCount(accountId);
         await incrementCurrentCount(groupId);
       }
+
+      console.log(
+        `[${accountId}] Saving the recipient information to the database is complete`
+      );
       break;
     } catch (error: any) {
-      console.error(
-        "Error occurred while saving recipient (2):",
-        error.message
+      console.log(
+        red(
+          `[${accountId}] Error occurred while saving recipient: ${error.message}`
+        )
       );
 
       await sleep(3000);

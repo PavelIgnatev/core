@@ -1,6 +1,7 @@
 import axios from "axios";
+import { blue, gray, red, yellow } from "colors/safe";
 
-import { sendToBot } from "./sendToBot";
+import { sendToBot } from "../helpers/sendToBot";
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -22,7 +23,18 @@ export const makeRequestGpt = async (
   accountId: string,
   part: string | null = ""
 ): Promise<string> => {
-  console.log(`Preamble: ${preamble}; Message: ${prompt}; `);
+  console.log(`[${accountId}] Initialize sub module`, yellow('MAKE REQUEST GPT'));
+
+  console.log(
+    `[${accountId}] Current preamble before generation:`,
+    gray(preamble.replace(/\n/g, ""))
+  );
+  console.log(
+    `[${accountId}] Current message for preamble:`,
+    gray(String(prompt).replace(/\n/g, ""))
+  );
+  console.log(`[${accountId}] Additional filters:`);
+  console.log(`[${accountId}] Part check:`, blue(part ? part : "off"));
 
   const generations = [];
   const errors = [];
@@ -41,7 +53,7 @@ export const makeRequestGpt = async (
       });
 
       if (!data || !data.trim()) {
-        throw new Error("Пустое сообщение");
+        throw new Error("Blank message");
       }
       generations.push(data);
 
@@ -50,6 +62,8 @@ export const makeRequestGpt = async (
         .replace(/['"`]/g, "")
         .replace(/!/g, ".")
         .trim();
+
+      console.log(`[${accountId}] Generated message before filters:`, gray(message));
 
       if (
         message.includes("[") ||
@@ -62,24 +76,15 @@ export const makeRequestGpt = async (
         message.includes(")") ||
         message.includes("*")
       ) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error("В ответе содержатся подозрительные символы");
+        throw new Error("The response contains suspicious characters");
       }
 
       if (hasMixedLanguageWords(message)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(`Потенциальное сообщение содержит англо-русские слова`);
+        throw new Error("The potential message contains English-Russian words");
       }
 
       if (containsChinese(message)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error(`Потенциальное сообщение содержит китайские слова`);
+        throw new Error("The potential message contains Chinese words");
       }
 
       const varMessage = capitalizeFirstLetter(
@@ -143,19 +148,19 @@ export const makeRequestGpt = async (
       );
 
       if (part && !message.includes(part)) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
         throw new Error(
-          `Потенциальное сообщение не содержит часть ${part}, хотя должно`
+          `The potential message does not contain the ${part} part, although it should`
         );
       }
 
-      return varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      console.log(`[${accountId}] Generated message after filters:`, gray(nmessage));
+
+      return nmessage;
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
-      console.log(`Ошибка запроса. ${error.message}`);
+      console.log(red(`[${accountId}] Request Gpt Error: ${error.message}`));
       errors.push(error.message);
     }
   }
@@ -173,7 +178,10 @@ ${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
   } catch {}
 
   if (generations[0]) {
-    return generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    console.log(`[${accountId}] Generated message after filters:`, gray(nmessage));
+
+    return nmessage;
   }
 
   throw new Error("Stopped");

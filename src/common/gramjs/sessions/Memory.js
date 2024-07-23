@@ -138,56 +138,10 @@ class MemorySession extends Session {
         return rows
     }
 
-    processEntities(tlo) {
-        const entitiesSet = this._entitiesToRows(tlo)
-        for (const e of entitiesSet) {
-            this._entities.add(e)
-        }
-    }
 
-    getEntityRowsByPhone(phone) {
-        for (const e of this._entities) { // id, hash, username, phone, name
-            if (e[3] === phone) {
-                return [e[0], e[1]]
-            }
-        }
-    }
 
-    getEntityRowsByUsername(username) {
-        for (const e of this._entities) { // id, hash, username, phone, name
-            if (e[2] === username) {
-                return [e[0], e[1]]
-            }
-        }
-    }
 
-    getEntityRowsByName(name) {
-        for (const e of this._entities) { // id, hash, username, phone, name
-            if (e[4] === name) {
-                return [e[0], e[1]]
-            }
-        }
-    }
 
-    getEntityRowsById(id, exact = true) {
-        if (exact) {
-            for (const e of this._entities) { // id, hash, username, phone, name
-                if (e[0] === id) {
-                    return [e[0], e[1]]
-                }
-            }
-        } else {
-            const ids = [utils.getPeerId(new types.PeerUser({ userId: id })),
-                utils.getPeerId(new types.PeerChat({ chatId: id })),
-                utils.getPeerId(new types.PeerChannel({ channelId: id })),
-            ]
-            for (const e of this._entities) { // id, hash, username, phone, name
-                if (ids.includes(e[0])) {
-                    return [e[0], e[1]]
-                }
-            }
-        }
-    }
 
     getInputEntity(key) {
         let exact

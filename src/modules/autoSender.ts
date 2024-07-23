@@ -1,3 +1,5 @@
+import { blue, gray, red, yellow } from "colors/safe";
+
 import GramJs from "../common/gramjs/tl/api";
 
 import { checkSpamBlock } from "./checkSpamBlock";
@@ -32,16 +34,21 @@ export const autoSender = async (
   client: any,
   accountId: string,
   tgAccountId: string,
-  tgRmainingTime?: string
+  tgRmainingTime: string | null
 ) => {
+  console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
+
   if (!tgRmainingTime) {
     const remainingTime = generateRandomTime();
     await updateAccountById(accountId, {
       remainingTime,
     });
+
     console.log(
-      `Remaing time not defined, new remaining time - ${remainingTime}`
+      `[${accountId}] Remaining time not defined, new remaining time:`,
+      blue(String(remainingTime))
     );
+
     return;
   }
 
@@ -56,16 +63,24 @@ export const autoSender = async (
 
     const recipient = await getRecipient(accountId);
     let recipientUserId;
-    console.log("User data before writing:", recipient);
-    console.log(`Start sending messages to user ${recipient.username}`);
+    console.log(`[${accountId}] Generate recipient before writing:`, gray(JSON.stringify(recipient)));
 
     try {
       const resolveMethod = recipient.username.includes("+")
         ? resolvePhone
         : resolveUsername;
-      const userByUsername = await resolveMethod(client, recipient.username);
+      const userByUsername = await resolveMethod(
+        client,
+        accountId,
+        recipient.username
+      );
       const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-      const recipientFull = await getFullUser(client, userId, accessHash);
+      const recipientFull = await getFullUser(
+        client,
+        accountId,
+        userId,
+        accessHash
+      );
 
       if (
         !userId ||
@@ -73,8 +88,10 @@ export const autoSender = async (
         !recipientFull ||
         !(userByUsername?.users?.[0] instanceof GramJs.User)
       ) {
-        console.error(
-          `Chat with username ${recipient.username}:${userId} not resolved`
+        console.log(
+          red(
+            `[${accountId}] Chat with username ${recipient.username}:${userId} not resolved`
+          )
         );
 
         await updateFailedMessage(recipient.username);
@@ -102,9 +119,6 @@ export const autoSender = async (
 
       const firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
-      console.log(
-        `First Message: ${firstMessage}; Second Message: ${secondMessage}`
-      );
       const sentFirstMessage = await sendMessage(
         client,
         userId,
@@ -119,14 +133,9 @@ export const autoSender = async (
         secondMessage,
         accountId
       );
-      console.log(
-        `Sending messages to user ${recipient.username}:${userId} was successful!`
-      );
-      await editFolder(client, userId, accessHash, 1);
-      await muteNotification(client, userId, accessHash, 2147483647);
-      console.log(
-        `Added a chat with user ${recipient.username}:${userId} to the archive and muted`
-      );
+
+      await editFolder(client, accountId, userId, accessHash, 1);
+      await muteNotification(client, accountId, userId, accessHash, 2147483647);
       await saveRecipient(
         accountId,
         recipientFull,
@@ -172,9 +181,10 @@ export const autoSender = async (
       await updateFailedMessage(recipient.username);
       throw new Error("Global Error");
     }
+  } else {
+    console.log(
+      `[${accountId}] Next message can be sent after`,
+      blue(String(remainingTime.toLocaleString()))
+    );
   }
-
-  console.log(
-    `AUTO SENDER: The next message to be sent will be ${remainingTime}`
-  );
 };

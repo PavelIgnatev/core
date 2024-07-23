@@ -8,6 +8,7 @@ class UpdateConnectionState {
     constructor(state, origin) {
         this.state = state;
         this.origin = origin;
+        this.className = "UpdateConnectionState"
     }
 }
 
