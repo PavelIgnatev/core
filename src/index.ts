@@ -26,7 +26,6 @@ const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
   let client: TelegramClient | null = null;
-  let setOnlineInterval: any = null;
 
   try {
     accountsInWork[ID] = 0;
@@ -64,20 +63,14 @@ const main = async (ID: string) => {
     );
     const tgAccountId = await usersMe(client, accountId, id);
 
-    setOnlineInterval = setInterval(() => {
-      setOffline(client, accountId, false);
-    }, 30000);
-
     for (let i = 0; i < 30; i++) {
       const startTime = performance.now();
       console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
       accountsInWork[ID] = i + 1;
 
+      await setOffline(client, accountId, false);
       const account = await getAccountById(ID);
       if (!account) {
-        if (setOnlineInterval) {
-          clearInterval(setOnlineInterval);
-        }
         delete accountsInWork[ID];
         await client.destroy();
         return;
@@ -108,18 +101,11 @@ const main = async (ID: string) => {
       );
     }
 
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
     await client.destroy();
     delete accountsInWork[ID];
 
     return;
   } catch (e: any) {
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
-
     if (client) {
       await client.destroy();
     }

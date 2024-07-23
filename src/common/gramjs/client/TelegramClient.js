@@ -307,7 +307,7 @@ class TelegramClient {
         let lastPongAt;
 
         while (!this._destroyed) {
-            await Helpers.sleep(60000);
+            await Helpers.sleep(PING_INTERVAL);
             if (this._sender.isReconnecting || this._isSwitchingDc) {
                 lastPongAt = undefined;
                 continue;
@@ -315,15 +315,19 @@ class TelegramClient {
 
             try {
                 const ping = () => {
-                    if (!this._sender) {
-                        console.log(
-                            red(
-                                `[${this._accountId}] Sender for ping not defined`
-                            )
-                        );
+                    if (this._destroyed) {
+                        return undefined;
                     }
 
-                    return undefined;
+                    return this._sender.send(
+                        new requests.PingDelayDisconnect({
+                            pingId: Helpers.getRandomInt(
+                                Number.MIN_SAFE_INTEGER,
+                                Number.MAX_SAFE_INTEGER
+                            ),
+                            disconnectDelay: PING_DISCONNECT_DELAY,
+                        })
+                    );
                 };
 
                 const pingAt = Date.now();
@@ -333,7 +337,7 @@ class TelegramClient {
 
                 if (!lastInterval || lastInterval < PING_INTERVAL_TO_WAKE_UP) {
                     await attempts(
-                        () => timeout(ping, 60000),
+                        () => timeout(ping, PING_TIMEOUT),
                         PING_FAIL_ATTEMPTS,
                         PING_FAIL_INTERVAL
                     );
@@ -351,9 +355,9 @@ class TelegramClient {
                             )
                         );
                         wakeUpWarningTimeout = undefined;
-                    }, 3000);
+                    }, PING_WAKE_UP_WARNING_TIMEOUT);
 
-                    await timeout(ping, 5000);
+                    await timeout(ping, PING_WAKE_UP_TIMEOUT);
 
                     if (wakeUpWarningTimeout) {
                         clearTimeout(wakeUpWarningTimeout);
@@ -380,6 +384,16 @@ class TelegramClient {
                     break;
                 }
                 this._sender.reconnect();
+            }
+
+            if (Date.now() - this._lastRequest > 30 * 60 * 1000) {
+                try {
+                    await this.pingCallback();
+                } catch (e) {
+                    // we don't care about errors here
+                }
+
+                lastPongAt = undefined;
             }
         }
         await this.disconnect();
@@ -781,7 +795,9 @@ class TelegramClient {
 
                     if (e.seconds <= this.floodSleepLimit) {
                         console.log(
-                            red(`[${this._accountId}] Flood wait Error: ${e.message}`)
+                            red(
+                                `[${this._accountId}] Flood wait Error: ${e.message}`
+                            )
                         );
 
                         await sleep(e.seconds * 1000);

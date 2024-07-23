@@ -67995,9 +67995,14 @@ var require_TelegramClient = __commonJS({
     var DEFAULT_DC_ID = 2;
     var EXPORTED_SENDER_RECONNECT_TIMEOUT = 1e3;
     var EXPORTED_SENDER_RELEASE_TIMEOUT = 3e4;
+    var PING_INTERVAL = 3e3;
+    var PING_TIMEOUT = 5e3;
     var PING_FAIL_ATTEMPTS = 3;
     var PING_FAIL_INTERVAL = 100;
     var PING_INTERVAL_TO_WAKE_UP = 5e3;
+    var PING_WAKE_UP_TIMEOUT = 3e3;
+    var PING_WAKE_UP_WARNING_TIMEOUT = 1e3;
+    var PING_DISCONNECT_DELAY = 6e4;
     var sizeTypes = ["u", "v", "w", "y", "d", "x", "c", "m", "b", "a", "s", "f"];
     var TelegramClient2 = class _TelegramClient {
       static DEFAULT_OPTIONS = {
@@ -68219,27 +68224,31 @@ var require_TelegramClient = __commonJS({
       async _updateLoop() {
         let lastPongAt;
         while (!this._destroyed) {
-          await Helpers2.sleep(6e4);
+          await Helpers2.sleep(PING_INTERVAL);
           if (this._sender.isReconnecting || this._isSwitchingDc) {
             lastPongAt = void 0;
             continue;
           }
           try {
             const ping = () => {
-              if (!this._sender) {
-                console.log(
-                  red13(
-                    `[${this._accountId}] Sender for ping not defined`
-                  )
-                );
+              if (this._destroyed) {
+                return void 0;
               }
-              return void 0;
+              return this._sender.send(
+                new requests.PingDelayDisconnect({
+                  pingId: Helpers2.getRandomInt(
+                    Number.MIN_SAFE_INTEGER,
+                    Number.MAX_SAFE_INTEGER
+                  ),
+                  disconnectDelay: PING_DISCONNECT_DELAY
+                })
+              );
             };
             const pingAt = Date.now();
             const lastInterval = lastPongAt ? pingAt - lastPongAt : void 0;
             if (!lastInterval || lastInterval < PING_INTERVAL_TO_WAKE_UP) {
               await attempts(
-                () => timeout2(ping, 6e4),
+                () => timeout2(ping, PING_TIMEOUT),
                 PING_FAIL_ATTEMPTS,
                 PING_FAIL_INTERVAL
               );
@@ -68256,8 +68265,8 @@ var require_TelegramClient = __commonJS({
                   )
                 );
                 wakeUpWarningTimeout = void 0;
-              }, 3e3);
-              await timeout2(ping, 5e3);
+              }, PING_WAKE_UP_WARNING_TIMEOUT);
+              await timeout2(ping, PING_WAKE_UP_TIMEOUT);
               if (wakeUpWarningTimeout) {
                 clearTimeout(wakeUpWarningTimeout);
                 wakeUpWarningTimeout = void 0;
@@ -68278,6 +68287,13 @@ var require_TelegramClient = __commonJS({
               break;
             }
             this._sender.reconnect();
+          }
+          if (Date.now() - this._lastRequest > 30 * 60 * 1e3) {
+            try {
+              await this.pingCallback();
+            } catch (e2) {
+            }
+            lastPongAt = void 0;
           }
         }
         await this.disconnect();
@@ -68603,7 +68619,9 @@ var require_TelegramClient = __commonJS({
               );
               if (e2.seconds <= this.floodSleepLimit) {
                 console.log(
-                  red13(`[${this._accountId}] Flood wait Error: ${e2.message}`)
+                  red13(
+                    `[${this._accountId}] Flood wait Error: ${e2.message}`
+                  )
                 );
                 await sleep3(e2.seconds * 1e3);
               } else {
@@ -68826,7 +68844,8 @@ var getAccounts = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.distinct("accountId", {
     banned: { $ne: true },
-    stopped: { $ne: true }
+    stopped: { $ne: true },
+    setuped: { $ne: true }
   });
   return accounts;
 };
@@ -70900,7 +70919,6 @@ var promises = [];
 var accountsInWork = {};
 var main = async (ID) => {
   let client = null;
-  let setOnlineInterval = null;
   try {
     accountsInWork[ID] = 0;
     let isAutoResponse = true;
@@ -70930,18 +70948,13 @@ var main = async (ID) => {
       firstName
     );
     const tgAccountId = await usersMe(client, accountId2, id);
-    setOnlineInterval = setInterval(() => {
-      setOffline(client, accountId2, false);
-    }, 3e4);
     for (let i2 = 0; i2 < 30; i2++) {
       const startTime = performance.now();
       console.log(`[${accountId2}]`, (0, import_safe23.yellow)(`Init iteration [${i2 + 1}]`));
       accountsInWork[ID] = i2 + 1;
+      await setOffline(client, accountId2, false);
       const account2 = await getAccountById(ID);
       if (!account2) {
-        if (setOnlineInterval) {
-          clearInterval(setOnlineInterval);
-        }
         delete accountsInWork[ID];
         await client.destroy();
         return;
@@ -70967,16 +70980,10 @@ var main = async (ID) => {
         )
       );
     }
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
     await client.destroy();
     delete accountsInWork[ID];
     return;
   } catch (e2) {
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
     if (client) {
       await client.destroy();
     }
