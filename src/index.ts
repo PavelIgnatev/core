@@ -2,7 +2,7 @@ import "dotenv/config";
 import util from "util";
 
 import { exec as childExec } from "child_process";
-import { red, yellow } from "colors/safe";
+import { black, red, yellow } from "colors/safe";
 
 import { getAccountById, getAccounts, updateAccountById } from "./db/accounts";
 
@@ -20,14 +20,19 @@ import "./helpers/setConsole.log";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
+const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
+  let client;
+
   try {
+    accountsInWork[ID] = 0;
     let isAutoResponse = true;
     const account = await getAccountById(ID);
 
     if (!account) {
       await sendToBot(`Account from getAccountById by id ${ID} not defined`);
+      delete accountsInWork[ID];
 
       return;
     }
@@ -46,7 +51,7 @@ const main = async (ID: string) => {
       throw new Error("Insufficient number of parameters to start");
     }
 
-    const client = await initClient(account, ID, () => (isAutoResponse = true));
+    client = await initClient(account, ID, () => (isAutoResponse = true));
 
     const tgFirstName = await accountSetup(
       client,
@@ -59,10 +64,13 @@ const main = async (ID: string) => {
     for (let i = 0; i < 30; i++) {
       const startTime = performance.now();
       console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
+      accountsInWork[ID] = i + 1;
       await setOffline(client, accountId, false);
 
       const account = await getAccountById(ID);
       if (!account) {
+        delete accountsInWork[ID];
+        await client.destroy();
         return;
       }
 
@@ -90,8 +98,16 @@ const main = async (ID: string) => {
         )
       );
     }
+    await client.destroy();
+    delete accountsInWork[ID];
     return;
   } catch (e: any) {
+    if (client) {
+      await client.destroy();
+    }
+
+    delete accountsInWork[ID];
+
     console.log(red(`[${ID}] Main error: ${e.message}`));
 
     if (e.message.includes("AUTH_KEY_DUPLICATED")) {
@@ -125,4 +141,8 @@ all proccess done
 ____________________________`);
     process.exit(1);
   });
+
+  setInterval(() => {
+    console.log(black(JSON.stringify(accountsInWork)));
+  }, 60000);
 });

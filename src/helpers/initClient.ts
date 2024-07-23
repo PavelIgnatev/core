@@ -4,6 +4,7 @@ import { Account } from "../@types/Account";
 import { init } from "../common/gramjs";
 
 import { updateAccountById } from "../db/accounts";
+import TelegramClient from "../common/gramjs/client/TelegramClient";
 
 export const initClient = async (
   account: Account,
@@ -26,7 +27,7 @@ export const initClient = async (
       throw new Error("Global Error (client not inited)");
     }
 
-    return client;
+    return client as TelegramClient;
   } catch (e: any) {
     if (
       [

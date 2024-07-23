@@ -70897,12 +70897,16 @@ console.log = (...args) => {
 // src/index.ts
 var exec = import_util3.default.promisify(import_child_process.exec);
 var promises = [];
+var accountsInWork = {};
 var main = async (ID) => {
+  let client;
   try {
+    accountsInWork[ID] = 0;
     let isAutoResponse = true;
     const account = await getAccountById(ID);
     if (!account) {
       await sendToBot(`Account from getAccountById by id ${ID} not defined`);
+      delete accountsInWork[ID];
       return;
     }
     const {
@@ -70917,7 +70921,7 @@ var main = async (ID) => {
     if (![accountId2, dcId, platform, userAgent].every(Boolean)) {
       throw new Error("Insufficient number of parameters to start");
     }
-    const client = await initClient(account, ID, () => isAutoResponse = true);
+    client = await initClient(account, ID, () => isAutoResponse = true);
     const tgFirstName = await accountSetup(
       client,
       accountId2,
@@ -70928,9 +70932,12 @@ var main = async (ID) => {
     for (let i2 = 0; i2 < 30; i2++) {
       const startTime = performance.now();
       console.log(`[${accountId2}]`, (0, import_safe23.yellow)(`Init iteration [${i2 + 1}]`));
+      accountsInWork[ID] = i2 + 1;
       await setOffline(client, accountId2, false);
       const account2 = await getAccountById(ID);
       if (!account2) {
+        delete accountsInWork[ID];
+        await client.destroy();
         return;
       }
       if (isAutoResponse) {
@@ -70954,8 +70961,14 @@ var main = async (ID) => {
         )
       );
     }
+    await client.destroy();
+    delete accountsInWork[ID];
     return;
   } catch (e2) {
+    if (client) {
+      await client.destroy();
+    }
+    delete accountsInWork[ID];
     console.log((0, import_safe23.red)(`[${ID}] Main error: ${e2.message}`));
     if (e2.message.includes("AUTH_KEY_DUPLICATED")) {
       await updateAccountById(ID, {
@@ -70986,6 +70999,9 @@ all proccess done
 ____________________________`);
     process.exit(1);
   });
+  setInterval(() => {
+    console.log((0, import_safe23.black)(JSON.stringify(accountsInWork)));
+  }, 6e4);
 });
 /*! Bundled license information:
 
