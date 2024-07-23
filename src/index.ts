@@ -63,43 +63,43 @@ const main = async (ID: string) => {
     );
     const tgAccountId = await usersMe(client, accountId, id);
 
-    for (let i = 0; i < 30; i++) {
-      const startTime = performance.now();
-      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
-      accountsInWork[ID] = i + 1;
+    // for (let i = 0; i < 30; i++) {
+    //   const startTime = performance.now();
+    //   console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
+    //   accountsInWork[ID] = i + 1;
 
-      await setOffline(client, accountId, false);
-      const account = await getAccountById(ID);
-      if (!account) {
-        delete accountsInWork[ID];
-        await client.destroy();
-        return;
-      }
+    //   await setOffline(client, accountId, false);
+    //   const account = await getAccountById(ID);
+    //   if (!account) {
+    //     delete accountsInWork[ID];
+    //     await client.destroy();
+    //     return;
+    //   }
 
-      if (isAutoResponse) {
-        isAutoResponse = false;
-        await autoResponse(client, accountId, tgAccountId, tgFirstName);
-      }
+    //   if (isAutoResponse) {
+    //     isAutoResponse = false;
+    //     await autoResponse(client, accountId, tgAccountId, tgFirstName);
+    //   }
 
-      await autoSender(
-        client,
-        accountId,
-        tgAccountId,
-        account.remainingTime || null
-      );
+    //   await autoSender(
+    //     client,
+    //     accountId,
+    //     tgAccountId,
+    //     account.remainingTime || null
+    //   );
 
-      await new Promise((res) => setTimeout(res, 60000));
+    //   await new Promise((res) => setTimeout(res, 60000));
 
-      const endTime = performance.now();
-      console.log(
-        `[${accountId}]`,
-        yellow(
-          `End iteration [${i + 1}][${Math.floor(
-            (endTime - startTime) / 1000
-          )}s]`
-        )
-      );
-    }
+    //   const endTime = performance.now();
+    //   console.log(
+    //     `[${accountId}]`,
+    //     yellow(
+    //       `End iteration [${i + 1}][${Math.floor(
+    //         (endTime - startTime) / 1000
+    //       )}s]`
+    //     )
+    //   );
+    // }
 
     await client.destroy();
     delete accountsInWork[ID];
@@ -135,7 +135,7 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  accounts.forEach((accountId: string) => {
+  accounts.slice(0, 100).forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 

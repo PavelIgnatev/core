@@ -7,10 +7,6 @@ export const setOffline = async (
   accountId: string,
   offline: boolean
 ) => {
-  console.log(
-    `[${accountId}] Set account status to`, blue(offline ? "offline" : "online")
-  );
-
   const result = await client.invoke(
     new GramJs.account.UpdateStatus({
       offline,

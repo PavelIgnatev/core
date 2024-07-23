@@ -304,97 +304,9 @@ class TelegramClient {
     }
 
     async _updateLoop() {
-        let lastPongAt;
 
         while (!this._destroyed) {
-            await Helpers.sleep(PING_INTERVAL);
-            if (this._sender.isReconnecting || this._isSwitchingDc) {
-                lastPongAt = undefined;
-                continue;
-            }
-
-            try {
-                const ping = () => {
-                    if (this._destroyed) {
-                        return undefined;
-                    }
-
-                    return this._sender.send(
-                        new requests.PingDelayDisconnect({
-                            pingId: Helpers.getRandomInt(
-                                Number.MIN_SAFE_INTEGER,
-                                Number.MAX_SAFE_INTEGER
-                            ),
-                            disconnectDelay: PING_DISCONNECT_DELAY,
-                        })
-                    );
-                };
-
-                const pingAt = Date.now();
-                const lastInterval = lastPongAt
-                    ? pingAt - lastPongAt
-                    : undefined;
-
-                if (!lastInterval || lastInterval < PING_INTERVAL_TO_WAKE_UP) {
-                    await attempts(
-                        () => timeout(ping, PING_TIMEOUT),
-                        PING_FAIL_ATTEMPTS,
-                        PING_FAIL_INTERVAL
-                    );
-                } else {
-                    let wakeUpWarningTimeout = setTimeout(() => {
-                        console.log(
-                            red(
-                                `[${this._accountId}] UpdateConnectionState - disconnected`
-                            )
-                        );
-
-                        this._handleUpdate(
-                            new UpdateConnectionState(
-                                UpdateConnectionState.disconnected
-                            )
-                        );
-                        wakeUpWarningTimeout = undefined;
-                    }, PING_WAKE_UP_WARNING_TIMEOUT);
-
-                    await timeout(ping, PING_WAKE_UP_TIMEOUT);
-
-                    if (wakeUpWarningTimeout) {
-                        clearTimeout(wakeUpWarningTimeout);
-                        wakeUpWarningTimeout = undefined;
-                    }
-
-                    this._handleUpdate(
-                        new UpdateConnectionState(
-                            UpdateConnectionState.connected
-                        )
-                    );
-                }
-
-                lastPongAt = Date.now();
-            } catch (err) {
-                // eslint-disable-next-line no-console
-
-                lastPongAt = undefined;
-
-                if (this._sender.isReconnecting || this._isSwitchingDc) {
-                    continue;
-                }
-                if (this._destroyed) {
-                    break;
-                }
-                this._sender.reconnect();
-            }
-
-            if (Date.now() - this._lastRequest > 30 * 60 * 1000) {
-                try {
-                    await this.pingCallback();
-                } catch (e) {
-                    // we don't care about errors here
-                }
-
-                lastPongAt = undefined;
-            }
+            await Helpers.sleep(60000);
         }
         await this.disconnect();
     }
@@ -795,9 +707,7 @@ class TelegramClient {
 
                     if (e.seconds <= this.floodSleepLimit) {
                         console.log(
-                            red(
-                                `[${this._accountId}] Flood wait Error: ${e.message}`
-                            )
+                            red(`[${this._accountId}] Flood wait Error: ${e.message}`)
                         );
 
                         await sleep(e.seconds * 1000);
