@@ -143,6 +143,9 @@ ____________________________`);
   });
 
   setInterval(() => {
-    console.log(black(JSON.stringify(accountsInWork)));
+    console.log(
+      black(JSON.stringify(accountsInWork)),
+      yellow(String(Object.keys(accountsInWork).length))
+    );
   }, 60000);
 });

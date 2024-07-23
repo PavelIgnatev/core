@@ -71000,7 +71000,10 @@ ____________________________`);
     process.exit(1);
   });
   setInterval(() => {
-    console.log((0, import_safe23.black)(JSON.stringify(accountsInWork)));
+    console.log(
+      (0, import_safe23.black)(JSON.stringify(accountsInWork)),
+      (0, import_safe23.yellow)(String(Object.keys(accountsInWork).length))
+    );
   }, 6e4);
 });
 /*! Bundled license information:
