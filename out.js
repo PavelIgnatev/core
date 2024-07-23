@@ -70809,6 +70809,7 @@ var promises = [];
 var accountsInWork = {};
 var main = async (ID) => {
   let client = null;
+  let setOnlineInterval = null;
   try {
     accountsInWork[ID] = 0;
     let isAutoResponse = true;
@@ -70838,13 +70839,18 @@ var main = async (ID) => {
       firstName
     );
     const tgAccountId = await usersMe(client, accountId2, id);
+    setOnlineInterval = setInterval(() => {
+      setOffline(client, accountId2, false);
+    }, 6e4);
     for (let i2 = 0; i2 < 30; i2++) {
       const startTime = performance.now();
       console.log(`[${accountId2}]`, (0, import_safe22.yellow)(`Init iteration [${i2 + 1}]`));
       accountsInWork[ID] = i2 + 1;
-      await setOffline(client, accountId2, false);
       const account2 = await getAccountById(ID);
       if (!account2) {
+        if (setOnlineInterval) {
+          clearInterval(setOnlineInterval);
+        }
         delete accountsInWork[ID];
         await client.destroy();
         return;
@@ -70870,10 +70876,16 @@ var main = async (ID) => {
         )
       );
     }
+    if (setOnlineInterval) {
+      clearInterval(setOnlineInterval);
+    }
     await client.destroy();
     delete accountsInWork[ID];
     return;
   } catch (e2) {
+    if (setOnlineInterval) {
+      clearInterval(setOnlineInterval);
+    }
     if (client) {
       await client.destroy();
     }
