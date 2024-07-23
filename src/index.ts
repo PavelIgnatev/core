@@ -16,6 +16,8 @@ import { autoResponse } from "./modules/autoResponse";
 import { autoSender } from "./modules/autoSender";
 import { accountSetup } from "./modules/accountSetup";
 
+import TelegramClient from "./common/gramjs/client/TelegramClient";
+
 import "./helpers/setConsole.log";
 
 const exec = util.promisify(childExec);
@@ -23,7 +25,8 @@ const promises: Promise<any>[] = [];
 const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
-  let client;
+  let client: TelegramClient | null = null;
+  let setOnlineInterval: any = null;
 
   try {
     accountsInWork[ID] = 0;
@@ -61,14 +64,20 @@ const main = async (ID: string) => {
     );
     const tgAccountId = await usersMe(client, accountId, id);
 
+    setOnlineInterval = setInterval(() => {
+      setOffline(client, accountId, false);
+    }, 30000);
+
     for (let i = 0; i < 30; i++) {
       const startTime = performance.now();
       console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
       accountsInWork[ID] = i + 1;
-      await setOffline(client, accountId, false);
 
       const account = await getAccountById(ID);
       if (!account) {
+        if (setOnlineInterval) {
+          clearInterval(setOnlineInterval);
+        }
         delete accountsInWork[ID];
         await client.destroy();
         return;
@@ -98,10 +107,18 @@ const main = async (ID: string) => {
         )
       );
     }
+
     await client.destroy();
     delete accountsInWork[ID];
+    if (setOnlineInterval) {
+      clearInterval(setOnlineInterval);
+    }
     return;
   } catch (e: any) {
+    if (setOnlineInterval) {
+      clearInterval(setOnlineInterval);
+    }
+
     if (client) {
       await client.destroy();
     }
