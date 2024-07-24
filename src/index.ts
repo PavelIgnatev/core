@@ -19,8 +19,6 @@ import { accountSetup } from "./modules/accountSetup";
 import TelegramClient from "./common/gramjs/client/TelegramClient";
 
 import "./helpers/setConsole.log";
-import { reportUser } from "./methods/account/reportUser";
-import { resolveUsername } from "./methods/contacts/resolveUsername";
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -65,61 +63,57 @@ const main = async (ID: string) => {
       setOffline(client, accountId, false);
     }, 60000);
 
-    accountsInWork[ID] = 1;
+    for (let i = 0; i < 30; i++) {
+      accountsInWork[ID] = i + 1;
 
-    await reportUser(client, accountId, "sarkorov_bot");
+      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
 
-    // for (let i = 0; i < 30; i++) {
-    //   accountsInWork[ID] = i + 1;
+      let timer;
+      const startTime = performance.now();
+      const timeout = new Promise(
+        (_, rej) =>
+          (timer = setTimeout(
+            () =>
+              rej(
+                new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
+              ),
+            600000
+          ))
+      );
 
-    //   console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
+      await Promise.race([
+        (async () => {
+          const account = await getAccountById(ID);
+          if (!account) {
+            throw new Error("Account not defined");
+          }
 
-    //   let timer;
-    //   const startTime = performance.now();
-    //   const timeout = new Promise(
-    //     (_, rej) =>
-    //       (timer = setTimeout(
-    //         () =>
-    //           rej(
-    //             new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
-    //           ),
-    //         600000
-    //       ))
-    //   );
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, accountId, tgAccountId, tgFirstName);
+          }
 
-    //   await Promise.race([
-    //     (async () => {
-    //       const account = await getAccountById(ID);
-    //       if (!account) {
-    //         throw new Error("Account not defined");
-    //       }
+          await autoSender(
+            client,
+            accountId,
+            tgAccountId,
+            account.remainingTime || null
+          );
 
-    //       if (isAutoResponse) {
-    //         isAutoResponse = false;
-    //         await autoResponse(client, accountId, tgAccountId, tgFirstName);
-    //       }
+          await new Promise((res) => setTimeout(res, 60000));
 
-    //       await autoSender(
-    //         client,
-    //         accountId,
-    //         tgAccountId,
-    //         account.remainingTime || null
-    //       );
+          const endTime = performance.now();
+          const diffTime = Math.floor((endTime - startTime) / 1000);
+          console.log(
+            `[${accountId}]`,
+            yellow(`End iteration [${i + 1}][${diffTime}s]`)
+          );
+        })(),
+        timeout,
+      ]);
 
-    //       await new Promise((res) => setTimeout(res, 60000));
-
-    //       const endTime = performance.now();
-    //       const diffTime = Math.floor((endTime - startTime) / 1000);
-    //       console.log(
-    //         `[${accountId}]`,
-    //         yellow(`End iteration [${i + 1}][${diffTime}s]`)
-    //       );
-    //     })(),
-    //     timeout,
-    //   ]);
-
-    //   clearTimeout(timer);
-    // }
+      clearTimeout(timer);
+    }
   } catch (e: any) {
     console.log(red(`[${ID}] Main error: ${e.message}`));
 
