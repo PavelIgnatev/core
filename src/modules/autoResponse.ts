@@ -30,7 +30,7 @@ const gptRequestWrapper = async (
 ${addedContextString}
 Today's date is ${getDateNow()}.
 
-## STYLE GUIDE]
+## STYLE GUIDE
 ${addedContextString}
 Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
 

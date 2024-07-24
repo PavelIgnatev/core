@@ -47120,7 +47120,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/common/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer3(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -47128,14 +47128,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt3 = BigInt10(randBuffer.toString("hex"), 16);
+      let bigInt3 = BigInt5(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt3.toString(2).length / 8) >= bytesNumber) {
-        bigInt3 = bigInt3.subtract(BigInt10(2).pow(BigInt10(bytesNumber * 8)));
+        bigInt3 = bigInt3.subtract(BigInt5(2).pow(BigInt5(bytesNumber * 8)));
       }
       return bigInt3;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt10(big);
+      const bigNumber = BigInt5(big);
       const byteArray = [];
       for (let i2 = 0; i2 < number; i2++) {
         byteArray[i2] = bigNumber.shiftRight(8 * i2).and(255);
@@ -47143,17 +47143,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt2(bigInt3, bytesNumber, little = true, signed = false) {
-      bigInt3 = BigInt10(bigInt3);
+      bigInt3 = BigInt5(bigInt3);
       const bitLength = bigInt3.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt3.lesser(BigInt10(0))) {
+      if (!signed && bigInt3.lesser(BigInt5(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt3.lesser(BigInt10(0))) {
+      if (bigInt3.lesser(BigInt5(0))) {
         below = true;
         bigInt3 = bigInt3.abs();
       }
@@ -47216,12 +47216,12 @@ var require_Helpers = __commonJS({
     }
     function modExp2(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt10.one;
+      let result = BigInt5.one;
       let x2 = a;
-      while (b.greater(BigInt10.zero)) {
-        const leastSignificantBit = b.remainder(BigInt10(2));
-        b = b.divide(BigInt10(2));
-        if (leastSignificantBit.eq(BigInt10.one)) {
+      while (b.greater(BigInt5.zero)) {
+        const leastSignificantBit = b.remainder(BigInt5(2));
+        b = b.divide(BigInt5(2));
+        if (leastSignificantBit.eq(BigInt5.one)) {
           result = result.multiply(x2);
           result = result.remainder(n);
         }
@@ -47233,7 +47233,7 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt2(BigInt10(integer), byteLength, false, signed);
+      return readBufferFromBigInt2(BigInt5(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
@@ -53103,7 +53103,7 @@ var require_IGE = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/common/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers2 = require_Helpers();
     var IGE2 = require_IGE();
@@ -53159,7 +53159,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers2.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt10(0);
+        this._lastMsgId = BigInt5(0);
         this.msgIds = [];
       }
       /**
@@ -53417,9 +53417,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt10(Math.floor(now)).shiftLeft(BigInt10(32)).or(BigInt10(nanoseconds).shiftLeft(BigInt10(2)));
+        let newMsgId = BigInt5(Math.floor(now)).shiftLeft(BigInt5(32)).or(BigInt5(nanoseconds).shiftLeft(BigInt5(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt10(4));
+          newMsgId = this._lastMsgId.add(BigInt5(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -53431,7 +53431,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt10(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt5(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -53442,10 +53442,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt10(32));
+        const correct = correctMsgId.shiftRight(BigInt5(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt10(0);
+          this._lastMsgId = BigInt5(0);
         }
         return this.timeOffset;
       }
@@ -53473,7 +53473,7 @@ var require_MTProtoState = __commonJS({
 var require_MTProtoPlainSender = __commonJS({
   "src/common/gramjs/network/MTProtoPlainSender.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var MTProtoState = require_MTProtoState();
     var BinaryReader2 = require_BinaryReader();
     var { InvalidBufferError } = require_Common();
@@ -53506,11 +53506,11 @@ var require_MTProtoPlainSender = __commonJS({
         }
         const reader = new BinaryReader2(body);
         const authKeyId = reader.readLong();
-        if (authKeyId.neq(BigInt10(0))) {
+        if (authKeyId.neq(BigInt5(0))) {
           throw new Error("Bad authKeyId");
         }
         msgId = reader.readLong();
-        if (msgId.eq(BigInt10(0))) {
+        if (msgId.eq(BigInt5(0))) {
           throw new Error("Bad msgId");
         }
         const length = reader.readInt();
@@ -53557,7 +53557,7 @@ var init_RSA = __esm({
 var require_Factorizator = __commonJS({
   "src/common/gramjs/crypto/Factorizator.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var { modExp: modExp2 } = require_Helpers();
     var Factorizator2 = class _Factorizator {
       /**
@@ -53567,7 +53567,7 @@ var require_Factorizator = __commonJS({
        * @returns {BigInteger}
        */
       static gcd(a, b) {
-        while (b.neq(BigInt10.zero)) {
+        while (b.neq(BigInt5.zero)) {
           const temp = b;
           b = a.remainder(b);
           a = temp;
@@ -53580,32 +53580,32 @@ var require_Factorizator = __commonJS({
        * @returns {{p: *, q: *}}
        */
       static factorize(pq) {
-        if (pq.remainder(2).equals(BigInt10.zero)) {
+        if (pq.remainder(2).equals(BigInt5.zero)) {
           return {
-            p: BigInt10(2),
-            q: pq.divide(BigInt10(2))
+            p: BigInt5(2),
+            q: pq.divide(BigInt5(2))
           };
         }
-        let y = BigInt10.randBetween(BigInt10(1), pq.minus(1));
-        const c = BigInt10.randBetween(BigInt10(1), pq.minus(1));
-        const m2 = BigInt10.randBetween(BigInt10(1), pq.minus(1));
-        let g = BigInt10.one;
-        let r2 = BigInt10.one;
-        let q = BigInt10.one;
-        let x2 = BigInt10.zero;
-        let ys = BigInt10.zero;
+        let y = BigInt5.randBetween(BigInt5(1), pq.minus(1));
+        const c = BigInt5.randBetween(BigInt5(1), pq.minus(1));
+        const m2 = BigInt5.randBetween(BigInt5(1), pq.minus(1));
+        let g = BigInt5.one;
+        let r2 = BigInt5.one;
+        let q = BigInt5.one;
+        let x2 = BigInt5.zero;
+        let ys = BigInt5.zero;
         let k;
-        while (g.eq(BigInt10.one)) {
+        while (g.eq(BigInt5.one)) {
           x2 = y;
-          for (let i2 = 0; BigInt10(i2).lesser(r2); i2++) {
-            y = modExp2(y, BigInt10(2), pq).add(c).remainder(pq);
+          for (let i2 = 0; BigInt5(i2).lesser(r2); i2++) {
+            y = modExp2(y, BigInt5(2), pq).add(c).remainder(pq);
           }
-          k = BigInt10.zero;
-          while (k.lesser(r2) && g.eq(BigInt10.one)) {
+          k = BigInt5.zero;
+          while (k.lesser(r2) && g.eq(BigInt5.one)) {
             ys = y;
-            const condition = BigInt10.min(m2, r2.minus(k));
-            for (let i2 = 0; BigInt10(i2).lesser(condition); i2++) {
-              y = modExp2(y, BigInt10(2), pq).add(c).remainder(pq);
+            const condition = BigInt5.min(m2, r2.minus(k));
+            for (let i2 = 0; BigInt5(i2).lesser(condition); i2++) {
+              y = modExp2(y, BigInt5(2), pq).add(c).remainder(pq);
               q = q.multiply(x2.minus(y).abs()).remainder(pq);
             }
             g = _Factorizator.gcd(q, pq);
@@ -53615,7 +53615,7 @@ var require_Factorizator = __commonJS({
         }
         if (g.eq(pq)) {
           while (true) {
-            ys = modExp2(ys, BigInt10(2), pq).add(c).remainder(pq);
+            ys = modExp2(ys, BigInt5(2), pq).add(c).remainder(pq);
             g = _Factorizator.gcd(x2.minus(ys).abs(), pq);
             if (g.greater(1)) {
               break;
@@ -53957,7 +53957,7 @@ var require_BinaryWriter = __commonJS({
 var require_MessagePacker = __commonJS({
   "src/common/gramjs/extensions/MessagePacker.js"(exports2, module2) {
     "use strict";
-    var { red: red13 } = require_safe();
+    var { red: red7 } = require_safe();
     var MessageContainer = require_MessageContainer();
     var TLMessage = require_TLMessage();
     var BinaryWriter = require_BinaryWriter();
@@ -54055,7 +54055,7 @@ var require_MessagePacker = __commonJS({
           return buffer.getValue();
         }
         console.log(
-          red13(
+          red7(
             `[${accountId}] Message payload for ${state.request.className || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`
           )
         );
@@ -54109,7 +54109,7 @@ var require_MessagePacker = __commonJS({
             break;
           }
           console.log(
-            red13(`[${accountId}] Message payload for ${state.request.className || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`)
+            red7(`[${accountId}] Message payload for ${state.request.className || state.request.constructor.name} is too long ${state.data.length} and cannot be sent`)
           );
           state.reject("Request Payload is too big");
           size = 0;
@@ -54206,7 +54206,7 @@ var require_updates = __commonJS({
 var require_MTProtoSender = __commonJS({
   "src/common/gramjs/network/MTProtoSender.js"(exports2, module2) {
     "use strict";
-    var { red: red13, blue: blue14 } = require_safe();
+    var { red: red7, blue: blue4 } = require_safe();
     var { RPCError } = require_errors3();
     var MtProtoPlainSender = require_MTProtoPlainSender();
     var MTProtoState = require_MTProtoState();
@@ -54370,7 +54370,7 @@ var require_MTProtoSender = __commonJS({
               );
             }
             console.log(
-              red13(
+              red7(
                 `[${this._accountId}] WebSocket error: ${err.message} [${attempt + 1} attempt(s)   ]`
               )
             );
@@ -54392,7 +54392,7 @@ var require_MTProtoSender = __commonJS({
        */
       async disconnect() {
         this.userDisconnected = true;
-        console.log(red13(`[${this._accountId}] Disconnecting...`));
+        console.log(red7(`[${this._accountId}] Disconnecting...`));
         await this._disconnect(this.getConnection());
       }
       destroy() {
@@ -54458,10 +54458,10 @@ var require_MTProtoSender = __commonJS({
         }
         if (!this.authKey.getKey()) {
           const plain = new MtProtoPlainSender(connection, console.log);
-          console.log(red13(`[${this._accountId}] New auth_key attempt ...`));
+          console.log(red7(`[${this._accountId}] New auth_key attempt ...`));
           const res = await doAuthentication2(plain, console.log);
           console.log(
-            red13(`[${this._accountId}] Generated new auth_key successfully`)
+            red7(`[${this._accountId}] Generated new auth_key successfully`)
           );
           await this.authKey.setKey(res.authKey);
           this._state.timeOffset = res.timeOffset;
@@ -54509,19 +54509,19 @@ var require_MTProtoSender = __commonJS({
         }
         if (connection === void 0) {
           console.log(
-            red13(`[${this._accountId}] Not disconnecting (already have no connection)`)
+            red7(`[${this._accountId}] Not disconnecting (already have no connection)`)
           );
           return;
         }
         console.log(
-          red13(`[${this._accountId}] Disconnecting from %s...`.replace(
+          red7(`[${this._accountId}] Disconnecting from %s...`.replace(
             "%s",
             connection.toString()
           ))
         );
         this._user_connected = false;
-        console.log(red13(`[${this._accountId}] Closing current connection...`));
-        console.log(red13(`[${this._accountId}] Disconnecting`));
+        console.log(red7(`[${this._accountId}] Closing current connection...`));
+        console.log(red7(`[${this._accountId}] Disconnecting`));
         await connection.disconnect();
       }
       async _longPollLoop() {
@@ -54575,7 +54575,7 @@ var require_MTProtoSender = __commonJS({
           console.log(
             `[${this._accountId}] Encrypting (${randomDelay}ms)...`,
             batch.map((m2) => m2.request.className),
-            `message(s) in ${blue14(data.length)} bytes for sending`
+            `message(s) in ${blue4(data.length)} bytes for sending`
           );
           await new Promise((r2) => setTimeout(r2, randomDelay));
           data = await this._state.encryptMessageData(data);
@@ -54583,7 +54583,7 @@ var require_MTProtoSender = __commonJS({
             await this.getConnection().send(data);
           } catch (e2) {
             console.log(
-              red13(`[${this._accountId}] Send loop error: ${e2.message}`)
+              red7(`[${this._accountId}] Send loop error: ${e2.message}`)
             );
             this._send_loop_handle = void 0;
             if (!this.userDisconnected) {
@@ -54622,7 +54622,7 @@ var require_MTProtoSender = __commonJS({
           } catch (e2) {
             if (!this.userDisconnected) {
               console.log(
-                red13(`[${this._accountId}] Recv loop error: ${e2.message}`)
+                red7(`[${this._accountId}] Recv loop error: ${e2.message}`)
               );
               this.reconnect();
             }
@@ -54633,16 +54633,16 @@ var require_MTProtoSender = __commonJS({
             message = await this._state.decryptMessageData(body);
           } catch (e2) {
             console.log(
-              red13(`[${this._accountId}] Error while receiving items from the network ${e2.message}`)
+              red7(`[${this._accountId}] Error while receiving items from the network ${e2.message}`)
             );
             if (e2 instanceof TypeNotFoundError) {
               console.log(
-                red13(`[${this._accountId}] Type ${e2.invalidConstructorId} not found, remaining data ${e2.remaining}`)
+                red7(`[${this._accountId}] Type ${e2.invalidConstructorId} not found, remaining data ${e2.remaining}`)
               );
               continue;
             } else if (e2 instanceof SecurityError2) {
               console.log(
-                red13(`[${this._accountId}] Security error while unpacking a received message: ${e2.message}`)
+                red7(`[${this._accountId}] Security error while unpacking a received message: ${e2.message}`)
               );
               continue;
             } else if (e2 instanceof InvalidBufferError) {
@@ -54650,7 +54650,7 @@ var require_MTProtoSender = __commonJS({
                 this._handleBadAuthKey();
               } else {
                 console.log(
-                  red13(`[${this._accountId}] Invalid buffer ${e2.code} for dc ${this._dcId}`)
+                  red7(`[${this._accountId}] Invalid buffer ${e2.code} for dc ${this._dcId}`)
                 );
                 this.reconnect();
               }
@@ -54658,7 +54658,7 @@ var require_MTProtoSender = __commonJS({
               return;
             } else {
               console.log(
-                red13(`[${this._accountId}] Recv loop error unhandled: ${e2.message}`)
+                red7(`[${this._accountId}] Recv loop error unhandled: ${e2.message}`)
               );
               this.reconnect();
               this._recv_loop_handle = void 0;
@@ -54674,7 +54674,7 @@ var require_MTProtoSender = __commonJS({
               }
             } else {
               console.log(
-                red13(`[${this._accountId}] Unhandled error: ${e2.message}`)
+                red7(`[${this._accountId}] Unhandled error: ${e2.message}`)
               );
             }
           }
@@ -54691,7 +54691,7 @@ var require_MTProtoSender = __commonJS({
           return;
         }
         console.log(
-          red13(`[${this._accountId}] Broken authorization key for dc ${this._dcId}, resetting...`)
+          red7(`[${this._accountId}] Broken authorization key for dc ${this._dcId}, resetting...`)
         );
         if (this._isMainSender && !this._isExported) {
           (_a4 = this._updateCallback) == null ? void 0 : _a4.call(
@@ -54777,7 +54777,7 @@ var require_MTProtoSender = __commonJS({
           } catch (e2) {
             if (e2 instanceof TypeNotFoundError) {
               console.log(
-                red13(`[${this._accountId}] Received response without parent request: ${result.body}`)
+                red7(`[${this._accountId}] Received response without parent request: ${result.body}`)
               );
               return;
             }
@@ -54828,7 +54828,7 @@ var require_MTProtoSender = __commonJS({
         var _a4;
         if (message.obj.SUBCLASS_OF_ID !== 2331323052) {
           console.log(
-            red13(`[${this._accountId}] Note: ${message.obj.className} is not an update, not dispatching it`)
+            red7(`[${this._accountId}] Note: ${message.obj.className} is not an update, not dispatching it`)
           );
           return;
         }
@@ -54890,7 +54890,7 @@ var require_MTProtoSender = __commonJS({
         const badMsg = message.obj;
         const states = this._popStates(badMsg.badMsgId);
         console.log(
-          red13(
+          red7(
             `[${this._accountId}] Handling bad msg ${JSON.stringify(
               badMsg
             )}`
@@ -54905,7 +54905,7 @@ var require_MTProtoSender = __commonJS({
             );
           }
           console.log(
-            red13(`[${this._accountId}] System clock is wrong, set time offset to ${newTimeOffset}s`)
+            red7(`[${this._accountId}] System clock is wrong, set time offset to ${newTimeOffset}s`)
           );
         } else if (badMsg.errorCode === 32) {
           this._state._sequence += 64;
@@ -54921,7 +54921,7 @@ var require_MTProtoSender = __commonJS({
         }
         this._send_queue.extend(states);
         console.log(
-          red13(
+          red7(
             `[${this._accountId}] Resent state...`,
             states.map((state) => state.request.className),
             "reason - bad msg"
@@ -54939,7 +54939,7 @@ var require_MTProtoSender = __commonJS({
       _handleDetailedInfo(message) {
         const msgId = message.obj.answerMsgId;
         console.log(
-          red13(`[${this._accountId}] Handling detailed info for message ${msgId}`)
+          red7(`[${this._accountId}] Handling detailed info for message ${msgId}`)
         );
       }
       /**
@@ -54953,7 +54953,7 @@ var require_MTProtoSender = __commonJS({
       _handleNewDetailedInfo(message) {
         const msgId = message.obj.answerMsgId;
         console.log(
-          red13(`[${this._accountId}] Handling new detailed info for message ${msgId}`)
+          red7(`[${this._accountId}] Handling new detailed info for message ${msgId}`)
         );
       }
       /**
@@ -54983,7 +54983,7 @@ var require_MTProtoSender = __commonJS({
        */
       _handleFutureSalts(message) {
         console.log(
-          red13(`[${this._accountId}] Handling future salts for message ${message.msgId}`)
+          red7(`[${this._accountId}] Handling future salts for message ${message.msgId}`)
         );
         const state = this._pending_state.getAndDelete(message.msgId);
         if (state) {
@@ -55022,21 +55022,21 @@ var require_MTProtoSender = __commonJS({
         if (this._user_connected && !this.isReconnecting) {
           this.isReconnecting = true;
           Helpers2.sleep(1e3).then(() => {
-            console.log(red13(`[${this._accountId}] Reconnecting...`));
-            console.log(red13(`[${this._accountId}] Started reconnecting`));
+            console.log(red7(`[${this._accountId}] Reconnecting...`));
+            console.log(red7(`[${this._accountId}] Started reconnecting`));
             this._reconnect();
           });
         }
       }
       async _reconnect() {
-        console.log(red13(`[${this._accountId}] Closing current connection...`));
+        console.log(red7(`[${this._accountId}] Closing current connection...`));
         try {
           console.log(
-            red13(`[${this._accountId}] [Reconnect] Closing current connection...`)
+            red7(`[${this._accountId}] [Reconnect] Closing current connection...`)
           );
           await this._disconnect(this.getConnection());
         } catch (err) {
-          console.log(red13(`[${this._accountId}] Reconnect error: ${err.message}`));
+          console.log(red7(`[${this._accountId}] Reconnect error: ${err.message}`));
         }
         this._send_queue.append(void 0);
         this._state.reset();
@@ -62290,12 +62290,12 @@ __export(src_exports, {
   Response: () => Response,
   blobFrom: () => blobFrom,
   blobFromSync: () => blobFromSync,
-  default: () => fetch2,
+  default: () => fetch,
   fileFrom: () => fileFrom,
   fileFromSync: () => fileFromSync,
   isRedirect: () => isRedirect
 });
-async function fetch2(url2, options_) {
+async function fetch(url2, options_) {
   return new Promise((resolve, reject) => {
     const request = new Request(url2, options_);
     const { parsedURL, options } = getNodeRequestOptions(request);
@@ -62427,7 +62427,7 @@ async function fetch2(url2, options_) {
             if (responseReferrerPolicy) {
               requestOptions.referrerPolicy = responseReferrerPolicy;
             }
-            resolve(fetch2(new Request(locationURL, requestOptions)));
+            resolve(fetch(new Request(locationURL, requestOptions)));
             finalize();
             return;
           }
@@ -66654,7 +66654,7 @@ var require_PromisedWebSockets = __commonJS({
   "src/common/gramjs/extensions/PromisedWebSockets.js"(exports2, module2) {
     "use strict";
     var { Mutex } = require_lib4();
-    var fetch3 = (init_src(), __toCommonJS(src_exports));
+    var fetch2 = (init_src(), __toCommonJS(src_exports));
     var { HttpsProxyAgent } = require_dist3();
     var { WebSocket } = require_ws();
     var mutex = new Mutex();
@@ -66784,7 +66784,7 @@ var require_PromisedWebSockets = __commonJS({
         this.client.onmessage = async (message) => {
           await mutex.runExclusive(async () => {
             const data = message.data instanceof ArrayBuffer ? Buffer.from(message.data) : Buffer.from(
-              await new fetch3.Response(
+              await new fetch2.Response(
                 message.data
               ).arrayBuffer()
             );
@@ -66917,7 +66917,7 @@ var require_Connection = __commonJS({
     var PromisedWebSockets = require_PromisedWebSockets();
     var HttpStream2 = (init_HttpStream(), __toCommonJS(HttpStream_exports)).default;
     var AsyncQueue = require_AsyncQueue();
-    var { red: red13 } = require_safe();
+    var { red: red7 } = require_safe();
     var Connection = class {
       PacketCodecClass = void 0;
       constructor(ip, port, dcId, loggers, testServers, isPremium, accountId2) {
@@ -67010,7 +67010,7 @@ var require_Connection = __commonJS({
               throw new Error("no data received");
             }
           } catch (e2) {
-            console.log(red13(`[${this._accountId}] connection closed`));
+            console.log(red7(`[${this._accountId}] connection closed`));
             this.disconnect();
             return;
           }
@@ -67115,7 +67115,7 @@ var require_TCPFull = __commonJS({
 var require_TCPAbridged = __commonJS({
   "src/common/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var { readBufferFromBigInt: readBufferFromBigInt2 } = require_Helpers();
     var {
       Connection,
@@ -67136,7 +67136,7 @@ var require_TCPAbridged = __commonJS({
           b.writeUInt8(length, 0);
           length = b;
         } else {
-          length = Buffer.concat([Buffer.from("7f", "hex"), readBufferFromBigInt2(BigInt10(length), 3)]);
+          length = Buffer.concat([Buffer.from("7f", "hex"), readBufferFromBigInt2(BigInt5(length), 3)]);
         }
         return Buffer.concat([length, data]);
       }
@@ -67475,7 +67475,7 @@ var init_uploadFile = __esm({
 var require_Password = __commonJS({
   "src/common/gramjs/Password.js"(exports2, module2) {
     "use strict";
-    var BigInt10 = require_BigInteger();
+    var BigInt5 = require_BigInteger();
     var { constructors } = require_tl();
     var {
       readBigIntFromBuffer: readBigIntFromBuffer3,
@@ -67754,7 +67754,7 @@ var require_Password = __commonJS({
       throw new Error("Changing passwords unsupported");
     }
     function isGoodLarge(number, p) {
-      return number.greater(BigInt10(0)) && p.subtract(number).greater(BigInt10(0));
+      return number.greater(BigInt5(0)) && p.subtract(number).greater(BigInt5(0));
     }
     function numBytesForHash(number) {
       return Buffer.concat([Buffer.alloc(SIZE_FOR_HASH - number.length), number]);
@@ -67766,7 +67766,7 @@ var require_Password = __commonJS({
       const diff = prime.subtract(modexp);
       const minDiffBitsCount = 2048 - 64;
       const maxModExpSize = 256;
-      return !(diff.lesser(BigInt10(0)) || diff.bitLength() < minDiffBitsCount || modexp.bitLength() < minDiffBitsCount || Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
+      return !(diff.lesser(BigInt5(0)) || diff.bitLength() < minDiffBitsCount || modexp.bitLength() < minDiffBitsCount || Math.floor((modexp.bitLength() + 7) / 8) > maxModExpSize);
     }
     function xor2(a, b) {
       const length = Math.min(a.length, b.length);
@@ -67791,7 +67791,7 @@ var require_Password = __commonJS({
         throw new Error("bad p/g in password");
       }
       const value = modExp2(
-        BigInt10(algo.g),
+        BigInt5(algo.g),
         readBigIntFromBuffer3(await computeHash(algo, password), false),
         readBigIntFromBuffer3(algo.p, false)
       );
@@ -67818,7 +67818,7 @@ var require_Password = __commonJS({
       const pForHash = numBytesForHash(algo.p);
       const gForHash = bigNumForHash(g);
       const bForHash = numBytesForHash(request.srp_B);
-      const gX = modExp2(BigInt10(g), x2, p);
+      const gX = modExp2(BigInt5(g), x2, p);
       const k = readBigIntFromBuffer3(await sha256(Buffer.concat([pForHash, gForHash])), false);
       const kgX = bigIntMod(k.multiply(gX), p);
       const generateAndCheckRandom = async () => {
@@ -67826,11 +67826,11 @@ var require_Password = __commonJS({
         while (true) {
           const random = generateRandomBytes4(randomSize);
           const a2 = readBigIntFromBuffer3(random, false);
-          const A2 = modExp2(BigInt10(g), a2, p);
+          const A2 = modExp2(BigInt5(g), a2, p);
           if (isGoodModExpFirst(A2, p)) {
             const aForHash2 = bigNumForHash(A2);
             const u2 = readBigIntFromBuffer3(await sha256(Buffer.concat([aForHash2, bForHash])), false);
-            if (u2.greater(BigInt10(0))) {
+            if (u2.greater(BigInt5(0))) {
               return [a2, aForHash2, u2];
             }
           }
@@ -67971,7 +67971,7 @@ var require_TelegramClient = __commonJS({
   "src/common/gramjs/client/TelegramClient.js"(exports2, module2) {
     "use strict";
     var os = require("os");
-    var { red: red13 } = require_safe();
+    var { red: red7 } = require_safe();
     var { sleep: sleep3 } = require_Helpers();
     var errors3 = require_errors3();
     var MemorySession = require_Memory();
@@ -68266,7 +68266,7 @@ var require_TelegramClient = __commonJS({
       }
       async _switchDC(newDc) {
         console.log(
-          red13(`[${this._accountId}] Reconnecting to new data center ${newDc}`)
+          red7(`[${this._accountId}] Reconnecting to new data center ${newDc}`)
         );
         const DC = utils.getDC(newDc);
         this.session.setDC(newDc, DC.ipAddress, DC.port);
@@ -68372,7 +68372,7 @@ var require_TelegramClient = __commonJS({
             return sender;
           } catch (err) {
             console.log(
-              red13(
+              red7(
                 `[${this._accountId}] Connect sender error: ${err.message}`
               )
             );
@@ -68445,7 +68445,7 @@ var require_TelegramClient = __commonJS({
           }
         } catch (err) {
           console.log(
-            red13(
+            red7(
               `[${this._accountId}] Borrow exported sender error: ${err.message}`
             )
           );
@@ -68529,7 +68529,7 @@ var require_TelegramClient = __commonJS({
           } catch (e2) {
             if (e2 instanceof errors3.ServerError || e2.message === "RPC_CALL_FAIL" || e2.message === "RPC_MCGET_FAIL") {
               console.log(
-                red13(
+                red7(
                   `[${this._accountId}] Telegram is having internal issues ${e2.constructor.name}`
                 )
               );
@@ -68540,7 +68540,7 @@ var require_TelegramClient = __commonJS({
               );
               if (e2.seconds <= this.floodSleepLimit) {
                 console.log(
-                  red13(`[${this._accountId}] Flood wait Error: ${e2.message}`)
+                  red7(`[${this._accountId}] Flood wait Error: ${e2.message}`)
                 );
                 await sleep3(e2.seconds * 1e3);
               } else {
@@ -68709,7 +68709,7 @@ Length provided: ${this.length}. Number of dictionaries provided: ${this.diction
 // src/index.ts
 var import_util3 = __toESM(require("util"));
 var import_child_process = require("child_process");
-var import_safe22 = __toESM(require_safe());
+var import_safe9 = __toESM(require_safe());
 
 // src/db/db.ts
 var import_mongodb = __toESM(require_lib3());
@@ -68755,15 +68755,6 @@ var updateAccountById = async (accountId2, accountData) => {
     { $set: { ...accountData, dateUpdated: /* @__PURE__ */ new Date() } }
   );
 };
-var incrementMessageCount = async (accountId2) => {
-  const accountCollection = await getAccountCollection();
-  await accountCollection.updateOne(
-    { accountId: accountId2 },
-    {
-      $inc: { messageCount: 1 }
-    }
-  );
-};
 
 // src/helpers/initClient.ts
 var import_safe3 = __toESM(require_safe());
@@ -68786,72 +68777,6 @@ var getDialogue = async (accountId2, recipientId) => {
     recipientId
   });
   return dialogue;
-};
-var getPingDialogues = async (accountId2) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const twelveHoursAgo = /* @__PURE__ */ new Date();
-  twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
-  const hours24Ago = /* @__PURE__ */ new Date();
-  hours24Ago.setHours(hours24Ago.getHours() - 24);
-  const pingDialogs = await dialoguesCollection.find({
-    accountId: accountId2,
-    step: 3,
-    ping: { $ne: true },
-    stopped: { $ne: true },
-    blocked: { $ne: true },
-    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo }
-  }).toArray();
-  return pingDialogs;
-};
-var getManualControlDialogues = async (accountId2) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const dialogs = await dialoguesCollection.find({
-    accountId: accountId2,
-    stopped: true,
-    blocked: { $ne: true },
-    managerMessage: { $ne: null }
-  }).toArray();
-  return dialogs;
-};
-var updateDialogue = async (dialogue) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  await dialoguesCollection.updateOne(
-    {
-      accountId: dialogue.accountId,
-      recipientId: dialogue.recipientId
-    },
-    {
-      $set: {
-        ...dialogue,
-        dateUpdated: /* @__PURE__ */ new Date()
-      },
-      $setOnInsert: {
-        dateCreated: /* @__PURE__ */ new Date()
-      }
-    },
-    {
-      upsert: true
-    }
-  );
-};
-var updateBlockedDialogue = async (accountId2, recipientId, reason) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  await dialoguesCollection.updateOne(
-    {
-      accountId: accountId2,
-      recipientId
-    },
-    {
-      $set: {
-        reason,
-        blocked: true,
-        stopped: true,
-        viewed: false,
-        managerMessage: null,
-        dateUpdated: /* @__PURE__ */ new Date()
-      }
-    }
-  );
 };
 
 // src/common/gramjs/index.ts
@@ -69030,1339 +68955,10 @@ var setOffline = async (client, accountId2, offline) => {
   return result;
 };
 
-// src/modules/autoResponse.ts
-var import_safe12 = __toESM(require_safe());
-
-// src/modules/getDialogs.ts
-var import_safe5 = __toESM(require_safe());
-var import_big_integer3 = __toESM(require_BigInteger());
-var import_api8 = __toESM(require_api());
-var getDialogs = async (client, accountId2) => {
-  var _a4, _b;
-  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe5.yellow)("GET DIALOGS"));
-  const clientDialogs = await client.invoke(
-    new import_api8.default.messages.GetDialogs({
-      offsetPeer: new import_api8.default.InputPeerEmpty(),
-      folderId: 1,
-      limit: 100
-    })
-  );
-  if (!((_a4 = clientDialogs == null ? void 0 : clientDialogs.users) == null ? void 0 : _a4.length)) {
-    return [];
-  }
-  const pingDialogsDB = await getPingDialogues(accountId2);
-  const manualControlDialogsDB = await getManualControlDialogues(accountId2);
-  const clientMessagesIds = clientDialogs.messages.filter((m2) => !m2.out).map((m2) => String(m2.peerId.userId));
-  const clientDialogsIds = clientDialogs.dialogs.filter((d) => d.unreadCount !== 0).map((d) => String(d.peer.userId));
-  const dialogs = [];
-  const pingDialogs = [];
-  const manualDialogs = [];
-  const dialogIds = [.../* @__PURE__ */ new Set([...clientMessagesIds, ...clientDialogsIds])];
-  const pingDialogIds = pingDialogsDB.map((d) => String(d.recipientId)).filter((d) => !dialogIds.includes(d));
-  const manualControlDialogIds = manualControlDialogsDB.map((d) => String(d.recipientId)).filter((d) => !dialogIds.includes(d));
-  for (const dialogId of [
-    ...dialogIds,
-    ...pingDialogIds,
-    ...manualControlDialogIds
-  ]) {
-    if (!dialogId || dialogId === "undefined") {
-      continue;
-    }
-    const user = clientDialogs.users.find(
-      (u) => String(u.id) === dialogId
-    );
-    if (user && !user.deleted && !user.bot && !user.support && !user.self && !(user.status instanceof import_api8.default.UserStatusEmpty)) {
-      const allMessages = await client.invoke(
-        new import_api8.default.messages.GetHistory({
-          peer: new import_api8.default.InputPeerUser({
-            userId: (0, import_big_integer3.default)(user.id),
-            accessHash: (0, import_big_integer3.default)(user.accessHash)
-          }),
-          limit: 30
-        })
-      );
-      if (!((_b = allMessages == null ? void 0 : allMessages.messages) == null ? void 0 : _b.length)) {
-        await updateBlockedDialogue(accountId2, dialogId, "messages-length");
-        continue;
-      }
-      const dialogDb = await getDialogue(accountId2, String(user.id));
-      const {
-        messages: dialogMessages = [],
-        groupId = 12343207729,
-        blocked = false
-      } = dialogDb || {};
-      if (blocked) {
-        await client.invoke(
-          new import_api8.default.contacts.Block({
-            id: new import_api8.default.InputPeerUser({
-              userId: (0, import_big_integer3.default)(user.id),
-              accessHash: (0, import_big_integer3.default)(user.accessHash)
-            })
-          })
-        );
-        await client.invoke(
-          new import_api8.default.messages.DeleteHistory({
-            peer: new import_api8.default.InputPeerUser({
-              userId: (0, import_big_integer3.default)(user.id),
-              accessHash: (0, import_big_integer3.default)(user.accessHash)
-            }),
-            revoke: true
-          })
-        );
-        continue;
-      }
-      for (const dialogMessage of allMessages.messages.reverse()) {
-        if (dialogMessages.find((m2) => m2.id === dialogMessage.id)) {
-          continue;
-        }
-        const {
-          photo = false,
-          voice = false,
-          round = false,
-          video = false,
-          document: document2 = false,
-          spoiler = false
-        } = (dialogMessage == null ? void 0 : dialogMessage.media) || {};
-        const fromId = dialogMessage == null ? void 0 : dialogMessage.fromId;
-        let text;
-        if (dialogMessage.fwdFrom) {
-          text = "[FORWARDED MESSAGE]";
-        } else if (dialogMessage.message) {
-          text = dialogMessage.message;
-        } else if (voice || round) {
-          await client.invoke(
-            new import_api8.default.messages.ReadMessageContents({
-              id: [dialogMessage.id]
-            })
-          );
-          text = "[VOICE MESSAGE]";
-        } else if (photo) {
-          text = "[PHOTO]";
-        } else if (video) {
-          text = "[VIDEO]";
-        } else if (document2) {
-          text = "[DOCUMENT]";
-        } else if (spoiler) {
-          text = "[SPOILER MESSAGE]";
-        } else {
-          text = "[UNKNOWN MESSAGE]";
-        }
-        dialogMessages.push({
-          id: dialogMessage.id,
-          text,
-          fromId: String((fromId == null ? void 0 : fromId.userId) || user.id),
-          date: dialogMessage.date
-        });
-      }
-      await client.invoke(
-        new import_api8.default.messages.ReadHistory({
-          peer: new import_api8.default.InputPeerUser({
-            userId: user.id,
-            accessHash: user.accessHash
-          })
-        })
-      );
-      const dialogData = {
-        ...user,
-        ...dialogDb,
-        groupId,
-        messages: dialogMessages
-      };
-      if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
-        manualDialogs.push(dialogData);
-      } else if (dialogIds.includes(dialogId)) {
-        dialogs.push(dialogData);
-      } else {
-        pingDialogs.push(dialogData);
-      }
-    } else {
-      await updateBlockedDialogue(accountId2, dialogId, `user-not-resolved`);
-      if (user && user.id && user.accessHash && (user.deleted || user.bot || user.support || user.self)) {
-        await client.invoke(
-          new import_api8.default.messages.DeleteHistory({
-            peer: new import_api8.default.InputPeerUser({
-              userId: (0, import_big_integer3.default)(user.id),
-              accessHash: (0, import_big_integer3.default)(user.accessHash)
-            }),
-            revoke: true
-          })
-        );
-      }
-    }
-  }
-  return [dialogs, pingDialogs, manualDialogs];
-};
-
-// src/modules/makeRequestComplete.ts
-init_axios2();
-var import_safe6 = __toESM(require_safe());
-init_sendToBot();
-function capitalizeFirstLetter(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-function removeQuestionAndExclamationSentences(text) {
-  const pattern = /[^.!?]*(?:[!?])/g;
-  const result = text.replace(pattern, "");
-  return result.trim();
-}
-function countSentences(paragraph) {
-  const sentenceEnders = [".", "!", "?"];
-  let sentenceCount = 0;
-  for (let i2 = 0; i2 < paragraph.length; i2++) {
-    if (sentenceEnders.includes(paragraph[i2])) {
-      sentenceCount++;
-    }
-  }
-  return sentenceCount;
-}
-var makeRequestComplete = async (preamble, documents, disableLink = false, deleteQuestion = false, minimalProposalLength = 1, part = null, chatHistory, groupId, accountId2) => {
-  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe6.yellow)("MAKE REQUEST COMPLETE"));
-  const lastDialog = chatHistory.pop();
-  console.log(
-    `[${accountId2}] Current preamble before generation:`,
-    (0, import_safe6.gray)(preamble.replace(/\n/g, ""))
-  );
-  console.log(
-    `[${accountId2}] Current dialog history [${chatHistory.length}]:`,
-    (0, import_safe6.gray)(JSON.stringify(chatHistory))
-  );
-  console.log(
-    `[${accountId2}] Last message from interlocutor:`,
-    (0, import_safe6.gray)(String(lastDialog == null ? void 0 : lastDialog.message).replace(/\n/g, ""))
-  );
-  console.log(`[${accountId2}] Additional filters:`);
-  console.log(
-    `[${accountId2}] Removing a reference:`,
-    (0, import_safe6.blue)(disableLink ? "on" : "off")
-  );
-  console.log(
-    `[${accountId2}] Deleting a question:`,
-    (0, import_safe6.blue)(deleteQuestion ? "on" : "off")
-  );
-  console.log(
-    `[${accountId2}] Minimum number of messages in a reply:`,
-    (0, import_safe6.blue)(String(minimalProposalLength))
-  );
-  console.log(`[${accountId2}] Part check:`, part ? part : "off");
-  const generations = [];
-  const errors3 = [];
-  for (let i2 = 0; i2 < 5; i2++) {
-    try {
-      if (!lastDialog) {
-        throw new Error("Last dialog message not defined");
-      }
-      const {
-        data: { text: data }
-      } = await axios_default.post("http://91.198.220.234/chat", {
-        k: 300,
-        temperature: 1,
-        model: "command-r-plus",
-        prompt_truncation: "AUTO_PRESERVE_ORDER",
-        preamble,
-        documents,
-        chat_history: chatHistory,
-        message: lastDialog.message
-      });
-      if (!data || !data.trim()) {
-        throw new Error("Blank message");
-      }
-      generations.push(data);
-      let message = data.replace(/\n/g, "").replace(/['"`]/g, "").replace(/!/g, ".").trim();
-      console.log(
-        `[${accountId2}] Generated message before filters:`,
-        (0, import_safe6.gray)(message)
-      );
-      let pattern = /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
-      const hasTextLink = message.match(pattern);
-      if (hasTextLink && disableLink) {
-        throw new Error(
-          "The reply contains a link at a stage where it is forbidden to send links"
-        );
-      }
-      if (part) {
-        message = message.replace(part, "[LINKTOGOAL]").replace(part, "[LINKTOGOAL]").replace(part, "[LINKTOGOAL]");
-      }
-      if (deleteQuestion && message.includes("?")) {
-        message = removeQuestionAndExclamationSentences(message);
-      }
-      if (part) {
-        message = message.replace("[LINKTOGOAL]", part).replace("[LINKTOGOAL]", part).replace("[LINKTOGOAL]", part);
-      }
-      if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("(") || message.includes(")") || message.includes("*")) {
-        throw new Error("The response contains suspicious characters");
-      }
-      const varMessage = capitalizeFirstLetter(
-        message.replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E,", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E!", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0434\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("Hi,", "").replace("Hi! ", "").replace("Hi!", "").replace("Hello,", "").replace("Hello! ", "").replace("Hello!", "").replace("Good morning,", "").replace("Good morning! ", "").replace("Good morning!", "").replace("Good morning", "").replace("good morning", "").replace("Good evening,", "").replace("Good evening! ", "").replace("Good evening!", "").replace("Good evening", "").replace("good evening", "").replace("Good afternoon,", "").replace("Good afternoon! ", "").replace("Good afternoon!", "").replace("Good afternoon", "").replace("good afternoon", "")
-      );
-      if (varMessage.length < 60) {
-        throw new Error("Minimum length 60 characters");
-      }
-      if (minimalProposalLength > countSentences(varMessage)) {
-        throw new Error(`Minimal number of messages: ${minimalProposalLength}`);
-      }
-      if (part && !message.includes(part)) {
-        throw new Error(
-          `The potential message does not contain the ${part} part, although it should`
-        );
-      }
-      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-      console.log(
-        `[${accountId2}] Generated message after filters:`,
-        (0, import_safe6.gray)(nmessage)
-      );
-      return nmessage;
-    } catch (error) {
-      await new Promise((res) => setTimeout(res, 2500));
-      console.log(
-        (0, import_safe6.red)(`[${accountId2}] Request Complete Error: ${error.message}`)
-      );
-      errors3.push(error.message);
-    }
-  }
-  try {
-    await sendToBot(`!!!GPT GENERATION ERROR!!!
-GROUP ID: ${groupId}
-ACCOUNT ID: ${accountId2}
-_____________
-GENERATIONS:
-${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
-ERRORS:
-${errors3.map((e2, i2) => `${i2 + 1}: ${e2}`).join("\n")}
-_____________
-\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0441\u0441\u044B\u043B\u043A\u0438: ${disableLink ? "\u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E" : "\u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E"}
-\u0423\u0434\u0430\u043B\u0435\u043D\u0438\u0435 \u0432\u043E\u043F\u0440\u043E\u0441\u0430: ${deleteQuestion ? "\u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E" : "\u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E"}
-\u041C\u0438\u043D\u0438\u043C\u0430\u043B\u044C\u043D\u043E\u0435 \u043A\u043E\u043B\u0438\u0447\u0435\u0441\u0442\u0432\u043E \u0441\u043E\u043E\u0431\u0449\u0435\u043D\u0438\u0439 \u0432 \u043E\u0442\u0432\u0435\u0442\u0435: ${minimalProposalLength}
-\u041F\u0440\u043E\u0432\u0435\u0440\u043A\u0430 \u043D\u0430 \u0441\u043E\u0441\u0442\u0430\u0432\u043D\u0443\u044E \u0447\u0430\u0441\u0442\u044C: ${part ? `\u0432\u043A\u043B\u044E\u0447\u0435\u043D\u043E (${part})` : "\u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D\u043E"}`);
-  } catch {
-  }
-  if (generations[0]) {
-    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
-    console.log(
-      `[${accountId2}] Generated message after filters:`,
-      (0, import_safe6.gray)(nmessage)
-    );
-    return nmessage;
-  }
-  throw new Error("Stopped");
-};
-
-// src/modules/makeRequestGpt.ts
-init_axios2();
-var import_safe7 = __toESM(require_safe());
-init_sendToBot();
-function capitalizeFirstLetter2(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-function hasMixedLanguageWords(str) {
-  const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
-  return mixedPattern.test(str);
-}
-function containsChinese(text) {
-  const chineseRegex = /[\u4e00-\u9fa5]/;
-  return chineseRegex.test(text);
-}
-var makeRequestGpt = async (preamble, prompt, groupId, accountId2, part = "") => {
-  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe7.yellow)("MAKE REQUEST GPT"));
-  console.log(
-    `[${accountId2}] Current preamble before generation:`,
-    (0, import_safe7.gray)(preamble.replace(/\n/g, ""))
-  );
-  console.log(
-    `[${accountId2}] Current message for preamble:`,
-    (0, import_safe7.gray)(String(prompt).replace(/\n/g, ""))
-  );
-  console.log(`[${accountId2}] Additional filters:`);
-  console.log(`[${accountId2}] Part check:`, (0, import_safe7.blue)(part ? part : "off"));
-  const generations = [];
-  const errors3 = [];
-  for (let i2 = 0; i2 < 5; i2++) {
-    try {
-      const {
-        data: { text: data }
-      } = await axios_default.post("http://91.198.220.234/chat", {
-        model: "command-r-plus",
-        k: 300,
-        temperature: 1,
-        prompt_truncation: "AUTO_PRESERVE_ORDER",
-        preamble,
-        message: prompt
-      });
-      if (!data || !data.trim()) {
-        throw new Error("Blank message");
-      }
-      generations.push(data);
-      let message = data.replace(/\n/g, "").replace(/['"`]/g, "").replace(/!/g, ".").trim();
-      console.log(`[${accountId2}] Generated message before filters:`, (0, import_safe7.gray)(message));
-      if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("(") || message.includes(")") || message.includes("*")) {
-        throw new Error("The response contains suspicious characters");
-      }
-      if (hasMixedLanguageWords(message)) {
-        throw new Error("The potential message contains English-Russian words");
-      }
-      if (containsChinese(message)) {
-        throw new Error("The potential message contains Chinese words");
-      }
-      const varMessage = capitalizeFirstLetter2(
-        message.replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E,", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E!", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0434\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("Hi,", "").replace("Hi! ", "").replace("Hi!", "").replace("Hello,", "").replace("Hello! ", "").replace("Hello!", "").replace("Good morning,", "").replace("Good morning! ", "").replace("Good morning!", "").replace("Good morning", "").replace("good morning", "").replace("Good evening,", "").replace("Good evening! ", "").replace("Good evening!", "").replace("Good evening", "").replace("good evening", "").replace("Good afternoon,", "").replace("Good afternoon! ", "").replace("Good afternoon!", "").replace("Good afternoon", "").replace("good afternoon", "")
-      );
-      if (part && !message.includes(part)) {
-        throw new Error(
-          `The potential message does not contain the ${part} part, although it should`
-        );
-      }
-      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-      console.log(`[${accountId2}] Generated message after filters:`, (0, import_safe7.gray)(nmessage));
-      return nmessage;
-    } catch (error) {
-      await new Promise((res) => setTimeout(res, 2500));
-      console.log((0, import_safe7.red)(`[${accountId2}] Request Gpt Error: ${error.message}`));
-      errors3.push(error.message);
-    }
-  }
-  try {
-    await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
-GROUP ID: ${groupId}
-ACCOUNT ID: ${accountId2}
-_____________
-GENERATIONS:
-${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
-ERRORS:
-${errors3.map((e2, i2) => `${i2 + 1}: ${e2}`).join("\n")}
-`);
-  } catch {
-  }
-  if (generations[0]) {
-    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
-    console.log(`[${accountId2}] Generated message after filters:`, (0, import_safe7.gray)(nmessage));
-    return nmessage;
-  }
-  throw new Error("Stopped");
-};
-
-// src/helpers/generateRandomString.ts
-var generateRandomString = (template) => {
-  const regex = /{(.*?)}/g;
-  return template.replace(regex, (match, group) => {
-    const options = group.split("|");
-    const randomIndex = Math.floor(Math.random() * options.length);
-    return options[randomIndex];
-  });
-};
-
-// src/helpers/converterName.ts
-var russianNames = {
-  anatoliy: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
-  anton: "\u0410\u043D\u0442\u043E\u043D",
-  arkadiy: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
-  artur: "\u0410\u0440\u0442\u0443\u0440",
-  boris: "\u0411\u043E\u0440\u0438\u0441",
-  vadim: "\u0412\u0430\u0434\u0438\u043C",
-  valentin: "\u0412\u0430\u043B\u0435\u043D\u0442\u0438\u043D",
-  valeriy: "\u0412\u0430\u043B\u0435\u0440\u0438\u0439",
-  viktor: "\u0412\u0438\u043A\u0442\u043E\u0440",
-  vitaliy: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
-  vladimir: "\u0412\u043B\u0430\u0434\u0438\u043C\u0438\u0440",
-  vladislav: "\u0412\u043B\u0430\u0434\u0438\u0441\u043B\u0430\u0432",
-  gennadiy: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
-  georgiy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  denis: "\u0414\u0435\u043D\u0438\u0441",
-  dmitriy: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
-  egor: "\u0415\u0433\u043E\u0440",
-  ivan: "\u0418\u0432\u0430\u043D",
-  igor: "\u0418\u0433\u043E\u0440\u044C",
-  ilya: "\u0418\u043B\u044C\u044F",
-  kirill: "\u041A\u0438\u0440\u0438\u043B\u043B",
-  konstantin: "\u041A\u043E\u043D\u0441\u0442\u0430\u043D\u0442\u0438\u043D",
-  leonid: "\u041B\u0435\u043E\u043D\u0438\u0434",
-  maksim: "\u041C\u0430\u043A\u0441\u0438\u043C",
-  mikhail: "\u041C\u0438\u0445\u0430\u0438\u043B",
-  nikita: "\u041D\u0438\u043A\u0438\u0442\u0430",
-  nikolai: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
-  oleg: "\u041E\u043B\u0435\u0433",
-  pavel: "\u041F\u0430\u0432\u0435\u043B",
-  roman: "\u0420\u043E\u043C\u0430\u043D",
-  ruslan: "\u0420\u0443\u0441\u043B\u0430\u043D",
-  sergey: "\u0421\u0435\u0440\u0433\u0435\u0439",
-  stepan: "\u0421\u0442\u0435\u043F\u0430\u043D",
-  timofey: "\u0422\u0438\u043C\u043E\u0444\u0435\u0439",
-  fedor: "\u0424\u0435\u0434\u043E\u0440",
-  aleksandr: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
-  alexander: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
-  aleksey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
-  alexey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
-  alex: "\u0410\u043B\u0435\u043A\u0441",
-  anatoly: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
-  andrey: "\u0410\u043D\u0434\u0440\u0435\u0439",
-  andrew: "\u0410\u043D\u0434\u0440\u0435\u0439",
-  arkady: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
-  artem: "\u0410\u0440\u0442\u0435\u043C",
-  arthur: "\u0410\u0440\u0442\u0443\u0440",
-  valera: "\u0412\u0430\u043B\u0435\u0440\u0430",
-  vasily: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
-  vasiliy: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
-  victor: "\u0412\u0438\u043A\u0442\u043E\u0440",
-  vitaly: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
-  gennady: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
-  georgy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  george: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  gleb: "\u0413\u043B\u0435\u0431",
-  grigory: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
-  grigoriy: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
-  grisha: "\u0413\u0440\u0438\u0448\u0430",
-  daniil: "\u0414\u0430\u043D\u0438\u0438\u043B",
-  danila: "\u0414\u0430\u043D\u0438\u043B\u0430",
-  dmitry: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
-  dima: "\u0414\u0438\u043C\u0430",
-  zakhar: "\u0417\u0430\u0445\u0430\u0440",
-  matvey: "\u041C\u0430\u0442\u0432\u0435\u0439",
-  nikolay: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
-  petr: "\u041F\u0435\u0442\u0440",
-  stanislav: "\u0421\u0442\u0430\u043D\u0438\u0441\u043B\u0430\u0432",
-  timur: "\u0422\u0438\u043C\u0443\u0440",
-  yaroslav: "\u042F\u0440\u043E\u0441\u043B\u0430\u0432"
-};
-var converterName = (aiName) => {
-  const lowerCaseName = aiName.toLowerCase().replace(".", "").trim();
-  return russianNames[lowerCaseName] || aiName;
-};
-
-// src/helpers/getCombinedMessages.ts
-var getCombinedMessages = (messages) => {
-  const combinedMessages = [];
-  for (let i2 = 0; i2 < messages.length; i2++) {
-    const curr = { ...messages[i2] };
-    if (combinedMessages.length > 0) {
-      const lastItem = combinedMessages[combinedMessages.length - 1];
-      if (lastItem.fromId === curr.fromId) {
-        lastItem.text += "." + curr.text;
-      } else {
-        combinedMessages.push(curr);
-      }
-    } else {
-      combinedMessages.push(curr);
-    }
-  }
-  return combinedMessages;
-};
-
-// src/helpers/getDateNow.ts
-var getDateNow = () => {
-  const now = /* @__PURE__ */ new Date();
-  return `${new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  }).format(now)} ${now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  })}`;
-};
-
-// src/helpers/sendToFormBot.ts
-init_axios2();
-var import_safe8 = __toESM(require_safe());
-var sendToFormBot = async (text) => {
-  const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
-  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-  const chatIds = ["483779758", "324820826"];
-  try {
-    await Promise.all(
-      chatIds.map(
-        (chatId) => axios_default.post(sendMessageUrl, {
-          chat_id: chatId,
-          text
-        })
-      )
-    );
-  } catch (error) {
-    console.log((0, import_safe8.red)(`Error sending message to bot: ${error.message}`));
-  }
-};
-
-// src/methods/messages/sendMessage.ts
-var import_big_integer4 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
-init_sendToBot();
-var import_safe9 = __toESM(require_safe());
-function reduceSpaces(string) {
-  return string.replace(/\s+/g, " ").trim();
-}
-function capitalizeFirstLetter3(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-function removeNonAlphaPrefix(string) {
-  if (string === "/start") {
-    return string;
-  }
-  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-}
-var sendMessage = async (client, userId, accessHash, message, accountId2) => {
-  try {
-    console.log(
-      `[${accountId2}] Send ${(0, import_safe9.gray)(message)} to ${(0, import_safe9.blue)(
-        `${userId}:${accessHash}`
-      )}`
-    );
-    const sentMessage = await client.invoke(
-      new import_api9.default.messages.SendMessage({
-        message: removeNonAlphaPrefix(
-          capitalizeFirstLetter3(reduceSpaces(message))
-        ),
-        clearDraft: true,
-        peer: new import_api9.default.InputPeerUser({
-          userId: (0, import_big_integer4.default)(userId),
-          accessHash: (0, import_big_integer4.default)(accessHash)
-        }),
-        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
-      })
-    );
-    return sentMessage;
-  } catch (e2) {
-    await sendToBot(
-      `Error: ${JSON.stringify(
-        e2.message
-      )}
-AccountId: ${accountId2}.
-UserId: ${userId}
-Message: ${message}.`
-    );
-    throw new Error(e2.message);
-  }
-};
-
-// src/modules/saveRecipient.ts
-var import_safe10 = __toESM(require_safe());
-
-// src/helpers/sleep.ts
-var sleep2 = (delay) => {
-  return new Promise((res) => {
-    setTimeout(res, delay);
-  });
-};
-
-// src/db/groupId.ts
-var getGroupIdCollection = async () => {
-  return (await DB()).collection("groupId");
-};
-var getGroupId = async (groupId) => {
-  const groupIdCollection = await getGroupIdCollection();
-  const result = await groupIdCollection.findOne(
-    {
-      groupId: Number(groupId)
-    },
-    { projection: { database: 0 } }
-  );
-  return result;
-};
-var incrementCurrentCount = async (groupId) => {
-  const groupIdCollection = await getGroupIdCollection();
-  await groupIdCollection.updateOne(
-    { groupId },
-    {
-      $inc: { currentCount: 1 },
-      $set: { dateUpdated: /* @__PURE__ */ new Date() }
-    }
-  );
-};
-
-// src/modules/saveRecipient.ts
-var saveRecipient = async (accountId2, recipient, recipientDb, messages, status, addedData = {}) => {
-  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe10.yellow)("SAVE RECIPIENT"));
-  const {
-    id: recipientId,
-    phone,
-    username,
-    firstName,
-    lastName = ""
-  } = recipient["users"][0];
-  const {
-    fullUser: { about }
-  } = recipient;
-  const {
-    groupId,
-    recipientUsername,
-    username: varSecondUsername,
-    recipientPhone
-  } = recipientDb;
-  const data = {
-    groupId,
-    accountId: accountId2,
-    recipientId: String(recipientId),
-    recipientUsername: (username || recipientUsername || varSecondUsername || "").toLowerCase(),
-    recipientTitle: `${firstName} ${lastName}`.trim(),
-    recipientBio: about || "",
-    recipientPhone: phone || recipientPhone || null,
-    messages,
-    step: getCombinedMessages(messages).length,
-    ...addedData
-  };
-  while (true) {
-    try {
-      await updateDialogue(data);
-      await updateAccountById(accountId2, {
-        remainingTime: new Date((/* @__PURE__ */ new Date()).getTime() + 216e5)
-      });
-      if (status === "create") {
-        await incrementMessageCount(accountId2);
-        await incrementCurrentCount(groupId);
-      }
-      console.log(
-        `[${accountId2}] Saving the recipient information to the database is complete`
-      );
-      break;
-    } catch (error) {
-      console.log(
-        (0, import_safe10.red)(
-          `[${accountId2}] Error occurred while saving recipient: ${error.message}`
-        )
-      );
-      await sleep2(3e3);
-    }
-  }
-};
-
-// src/methods/users/getFullUser.ts
-var import_big_integer5 = __toESM(require_BigInteger());
-var import_safe11 = __toESM(require_safe());
-var import_api10 = __toESM(require_api());
-var getFullUser = async (client, accountId2, userId, accessHash) => {
-  if (!userId || !accessHash) {
-    return null;
-  }
-  console.log(
-    `[${accountId2}] Get full user information by ${(0, import_safe11.blue)(
-      `${userId}:${accessHash}`
-    )}`
-  );
-  const userFull = await client.invoke(
-    new import_api10.default.users.GetFullUser({
-      id: new import_api10.default.InputPeerUser({
-        userId: (0, import_big_integer5.default)(userId),
-        accessHash: (0, import_big_integer5.default)(accessHash)
-      })
-    })
-  );
-  return userFull;
-};
-
-// src/modules/autoResponse.ts
-var gptRequestWrapper = async (language, message, dialogGroupId, accountId2, addedContextString = "", part = "") => {
-  return await makeRequestGpt(
-    `## CONTEXT
-${addedContextString}
-Today's date is ${getDateNow()}.
-
-## STYLE GUIDE]
-${addedContextString}
-Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
-
-## INSTRUCTIONS
-I need you to paraphrase a message (which is inside '''') while maintaining its original meaning, structure, and character count. Make sure the resulting message is the same length as the original, and conveys the same thought in a unique but similar way to the original message. RESPONSE LANGUAGE: ${language}. Make sure that the result does not contain any words other than ${language} (except for proper names).`,
-    `A message where the wording needs to be changed: ''''${message}''''`,
-    dialogGroupId,
-    accountId2,
-    part
-  );
-};
-var autoResponse = async (client, accountId2, tgAccountId, tgFirstName) => {
-  var _a4;
-  console.log(`[${accountId2}] Initialize module`, (0, import_safe12.yellow)("AUTO RESPONSE"));
-  const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
-    client,
-    accountId2
-  );
-  for (const dialog of dialogs) {
-    const {
-      id,
-      accessHash,
-      messages,
-      groupId: dialogGroupId,
-      firstName,
-      lastName = ""
-    } = dialog;
-    const groupId = await getGroupId(dialogGroupId);
-    const combinedMessages = getCombinedMessages(messages);
-    const chatHistory = messages.map((m2) => ({
-      role: m2.fromId === String(id) ? "USER" : "CHATBOT",
-      message: m2.text
-    })).slice(-30);
-    const currentStage = combinedMessages.filter(
-      (m2) => m2.fromId === String(id)
-    ).length;
-    const userName = `${firstName} ${lastName}`.trim().replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
-    if (currentStage > 25) {
-      console.log((0, import_safe12.red)(`[${accountId2}] MAXIMUM STAGE in ${accountId2}:${id}`));
-      await updateBlockedDialogue(accountId2, id, "dialogs-max-stage");
-      continue;
-    }
-    const recipientFull = await getFullUser(client, accountId2, id, accessHash);
-    if (!recipientFull) {
-      console.log((0, import_safe12.red)(`[${accountId2}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId2, id, "dialogs-not-resolved");
-      continue;
-    }
-    const {
-      aiRole = "",
-      companyDescription = "",
-      addedInformation = "",
-      goal = "",
-      part = "",
-      addedQuestion = "",
-      secondAddedQuestion = "",
-      styleGuide = "",
-      language = "RUSSIAN"
-    } = groupId || {};
-    const meName = language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
-    let promptGoal = "";
-    if (currentStage === 1) {
-      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
-    }
-    if (currentStage >= 2) {
-      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER). ${goal}.!!!!`;
-    }
-    const parted = currentStage === 2 && part ? part : null;
-    const wresponseMessage = await makeRequestComplete(
-      `
-## CONTEXT
-You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
-
-## STYLE GUIDE
-${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. RESPONSE LANGUAGE: ${language}.
-
-## INSTRUCTIONS
-${promptGoal} ${parted ? `!!!!A mandatory part that should definitely be in the answer: ${part}!!!!` : ""}`,
-      [
-        {
-          title: "YOUR_COMPANY_DESCRIPTION",
-          text: companyDescription
-        },
-        {
-          title: "YOUR_COMPANY_ADDED_INFORMATION",
-          text: addedInformation
-        }
-      ],
-      currentStage === 1,
-      currentStage <= 2,
-      currentStage <= 2 ? 2 : 1,
-      currentStage === 2 ? part : null,
-      chatHistory,
-      dialogGroupId,
-      accountId2
-    );
-    const responseMessage = await gptRequestWrapper(
-      language,
-      wresponseMessage,
-      dialogGroupId,
-      accountId2,
-      `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`,
-      currentStage === 2 ? part : null
-    );
-    await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
-\u0414\u041E: ${wresponseMessage}
-\u041F\u041E\u0421\u041B\u0415: ${responseMessage}`);
-    const sentResponseMessage = await sendMessage(
-      client,
-      id,
-      accessHash,
-      responseMessage,
-      accountId2
-    );
-    messages.push({
-      id: sentResponseMessage.id,
-      text: responseMessage,
-      fromId: tgAccountId,
-      date: Math.round(Date.now() / 1e3)
-    });
-    if (currentStage === 1 && addedQuestion) {
-      const genQuestion = generateRandomString(addedQuestion);
-      const genAddedQuestion = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId2,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
-      );
-      const sentAddedQuestion = await sendMessage(
-        client,
-        id,
-        accessHash,
-        genAddedQuestion,
-        accountId2
-      );
-      messages.push({
-        id: sentAddedQuestion.id,
-        text: genAddedQuestion,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-      await sendToFormBot(`**** FIRST ADDED MESSAGE (${language}) ****
-\u0414\u041E: ${genQuestion}
-\u041F\u041E\u0421\u041B\u0415: ${genAddedQuestion}`);
-    }
-    if (currentStage === 2 && secondAddedQuestion) {
-      const genQuestion = generateRandomString(secondAddedQuestion);
-      const genAddedQuestion = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId2,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
-      );
-      const sentSecondAddedQuestion = await sendMessage(
-        client,
-        id,
-        accessHash,
-        genAddedQuestion,
-        accountId2
-      );
-      messages.push({
-        id: sentSecondAddedQuestion.id,
-        text: genAddedQuestion,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-      await sendToFormBot(`**** SECOND ADDED MESSAGE (${language}) ****
-\u0414\u041E: ${genQuestion}
-\u041F\u041E\u0421\u041B\u0415: ${genAddedQuestion}`);
-    }
-    await saveRecipient(accountId2, recipientFull, dialog, messages, "update");
-  }
-  for (const dialog of pingDialogs) {
-    const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
-    const groupId = await getGroupId(dialogGroupId);
-    const recipientFull = await getFullUser(client, accountId2, id, accessHash);
-    if (!recipientFull) {
-      console.log((0, import_safe12.red)(`[${accountId2}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId2, id, "ping-not-resolved");
-      continue;
-    }
-    const {
-      firstName = "",
-      lastName = "",
-      username = ""
-    } = ((_a4 = recipientFull == null ? void 0 : recipientFull.users) == null ? void 0 : _a4[0]) || {};
-    const { language } = groupId || { language: "RUSSIAN" };
-    const chatHistory = messages.map((m2) => ({
-      role: m2.fromId === String(id) ? "USER" : "CHATBOT",
-      message: m2.text
-    })).slice(-15);
-    const userName = `${firstName} ${lastName}`.trim().replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
-    const pingMessage = await makeRequestGpt(
-      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
-      `## STYLE GUIDE
-Maximum length of reminder message 100 characters
-
-## USER DATA
-USER: ${userName}, ${username};
-Today's date is ${getDateNow()};
-      
-## DIALOG
-${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
-      dialogGroupId,
-      accountId2,
-      null
-    );
-    await sendToFormBot(`**** PING MESSAGE (${language}) ****
-${pingMessage}`);
-    const sentPingMessage = await sendMessage(
-      client,
-      id,
-      accessHash,
-      pingMessage,
-      accountId2
-    );
-    messages.push({
-      id: sentPingMessage.id,
-      text: pingMessage,
-      fromId: tgAccountId,
-      date: Math.round(Date.now() / 1e3)
-    });
-    await saveRecipient(accountId2, recipientFull, dialog, messages, "update", {
-      ping: true
-    });
-  }
-  for (const dialog of manualControlDialogs) {
-    const { id, accessHash, messages, managerMessage } = dialog;
-    const recipientFull = await getFullUser(client, accountId2, id, accessHash);
-    if (!recipientFull) {
-      console.log((0, import_safe12.red)(`[${accountId2}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(
-        accountId2,
-        id,
-        "manual-control-dialogs-not-resolved"
-      );
-      continue;
-    }
-    if (managerMessage) {
-      const sentManagerMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        managerMessage,
-        accountId2
-      );
-      messages.push({
-        id: sentManagerMessage.id,
-        text: managerMessage,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-    }
-    await saveRecipient(accountId2, recipientFull, dialog, messages, "update", {
-      managerMessage: null,
-      viewed: false
-    });
-  }
-};
-
-// src/modules/autoSender.ts
-var import_safe20 = __toESM(require_safe());
-var import_api16 = __toESM(require_api());
-
-// src/modules/checkSpamBlock.ts
-var import_safe15 = __toESM(require_safe());
-
-// src/methods/messages/getMessages.ts
-var import_big_integer6 = __toESM(require_BigInteger());
-var import_safe13 = __toESM(require_safe());
-var import_api11 = __toESM(require_api());
-var getMessages = async (client, accountId2, userId, accessHash, minId) => {
-  console.log(
-    `[${accountId2}] Get history by`,
-    (0, import_safe13.blue)(`${userId}:${accessHash}`),
-    "with",
-    (0, import_safe13.blue)(`minimumId=${minId}`)
-  );
-  const { messages } = await client.invoke(
-    new import_api11.default.messages.GetHistory({
-      peer: new import_api11.default.InputPeerUser({
-        userId: (0, import_big_integer6.default)(userId),
-        accessHash: (0, import_big_integer6.default)(accessHash)
-      }),
-      minId
-    })
-  );
-  return messages;
-};
-
-// src/methods/contacts/resolveUsername.ts
-var import_safe14 = __toESM(require_safe());
-var import_api12 = __toESM(require_api());
-var resolveUsername = async (client, accountId2, username) => {
-  console.log(`[${accountId2}] Initialize resolve username:`, (0, import_safe14.blue)(username));
-  const userByUsername = await client.invoke(
-    new import_api12.default.contacts.ResolveUsername({
-      username
-    })
-  );
-  return userByUsername;
-};
-
-// src/modules/checkSpamBlock.ts
-var checkSpamBlock = async (client, accountId2) => {
-  var _a4, _b;
-  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe15.yellow)("CHECK SPAMBLOCK"));
-  const result = await resolveUsername(client, accountId2, "spambot");
-  const { id: userId, accessHash, username } = ((_a4 = result == null ? void 0 : result.users) == null ? void 0 : _a4[0]) ?? {};
-  if (!userId || !accessHash || username !== "SpamBot") {
-    console.log((0, import_safe15.red)(`[${accountId2}] Chat with SpamBot not defined`));
-    return true;
-  }
-  const sentMessage = await sendMessage(
-    client,
-    userId,
-    accessHash,
-    "/start",
-    accountId2
-  );
-  const { maxId } = ((_b = sentMessage == null ? void 0 : sentMessage.updates) == null ? void 0 : _b[2]) ?? {};
-  if (!maxId) {
-    console.log((0, import_safe15.red)(`[${accountId2}] MaxId from SpamBot not defined`));
-    return true;
-  }
-  const messages = await getMessages(
-    client,
-    accountId2,
-    userId,
-    accessHash,
-    maxId
-  );
-  if (!(messages == null ? void 0 : messages[0])) {
-    console.log((0, import_safe15.red)(`[${accountId2}] Messages from SpamBot not defined`));
-    return true;
-  }
-  const { message } = messages[0];
-  if (message.includes("no limits are currently applied")) {
-    console.log(`[${accountId2}] Account is spamblock-free`);
-    await updateAccountById(accountId2, {
-      spamBlockDate: null
-    });
-    return false;
-  }
-  const untilDateMatch = message.match(/until\s(.*)\./);
-  const spamBlockDate = untilDateMatch ? untilDateMatch[1].replace("UTC", "") : "INFINITY";
-  const currentDate = /* @__PURE__ */ new Date();
-  const nextDay = new Date(currentDate);
-  nextDay.setDate(currentDate.getDate() + 1);
-  await updateAccountById(accountId2, {
-    remainingTime: String(nextDay),
-    spamBlockDate
-  });
-  console.log(
-    `[${accountId2}] Account has a spamblock to ${(0, import_safe15.blue)(String(spamBlockDate))}`
-  );
-  return spamBlockDate;
-};
-
-// src/modules/autoSender.ts
-init_sendToBot();
-
-// src/methods/folders/editFolder.ts
-var import_big_integer7 = __toESM(require_BigInteger());
-var import_safe16 = __toESM(require_safe());
-var import_api13 = __toESM(require_api());
-var editFolder = async (client, accountId2, userId, accessHash, folderId) => {
-  console.log(
-    `[${accountId2}] Edit folder account by ${(0, import_safe16.blue)(
-      `${userId}:${accessHash}`
-    )} to ${(0, import_safe16.blue)(`#folder${folderId}`)}`
-  );
-  await client.invoke(
-    new import_api13.default.folders.EditPeerFolders({
-      folderPeers: [
-        new import_api13.default.InputFolderPeer({
-          peer: new import_api13.default.InputPeerUser({
-            userId: (0, import_big_integer7.default)(userId),
-            accessHash: (0, import_big_integer7.default)(accessHash)
-          }),
-          folderId
-        })
-      ]
-    })
-  );
-};
-
-// src/methods/recipients/getRecipient.ts
-var import_safe17 = __toESM(require_safe());
-init_sendToBot();
-var defaultFirstMessagePrompt = "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!";
-var defaultSecondMessagePrompt = "{\u042F |}{\u0437\u0430\u043C\u0435\u0442\u0438\u043B|\u0443\u0432\u0438\u0434\u0435\u043B|\u043E\u0431\u0440\u0430\u0442\u0438\u043B \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u0435|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u0438\u043C\u0430\u044E|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0438\u043B|\u0432\u0435\u0440\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u0437\u0430\u043F\u043E\u043C\u043D\u0438\u043B|\u043F\u043E\u0434\u043C\u0435\u0442\u0438\u043B}, {\u0447\u0442\u043E \u0432\u044B|\u0447\u0442\u043E \u0412\u044B|\u0432\u044B|\u0412\u044B} {\u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C|\u0432\u0435\u0434\u0435\u0442\u0435 \u0431\u0438\u0437\u043D\u0435\u0441|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C\u044E|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E\u043C|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u0432\u0435\u0434\u0435\u043D\u0438\u0435\u043C \u0431\u0438\u0437\u043D\u0435\u0441\u0430|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043A\u043E\u043C\u043C\u0435\u0440\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C\u044E}{?|.|,} {\u044D\u0442\u043E \u0442\u0430\u043A|\u044F \u043F\u0440\u0430\u0432|\u043F\u0440\u0430\u0432 \u043B\u0438 \u044F|\u044D\u0442\u043E \u043F\u0440\u0430\u0432\u0434\u0430|\u0442\u0430\u043A \u043B\u0438 \u044D\u0442\u043E|\u044D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0442\u0430\u043A|\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u043B\u0438 \u0442\u0430\u043A|\u043D\u0435 \u043E\u0448\u0438\u0431\u0441\u044F|\u0432\u0435\u0440\u043D\u043E|\u044D\u0442\u043E \u0432\u0435\u0440\u043D\u043E}?";
-var getRecipient = async (accountId2) => {
-  while (true) {
-    try {
-      const response = await fetch(`${process.env.RECIPIENT_URL}`);
-      const user = await response.json();
-      if (!(user == null ? void 0 : user.groupId) || !(user == null ? void 0 : user.username)) {
-        await sendToBot(
-          `\u041F\u0440\u0438 \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0438 recipient \u043F\u0440\u043E\u0438\u0437\u043E\u0448\u043B\u0430 \u043E\u0448\u0438\u0431\u043A\u0430: ${JSON.stringify(user)}:${user == null ? void 0 : user.groupId}:${user == null ? void 0 : user.username}`
-        );
-      }
-      if (!user.firstMessagePrompt) {
-        user.firstMessagePrompt = defaultFirstMessagePrompt;
-      }
-      if (!user.secondMessagePrompt) {
-        user.secondMessagePrompt = defaultSecondMessagePrompt;
-      }
-      return user;
-    } catch (error) {
-      console.log((0, import_safe17.red)(`[${accountId2}] Get recipient error: ${error.message}`));
-      await sleep2(3e3);
-    }
-  }
-};
-
-// src/methods/contacts/resolvePhone.ts
-var import_safe18 = __toESM(require_safe());
-var import_api14 = __toESM(require_api());
-var resolvePhone = async (client, accountId2, phone) => {
-  console.log(`[${accountId2}] Initialize resolve phone number:`, (0, import_safe18.blue)(phone));
-  const userByUsername = await client.invoke(
-    new import_api14.default.contacts.ResolvePhone({
-      phone
-    })
-  );
-  return userByUsername;
-};
-
-// src/methods/account/muteNotification.ts
-var import_big_integer8 = __toESM(require_BigInteger());
-var import_safe19 = __toESM(require_safe());
-var import_api15 = __toESM(require_api());
-var muteNotification = async (client, accountId2, id, accessHash, muteUntil = 2147483647) => {
-  console.log(
-    `[${accountId2}] Mute notifications in account ${(0, import_safe19.blue)(
-      `${id}:${accessHash}`
-    )}`
-  );
-  const muteInvoke = await client.invoke(
-    new import_api15.default.account.UpdateNotifySettings({
-      peer: new import_api15.default.InputNotifyPeer({
-        peer: new import_api15.default.InputPeerUser({
-          userId: (0, import_big_integer8.default)(id),
-          accessHash: (0, import_big_integer8.default)(accessHash)
-        })
-      }),
-      settings: new import_api15.default.InputPeerNotifySettings({ muteUntil })
-    })
-  );
-  return muteInvoke;
-};
-
-// src/db/messages.ts
-var getMessagesCollection = async () => {
-  return (await DB()).collection("messages");
-};
-var updateFailedMessage = async (username) => {
-  const messagesCollection = await getMessagesCollection();
-  await messagesCollection.updateOne(
-    { username: username.toLowerCase() },
-    { $set: { failed: true } },
-    { upsert: true }
-  );
-};
-
-// src/modules/autoSender.ts
-var generateRandomTime = () => {
-  const minTime = 36e4;
-  const maxTime = 36e5;
-  const randomTime = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
-  const currentTime = /* @__PURE__ */ new Date();
-  const futureTime = new Date(currentTime.getTime() + randomTime);
-  return futureTime;
-};
-var autoSender = async (client, accountId2, tgAccountId, tgRmainingTime) => {
-  var _a4, _b;
-  console.log(`[${accountId2}] Initialize module`, (0, import_safe20.yellow)("AUTO SENDER"));
-  if (!tgRmainingTime) {
-    const remainingTime2 = generateRandomTime();
-    await updateAccountById(accountId2, {
-      remainingTime: remainingTime2
-    });
-    console.log(
-      `[${accountId2}] Remaining time not defined, new remaining time:`,
-      (0, import_safe20.blue)(String(remainingTime2))
-    );
-    return;
-  }
-  const currentTime = /* @__PURE__ */ new Date();
-  let remainingTime = new Date(tgRmainingTime || currentTime);
-  if (currentTime >= remainingTime) {
-    const spamBlockDate = await checkSpamBlock(client, accountId2);
-    if (spamBlockDate) {
-      return;
-    }
-    const recipient = await getRecipient(accountId2);
-    let recipientUserId;
-    console.log(`[${accountId2}] Generate recipient before writing:`, (0, import_safe20.gray)(JSON.stringify(recipient)));
-    try {
-      const resolveMethod = recipient.username.includes("+") ? resolvePhone : resolveUsername;
-      const userByUsername = await resolveMethod(
-        client,
-        accountId2,
-        recipient.username
-      );
-      const { id: userId, accessHash } = ((_a4 = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _a4[0]) ?? {};
-      const recipientFull = await getFullUser(
-        client,
-        accountId2,
-        userId,
-        accessHash
-      );
-      if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api16.default.User)) {
-        console.log(
-          (0, import_safe20.red)(
-            `[${accountId2}] Chat with username ${recipient.username}:${userId} not resolved`
-          )
-        );
-        await updateFailedMessage(recipient.username);
-        return;
-      }
-      recipientUserId = userId;
-      const {
-        self: self2,
-        deleted,
-        bot,
-        support,
-        contactRequirePremium,
-        botBusiness
-      } = userByUsername.users[0];
-      if (self2) {
-        return;
-      }
-      if (deleted || bot || support || contactRequirePremium || botBusiness) {
-        await updateFailedMessage(recipient.username);
-        return;
-      }
-      const firstMessage = generateRandomString(recipient.firstMessagePrompt);
-      const secondMessage = generateRandomString(recipient.secondMessagePrompt);
-      const sentFirstMessage = await sendMessage(
-        client,
-        userId,
-        accessHash,
-        firstMessage,
-        accountId2
-      );
-      const sentSecondMessage = await sendMessage(
-        client,
-        userId,
-        accessHash,
-        secondMessage,
-        accountId2
-      );
-      await editFolder(client, accountId2, userId, accessHash, 1);
-      await muteNotification(client, accountId2, userId, accessHash, 2147483647);
-      await saveRecipient(
-        accountId2,
-        recipientFull,
-        recipient,
-        [
-          {
-            id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
-            text: firstMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1e3)
-          },
-          {
-            id: sentSecondMessage.id || (sentSecondMessage.id ? sentSecondMessage.id + 1 : Math.floor(Math.random() * 9e5) + 1e5),
-            text: secondMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1e3)
-          }
-        ],
-        "create"
-      );
-    } catch (e2) {
-      if (![
-        "PEER_FLOOD",
-        "PHONE_NOT_OCCUPIED",
-        "USERNAME_NOT_OCCUPIED",
-        "USERNAME_INVALID"
-      ].includes(e2.message)) {
-        await sendToBot(
-          `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e2.message}`
-        );
-      }
-      if (e2.message.includes("PEER_FLOOD")) {
-        throw new Error("Stopped");
-      }
-      await updateFailedMessage(recipient.username);
-      throw new Error("Global Error");
-    }
-  } else {
-    console.log(
-      `[${accountId2}] Next message can be sent after`,
-      (0, import_safe20.blue)(String(remainingTime.toLocaleString()))
-    );
-  }
-};
-
 // src/modules/accountSetup.ts
-var import_big_integer9 = __toESM(require_BigInteger());
-var import_safe21 = __toESM(require_safe());
-var import_api18 = __toESM(require_api());
+var import_big_integer3 = __toESM(require_BigInteger());
+var import_safe5 = __toESM(require_safe());
+var import_api9 = __toESM(require_api());
 init_uploadFile();
 
 // src/helpers/generateUser.ts
@@ -70626,8 +69222,15 @@ var generateUser = () => {
   return { firstName, lastName, username: randomUsername };
 };
 
+// src/helpers/sleep.ts
+var sleep2 = (delay) => {
+  return new Promise((res) => {
+    setTimeout(res, delay);
+  });
+};
+
 // src/methods/account/updateProfile.ts
-var import_api17 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 var updateProfile = (client, accountId2, {
   firstName,
   lastName,
@@ -70639,7 +69242,7 @@ var updateProfile = (client, accountId2, {
     about: about || ""
   };
   console.log(`[${accountId2}] Update me, new profile data:`, newProfile);
-  return client.invoke(new import_api17.default.account.UpdateProfile(newProfile));
+  return client.invoke(new import_api8.default.account.UpdateProfile(newProfile));
 };
 
 // src/helpers/getProfileFiles.ts
@@ -70700,14 +69303,14 @@ var accountSetup = async (client, accountId2, setupped, firstName) => {
   if (setupped) {
     return firstName;
   }
-  console.log(`[${accountId2}] Initialize module`, (0, import_safe21.yellow)("ACCOUNT SETUP"));
+  console.log(`[${accountId2}] Initialize module`, (0, import_safe5.yellow)("ACCOUNT SETUP"));
   let user;
   while (true) {
     try {
       const genUser = generateUser();
       const { firstName: firstName2, lastName, username } = genUser;
       await client.invoke(
-        new import_api18.default.account.UpdateUsername({
+        new import_api9.default.account.UpdateUsername({
           username
         })
       );
@@ -70720,24 +69323,24 @@ var accountSetup = async (client, accountId2, setupped, firstName) => {
       break;
     } catch (error) {
       console.log(
-        (0, import_safe21.red)(`[${accountId2}] Error when updating user data: ${error.message}`)
+        (0, import_safe5.red)(`[${accountId2}] Error when updating user data: ${error.message}`)
       );
       await sleep2(3e3);
     }
   }
   const { photos: profilePhotos } = await client.invoke(
-    new import_api18.default.photos.GetUserPhotos({
-      userId: new import_api18.default.InputUserSelf(),
+    new import_api9.default.photos.GetUserPhotos({
+      userId: new import_api9.default.InputUserSelf(),
       limit: 40,
       offset: 0,
-      maxId: (0, import_big_integer9.default)("0")
+      maxId: (0, import_big_integer3.default)("0")
     })
   );
   if (profilePhotos.length) {
     await client.invoke(
-      new import_api18.default.photos.DeletePhotos({
+      new import_api9.default.photos.DeletePhotos({
         id: profilePhotos.map(
-          (photo) => new import_api18.default.InputPhoto({
+          (photo) => new import_api9.default.InputPhoto({
             id: photo.id,
             accessHash: photo.accessHash,
             fileReference: Buffer.alloc(0)
@@ -70749,39 +69352,39 @@ var accountSetup = async (client, accountId2, setupped, firstName) => {
   const files = getProfileFiles();
   for (const file of files) {
     await client.invoke(
-      new import_api18.default.photos.UploadProfilePhoto({
+      new import_api9.default.photos.UploadProfilePhoto({
         file: await uploadFile(client, file)
       })
     );
   }
   await client.invoke(
-    new import_api18.default.account.SetPrivacy({
-      key: new import_api18.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api18.default.InputPrivacyValueAllowAll()]
+    new import_api9.default.account.SetPrivacy({
+      key: new import_api9.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api9.default.InputPrivacyValueAllowAll()]
     })
   );
   await client.invoke(
-    new import_api18.default.account.SetPrivacy({
-      key: new import_api18.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api18.default.InputPrivacyValueAllowAll()]
+    new import_api9.default.account.SetPrivacy({
+      key: new import_api9.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api9.default.InputPrivacyValueAllowAll()]
     })
   );
   await client.invoke(
-    new import_api18.default.account.SetPrivacy({
-      key: new import_api18.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api18.default.InputPrivacyValueAllowAll()]
+    new import_api9.default.account.SetPrivacy({
+      key: new import_api9.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api9.default.InputPrivacyValueAllowAll()]
     })
   );
   await client.invoke(
-    new import_api18.default.account.SetPrivacy({
-      key: new import_api18.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api18.default.InputPrivacyValueDisallowAll()]
+    new import_api9.default.account.SetPrivacy({
+      key: new import_api9.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api9.default.InputPrivacyValueDisallowAll()]
     })
   );
   await client.invoke(
-    new import_api18.default.account.SetPrivacy({
-      key: new import_api18.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api18.default.InputPrivacyValueDisallowAll()]
+    new import_api9.default.account.SetPrivacy({
+      key: new import_api9.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api9.default.InputPrivacyValueDisallowAll()]
     })
   );
   await updateAccountById(accountId2, {
@@ -70800,6 +69403,200 @@ console.log = (...args) => {
   const now = /* @__PURE__ */ new Date();
   const dateTimeString = now.toLocaleString();
   l(...args, `[${dateTimeString}]`);
+};
+
+// src/methods/account/reportUser.ts
+var import_big_integer4 = __toESM(require_BigInteger());
+var import_api11 = __toESM(require_api());
+
+// src/methods/contacts/resolveUsername.ts
+var import_safe6 = __toESM(require_safe());
+var import_api10 = __toESM(require_api());
+var resolveUsername = async (client, accountId2, username) => {
+  console.log(`[${accountId2}] Initialize resolve username:`, (0, import_safe6.blue)(username));
+  const userByUsername = await client.invoke(
+    new import_api10.default.contacts.ResolveUsername({
+      username
+    })
+  );
+  return userByUsername;
+};
+
+// src/modules/makeRequestGpt.ts
+init_axios2();
+var import_safe7 = __toESM(require_safe());
+init_sendToBot();
+function capitalizeFirstLetter(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function hasMixedLanguageWords(str) {
+  const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
+  return mixedPattern.test(str);
+}
+function containsChinese(text) {
+  const chineseRegex = /[\u4e00-\u9fa5]/;
+  return chineseRegex.test(text);
+}
+var makeRequestGpt = async (preamble, prompt, groupId, accountId2, part = "") => {
+  console.log(`[${accountId2}] Initialize sub module`, (0, import_safe7.yellow)("MAKE REQUEST GPT"));
+  console.log(
+    `[${accountId2}] Current preamble before generation:`,
+    (0, import_safe7.gray)(preamble.replace(/\n/g, ""))
+  );
+  console.log(
+    `[${accountId2}] Current message for preamble:`,
+    (0, import_safe7.gray)(String(prompt).replace(/\n/g, ""))
+  );
+  console.log(`[${accountId2}] Additional filters:`);
+  console.log(`[${accountId2}] Part check:`, (0, import_safe7.blue)(part ? part : "off"));
+  const generations = [];
+  const errors3 = [];
+  for (let i2 = 0; i2 < 5; i2++) {
+    try {
+      const {
+        data: { text: data }
+      } = await axios_default.post("http://91.198.220.234/chat", {
+        model: "command-r-plus",
+        k: 300,
+        temperature: 1,
+        prompt_truncation: "AUTO_PRESERVE_ORDER",
+        preamble,
+        message: prompt
+      });
+      if (!data || !data.trim()) {
+        throw new Error("Blank message");
+      }
+      generations.push(data);
+      let message = data.replace(/\n/g, "").replace(/['"`]/g, "").replace(/!/g, ".").trim();
+      console.log(`[${accountId2}] Generated message before filters:`, (0, import_safe7.gray)(message));
+      if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("(") || message.includes(")") || message.includes("*")) {
+        throw new Error("The response contains suspicious characters");
+      }
+      if (hasMixedLanguageWords(message)) {
+        throw new Error("The potential message contains English-Russian words");
+      }
+      if (containsChinese(message)) {
+        throw new Error("The potential message contains Chinese words");
+      }
+      const varMessage = capitalizeFirstLetter(
+        message.replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442,", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442!", "").replace("\u041F\u0440\u0438\u0432\u0435\u0442", "").replace("\u043F\u0440\u0438\u0432\u0435\u0442", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439,", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439!", "").replace("\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0437\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E,", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E!", "").replace("\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0434\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C,", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C!", "").replace("\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("\u0434\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C", "").replace("Hi,", "").replace("Hi! ", "").replace("Hi!", "").replace("Hello,", "").replace("Hello! ", "").replace("Hello!", "").replace("Good morning,", "").replace("Good morning! ", "").replace("Good morning!", "").replace("Good morning", "").replace("good morning", "").replace("Good evening,", "").replace("Good evening! ", "").replace("Good evening!", "").replace("Good evening", "").replace("good evening", "").replace("Good afternoon,", "").replace("Good afternoon! ", "").replace("Good afternoon!", "").replace("Good afternoon", "").replace("good afternoon", "")
+      );
+      if (part && !message.includes(part)) {
+        throw new Error(
+          `The potential message does not contain the ${part} part, although it should`
+        );
+      }
+      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      console.log(`[${accountId2}] Generated message after filters:`, (0, import_safe7.gray)(nmessage));
+      return nmessage;
+    } catch (error) {
+      await new Promise((res) => setTimeout(res, 2500));
+      console.log((0, import_safe7.red)(`[${accountId2}] Request Gpt Error: ${error.message}`));
+      errors3.push(error.message);
+    }
+  }
+  try {
+    await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
+GROUP ID: ${groupId}
+ACCOUNT ID: ${accountId2}
+_____________
+GENERATIONS:
+${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
+ERRORS:
+${errors3.map((e2, i2) => `${i2 + 1}: ${e2}`).join("\n")}
+`);
+  } catch {
+  }
+  if (generations[0]) {
+    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    console.log(`[${accountId2}] Generated message after filters:`, (0, import_safe7.gray)(nmessage));
+    return nmessage;
+  }
+  throw new Error("Stopped");
+};
+
+// src/helpers/sendToFormBot.ts
+init_axios2();
+var import_safe8 = __toESM(require_safe());
+var sendToFormBot = async (text) => {
+  const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
+  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const chatIds = ["483779758", "324820826"];
+  try {
+    await Promise.all(
+      chatIds.map(
+        (chatId) => axios_default.post(sendMessageUrl, {
+          chat_id: chatId,
+          text
+        })
+      )
+    );
+  } catch (error) {
+    console.log((0, import_safe8.red)(`Error sending message to bot: ${error.message}`));
+  }
+};
+
+// src/methods/account/reportUser.ts
+var reportUser = async (client, accountId2, username) => {
+  const initialReportMessage = `\u041A\u043E\u043D\u0442\u0435\u043D\u0442, \u043F\u0440\u043E\u0434\u0430\u0432\u0430\u0435\u043C\u044B\u0439 \u0447\u0435\u0440\u0435\u0437 \u0431\u043E\u0442 @Sarkorov_bot, \u043F\u0440\u0438\u043D\u0430\u0434\u043B\u0435\u0436\u0438\u0442 \u0410\u0440\u0441\u0435\u043D\u0443 \u041C\u0430\u0440\u043A\u0430\u0440\u044F\u043D\u0443 \u0438 \u0434\u0440\u0443\u0433\u0438\u043C \u043F\u0440\u0430\u0432\u043E\u043E\u0431\u043B\u0430\u0434\u0430\u0442\u0435\u043B\u044F\u043C \u0437\u0430\u043F\u0443\u0441\u0442\u0438\u0432\u0448\u0438\u043C \u043F\u0440\u043E\u0435\u043A\u0442 Grind University \u0441 \u043E\u0431\u0443\u0447\u0435\u043D\u0438\u0435\u043C on-line \u043F\u0440\u043E\u0444\u0435\u0441\u0441\u0438\u044F\u043C. \u0422\u0430\u043A\u0436\u0435, \u0432\u0430\u0436\u043D\u043E \u043E\u0442\u043C\u0435\u0442\u0438\u0442\u044C, \u0447\u0442\u043E \u0432 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0438 \u043A\u0430\u043D\u0430\u043B\u0430 \u0443\u043F\u043E\u0442\u0440\u0435\u0431\u043B\u044F\u0435\u0442\u0441\u044F \u0442\u0435\u0440\u043C\u0438\u043D \u0421\u041B\u0418\u0412, \u0447\u0442\u043E \u044F\u0432\u043D\u043E \u043F\u043E\u0437\u0438\u0446\u0438\u043E\u043D\u0438\u0440\u0443\u0435\u0442 \u043A\u0430\u043D\u0430\u043B \u043A\u0430\u043A \u043D\u0430\u0440\u0443\u0448\u0438\u0442\u0435\u043B\u044F \u0430\u0432\u0442\u043E\u0440\u0441\u043A\u0438\u0445 \u043F\u0440\u0430\u0432. ${Math.random() >= 0.7 ? "\u042F, \u043A\u0430\u043A \u043F\u043E\u0434\u043F\u0438\u0441\u0447\u0438\u043A \u0438 \u0410\u0440\u0441\u0435\u043D\u0430 \u041C\u0430\u0440\u043A\u0430\u0440\u044F\u043D\u0430 \u0438 \u043F\u043E\u0441\u043B\u0435\u0434\u043E\u0432\u0442\u0435\u043B\u044C \u043A\u0443\u0440\u0441\u0430 Grind University \u043D\u0435 \u0445\u043E\u0442\u0435\u043B \u0431\u044B, \u0447\u0442\u043E\u0431\u044B \u043A\u0442\u043E-\u0442\u043E \u0434\u0440\u0443\u0433\u043E\u0439 \u0437\u0430\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u043B \u043D\u0430 \u043D\u0435\u043C \u0438 \u043F\u043E\u044D\u0442\u043E\u043C\u0443 \u0436\u0430\u043B\u0443\u044E\u0441\u044C \u043D\u0430 \u0434\u0430\u043D\u043D\u044B\u0439 \u043A\u0430\u043D\u0430\u043B." : ""} \u0411\u0443\u0434\u0443 \u043F\u0440\u0438\u0437\u043D\u0435\u0442\u0435\u043B\u0435\u043D, \u0435\u0441\u043B\u0438 \u0432\u044B \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u0443\u0435\u0442\u0435 \u0434\u0430\u043D\u043D\u043E\u0433\u043E \u0431\u043E\u0442\u0430, \u043D\u0430\u0440\u0443\u0448\u0430\u044E\u0449\u0435\u0433\u043E \u043F\u0440\u0430\u0432\u0430 \u043D\u0430 \u043A\u043E\u043D\u0442\u0435\u043D\u0442.`;
+  const initialReportContext = `## CONTEXT
+\u0422\u044B \u043F\u043E\u0434\u043F\u0438\u0441\u0447\u0438\u043A \u0410\u0440\u0441\u0435\u043D\u0430 \u043C\u0430\u0440\u043A\u0430\u0440\u044F\u043D\u0430 \u0438 \u0447\u0435\u043B\u043E\u0432\u0435\u043A, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u043F\u0440\u043E\u0445\u043E\u0434\u0438\u0442 Grind University. \u0422\u044B \u0432\u043E\u0437\u043C\u0443\u0449\u0435\u043D \u0442\u0435\u043C, \u0447\u0442\u043E \u043A\u0442\u043E-\u0442\u043E \u0437\u0430\u0440\u0430\u0431\u0430\u0442\u044B\u0432\u0430\u0435\u0442 \u043D\u0430 \u043A\u043E\u043D\u0442\u0435\u043D\u0442\u0435 \u0410\u0440\u0441\u0435\u043D\u0430 \u041C\u0430\u0440\u043A\u0430\u0440\u044F\u043D\u0430, \u043F\u0440\u043E\u0434\u0430\u0432\u0430\u0435\u043C\u043E\u043C \u0447\u0435\u0440\u0435\u0437 \u0431\u043E\u0442\u0430 @Sarkorov_bot \u0438 \u043D\u0435 \u0441\u0442\u0435\u0441\u043D\u044F\u044F\u0441\u044C, \u0434\u0430\u0436\u0435 \u043F\u0438\u0448\u0435\u0442, \u0447\u0442\u043E \u043E\u043D \u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0441\u044F \u0438\u043C\u0435\u043D\u043D\u043E \u0421\u041B\u0418\u0412\u043E\u043C, \u043E\u043D \u043D\u0430\u043F\u0438\u0441\u0430\u043B \u044D\u0442\u043E \u0432 \u043E\u043F\u0438\u0441\u0430\u043D\u0438\u0438 \u0431\u043E\u0442\u0430 @Sarkorov_bot, \u0432 \u043D\u0430\u0437\u0432\u0430\u043D\u0438\u0438.
+    
+## STYLE GUIDE
+Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: RUSSIAN.
+    
+## INSTRUCTIONS
+I need you to paraphrase a message (which is inside '''') while maintaining its original meaning, structure, and character count. Make sure the resulting message is the same length as the original, and conveys the same thought in a unique but similar way to the original message. RESPONSE LANGUAGE: RUSSIAN. Make sure that the result does not contain any words other than RUSSIOAN (except for proper names).`;
+  const firstIterationReportMessage = await makeRequestGpt(
+    initialReportContext,
+    `A message where the wording needs to be changed: ''''${initialReportMessage}''''`,
+    "experemenatal-report-acc",
+    accountId2,
+    null
+  );
+  const secondIterationReportMessage = await makeRequestGpt(
+    initialReportContext,
+    `A message where the wording needs to be changed: ''''${firstIterationReportMessage}''''`,
+    "experemenatal-report-acc",
+    accountId2,
+    null
+  );
+  await sendToFormBot(`**** REPORT SPAM ****
+\u0414\u041E: ${firstIterationReportMessage}
+\u041F\u041E\u0421\u041B\u0415: ${secondIterationReportMessage}`);
+  const { users } = await resolveUsername(client, accountId2, username);
+  const { id, accessHash } = users[0];
+  const userPeer = new import_api11.default.InputPeerUser({
+    userId: (0, import_big_integer4.default)(id),
+    accessHash: (0, import_big_integer4.default)(accessHash)
+  });
+  await new Promise((resolve) => {
+    const min = 1;
+    const max = 25;
+    const randomMinutes = Math.floor(Math.random() * (max - min + 1)) + min;
+    const randomMilliseconds = randomMinutes * 60 * 1e3;
+    console.log(
+      `[${accountId2}] Wait ${randomMinutes}min before send report`
+    );
+    setTimeout(resolve, randomMilliseconds);
+  });
+  const reportFirst = await client.invoke(
+    new import_api11.default.account.ReportPeer({
+      peer: userPeer,
+      reason: new import_api11.default.InputReportReasonCopyright(),
+      message: ""
+    })
+  );
+  const reportSecond = await client.invoke(
+    new import_api11.default.account.ReportPeer({
+      peer: userPeer,
+      reason: new import_api11.default.InputReportReasonFake(),
+      message: ""
+    })
+  );
+  console.log(reportFirst);
+  console.log(reportSecond);
+  return [reportFirst, reportSecond];
 };
 
 // src/index.ts
@@ -70838,49 +69635,10 @@ var main = async (ID) => {
     setOnlineInterval = setInterval(() => {
       setOffline(client, accountId2, false);
     }, 6e4);
-    for (let i2 = 0; i2 < 30; i2++) {
-      accountsInWork[ID] = i2 + 1;
-      console.log(`[${accountId2}]`, (0, import_safe22.yellow)(`Init iteration [${i2 + 1}]`));
-      let timer;
-      const startTime = performance.now();
-      const timeout2 = new Promise(
-        (_, rej) => timer = setTimeout(
-          () => rej(
-            new Error(`Iteration [${i2 + 1}] took longer than 10 minutes.`)
-          ),
-          6e5
-        )
-      );
-      await Promise.race([
-        (async () => {
-          const account2 = await getAccountById(ID);
-          if (!account2) {
-            throw new Error("Account not defined");
-          }
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, accountId2, tgAccountId, tgFirstName);
-          }
-          await autoSender(
-            client,
-            accountId2,
-            tgAccountId,
-            account2.remainingTime || null
-          );
-          await new Promise((res) => setTimeout(res, 6e4));
-          const endTime = performance.now();
-          const diffTime = Math.floor((endTime - startTime) / 1e3);
-          console.log(
-            `[${accountId2}]`,
-            (0, import_safe22.yellow)(`End iteration [${i2 + 1}][${diffTime}s]`)
-          );
-        })(),
-        timeout2
-      ]);
-      clearTimeout(timer);
-    }
+    accountsInWork[ID] = 1;
+    await reportUser(client, accountId2, "sarkorov_bot");
   } catch (e2) {
-    console.log((0, import_safe22.red)(`[${ID}] Main error: ${e2.message}`));
+    console.log((0, import_safe9.red)(`[${ID}] Main error: ${e2.message}`));
     if (e2.message.includes("AUTH_KEY_DUPLICATED")) {
       await updateAccountById(ID, {
         banned: true,
@@ -70920,8 +69678,8 @@ ____________________________`);
   });
   setInterval(() => {
     console.log(
-      (0, import_safe22.black)(JSON.stringify(accountsInWork)),
-      (0, import_safe22.yellow)(String(Object.keys(accountsInWork).length))
+      (0, import_safe9.black)(JSON.stringify(accountsInWork)),
+      (0, import_safe9.yellow)(String(Object.keys(accountsInWork).length))
     );
   }, 6e4);
 });
