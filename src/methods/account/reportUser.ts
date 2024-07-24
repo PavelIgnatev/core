@@ -39,10 +39,6 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     null
   );
 
-  await sendToFormBot(`**** REPORT SPAM ****
-ДО: ${firstIterationReportMessage}
-ПОСЛЕ: ${secondIterationReportMessage}`);
-
   const { users } = await resolveUsername(client, accountId, username);
   const { id, accessHash } = users[0];
 
@@ -57,9 +53,7 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     const randomMinutes = Math.floor(Math.random() * (max - min + 1)) + min;
 
     const randomMilliseconds = randomMinutes * 60 * 1000;
-    console.log(
-      `[${accountId}] Wait ${randomMinutes}min before send report`
-    );
+    console.log(`[${accountId}] Wait ${randomMinutes}min before send report`);
     setTimeout(resolve, randomMilliseconds);
   });
 
@@ -79,6 +73,10 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
   );
   console.log(reportFirst);
   console.log(reportSecond);
+
+  await sendToFormBot(`**** REPORT SPAM ****
+ДО: ${firstIterationReportMessage}
+ПОСЛЕ: ${secondIterationReportMessage}`);
 
   return [reportFirst, reportSecond];
 };

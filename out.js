@@ -69561,9 +69561,6 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     accountId2,
     null
   );
-  await sendToFormBot(`**** REPORT SPAM ****
-\u0414\u041E: ${firstIterationReportMessage}
-\u041F\u041E\u0421\u041B\u0415: ${secondIterationReportMessage}`);
   const { users } = await resolveUsername(client, accountId2, username);
   const { id, accessHash } = users[0];
   const userPeer = new import_api11.default.InputPeerUser({
@@ -69575,9 +69572,7 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     const max = 25;
     const randomMinutes = Math.floor(Math.random() * (max - min + 1)) + min;
     const randomMilliseconds = randomMinutes * 60 * 1e3;
-    console.log(
-      `[${accountId2}] Wait ${randomMinutes}min before send report`
-    );
+    console.log(`[${accountId2}] Wait ${randomMinutes}min before send report`);
     setTimeout(resolve, randomMilliseconds);
   });
   const reportFirst = await client.invoke(
@@ -69596,6 +69591,9 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
   );
   console.log(reportFirst);
   console.log(reportSecond);
+  await sendToFormBot(`**** REPORT SPAM ****
+\u0414\u041E: ${firstIterationReportMessage}
+\u041F\u041E\u0421\u041B\u0415: ${secondIterationReportMessage}`);
   return [reportFirst, reportSecond];
 };
 
