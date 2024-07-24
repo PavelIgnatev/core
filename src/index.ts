@@ -25,19 +25,14 @@ const promises: Promise<any>[] = [];
 const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
+  let isAutoResponse = true;
   let client: TelegramClient | null = null;
   let setOnlineInterval: any = null;
 
   try {
-    accountsInWork[ID] = 0;
-    let isAutoResponse = true;
     const account = await getAccountById(ID);
-
     if (!account) {
-      await sendToBot(`Account from getAccountById by id ${ID} not defined`);
-      delete accountsInWork[ID];
-
-      return;
+      throw new Error("Account not defined");
     }
 
     const {
@@ -69,63 +64,57 @@ const main = async (ID: string) => {
     }, 60000);
 
     for (let i = 0; i < 30; i++) {
-      const startTime = performance.now();
-      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
       accountsInWork[ID] = i + 1;
 
-      const account = await getAccountById(ID);
-      if (!account) {
-        if (setOnlineInterval) {
-          clearInterval(setOnlineInterval);
-        }
-        delete accountsInWork[ID];
-        await client.destroy();
-        return;
-      }
+      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
 
-      if (isAutoResponse) {
-        isAutoResponse = false;
-        await autoResponse(client, accountId, tgAccountId, tgFirstName);
-      }
-
-      await autoSender(
-        client,
-        accountId,
-        tgAccountId,
-        account.remainingTime || null
+      let timer;
+      const startTime = performance.now();
+      const timeout = new Promise(
+        (_, rej) =>
+          (timer = setTimeout(
+            () =>
+              rej(
+                new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
+              ),
+            600000
+          ))
       );
 
-      await new Promise((res) => setTimeout(res, 60000));
+      await Promise.race([
+        (async () => {
+          const account = await getAccountById(ID);
+          if (!account) {
+            throw new Error("Account not defined");
+          }
 
-      const endTime = performance.now();
-      console.log(
-        `[${accountId}]`,
-        yellow(
-          `End iteration [${i + 1}][${Math.floor(
-            (endTime - startTime) / 1000
-          )}s]`
-        )
-      );
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, accountId, tgAccountId, tgFirstName);
+          }
+
+          await autoSender(
+            client,
+            accountId,
+            tgAccountId,
+            account.remainingTime || null
+          );
+
+          await new Promise((res) => setTimeout(res, 60000));
+
+          const endTime = performance.now();
+          const diffTime = Math.floor((endTime - startTime) / 1000);
+          console.log(
+            `[${accountId}]`,
+            yellow(`End iteration [${i + 1}][${diffTime}s]`)
+          );
+        })(),
+        timeout,
+      ]);
+
+      clearTimeout(timer);
     }
-
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
-    await client.destroy();
-    delete accountsInWork[ID];
-
-    return;
   } catch (e: any) {
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
-
-    if (client) {
-      await client.destroy();
-    }
-
-    delete accountsInWork[ID];
-
     console.log(red(`[${ID}] Main error: ${e.message}`));
 
     if (e.message.includes("AUTH_KEY_DUPLICATED")) {
@@ -146,12 +135,26 @@ const main = async (ID: string) => {
       );
     }
   }
+
+  delete accountsInWork[ID];
+
+  if (setOnlineInterval) {
+    clearInterval(setOnlineInterval);
+  }
+
+  if (client) {
+    await client.destroy();
+  }
+
+  return;
 };
 
 getAccounts().then((accounts) => {
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(
+    main("dfcc64c9-23d3-4cf3-8577-09d404af8d82-25906101-uk-test-50")
+  );
+  // });
 
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________

@@ -70807,16 +70807,13 @@ var exec = import_util3.default.promisify(import_child_process.exec);
 var promises = [];
 var accountsInWork = {};
 var main = async (ID) => {
+  let isAutoResponse = true;
   let client = null;
   let setOnlineInterval = null;
   try {
-    accountsInWork[ID] = 0;
-    let isAutoResponse = true;
     const account = await getAccountById(ID);
     if (!account) {
-      await sendToBot(`Account from getAccountById by id ${ID} not defined`);
-      delete accountsInWork[ID];
-      return;
+      throw new Error("Account not defined");
     }
     const {
       accountId: accountId2,
@@ -70842,53 +70839,47 @@ var main = async (ID) => {
       setOffline(client, accountId2, false);
     }, 6e4);
     for (let i2 = 0; i2 < 30; i2++) {
-      const startTime = performance.now();
-      console.log(`[${accountId2}]`, (0, import_safe22.yellow)(`Init iteration [${i2 + 1}]`));
       accountsInWork[ID] = i2 + 1;
-      const account2 = await getAccountById(ID);
-      if (!account2) {
-        if (setOnlineInterval) {
-          clearInterval(setOnlineInterval);
-        }
-        delete accountsInWork[ID];
-        await client.destroy();
-        return;
-      }
-      if (isAutoResponse) {
-        isAutoResponse = false;
-        await autoResponse(client, accountId2, tgAccountId, tgFirstName);
-      }
-      await autoSender(
-        client,
-        accountId2,
-        tgAccountId,
-        account2.remainingTime || null
-      );
-      await new Promise((res) => setTimeout(res, 6e4));
-      const endTime = performance.now();
-      console.log(
-        `[${accountId2}]`,
-        (0, import_safe22.yellow)(
-          `End iteration [${i2 + 1}][${Math.floor(
-            (endTime - startTime) / 1e3
-          )}s]`
+      console.log(`[${accountId2}]`, (0, import_safe22.yellow)(`Init iteration [${i2 + 1}]`));
+      let timer;
+      const startTime = performance.now();
+      const timeout2 = new Promise(
+        (_, rej) => timer = setTimeout(
+          () => rej(
+            new Error(`Iteration [${i2 + 1}] took longer than 10 minutes.`)
+          ),
+          6e5
         )
       );
+      await Promise.race([
+        (async () => {
+          const account2 = await getAccountById(ID);
+          if (!account2) {
+            throw new Error("Account not defined");
+          }
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, accountId2, tgAccountId, tgFirstName);
+          }
+          await autoSender(
+            client,
+            accountId2,
+            tgAccountId,
+            account2.remainingTime || null
+          );
+          await new Promise((res) => setTimeout(res, 6e4));
+          const endTime = performance.now();
+          const diffTime = Math.floor((endTime - startTime) / 1e3);
+          console.log(
+            `[${accountId2}]`,
+            (0, import_safe22.yellow)(`End iteration [${i2 + 1}][${diffTime}s]`)
+          );
+        })(),
+        timeout2
+      ]);
+      clearTimeout(timer);
     }
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
-    await client.destroy();
-    delete accountsInWork[ID];
-    return;
   } catch (e2) {
-    if (setOnlineInterval) {
-      clearInterval(setOnlineInterval);
-    }
-    if (client) {
-      await client.destroy();
-    }
-    delete accountsInWork[ID];
     console.log((0, import_safe22.red)(`[${ID}] Main error: ${e2.message}`));
     if (e2.message.includes("AUTH_KEY_DUPLICATED")) {
       await updateAccountById(ID, {
@@ -70908,11 +70899,19 @@ var main = async (ID) => {
       );
     }
   }
+  delete accountsInWork[ID];
+  if (setOnlineInterval) {
+    clearInterval(setOnlineInterval);
+  }
+  if (client) {
+    await client.destroy();
+  }
+  return;
 };
 getAccounts().then((accounts) => {
-  accounts.forEach((accountId2) => {
-    promises.push(main(accountId2));
-  });
+  promises.push(
+    main("dfcc64c9-23d3-4cf3-8577-09d404af8d82-25906101-uk-test-50")
+  );
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________
 all proccess done
