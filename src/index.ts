@@ -26,8 +26,8 @@ const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
   let isAutoResponse = true;
-  let client: TelegramClient | null = null;
   let setOnlineInterval: any = null;
+  let client: TelegramClient | null = null;
 
   try {
     const account = await getAccountById(ID);
@@ -150,11 +150,9 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  // accounts.forEach((accountId: string) => {
-  promises.push(
-    main("dfcc64c9-23d3-4cf3-8577-09d404af8d82-25906101-uk-test-50")
-  );
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________

@@ -70808,8 +70808,8 @@ var promises = [];
 var accountsInWork = {};
 var main = async (ID) => {
   let isAutoResponse = true;
-  let client = null;
   let setOnlineInterval = null;
+  let client = null;
   try {
     const account = await getAccountById(ID);
     if (!account) {
@@ -70909,9 +70909,9 @@ var main = async (ID) => {
   return;
 };
 getAccounts().then((accounts) => {
-  promises.push(
-    main("dfcc64c9-23d3-4cf3-8577-09d404af8d82-25906101-uk-test-50")
-  );
+  accounts.forEach((accountId2) => {
+    promises.push(main(accountId2));
+  });
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________
 all proccess done
