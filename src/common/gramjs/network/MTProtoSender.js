@@ -226,7 +226,6 @@ class MTProtoSender {
                 await this._connect(this.getConnection());
                 console.log(`[${this._accountId}] Connected!`);
                 if (!this._isExported) {
-
                     this._updateCallback?.(
                         new UpdateConnectionState(
                             UpdateConnectionState.connected
@@ -236,7 +235,6 @@ class MTProtoSender {
                 break;
             } catch (err) {
                 if (!this._isExported && attempt === 0) {
-
                     this._updateCallback?.(
                         new UpdateConnectionState(
                             UpdateConnectionState.disconnected
@@ -411,20 +409,24 @@ class MTProtoSender {
 
         if (connection === undefined) {
             console.log(
-                red(`[${this._accountId}] Not disconnecting (already have no connection)`)
+                red(
+                    `[${this._accountId}] Not disconnecting (already have no connection)`
+                )
             );
             return;
         }
 
         console.log(
-            red(`[${this._accountId}] Disconnecting from %s...`.replace(
-                "%s",
-                connection.toString()
-            ))
+            red(
+                `[${this._accountId}] Disconnecting from %s...`.replace(
+                    "%s",
+                    connection.toString()
+                )
+            )
         );
         this._user_connected = false;
-        console.log(red(`[${this._accountId}] Closing current connection...`))
-        console.log(red(`[${this._accountId}] Disconnecting`))
+        console.log(red(`[${this._accountId}] Closing current connection...`));
+        console.log(red(`[${this._accountId}] Disconnecting`));
         await connection.disconnect();
     }
 
@@ -454,11 +456,18 @@ class MTProtoSender {
 
             let { data } = res;
             const { batch } = res;
-            console.log(
-                `[${this._accountId}] Init sending...`,
-                batch.map((m) => m.request.className),
-                "message(s) to send"
-            );
+            const allClassNames = batch.map((m) => m.request.className);
+            const onlyUpdateStatus =
+                allClassNames.length === 1 &&
+                allClassNames[0] === "account.UpdateStatus";
+
+            if (!onlyUpdateStatus) {
+                console.log(
+                    `[${this._accountId}] Init sending...`,
+                    allClassNames,
+                    "message(s) to send"
+                );
+            }
 
             for (const state of batch) {
                 if (!Array.isArray(state)) {
@@ -495,11 +504,13 @@ class MTProtoSender {
                     ? 0
                     : Math.floor(Math.random() * 10000) + 2000;
 
-            console.log(
-                `[${this._accountId}] Encrypting (${randomDelay}ms)...`,
-                batch.map((m) => m.request.className),
-                `message(s) in ${blue(data.length)} bytes for sending`
-            );
+            if (!onlyUpdateStatus) {
+                console.log(
+                    `[${this._accountId}] Encrypting (${randomDelay}ms)...`,
+                    allClassNames,
+                    `message(s) in ${blue(data.length)} bytes for sending`
+                );
+            }
 
             await new Promise((r) => setTimeout(r, randomDelay));
             data = await this._state.encryptMessageData(data);
@@ -530,11 +541,13 @@ class MTProtoSender {
                     }
                 }
 
-                console.log(
-                    `[${this._accountId}]`,
-                    "Done sending...",
-                    batch.map((m) => m.request.className)
-                );
+                if (!onlyUpdateStatus) {
+                    console.log(
+                        `[${this._accountId}]`,
+                        "Done sending...",
+                        allClassNames
+                    );
+                }
             }
         }
 
@@ -552,7 +565,9 @@ class MTProtoSender {
                 /** when the server disconnects us we want to reconnect */
                 if (!this.userDisconnected) {
                     console.log(
-                        red(`[${this._accountId}] Recv loop error: ${e.message}`)
+                        red(
+                            `[${this._accountId}] Recv loop error: ${e.message}`
+                        )
                     );
                     this.reconnect();
                 }
@@ -564,19 +579,25 @@ class MTProtoSender {
                 message = await this._state.decryptMessageData(body);
             } catch (e) {
                 console.log(
-                    red(`[${this._accountId}] Error while receiving items from the network ${e.message}`)
+                    red(
+                        `[${this._accountId}] Error while receiving items from the network ${e.message}`
+                    )
                 );
                 if (e instanceof TypeNotFoundError) {
                     // Received object which we don't know how to deserialize
                     console.log(
-                        red(`[${this._accountId}] Type ${e.invalidConstructorId} not found, remaining data ${e.remaining}`)
+                        red(
+                            `[${this._accountId}] Type ${e.invalidConstructorId} not found, remaining data ${e.remaining}`
+                        )
                     );
                     continue;
                 } else if (e instanceof SecurityError) {
                     // A step while decoding had the incorrect data. This message
                     // should not be considered safe and it should be ignored.
                     console.log(
-                        red(`[${this._accountId}] Security error while unpacking a received message: ${e.message}`)
+                        red(
+                            `[${this._accountId}] Security error while unpacking a received message: ${e.message}`
+                        )
                     );
                     continue;
                 } else if (e instanceof InvalidBufferError) {
@@ -588,7 +609,9 @@ class MTProtoSender {
                         // reconnecting should be enough usually
                         // since the data we sent and received is probably wrong now.
                         console.log(
-                            red(`[${this._accountId}] Invalid buffer ${e.code} for dc ${this._dcId}`)
+                            red(
+                                `[${this._accountId}] Invalid buffer ${e.code} for dc ${this._dcId}`
+                            )
                         );
                         this.reconnect();
                     }
@@ -596,7 +619,9 @@ class MTProtoSender {
                     return;
                 } else {
                     console.log(
-                        red(`[${this._accountId}] Recv loop error unhandled: ${e.message}`)
+                        red(
+                            `[${this._accountId}] Recv loop error unhandled: ${e.message}`
+                        )
                     );
                     this.reconnect();
                     this._recv_loop_handle = undefined;
@@ -617,7 +642,9 @@ class MTProtoSender {
                     }
                 } else {
                     console.log(
-                        red(`[${this._accountId}] Unhandled error: ${e.message}`)
+                        red(
+                            `[${this._accountId}] Unhandled error: ${e.message}`
+                        )
                     );
                 }
             }
@@ -638,10 +665,12 @@ class MTProtoSender {
         }
 
         console.log(
-            red(`[${this._accountId}] Broken authorization key for dc ${this._dcId}, resetting...`)
+            red(
+                `[${this._accountId}] Broken authorization key for dc ${this._dcId}, resetting...`
+            )
         );
 
-        if (this._isMainSender && !this._isExported) {  
+        if (this._isMainSender && !this._isExported) {
             this._updateCallback?.(
                 new UpdateConnectionState(UpdateConnectionState.broken)
             );
@@ -739,7 +768,9 @@ class MTProtoSender {
             } catch (e) {
                 if (e instanceof TypeNotFoundError) {
                     console.log(
-                        red(`[${this._accountId}] Received response without parent request: ${result.body}`)
+                        red(
+                            `[${this._accountId}] Received response without parent request: ${result.body}`
+                        )
                     );
                     return;
                 }
@@ -795,7 +826,9 @@ class MTProtoSender {
     _handleUpdate(message) {
         if (message.obj.SUBCLASS_OF_ID !== 0x8af52aac) {
             console.log(
-                red(`[${this._accountId}] Note: ${message.obj.className} is not an update, not dispatching it`)
+                red(
+                    `[${this._accountId}] Note: ${message.obj.className} is not an update, not dispatching it`
+                )
             );
             return;
         }
@@ -881,7 +914,9 @@ class MTProtoSender {
             }
 
             console.log(
-                red(`[${this._accountId}] System clock is wrong, set time offset to ${newTimeOffset}s`)
+                red(
+                    `[${this._accountId}] System clock is wrong, set time offset to ${newTimeOffset}s`
+                )
             );
         } else if (badMsg.errorCode === 32) {
             // msg_seqno too low, so just pump it up by some "large" amount
@@ -922,7 +957,9 @@ class MTProtoSender {
         // TODO https://goo.gl/VvpCC6
         const msgId = message.obj.answerMsgId;
         console.log(
-            red(`[${this._accountId}] Handling detailed info for message ${msgId}`)
+            red(
+                `[${this._accountId}] Handling detailed info for message ${msgId}`
+            )
         );
     }
 
@@ -938,7 +975,9 @@ class MTProtoSender {
         // TODO https://goo.gl/VvpCC6
         const msgId = message.obj.answerMsgId;
         console.log(
-            red(`[${this._accountId}] Handling new detailed info for message ${msgId}`)
+            red(
+                `[${this._accountId}] Handling new detailed info for message ${msgId}`
+            )
         );
     }
 
@@ -973,7 +1012,9 @@ class MTProtoSender {
         // TODO save these salts and automatically adjust to the
         // correct one whenever the salt in use expires.
         console.log(
-           red( `[${this._accountId}] Handling future salts for message ${message.msgId}`)
+            red(
+                `[${this._accountId}] Handling future salts for message ${message.msgId}`
+            )
         );
         const state = this._pending_state.getAndDelete(message.msgId);
 
@@ -1019,22 +1060,26 @@ class MTProtoSender {
             // we want to wait a second between each reconnect try to not flood the server with reconnects
             // in case of internal server issues.
             Helpers.sleep(1000).then(() => {
-                console.log(red(`[${this._accountId}] Reconnecting...`))
-                console.log(red(`[${this._accountId}] Started reconnecting`))
+                console.log(red(`[${this._accountId}] Reconnecting...`));
+                console.log(red(`[${this._accountId}] Started reconnecting`));
                 this._reconnect();
             });
         }
     }
 
     async _reconnect() {
-        console.log(red(`[${this._accountId}] Closing current connection...`))
+        console.log(red(`[${this._accountId}] Closing current connection...`));
         try {
             console.log(
-                red(`[${this._accountId}] [Reconnect] Closing current connection...`)
+                red(
+                    `[${this._accountId}] [Reconnect] Closing current connection...`
+                )
             );
             await this._disconnect(this.getConnection());
         } catch (err) {
-            console.log(red(`[${this._accountId}] Reconnect error: ${err.message}`))
+            console.log(
+                red(`[${this._accountId}] Reconnect error: ${err.message}`)
+            );
         }
 
         this._send_queue.append(undefined);
