@@ -60,11 +60,12 @@ export const saveRecipient = async (
   while (true) {
     try {
       await updateDialogue(data);
-      await updateAccountById(accountId, {
-        remainingTime: new Date(new Date().getTime() + 21600000),
-      });
 
       if (status === "create") {
+        await updateAccountById(accountId, {
+          remainingTime: new Date(new Date().getTime() + 18000000),
+        });
+
         await incrementMessageCount(accountId);
         await incrementCurrentCount(groupId);
       }
