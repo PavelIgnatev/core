@@ -63,57 +63,57 @@ const main = async (ID: string) => {
       setOffline(client, accountId, false);
     }, 60000);
 
-    // for (let i = 0; i < 30; i++) {
-    //   accountsInWork[ID] = i + 1;
+    for (let i = 0; i < 30; i++) {
+      accountsInWork[ID] = i + 1;
 
-    //   console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
+      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
 
-    //   let timer;
-    //   const startTime = performance.now();
-    //   const timeout = new Promise(
-    //     (_, rej) =>
-    //       (timer = setTimeout(
-    //         () =>
-    //           rej(
-    //             new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
-    //           ),
-    //         600000
-    //       ))
-    //   );
+      let timer;
+      const startTime = performance.now();
+      const timeout = new Promise(
+        (_, rej) =>
+          (timer = setTimeout(
+            () =>
+              rej(
+                new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
+              ),
+            600000
+          ))
+      );
 
-    //   await Promise.race([
-    //     (async () => {
-    //       const account = await getAccountById(ID);
-    //       if (!account) {
-    //         throw new Error("Account not defined");
-    //       }
+      await Promise.race([
+        (async () => {
+          const account = await getAccountById(ID);
+          if (!account) {
+            throw new Error("Account not defined");
+          }
 
-    //       if (isAutoResponse) {
-    //         isAutoResponse = false;
-    //         await autoResponse(client, accountId, tgAccountId, tgFirstName);
-    //       }
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, accountId, tgAccountId, tgFirstName);
+          }
 
-    //       await autoSender(
-    //         client,
-    //         accountId,
-    //         tgAccountId,
-    //         account.remainingTime || null
-    //       );
+          await autoSender(
+            client,
+            accountId,
+            tgAccountId,
+            account.remainingTime || null
+          );
 
-    //       await new Promise((res) => setTimeout(res, 60000));
+          await new Promise((res) => setTimeout(res, 60000));
 
-    //       const endTime = performance.now();
-    //       const diffTime = Math.floor((endTime - startTime) / 1000);
-    //       console.log(
-    //         `[${accountId}]`,
-    //         yellow(`End iteration [${i + 1}][${diffTime}s]`)
-    //       );
-    //     })(),
-    //     timeout,
-    //   ]);
+          const endTime = performance.now();
+          const diffTime = Math.floor((endTime - startTime) / 1000);
+          console.log(
+            `[${accountId}]`,
+            yellow(`End iteration [${i + 1}][${diffTime}s]`)
+          );
+        })(),
+        timeout,
+      ]);
 
-    //   clearTimeout(timer);
-    // }
+      clearTimeout(timer);
+    }
   } catch (e: any) {
     console.log(red(`[${ID}] Main error: ${e.message}`));
 
@@ -150,7 +150,7 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  accounts.slice(0, 100).forEach((accountId: string) => {
+  accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 
