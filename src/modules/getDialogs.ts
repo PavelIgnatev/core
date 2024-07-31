@@ -90,9 +90,11 @@ export const getDialogs = async (client: any, accountId: string) => {
       const dialogDb = await getDialogue(accountId, String(user.id));
       const {
         messages: dialogMessages = [],
-        groupId = 12343207729,
+        groupId = 13228671259,
         blocked = false,
       } = dialogDb || {};
+
+      // if not group id
 
       if (blocked) {
         await client.invoke(
