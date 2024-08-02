@@ -88,10 +88,10 @@ const main = async (ID: string) => {
             throw new Error("Account not defined");
           }
 
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, accountId, tgAccountId, tgFirstName);
-          }
+          // if (isAutoResponse) {
+          //   isAutoResponse = false;
+          //   await autoResponse(client, accountId, tgAccountId, tgFirstName);
+          // }
 
           await autoSender(
             client,
