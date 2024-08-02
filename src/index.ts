@@ -150,9 +150,11 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(
+    main("cd34d4ed-2b5f-409a-a04c-f8f00b978917-25906101-uk-test-50")
+  );
+  // });
 
   Promise.all(promises).then(async () => {
     await sendToBot(`____________________________

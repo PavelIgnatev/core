@@ -70,6 +70,7 @@ export async function init(
                         update instanceof GramJs.UpdateNewMessage ||
                         update instanceof GramJs.UpdateShortMessage
                     ) {
+                        console.log(update);
                         const {
                             userId: varUserId,
                             message: {
@@ -108,9 +109,7 @@ export async function init(
                         if (update.className !== "UpdateConnectionState") {
                             console.log(
                                 `[${accountData.accountId}]`,
-                                yellow(
-                                    `Update handler: "${update.className}"`
-                                )
+                                yellow(`Update handler: "${update.className}"`)
                             );
                         }
                     }

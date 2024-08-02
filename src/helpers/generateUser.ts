@@ -6,19 +6,14 @@ import {
 } from "unique-names-generator";
 
 const firstNames = [
-  "Anatoliy",
   "Anton",
-  "Arkadiy",
   "Artur",
   "Boris",
   "Vadim",
-  "Valentin",
   "Valeriy",
   "Viktor",
   "Vitaliy",
   "Vladimir",
-  "Vladislav",
-  "Gennadiy",
   "Georgiy",
   "Denis",
   "Dmitriy",
@@ -27,11 +22,9 @@ const firstNames = [
   "Igor",
   "Ilya",
   "Kirill",
-  "Konstantin",
   "Leonid",
   "Maksim",
   "Mikhail",
-  "Nikita",
   "Nikolai",
   "Oleg",
   "Pavel",
@@ -41,54 +34,28 @@ const firstNames = [
   "Stepan",
   "Timofey",
   "Fedor",
-  "Aleksandr",
-  "Alexander",
   "Aleksey",
   "Alexey",
-  "Alex",
-  "Anatoly",
-  "Andrey",
   "Andrew",
-  "Arkady",
   "Artem",
   "Arthur",
-  "Valera",
-  "Vasily",
-  "Vasiliy",
   "Victor",
   "Vitaly",
   "Gennady",
-  "Georgy",
-  "George",
-  "Gleb",
   "Grigory",
-  "Grigoriy",
-  "Grisha",
-  "Daniil",
-  "Danila",
   "Dmitry",
-  "Dima",
-  "Zakhar",
   "Matvey",
   "Nikolay",
   "Petr",
-  "Stanislav",
-  "Timur",
-  "Yaroslav",
 ];
 
 const lastNames = [
   "Abramov",
-  "Afanasyev",
   "Agapov",
-  "Ageyev",
   "Alekseev",
   "Andreev",
   "Anisimov",
   "Antonov",
-  "Artamonov",
-  "Babkin",
-  "Balandin",
   "Baranov",
   "Belov",
   "Bogdanov",
@@ -107,7 +74,6 @@ const lastNames = [
   "Ermakov",
   "Erokhin",
   "Eroshkin",
-  "Evdokimov",
   "Fedorov",
   "Filatov",
   "Frolov",
@@ -115,11 +81,8 @@ const lastNames = [
   "Gavrilov",
   "Glazunov",
   "Golubev",
-  "Goncharov",
-  "Gorbachev",
   "Gorbunov",
   "Gorshkov",
-  "Grigoriev",
   "Grishin",
   "Gromov",
   "Ignatov",
@@ -128,28 +91,19 @@ const lastNames = [
   "Kalinin",
   "Karpov",
   "Kashirin",
-  "Kazantsev",
   "Kazmin",
-  "Kharitonov",
   "Khokhlov",
   "Kiselev",
-  "Kolesnikov",
-  "Kondratiev",
-  "Konstantinov",
-  "Konovalov",
   "Korneev",
   "Korneyev",
   "Korolev",
   "Kostin",
   "Kozlov",
-  "Kravchenko",
   "Kuzmin",
-  "Kuznetsov",
   "Lapshin",
   "Larionov",
   "Lazarev",
   "Lebedev",
-  "Likhachev",
   "Lobanov",
   "Loginov",
   "Makarov",
@@ -172,15 +126,12 @@ const lastNames = [
   "Novikov",
   "Orlov",
   "Osipov",
-  "Ovchinnikov",
   "Pakhomov",
   "Panfilov",
   "Pavlov",
   "Petrov",
-  "Ponomarev",
   "Popov",
   "Potapov",
-  "Prokhorov",
   "Puchkov",
   "Romanov",
   "Rostov",
@@ -190,25 +141,20 @@ const lastNames = [
   "Savin",
   "Semenov",
   "Serov",
-  "Shapovalov",
-  "Shevchenko",
   "Shevchuk",
   "Shirokov",
   "Shishkin",
   "Shubin",
   "Shumilov",
-  "Sidorenko",
   "Sidorov",
   "Simonov",
   "Sinitsyn",
-  "Skvortsov",
   "Smirnov",
   "Sobolev",
   "Sokolov",
   "Soloviev",
   "Sorokin",
   "Stepanov",
-  "Streltsov",
   "Suvorov",
   "Sysoev",
   "Tarasov",
@@ -223,13 +169,9 @@ const lastNames = [
   "Ustinov",
   "Vasilyev",
   "Vikhrov",
-  "Vinogradov",
   "Vlasov",
   "Volkov",
   "Voronin",
-  "Vorontsov",
-  "Vasiliev",
-  "Yudin",
   "Zakharov",
   "Zaitsev",
   "Zaytsev",
@@ -246,27 +188,34 @@ export const generateUser = () => {
   const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
   const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
 
-  const dictionaries = [adjectives, [firstName, lastName], colors];
-  const randomDictionaries = [];
-
-  for (let i = 0; i < 2; i++) {
-    const index = Math.floor(Math.random() * dictionaries.length);
-    randomDictionaries.push(dictionaries.splice(index, 1)[0]);
-  }
+  const dictionaries = [[lastName], [...adjectives, ...colors]];
 
   function randomSeparator() {
-    const separators = ["_", ""];
+    const separators = ["_"];
     const index = Math.floor(Math.random() * separators.length);
     return separators[index];
   }
 
   const dictionariesType: Config = {
-    dictionaries: [...randomDictionaries],
+    dictionaries: [...dictionaries],
+    length: 2,
+    separator: randomSeparator(),
+    style: "lowerCase",
+  };
+  const dictionariesTypeSecond: Config = {
+    dictionaries: [
+      [`${lastName}${firstName}`],
+      Array.from(Array(100 + 1).keys())
+        .slice(1)
+        .map(String),
+    ],
     length: 2,
     separator: randomSeparator(),
     style: "lowerCase",
   };
 
   const randomUsername = uniqueNamesGenerator(dictionariesType);
-  return { firstName, lastName, username: randomUsername };
+  const randomElseUsername = uniqueNamesGenerator(dictionariesTypeSecond);
+
+  return { firstName, lastName, username: randomUsername, randomElseUsername };
 };

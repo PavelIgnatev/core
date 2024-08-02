@@ -11,6 +11,45 @@ import { sleep } from "../helpers/sleep";
 
 import { updateProfile } from "../methods/account/updateProfile";
 import { getProfileFiles } from "../helpers/getProfileFiles";
+import { generateRandomString } from "../helpers/generateRandomString";
+
+const emojis = [
+  "🌎",
+  "🌍",
+  "🌏",
+  "🪐",
+  "♻️",
+  "🌿",
+  "🧩",
+  "☘️",
+  "🍀",
+  "🦕",
+  "🍃",
+  "🧳",
+  "💼",
+  "🚀",
+  "🌊",
+  "📌",
+  "🎯",
+  "👋",
+  "🤝",
+  "👨‍💻",
+  "🌳",
+  "🐢",
+  "🦖",
+  "🌵",
+  "🌀",
+  "⛰️",
+  "🍁",
+  "🍂",
+  "🦔",
+  "🥑",
+  "🏆",
+  "🐌",
+  "🧬",
+  "🐊",
+  "🌔",
+];
 
 export const accountSetup = async (
   client: any,
@@ -29,7 +68,7 @@ export const accountSetup = async (
   while (true) {
     try {
       const genUser = generateUser();
-      const { firstName, lastName, username } = genUser;
+      const { firstName, lastName, username, randomElseUsername } = genUser;
 
       await client.invoke(
         new GramJs.account.UpdateUsername({
@@ -39,8 +78,9 @@ export const accountSetup = async (
 
       await updateProfile(client, accountId, {
         firstName,
-        lastName,
-        about: "",
+        lastName:
+          lastName + ` ${emojis[Math.floor(Math.random() * emojis.length)]}`,
+        about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
       });
 
       user = genUser;
@@ -54,40 +94,46 @@ export const accountSetup = async (
       await sleep(3000);
     }
   }
+  // const { photos: profilePhotos } = await client.invoke(
+  //   new GramJs.photos.GetUserPhotos({
+  //     userId: new GramJs.InputUserSelf(),
+  //     limit: 40,
+  //     offset: 0,
+  //     maxId: BigInt("0"),
+  //   })
+  // );
 
-  const { photos: profilePhotos } = await client.invoke(
-    new GramJs.photos.GetUserPhotos({
-      userId: new GramJs.InputUserSelf(),
-      limit: 40,
-      offset: 0,
-      maxId: BigInt("0"),
+  // if (profilePhotos.length) {
+  //   await client.invoke(
+  //     new GramJs.photos.DeletePhotos({
+  //       id: profilePhotos.map(
+  //         (photo: GramJs.Photo) =>
+  //           new GramJs.InputPhoto({
+  //             id: photo.id,
+  //             accessHash: photo.accessHash,
+  //             fileReference: Buffer.alloc(0),
+  //           })
+  //       ),
+  //     })
+  //   );
+  // }
+
+  // const files = getProfileFiles();
+
+  // for (const file of files) {
+  //   await client.invoke(
+  //     new GramJs.photos.UploadProfilePhoto({
+  //       file: await uploadFile(client, file),
+  //     })
+  //   );
+  // }
+
+  await client.invoke(
+    new GramJs.account.SetPrivacy({
+      key: new GramJs.InputPrivacyKeyAbout(),
+      rules: [new GramJs.InputPrivacyValueAllowAll()],
     })
   );
-
-  if (profilePhotos.length) {
-    await client.invoke(
-      new GramJs.photos.DeletePhotos({
-        id: profilePhotos.map(
-          (photo: GramJs.Photo) =>
-            new GramJs.InputPhoto({
-              id: photo.id,
-              accessHash: photo.accessHash,
-              fileReference: Buffer.alloc(0),
-            })
-        ),
-      })
-    );
-  }
-
-  const files = getProfileFiles();
-
-  for (const file of files) {
-    await client.invoke(
-      new GramJs.photos.UploadProfilePhoto({
-        file: await uploadFile(client, file),
-      })
-    );
-  }
 
   await client.invoke(
     new GramJs.account.SetPrivacy({
@@ -106,13 +152,27 @@ export const accountSetup = async (
   await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneNumber(),
-      rules: [new GramJs.InputPrivacyValueAllowAll()],
+      rules: [new GramJs.InputPrivacyValueDisallowAll()],
+    })
+  );
+
+  await client.invoke(
+    new GramJs.account.SetPrivacy({
+      key: new GramJs.InputPrivacyKeyPhoneP2P(),
+      rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
 
   await client.invoke(
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyChatInvite(),
+      rules: [new GramJs.InputPrivacyValueDisallowAll()],
+    })
+  );
+
+  await client.invoke(
+    new GramJs.account.SetPrivacy({
+      key: new GramJs.InputPrivacyKeyForwards(),
       rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
@@ -128,7 +188,7 @@ export const accountSetup = async (
     ...user,
     setuped: true,
     banned: false,
-    messageCount: 0,
+    // messageCount: 0,
     lastProcessedBy: new Date(),
   });
 

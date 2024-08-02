@@ -46,7 +46,7 @@ export const initClient = async (
         banned: true,
         reason: e.message,
       });
-      throw new Error("Global Error");
+      throw new Error(e.message);
     }
 
     throw new Error(e.message);

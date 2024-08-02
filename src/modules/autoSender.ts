@@ -36,7 +36,7 @@ export const autoSender = async (
   tgAccountId: string,
   tgRmainingTime: string | null
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
+  console.log(`[${accountId}] Initialize module`, yellow("AUTO SENDER"));
 
   if (!tgRmainingTime) {
     const remainingTime = generateRandomTime();
@@ -63,7 +63,10 @@ export const autoSender = async (
 
     const recipient = await getRecipient(accountId);
     let recipientUserId;
-    console.log(`[${accountId}] Generate recipient before writing:`, gray(JSON.stringify(recipient)));
+    console.log(
+      `[${accountId}] Generate recipient before writing:`,
+      gray(JSON.stringify(recipient))
+    );
 
     try {
       const resolveMethod = recipient.username.includes("+")
@@ -161,6 +164,7 @@ export const autoSender = async (
         "create"
       );
     } catch (e: any) {
+      console.log(e)
       if (
         ![
           "PEER_FLOOD",
@@ -174,11 +178,10 @@ export const autoSender = async (
         );
       }
 
-      if (e.message.includes("PEER_FLOOD")) {
-        throw new Error("Stopped");
+      if (!e.message.includes("PEER_FLOOD")) {
+        await updateFailedMessage(recipient.username);
       }
 
-      await updateFailedMessage(recipient.username);
       throw new Error("Global Error");
     }
   } else {
