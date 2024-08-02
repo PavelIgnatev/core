@@ -63,10 +63,6 @@ export const autoSender = async (
 
     const recipient = await getRecipient(accountId);
     let recipientUserId;
-    console.log(
-      `[${accountId}] Generate recipient before writing:`,
-      gray(JSON.stringify(recipient))
-    );
 
     try {
       const resolveMethod = recipient.username.includes("+")
