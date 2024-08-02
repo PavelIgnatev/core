@@ -130,9 +130,28 @@ const main = async (ID: string) => {
         stopped: true,
       });
     } else {
-      await sendToBot(
-        `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
-      );
+      if (
+        [
+          "USER_DEACTIVATED_BAN",
+          "AUTH_KEY_UNREGISTERED",
+          "AUTH_KEY_INVALID",
+          "USER_DEACTIVATED",
+          "SESSION_REVOKED",
+          "SESSION_EXPIRED",
+          "AUTH_KEY_PERM_EMPTY",
+          "SESSION_PASSWORD_NEEDED",
+        ].includes(e.message)
+      ) {
+        await updateAccountById(ID, {
+          banned: true,
+          reason: e.message,
+        });
+        await sendToBot(`!!!БАН АККАУНТА!!! ID: ${ID}; Error: ${e.message}`);
+      } else {
+        await sendToBot(
+          `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
+        );
+      }
     }
   }
 
