@@ -70,7 +70,6 @@ export async function init(
                         update instanceof GramJs.UpdateNewMessage ||
                         update instanceof GramJs.UpdateShortMessage
                     ) {
-                        console.log(update);
                         const {
                             userId: varUserId,
                             message: {
