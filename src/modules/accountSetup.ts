@@ -94,39 +94,39 @@ export const accountSetup = async (
       await sleep(3000);
     }
   }
-  // const { photos: profilePhotos } = await client.invoke(
-  //   new GramJs.photos.GetUserPhotos({
-  //     userId: new GramJs.InputUserSelf(),
-  //     limit: 40,
-  //     offset: 0,
-  //     maxId: BigInt("0"),
-  //   })
-  // );
+  const { photos: profilePhotos } = await client.invoke(
+    new GramJs.photos.GetUserPhotos({
+      userId: new GramJs.InputUserSelf(),
+      limit: 40,
+      offset: 0,
+      maxId: BigInt("0"),
+    })
+  );
 
-  // if (profilePhotos.length) {
-  //   await client.invoke(
-  //     new GramJs.photos.DeletePhotos({
-  //       id: profilePhotos.map(
-  //         (photo: GramJs.Photo) =>
-  //           new GramJs.InputPhoto({
-  //             id: photo.id,
-  //             accessHash: photo.accessHash,
-  //             fileReference: Buffer.alloc(0),
-  //           })
-  //       ),
-  //     })
-  //   );
-  // }
+  if (profilePhotos.length) {
+    await client.invoke(
+      new GramJs.photos.DeletePhotos({
+        id: profilePhotos.map(
+          (photo: GramJs.Photo) =>
+            new GramJs.InputPhoto({
+              id: photo.id,
+              accessHash: photo.accessHash,
+              fileReference: Buffer.alloc(0),
+            })
+        ),
+      })
+    );
+  }
 
-  // const files = getProfileFiles();
+  const files = getProfileFiles();
 
-  // for (const file of files) {
-  //   await client.invoke(
-  //     new GramJs.photos.UploadProfilePhoto({
-  //       file: await uploadFile(client, file),
-  //     })
-  //   );
-  // }
+  for (const file of files) {
+    await client.invoke(
+      new GramJs.photos.UploadProfilePhoto({
+        file: await uploadFile(client, file),
+      })
+    );
+  }
 
   await client.invoke(
     new GramJs.account.SetPrivacy({
@@ -188,7 +188,7 @@ export const accountSetup = async (
     ...user,
     setuped: true,
     banned: false,
-    // messageCount: 0,
+    messageCount: 0,
     lastProcessedBy: new Date(),
   });
 
