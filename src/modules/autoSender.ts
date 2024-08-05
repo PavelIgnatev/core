@@ -56,10 +56,10 @@ export const autoSender = async (
   let remainingTime = new Date(tgRmainingTime || currentTime);
 
   if (currentTime <= remainingTime) {
-    // const spamBlockDate = await checkSpamBlock(client, accountId);
-    // if (spamBlockDate) {
-    //   return;
-    // }
+    const spamBlockDate = await checkSpamBlock(client, accountId);
+    if (spamBlockDate) {
+      return;
+    }
 
     const recipient = await getRecipient(accountId);
     let recipientUserId;
