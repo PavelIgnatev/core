@@ -159,7 +159,9 @@ export const autoSender = async (
           }),
         })
       );
-      const messages = (allHistory.messages || []).reverse();
+      const messages = (allHistory.messages || [])
+        .filter((m: GramJs.Message) => m.className === "Message")
+        .reverse();
       const isSame =
         messages.length === 2 &&
         removeSpaces(messages[0].message) === removeSpaces(firstMessage) &&
