@@ -102,7 +102,7 @@ export const autoSender = async (
   const currentTime = new Date();
   let remainingTime = new Date(tgRmainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime <= remainingTime) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
     if (spamBlockDate) {
       return;
@@ -160,11 +160,10 @@ export const autoSender = async (
         })
       );
       const messages = (allHistory.messages || []).reverse();
-
       const isSame =
         messages.length === 2 &&
-        removeSpaces(messages[1].message) === removeSpaces(firstMessage) &&
-        removeSpaces(messages[0].message) === removeSpaces(secondMessage);
+        removeSpaces(messages[0].message) === removeSpaces(firstMessage) &&
+        removeSpaces(messages[1].message) === removeSpaces(secondMessage);
       const fullRecipient = await resolveUser(client, accountId, recipient);
       const fullUser = fullRecipient.users[0];
       const isBlocked =
