@@ -23,7 +23,7 @@ import TelegramClient from "../common/gramjs/client/TelegramClient";
 import { resolveUsername } from "../methods/contacts/resolveUsername";
 
 const removeSpaces = (str: string) => {
-  return str.replace(/\s+/g, "");
+  return str.replace(/\s+/g, "").toLowerCase();
 };
 
 export const generateRandomTime = () => {
