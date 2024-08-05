@@ -178,8 +178,9 @@ Account ID: ${accountId}
 User ID: ${id}
 First Message: ${firstMessage}
 Second Message: ${secondMessage}
-Real first message: ${messages?.[1]?.message}
-Real second message: ${messages?.[0]?.message}`);
+Messages: ${JSON.stringify(messages)}
+Real first message: ${messages?.[0]?.message}
+Real second message: ${messages?.[1]?.message}`);
       }
 
       await saveRecipient(
