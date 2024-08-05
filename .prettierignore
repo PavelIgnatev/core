@@ -9,7 +9,7 @@
 
 # production
 /build
-
+*.d.ts
 # misc
 .DS_Store
 *.pem
@@ -27,7 +27,5 @@ yarn-error.log*
 
 .eslintrc.js
 .prettierrc
-src/common/
+src/common/images
 out.js
-
-*.d.ts

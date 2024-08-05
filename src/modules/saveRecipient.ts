@@ -1,33 +1,30 @@
-import { red, yellow } from "colors/safe";
+import { red, yellow } from 'colors/safe';
 
-import GramJs from "../common/gramjs/tl/api";
-
-import { Dialogue } from "../@types/Dialogue";
-
-import { getCombinedMessages } from "../helpers/getCombinedMessages";
-import { sleep } from "../helpers/sleep";
-
-import { updateDialogue } from "../db/dialogues";
-import { incrementMessageCount, updateAccountById } from "../db/accounts";
-import { incrementCurrentCount } from "../db/groupId";
+import { Dialogue } from '../@types/Dialogue';
+import GramJs from '../common/gramjs/tl/api';
+import { incrementMessageCount, updateAccountById } from '../db/accounts';
+import { updateDialogue } from '../db/dialogues';
+import { incrementCurrentCount } from '../db/groupId';
+import { getCombinedMessages } from '../helpers/getCombinedMessages';
+import { sleep } from '../helpers/sleep';
 
 export const saveRecipient = async (
   accountId: string,
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
-  status: "create" | "update",
+  status: 'create' | 'update',
   addedData: Record<string, unknown> = {}
 ) => {
-  console.log(`[${accountId}] Initialize sub module`, yellow("SAVE RECIPIENT"));
+  console.log(`[${accountId}] Initialize sub module`, yellow('SAVE RECIPIENT'));
 
   const {
     id: recipientId,
     phone,
     username,
     firstName,
-    lastName = "",
-  } = recipient["users"][0] as GramJs.User;
+    lastName = '',
+  } = recipient.users[0] as GramJs.User;
   const {
     fullUser: { about },
   } = recipient;
@@ -47,21 +44,22 @@ export const saveRecipient = async (
       username ||
       recipientUsername ||
       varSecondUsername ||
-      ""
+      ''
     ).toLowerCase(),
     recipientTitle: `${firstName} ${lastName}`.trim(),
-    recipientBio: about || "",
+    recipientBio: about || '',
     recipientPhone: phone || recipientPhone || null,
-    messages: messages,
+    messages,
     step: getCombinedMessages(messages).length,
     ...addedData,
   };
 
-  while (true) {
+  let isSave = false;
+  while (!isSave) {
     try {
       await updateDialogue(data);
 
-      if (status === "create") {
+      if (status === 'create') {
         await updateAccountById(accountId, {
           remainingTime: new Date(new Date().getTime() + 18000000),
         });
@@ -73,7 +71,7 @@ export const saveRecipient = async (
       console.log(
         `[${accountId}] Saving the recipient information to the database is complete`
       );
-      break;
+      isSave = true;
     } catch (error: any) {
       console.log(
         red(

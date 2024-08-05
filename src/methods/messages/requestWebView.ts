@@ -1,13 +1,14 @@
-import bigInt from "big-integer";
-import GramJs from "../../common/gramjs/tl/api";
-import { resolveUsername } from "../contacts/resolveUsername";
-import { updateAccountById } from "../../db/accounts";
-import { getInviteById, updateInviteByAccountId } from "../../db/invites";
+import bigInt from 'big-integer';
+
+import GramJs from '../../common/gramjs/tl/api';
+import { updateAccountById } from '../../db/accounts';
+import { updateInviteByAccountId } from '../../db/invites';
+import { resolveUsername } from '../contacts/resolveUsername';
 
 export const requestWebView = async (client: any, accountId: string) => {
-  const botLink = "dogshouse_bot";
-  const shortName = "join";
-  const startParam = "gDVBYjhvScWcL_QcuKYvhA";
+  const botLink = 'dogshouse_bot';
+  const shortName = 'join';
+  const startParam = 'gDVBYjhvScWcL_QcuKYvhA';
 
   const bot = await resolveUsername(client, accountId, botLink);
   const { id, accessHash } = bot.users[0];
@@ -33,7 +34,7 @@ export const requestWebView = async (client: any, accountId: string) => {
       }),
       startParam,
       themeParams: undefined,
-      platform: "android",
+      platform: 'android',
       writeAllowed: undefined,
     })
   );

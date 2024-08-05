@@ -8,18 +8,18 @@ const { RPCError } = require('./RPCBaseErrors');
 const { rpcErrorRe } = require('./RPCErrorList');
 
 function RPCMessageToError(rpcError, request) {
-    for (const [msgRegex, Cls] of rpcErrorRe) {
-        const m = rpcError.errorMessage.match(msgRegex);
-        if (m) {
-            const capture = m.length === 2 ? parseInt(m[1], 10) : undefined;
-            return new Cls({
-                request,
-                capture,
-            });
-        }
+  for (const [msgRegex, Cls] of rpcErrorRe) {
+    const m = rpcError.errorMessage.match(msgRegex);
+    if (m) {
+      const capture = m.length === 2 ? parseInt(m[1], 10) : undefined;
+      return new Cls({
+        request,
+        capture,
+      });
     }
+  }
 
-    return new RPCError(rpcError.errorMessage, request);
+  return new RPCError(rpcError.errorMessage, request);
 }
 
 const Common = require('./Common');
@@ -27,8 +27,8 @@ const RPCBaseErrors = require('./RPCBaseErrors');
 const RPCErrorList = require('./RPCErrorList');
 
 module.exports = {
-    RPCMessageToError,
-    ...Common,
-    ...RPCBaseErrors,
-    ...RPCErrorList,
+  RPCMessageToError,
+  ...Common,
+  ...RPCBaseErrors,
+  ...RPCErrorList,
 };

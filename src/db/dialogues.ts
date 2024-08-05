@@ -1,9 +1,8 @@
-import { DB } from "./db";
-
-import { Dialogue } from "../@types/Dialogue";
+import { DB } from './db';
+import { Dialogue } from '../@types/Dialogue';
 
 const getDialoguesCollection = async () => {
-  return (await DB()).collection("dialogues");
+  return (await DB()).collection('dialogues');
 };
 
 export const getDialogue = async (accountId: string, recipientId: string) => {

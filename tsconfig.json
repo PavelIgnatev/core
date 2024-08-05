@@ -2,12 +2,7 @@
   "compilerOptions": {
     // We don't care about this since Webpack runs Babel after TypeScript
     "target": "esnext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "webworker",
-      "es2019"
-    ],
+    "lib": ["dom", "dom.iterable", "webworker", "es2019"],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -28,6 +23,6 @@
     "dev",
     "webpack.config.ts",
     "webpack-electron.config.ts",
-    "babel.config.js",
+    "babel.config.js"
   ]
 }

@@ -7,7 +7,7 @@ export const getCombinedMessages = (messages: Message[]) => {
     if (combinedMessages.length > 0) {
       const lastItem = combinedMessages[combinedMessages.length - 1];
       if (lastItem.fromId === curr.fromId) {
-        lastItem.text += "." + curr.text;
+        lastItem.text += `.${curr.text}`;
       } else {
         combinedMessages.push(curr);
       }

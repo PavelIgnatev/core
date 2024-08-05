@@ -1,7 +1,7 @@
-import axios from "axios";
-import { blue, gray, red, yellow } from "colors/safe";
+import axios from 'axios';
+import { blue, gray, red, yellow } from 'colors/safe';
 
-import { sendToBot } from "../helpers/sendToBot";
+import { sendToBot } from '../helpers/sendToBot';
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -21,20 +21,23 @@ export const makeRequestGpt = async (
   prompt: string,
   groupId: string,
   accountId: string,
-  part: string | null = ""
+  part: string | null = ''
 ): Promise<string> => {
-  console.log(`[${accountId}] Initialize sub module`, yellow('MAKE REQUEST GPT'));
+  console.log(
+    `[${accountId}] Initialize sub module`,
+    yellow('MAKE REQUEST GPT')
+  );
 
   console.log(
     `[${accountId}] Current preamble before generation:`,
-    gray(preamble.replace(/\n/g, ""))
+    gray(preamble.replace(/\n/g, ''))
   );
   console.log(
     `[${accountId}] Current message for preamble:`,
-    gray(String(prompt).replace(/\n/g, ""))
+    gray(String(prompt).replace(/\n/g, ''))
   );
   console.log(`[${accountId}] Additional filters:`);
-  console.log(`[${accountId}] Part check:`, blue(part ? part : "off"));
+  console.log(`[${accountId}] Part check:`, blue(part || 'off'));
 
   const generations = [];
   const errors = [];
@@ -43,108 +46,111 @@ export const makeRequestGpt = async (
     try {
       const {
         data: { text: data },
-      } = await axios.post("http://91.198.220.234/chat", {
-        model: "command-r-plus",
+      } = await axios.post('http://91.198.220.234/chat', {
+        model: 'command-r-plus',
         k: 300,
         temperature: 1,
-        prompt_truncation: "AUTO_PRESERVE_ORDER",
+        prompt_truncation: 'AUTO_PRESERVE_ORDER',
         preamble,
         message: prompt,
       });
 
       if (!data || !data.trim()) {
-        throw new Error("Blank message");
+        throw new Error('Blank message');
       }
       generations.push(data);
 
-      let message = data
-        .replace(/\n/g, "")
-        .replace(/['"`]/g, "")
-        .replace(/!/g, ".")
+      const message = data
+        .replace(/\n/g, '')
+        .replace(/['"`]/g, '')
+        .replace(/!/g, '.')
         .trim();
 
-      console.log(`[${accountId}] Generated message before filters:`, gray(message));
+      console.log(
+        `[${accountId}] Generated message before filters:`,
+        gray(message)
+      );
 
       if (
-        message.includes("[") ||
-        message.includes("]") ||
-        message.includes("{") ||
-        message.includes("}") ||
-        message.includes("<") ||
-        message.includes(">") ||
-        message.includes("(") ||
-        message.includes(")") ||
-        message.includes("*")
+        message.includes('[') ||
+        message.includes(']') ||
+        message.includes('{') ||
+        message.includes('}') ||
+        message.includes('<') ||
+        message.includes('>') ||
+        message.includes('(') ||
+        message.includes(')') ||
+        message.includes('*')
       ) {
-        throw new Error("The response contains suspicious characters");
+        throw new Error('The response contains suspicious characters');
       }
 
       if (hasMixedLanguageWords(message)) {
-        throw new Error("The potential message contains English-Russian words");
+        throw new Error('The potential message contains English-Russian words');
       }
 
       if (containsChinese(message)) {
-        throw new Error("The potential message contains Chinese words");
+        throw new Error('The potential message contains Chinese words');
       }
 
       const varMessage = capitalizeFirstLetter(
         message
-          .replace("Приветствую!", "")
-          .replace("Приветствую,", "")
-          .replace("Приветствую", "")
-          .replace("приветствую", "")
+          .replace('Приветствую!', '')
+          .replace('Приветствую,', '')
+          .replace('Приветствую', '')
+          .replace('приветствую', '')
 
-          .replace("Привет,", "")
-          .replace("Привет!", "")
-          .replace("Привет", "")
-          .replace("привет", "")
+          .replace('Привет,', '')
+          .replace('Привет!', '')
+          .replace('Привет', '')
+          .replace('привет', '')
 
-          .replace("Здравствуйте,", "")
-          .replace("Здравствуйте!", "")
-          .replace("Здравствуйте", "")
-          .replace("здравствуйте", "")
+          .replace('Здравствуйте,', '')
+          .replace('Здравствуйте!', '')
+          .replace('Здравствуйте', '')
+          .replace('здравствуйте', '')
 
-          .replace("Здравствуй,", "")
-          .replace("Здравствуй!", "")
-          .replace("Здравствуй", "")
-          .replace("здравствуй", "")
+          .replace('Здравствуй,', '')
+          .replace('Здравствуй!', '')
+          .replace('Здравствуй', '')
+          .replace('здравствуй', '')
 
-          .replace("Доброе утро,", "")
-          .replace("Доброе утро!", "")
-          .replace("Доброе утро", "")
-          .replace("доброе утро", "")
+          .replace('Доброе утро,', '')
+          .replace('Доброе утро!', '')
+          .replace('Доброе утро', '')
+          .replace('доброе утро', '')
 
-          .replace("Добрый вечер,", "")
-          .replace("Добрый вечер!", "")
-          .replace("Добрый вечер", "")
-          .replace("добрый вечер", "")
+          .replace('Добрый вечер,', '')
+          .replace('Добрый вечер!', '')
+          .replace('Добрый вечер', '')
+          .replace('добрый вечер', '')
 
-          .replace("Добрый день,", "")
-          .replace("Добрый день!", "")
-          .replace("Добрый день", "")
-          .replace("добрый день", "")
+          .replace('Добрый день,', '')
+          .replace('Добрый день!', '')
+          .replace('Добрый день', '')
+          .replace('добрый день', '')
 
-          .replace("Hi,", "")
-          .replace("Hi! ", "")
-          .replace("Hi!", "")
-          .replace("Hello,", "")
-          .replace("Hello! ", "")
-          .replace("Hello!", "")
-          .replace("Good morning,", "")
-          .replace("Good morning! ", "")
-          .replace("Good morning!", "")
-          .replace("Good morning", "")
-          .replace("good morning", "")
-          .replace("Good evening,", "")
-          .replace("Good evening! ", "")
-          .replace("Good evening!", "")
-          .replace("Good evening", "")
-          .replace("good evening", "")
-          .replace("Good afternoon,", "")
-          .replace("Good afternoon! ", "")
-          .replace("Good afternoon!", "")
-          .replace("Good afternoon", "")
-          .replace("good afternoon", "")
+          .replace('Hi,', '')
+          .replace('Hi! ', '')
+          .replace('Hi!', '')
+          .replace('Hello,', '')
+          .replace('Hello! ', '')
+          .replace('Hello!', '')
+          .replace('Good morning,', '')
+          .replace('Good morning! ', '')
+          .replace('Good morning!', '')
+          .replace('Good morning', '')
+          .replace('good morning', '')
+          .replace('Good evening,', '')
+          .replace('Good evening! ', '')
+          .replace('Good evening!', '')
+          .replace('Good evening', '')
+          .replace('good evening', '')
+          .replace('Good afternoon,', '')
+          .replace('Good afternoon! ', '')
+          .replace('Good afternoon!', '')
+          .replace('Good afternoon', '')
+          .replace('good afternoon', '')
       );
 
       if (part && !message.includes(part)) {
@@ -153,8 +159,11 @@ export const makeRequestGpt = async (
         );
       }
 
-      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-      console.log(`[${accountId}] Generated message after filters:`, gray(nmessage));
+      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, '');
+      console.log(
+        `[${accountId}] Generated message after filters:`,
+        gray(nmessage)
+      );
 
       return nmessage;
     } catch (error: any) {
@@ -171,18 +180,22 @@ GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
 GENERATIONS:
-${generations.map((g, i) => `${i + 1}: ${g}`).join("\n")}
+${generations.map((g, i) => `${i + 1}: ${g}`).join('\n')}
 ERRORS:
-${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
-`);
-  } catch {}
+${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}`);
+  } catch (e: any) {
+    console.log(red(`[${accountId}] GPT GENERATION ERROR: ${e.message}`));
+  }
 
   if (generations[0]) {
-    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
-    console.log(`[${accountId}] Generated message after filters:`, gray(nmessage));
+    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, '');
+    console.log(
+      `[${accountId}] Generated message after filters:`,
+      gray(nmessage)
+    );
 
     return nmessage;
   }
 
-  throw new Error("Stopped");
+  throw new Error('Stopped');
 };

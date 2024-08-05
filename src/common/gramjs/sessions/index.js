@@ -6,10 +6,10 @@ const IdbSession = require('./IdbSession');
 const CallbackSession = require('./CallbackSession');
 
 module.exports = {
-    Memory,
-    StringSession,
-    CacheApiSession,
-    LocalStorageSession,
-    IdbSession,
-    CallbackSession,
+  Memory,
+  StringSession,
+  CacheApiSession,
+  LocalStorageSession,
+  IdbSession,
+  CallbackSession,
 };

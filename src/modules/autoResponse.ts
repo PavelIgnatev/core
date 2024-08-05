@@ -1,31 +1,28 @@
-import { red, yellow } from "colors/safe";
+import { red, yellow } from 'colors/safe';
 
-import { getDialogs } from "./getDialogs";
-import { makeRequestComplete } from "./makeRequestComplete";
-
-import { makeRequestGpt } from "./makeRequestGpt";
-import { generateRandomString } from "../helpers/generateRandomString";
-import { converterName } from "../helpers/converterName";
-import { getCombinedMessages } from "../helpers/getCombinedMessages";
-import { getDateNow } from "../helpers/getDateNow";
-import { sendToFormBot } from "../helpers/sendToFormBot";
-
-import { sendMessage } from "../methods/messages/sendMessage";
-import { saveRecipient } from "./saveRecipient";
-import { getFullUser } from "../methods/users/getFullUser";
-
-import { getGroupId } from "../db/groupId";
-import { updateBlockedDialogue } from "../db/dialogues";
+import { getDialogs } from './getDialogs';
+import { makeRequestComplete } from './makeRequestComplete';
+import { makeRequestGpt } from './makeRequestGpt';
+import { saveRecipient } from './saveRecipient';
+import { updateBlockedDialogue } from '../db/dialogues';
+import { getGroupId } from '../db/groupId';
+import { converterName } from '../helpers/converterName';
+import { generateRandomString } from '../helpers/generateRandomString';
+import { getCombinedMessages } from '../helpers/getCombinedMessages';
+import { getDateNow } from '../helpers/getDateNow';
+import { sendToFormBot } from '../helpers/sendToFormBot';
+import { sendMessage } from '../methods/messages/sendMessage';
+import { getFullUser } from '../methods/users/getFullUser';
 
 const gptRequestWrapper = async (
   language: string,
   message: string,
   dialogGroupId: string,
   accountId: string,
-  addedContextString = "",
-  part: string = ""
+  addedContextString: string = '',
+  part: string = ''
 ) => {
-  return await makeRequestGpt(
+  const result = await makeRequestGpt(
     `## CONTEXT
 ${addedContextString}
 Today's date is ${getDateNow()}.
@@ -41,6 +38,8 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     accountId,
     part
   );
+
+  return result;
 };
 
 export const autoResponse = async (
@@ -49,7 +48,7 @@ export const autoResponse = async (
   tgAccountId: string,
   tgFirstName: string
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow("AUTO RESPONSE"));
+  console.log(`[${accountId}] Initialize module`, yellow('AUTO RESPONSE'));
 
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
@@ -63,7 +62,7 @@ export const autoResponse = async (
       messages,
       groupId: dialogGroupId,
       firstName,
-      lastName = "",
+      lastName = '',
     } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
@@ -71,7 +70,7 @@ export const autoResponse = async (
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
-        role: m.fromId === String(id) ? "USER" : "CHATBOT",
+        role: m.fromId === String(id) ? 'USER' : 'CHATBOT',
         message: m.text,
       }))
       .slice(-30);
@@ -81,36 +80,36 @@ export const autoResponse = async (
     ).length;
     const userName = `${firstName} ${lastName}`
       .trim()
-      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
+      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
 
     if (currentStage > 25) {
       console.log(red(`[${accountId}] MAXIMUM STAGE in ${accountId}:${id}`));
-      await updateBlockedDialogue(accountId, id, "dialogs-max-stage");
+      await updateBlockedDialogue(accountId, id, 'dialogs-max-stage');
       continue;
     }
 
     const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
       console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId, id, "dialogs-not-resolved");
+      await updateBlockedDialogue(accountId, id, 'dialogs-not-resolved');
       continue;
     }
 
     const {
-      aiRole = "",
-      companyDescription = "",
-      addedInformation = "",
-      goal = "",
-      part = "",
-      addedQuestion = "",
-      secondAddedQuestion = "",
-      styleGuide = "",
-      language = "RUSSIAN",
+      aiRole = '',
+      companyDescription = '',
+      addedInformation = '',
+      goal = '',
+      part = '',
+      addedQuestion = '',
+      secondAddedQuestion = '',
+      styleGuide = '',
+      language = 'RUSSIAN',
     } = groupId || ({} as any);
     const meName =
-      language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
+      language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
 
-    let promptGoal = "";
+    let promptGoal = '';
     if (currentStage === 1) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
     }
@@ -131,15 +130,15 @@ ${styleGuide}. Avoid including unnecessary greetings and third-party characters 
 ${promptGoal} ${
         parted
           ? `!!!!A mandatory part that should definitely be in the answer: ${part}!!!!`
-          : ""
+          : ''
       }`,
       [
         {
-          title: "YOUR_COMPANY_DESCRIPTION",
+          title: 'YOUR_COMPANY_DESCRIPTION',
           text: companyDescription,
         },
         {
-          title: "YOUR_COMPANY_ADDED_INFORMATION",
+          title: 'YOUR_COMPANY_ADDED_INFORMATION',
           text: addedInformation,
         },
       ],
@@ -236,7 +235,7 @@ ${promptGoal} ${
 ПОСЛЕ: ${genAddedQuestion}`);
     }
 
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update");
+    await saveRecipient(accountId, recipientFull, dialog, messages, 'update');
   }
 
   for (const dialog of pingDialogs) {
@@ -246,27 +245,27 @@ ${promptGoal} ${
     const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
       console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId, id, "ping-not-resolved");
+      await updateBlockedDialogue(accountId, id, 'ping-not-resolved');
       continue;
     }
 
     const {
-      firstName = "",
-      lastName = "",
-      username = "",
+      firstName = '',
+      lastName = '',
+      username = '',
     } = recipientFull?.users?.[0] || {};
 
-    const { language } = groupId || { language: "RUSSIAN" };
+    const { language } = groupId || { language: 'RUSSIAN' };
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
-        role: m.fromId === String(id) ? "USER" : "CHATBOT",
+        role: m.fromId === String(id) ? 'USER' : 'CHATBOT',
         message: m.text,
       }))
-      .slice(-15) as Array<{ role: "USER" | "CHATBOT"; message: string }>;
+      .slice(-15) as Array<{ role: 'USER' | 'CHATBOT'; message: string }>;
     const userName = `${firstName} ${lastName}`
       .trim()
-      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, "");
+      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
     const pingMessage = await makeRequestGpt(
       `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
       `## STYLE GUIDE
@@ -277,7 +276,7 @@ USER: ${userName}, ${username};
 Today's date is ${getDateNow()};
       
 ## DIALOG
-${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`,
+${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
       dialogGroupId,
       accountId,
       null
@@ -301,7 +300,7 @@ ${pingMessage}`);
       date: Math.round(Date.now() / 1000),
     });
 
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
+    await saveRecipient(accountId, recipientFull, dialog, messages, 'update', {
       ping: true,
     });
   }
@@ -315,7 +314,7 @@ ${pingMessage}`);
       await updateBlockedDialogue(
         accountId,
         id,
-        "manual-control-dialogs-not-resolved"
+        'manual-control-dialogs-not-resolved'
       );
       continue;
     }
@@ -337,7 +336,7 @@ ${pingMessage}`);
       });
     }
 
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
+    await saveRecipient(accountId, recipientFull, dialog, messages, 'update', {
       managerMessage: null,
       viewed: false,
     });

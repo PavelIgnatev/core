@@ -1,19 +1,21 @@
-import { blue, red, yellow } from "colors/safe";
+import { blue, red, yellow } from 'colors/safe';
 
-import { sendMessage } from "../methods/messages/sendMessage";
-import { getMessages } from "../methods/messages/getMessages";
-import { resolveUsername } from "../methods/contacts/resolveUsername";
-
-import { updateAccountById } from "../db/accounts";
+import { updateAccountById } from '../db/accounts';
+import { resolveUsername } from '../methods/contacts/resolveUsername';
+import { getMessages } from '../methods/messages/getMessages';
+import { sendMessage } from '../methods/messages/sendMessage';
 
 export const checkSpamBlock = async (client: any, accountId: string) => {
-  console.log(`[${accountId}] Initialize sub module`, yellow('CHECK SPAMBLOCK'));
+  console.log(
+    `[${accountId}] Initialize sub module`,
+    yellow('CHECK SPAMBLOCK')
+  );
 
-  const result = await resolveUsername(client, accountId, "spambot");
+  const result = await resolveUsername(client, accountId, 'spambot');
 
   const { id: userId, accessHash, username } = result?.users?.[0] ?? {};
 
-  if (!userId || !accessHash || username !== "SpamBot") {
+  if (!userId || !accessHash || username !== 'SpamBot') {
     console.log(red(`[${accountId}] Chat with SpamBot not defined`));
     return true;
   }
@@ -22,7 +24,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     client,
     userId,
     accessHash,
-    "/start",
+    '/start',
     accountId
   );
   const { maxId } = sentMessage?.updates?.[2] ?? {};
@@ -45,7 +47,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
 
   const { message } = messages[0];
 
-  if (message.includes("no limits are currently applied")) {
+  if (message.includes('no limits are currently applied')) {
     console.log(`[${accountId}] Account is spamblock-free`);
     await updateAccountById(accountId, {
       spamBlockDate: null,
@@ -56,8 +58,8 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
   const untilDateMatch = message.match(/until\s(.*)\./);
 
   const spamBlockDate = untilDateMatch
-    ? untilDateMatch[1].replace("UTC", "")
-    : "INFINITY";
+    ? untilDateMatch[1].replace('UTC', '')
+    : 'INFINITY';
 
   const currentDate = new Date();
   const nextDay = new Date(currentDate);

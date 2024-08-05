@@ -1,8 +1,8 @@
-import axios from "axios";
-import { ChatMessage } from "cohere-ai/api";
-import { blue, gray, red, yellow } from "colors/safe";
+import axios from 'axios';
+import { ChatMessage } from 'cohere-ai/api';
+import { blue, gray, red, yellow } from 'colors/safe';
 
-import { sendToBot } from "../helpers/sendToBot";
+import { sendToBot } from '../helpers/sendToBot';
 
 function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -10,12 +10,12 @@ function capitalizeFirstLetter(str: string) {
 
 function removeQuestionAndExclamationSentences(text: string) {
   const pattern = /[^.!?]*(?:[!?])/g;
-  const result = text.replace(pattern, "");
+  const result = text.replace(pattern, '');
   return result.trim();
 }
 
 function countSentences(paragraph: string) {
-  const sentenceEnders = [".", "!", "?"];
+  const sentenceEnders = ['.', '!', '?'];
   let sentenceCount = 0;
 
   for (let i = 0; i < paragraph.length; i++) {
@@ -30,20 +30,23 @@ function countSentences(paragraph: string) {
 export const makeRequestComplete = async (
   preamble: string,
   documents: { title: string; text: string }[],
-  disableLink: boolean = false,
-  deleteQuestion: boolean = false,
-  minimalProposalLength: number = 1,
-  part: string | null = null,
+  disableLink: boolean,
+  deleteQuestion: boolean,
+  minimalProposalLength: number,
+  part: string | null,
   chatHistory: ChatMessage[],
   groupId: string,
   accountId: string
 ): Promise<string> => {
-  console.log(`[${accountId}] Initialize sub module`, yellow('MAKE REQUEST COMPLETE'));
+  console.log(
+    `[${accountId}] Initialize sub module`,
+    yellow('MAKE REQUEST COMPLETE')
+  );
 
   const lastDialog = chatHistory.pop();
   console.log(
     `[${accountId}] Current preamble before generation:`,
-    gray(preamble.replace(/\n/g, ""))
+    gray(preamble.replace(/\n/g, ''))
   );
   console.log(
     `[${accountId}] Current dialog history [${chatHistory.length}]:`,
@@ -51,22 +54,22 @@ export const makeRequestComplete = async (
   );
   console.log(
     `[${accountId}] Last message from interlocutor:`,
-    gray(String(lastDialog?.message).replace(/\n/g, ""))
+    gray(String(lastDialog?.message).replace(/\n/g, ''))
   );
   console.log(`[${accountId}] Additional filters:`);
   console.log(
     `[${accountId}] Removing a reference:`,
-    blue(disableLink ? "on" : "off")
+    blue(disableLink ? 'on' : 'off')
   );
   console.log(
     `[${accountId}] Deleting a question:`,
-    blue(deleteQuestion ? "on" : "off")
+    blue(deleteQuestion ? 'on' : 'off')
   );
   console.log(
     `[${accountId}] Minimum number of messages in a reply:`,
     blue(String(minimalProposalLength))
   );
-  console.log(`[${accountId}] Part check:`, part ? part : "off");
+  console.log(`[${accountId}] Part check:`, part || 'off');
 
   const generations = [];
   const errors = [];
@@ -74,16 +77,16 @@ export const makeRequestComplete = async (
   for (let i = 0; i < 5; i++) {
     try {
       if (!lastDialog) {
-        throw new Error("Last dialog message not defined");
+        throw new Error('Last dialog message not defined');
       }
 
       const {
         data: { text: data },
-      } = await axios.post("http://91.198.220.234/chat", {
+      } = await axios.post('http://91.198.220.234/chat', {
         k: 300,
         temperature: 1,
-        model: "command-r-plus",
-        prompt_truncation: "AUTO_PRESERVE_ORDER",
+        model: 'command-r-plus',
+        prompt_truncation: 'AUTO_PRESERVE_ORDER',
         preamble,
         documents,
         chat_history: chatHistory,
@@ -91,14 +94,14 @@ export const makeRequestComplete = async (
       });
 
       if (!data || !data.trim()) {
-        throw new Error("Blank message");
+        throw new Error('Blank message');
       }
       generations.push(data);
 
       let message = data
-        .replace(/\n/g, "")
-        .replace(/['"`]/g, "")
-        .replace(/!/g, ".")
+        .replace(/\n/g, '')
+        .replace(/['"`]/g, '')
+        .replace(/!/g, '.')
         .trim();
 
       console.log(
@@ -106,110 +109,110 @@ export const makeRequestComplete = async (
         gray(message)
       );
 
-      let pattern =
+      const pattern =
         /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
       const hasTextLink = message.match(pattern);
 
       if (hasTextLink && disableLink) {
         throw new Error(
-          "The reply contains a link at a stage where it is forbidden to send links"
+          'The reply contains a link at a stage where it is forbidden to send links'
         );
       }
 
       if (part) {
         message = message
-          .replace(part, "[LINKTOGOAL]")
-          .replace(part, "[LINKTOGOAL]")
-          .replace(part, "[LINKTOGOAL]");
+          .replace(part, '[LINKTOGOAL]')
+          .replace(part, '[LINKTOGOAL]')
+          .replace(part, '[LINKTOGOAL]');
       }
 
-      if (deleteQuestion && message.includes("?")) {
+      if (deleteQuestion && message.includes('?')) {
         message = removeQuestionAndExclamationSentences(message);
       }
 
       if (part) {
         message = message
-          .replace("[LINKTOGOAL]", part)
-          .replace("[LINKTOGOAL]", part)
-          .replace("[LINKTOGOAL]", part);
+          .replace('[LINKTOGOAL]', part)
+          .replace('[LINKTOGOAL]', part)
+          .replace('[LINKTOGOAL]', part);
       }
 
       if (
-        message.includes("[") ||
-        message.includes("]") ||
-        message.includes("{") ||
-        message.includes("}") ||
-        message.includes("<") ||
-        message.includes(">") ||
-        message.includes("(") ||
-        message.includes(")") ||
-        message.includes("*")
+        message.includes('[') ||
+        message.includes(']') ||
+        message.includes('{') ||
+        message.includes('}') ||
+        message.includes('<') ||
+        message.includes('>') ||
+        message.includes('(') ||
+        message.includes(')') ||
+        message.includes('*')
       ) {
-        throw new Error("The response contains suspicious characters");
+        throw new Error('The response contains suspicious characters');
       }
 
       const varMessage = capitalizeFirstLetter(
         message
-          .replace("Приветствую!", "")
-          .replace("Приветствую,", "")
-          .replace("Приветствую", "")
-          .replace("приветствую", "")
+          .replace('Приветствую!', '')
+          .replace('Приветствую,', '')
+          .replace('Приветствую', '')
+          .replace('приветствую', '')
 
-          .replace("Привет,", "")
-          .replace("Привет!", "")
-          .replace("Привет", "")
-          .replace("привет", "")
+          .replace('Привет,', '')
+          .replace('Привет!', '')
+          .replace('Привет', '')
+          .replace('привет', '')
 
-          .replace("Здравствуйте,", "")
-          .replace("Здравствуйте!", "")
-          .replace("Здравствуйте", "")
-          .replace("здравствуйте", "")
+          .replace('Здравствуйте,', '')
+          .replace('Здравствуйте!', '')
+          .replace('Здравствуйте', '')
+          .replace('здравствуйте', '')
 
-          .replace("Здравствуй,", "")
-          .replace("Здравствуй!", "")
-          .replace("Здравствуй", "")
-          .replace("здравствуй", "")
+          .replace('Здравствуй,', '')
+          .replace('Здравствуй!', '')
+          .replace('Здравствуй', '')
+          .replace('здравствуй', '')
 
-          .replace("Доброе утро,", "")
-          .replace("Доброе утро!", "")
-          .replace("Доброе утро", "")
-          .replace("доброе утро", "")
+          .replace('Доброе утро,', '')
+          .replace('Доброе утро!', '')
+          .replace('Доброе утро', '')
+          .replace('доброе утро', '')
 
-          .replace("Добрый вечер,", "")
-          .replace("Добрый вечер!", "")
-          .replace("Добрый вечер", "")
-          .replace("добрый вечер", "")
+          .replace('Добрый вечер,', '')
+          .replace('Добрый вечер!', '')
+          .replace('Добрый вечер', '')
+          .replace('добрый вечер', '')
 
-          .replace("Добрый день,", "")
-          .replace("Добрый день!", "")
-          .replace("Добрый день", "")
-          .replace("добрый день", "")
+          .replace('Добрый день,', '')
+          .replace('Добрый день!', '')
+          .replace('Добрый день', '')
+          .replace('добрый день', '')
 
-          .replace("Hi,", "")
-          .replace("Hi! ", "")
-          .replace("Hi!", "")
-          .replace("Hello,", "")
-          .replace("Hello! ", "")
-          .replace("Hello!", "")
-          .replace("Good morning,", "")
-          .replace("Good morning! ", "")
-          .replace("Good morning!", "")
-          .replace("Good morning", "")
-          .replace("good morning", "")
-          .replace("Good evening,", "")
-          .replace("Good evening! ", "")
-          .replace("Good evening!", "")
-          .replace("Good evening", "")
-          .replace("good evening", "")
-          .replace("Good afternoon,", "")
-          .replace("Good afternoon! ", "")
-          .replace("Good afternoon!", "")
-          .replace("Good afternoon", "")
-          .replace("good afternoon", "")
+          .replace('Hi,', '')
+          .replace('Hi! ', '')
+          .replace('Hi!', '')
+          .replace('Hello,', '')
+          .replace('Hello! ', '')
+          .replace('Hello!', '')
+          .replace('Good morning,', '')
+          .replace('Good morning! ', '')
+          .replace('Good morning!', '')
+          .replace('Good morning', '')
+          .replace('good morning', '')
+          .replace('Good evening,', '')
+          .replace('Good evening! ', '')
+          .replace('Good evening!', '')
+          .replace('Good evening', '')
+          .replace('good evening', '')
+          .replace('Good afternoon,', '')
+          .replace('Good afternoon! ', '')
+          .replace('Good afternoon!', '')
+          .replace('Good afternoon', '')
+          .replace('good afternoon', '')
       );
 
       if (varMessage.length < 60) {
-        throw new Error("Minimum length 60 characters");
+        throw new Error('Minimum length 60 characters');
       }
 
       if (minimalProposalLength > countSentences(varMessage)) {
@@ -222,7 +225,7 @@ export const makeRequestComplete = async (
         );
       }
 
-      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+      const nmessage = varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, '');
       console.log(
         `[${accountId}] Generated message after filters:`,
         gray(nmessage)
@@ -245,18 +248,20 @@ GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
 GENERATIONS:
-${generations.map((g, i) => `${i + 1}: ${g}`).join("\n")}
+${generations.map((g, i) => `${i + 1}: ${g}`).join('\n')}
 ERRORS:
-${errors.map((e, i) => `${i + 1}: ${e}`).join("\n")}
+${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}
 _____________
-Удаление ссылки: ${disableLink ? "включено" : "выключено"}
-Удаление вопроса: ${deleteQuestion ? "включено" : "выключено"}
+Удаление ссылки: ${disableLink ? 'включено' : 'выключено'}
+Удаление вопроса: ${deleteQuestion ? 'включено' : 'выключено'}
 Минимальное количество сообщений в ответе: ${minimalProposalLength}
-Проверка на составную часть: ${part ? `включено (${part})` : "выключено"}`);
-  } catch {}
+Проверка на составную часть: ${part ? `включено (${part})` : 'выключено'}`);
+  } catch (e: any) {
+    console.log(red(`[${accountId}] GPT GENERATION ERROR: ${e.message}`));
+  }
 
   if (generations[0]) {
-    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, "");
+    const nmessage = generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, '');
     console.log(
       `[${accountId}] Generated message after filters:`,
       gray(nmessage)
@@ -265,5 +270,5 @@ _____________
     return nmessage;
   }
 
-  throw new Error("Stopped");
+  throw new Error('Stopped');
 };

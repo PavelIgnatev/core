@@ -1,9 +1,9 @@
-import BigInt from "big-integer";
+import BigInt from 'big-integer';
 
-import GramJs from "../../common/gramjs/tl/api";
-import { resolveUsername } from "../contacts/resolveUsername";
-import { makeRequestGpt } from "../../modules/makeRequestGpt";
-import { sendToFormBot } from "../../helpers/sendToFormBot";
+import GramJs from '../../common/gramjs/tl/api';
+import { sendToFormBot } from '../../helpers/sendToFormBot';
+import { makeRequestGpt } from '../../modules/makeRequestGpt';
+import { resolveUsername } from '../contacts/resolveUsername';
 
 export const reportUser = async (
   client: any,
@@ -12,8 +12,8 @@ export const reportUser = async (
 ) => {
   const initialReportMessage = `Контент, продаваемый через бот @Sarkorov_bot, принадлежит Арсену Маркаряну и другим правообладателям запустившим проект Grind University с обучением on-line профессиям. Также, важно отметить, что в названии канала употребляется термин СЛИВ, что явно позиционирует канал как нарушителя авторских прав. ${
     Math.random() >= 0.7
-      ? "Я, как подписчик и Арсена Маркаряна и последовтель курса Grind University не хотел бы, чтобы кто-то другой зарабатывал на нем и поэтому жалуюсь на данный канал."
-      : ""
+      ? 'Я, как подписчик и Арсена Маркаряна и последовтель курса Grind University не хотел бы, чтобы кто-то другой зарабатывал на нем и поэтому жалуюсь на данный канал.'
+      : ''
   } Буду признетелен, если вы заблокируете данного бота, нарушающего права на контент.`;
   const initialReportContext = `## CONTEXT
 Ты подписчик Арсена маркаряна и человек, который проходит Grind University. Ты возмущен тем, что кто-то зарабатывает на контенте Арсена Маркаряна, продаваемом через бота @Sarkorov_bot и не стесняясь, даже пишет, что он занимается именно СЛИВом, он написал это в описании бота @Sarkorov_bot, в названии.
@@ -27,14 +27,14 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
   const firstIterationReportMessage = await makeRequestGpt(
     initialReportContext,
     `A message where the wording needs to be changed: ''''${initialReportMessage}''''`,
-    "experemenatal-report-acc",
+    'experemenatal-report-acc',
     accountId,
     null
   );
   const secondIterationReportMessage = await makeRequestGpt(
     initialReportContext,
     `A message where the wording needs to be changed: ''''${firstIterationReportMessage}''''`,
-    "experemenatal-report-acc",
+    'experemenatal-report-acc',
     accountId,
     null
   );
@@ -61,14 +61,14 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
     new GramJs.account.ReportPeer({
       peer: userPeer,
       reason: new GramJs.InputReportReasonCopyright(),
-      message: "",
+      message: '',
     })
   );
   const reportSecond = await client.invoke(
     new GramJs.account.ReportPeer({
       peer: userPeer,
       reason: new GramJs.InputReportReasonFake(),
-      message: "",
+      message: '',
     })
   );
 

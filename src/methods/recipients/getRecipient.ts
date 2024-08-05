@@ -1,10 +1,11 @@
-import { red } from "colors/safe";
-import { sendToBot } from "../../helpers/sendToBot";
-import { sleep } from "../../helpers/sleep";
+import { red } from 'colors/safe';
 
-const defaultFirstMessagePrompt = "Здравствуйте!";
+import { sendToBot } from '../../helpers/sendToBot';
+import { sleep } from '../../helpers/sleep';
+
+const defaultFirstMessagePrompt = 'Здравствуйте!';
 const defaultSecondMessagePrompt =
-  "{Я |}{заметил|увидел|обратил внимание|правильно понимаю|правильно понял|правильно предполагаю|предполагаю|обнаружил|верно понял|запомнил|подметил}, {что вы|что Вы|вы|Вы} {предприниматель|ведете бизнес|занимаетесь предпринимательской деятельностью|занимаетесь предпринимательством|занимаетесь ведением бизнеса|занимаетесь коммерческой деятельностью}{?|.|,} {это так|я прав|прав ли я|это правда|так ли это|это действительно так|действительно ли так|не ошибся|верно|это верно}?";
+  '{Я |}{заметил|увидел|обратил внимание|правильно понимаю|правильно понял|правильно предполагаю|предполагаю|обнаружил|верно понял|запомнил|подметил}, {что вы|что Вы|вы|Вы} {предприниматель|ведете бизнес|занимаетесь предпринимательской деятельностью|занимаетесь предпринимательством|занимаетесь ведением бизнеса|занимаетесь коммерческой деятельностью}{?|.|,} {это так|я прав|прав ли я|это правда|так ли это|это действительно так|действительно ли так|не ошибся|верно|это верно}?';
 
 export const getRecipient = async (accountId: string) => {
   while (true) {
@@ -27,7 +28,7 @@ export const getRecipient = async (accountId: string) => {
         user.secondMessagePrompt = defaultSecondMessagePrompt;
       }
 
-      return user
+      return user;
     } catch (error: any) {
       console.log(red(`[${accountId}] Get recipient error: ${error.message}`));
       await sleep(3000);

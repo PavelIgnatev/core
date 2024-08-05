@@ -4,9 +4,9 @@ const { ConnectionTCPAbridged } = require('./TCPAbridged');
 const { ConnectionTCPObfuscated } = require('./TCPObfuscated');
 
 module.exports = {
-    Connection,
-    HttpConnection,
-    ConnectionTCPFull,
-    ConnectionTCPAbridged,
-    ConnectionTCPObfuscated,
+  Connection,
+  HttpConnection,
+  ConnectionTCPFull,
+  ConnectionTCPAbridged,
+  ConnectionTCPObfuscated,
 };

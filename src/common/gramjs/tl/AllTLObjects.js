@@ -4,16 +4,16 @@ const LAYER = 177;
 const tlobjects = {};
 
 for (const tl of Object.values(api)) {
-    if (tl.CONSTRUCTOR_ID) {
-        tlobjects[tl.CONSTRUCTOR_ID] = tl;
-    } else {
-        for (const sub of Object.values(tl)) {
-            tlobjects[sub.CONSTRUCTOR_ID] = sub;
-        }
+  if (tl.CONSTRUCTOR_ID) {
+    tlobjects[tl.CONSTRUCTOR_ID] = tl;
+  } else {
+    for (const sub of Object.values(tl)) {
+      tlobjects[sub.CONSTRUCTOR_ID] = sub;
     }
+  }
 }
 
 module.exports = {
-    LAYER,
-    tlobjects,
+  LAYER,
+  tlobjects,
 };

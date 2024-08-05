@@ -1,7 +1,7 @@
-import { DB } from "./db";
+import { DB } from './db';
 
 const getGroupIdCollection = async () => {
-  return (await DB()).collection("groupId");
+  return (await DB()).collection('groupId');
 };
 
 export const getGroupId = async (groupId: string) => {

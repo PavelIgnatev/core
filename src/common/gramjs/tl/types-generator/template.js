@@ -1,143 +1,164 @@
 // Not sure what they are for.
-const RAW_TYPES = new Set(['Bool', 'X'])
+const RAW_TYPES = new Set(['Bool', 'X']);
 
 const FLAG_REGEX = /flags\d*/;
 
 module.exports = ({ types, constructors, functions }) => {
-    function groupByKey(collection, key) {
-        return collection.reduce((byKey, member) => {
-            const keyValue = member[key] || '_'
+  function groupByKey(collection, key) {
+    return collection.reduce((byKey, member) => {
+      const keyValue = member[key] || '_';
 
-            if (!byKey[keyValue]) {
-                byKey[keyValue] = [member]
-            } else {
-                byKey[keyValue].push(member)
-            }
+      if (!byKey[keyValue]) {
+        byKey[keyValue] = [member];
+      } else {
+        byKey[keyValue].push(member);
+      }
 
-            return byKey
-        }, {})
-    }
+      return byKey;
+    }, {});
+  }
 
-    function isFlagArg(argName) {
-        return argName.match(FLAG_REGEX);
-    }
+  function isFlagArg(argName) {
+    return argName.match(FLAG_REGEX);
+  }
 
-    function renderTypes(types, indent) {
-        return types.map(({ name, constructors }) => `
-      ${!constructors.length ? '// ' : ''}export type Type${upperFirst(name)} = ${constructors.map((name) => name)
-            .join(' | ')};
-    `.trim())
-            .join(`\n${indent}`)
-    }
+  function renderTypes(types, indent) {
+    return types
+      .map(({ name, constructors }) =>
+        `
+      ${!constructors.length ? '// ' : ''}export type Type${upperFirst(name)} = ${constructors
+        .map((name) => name)
+        .join(' | ')};
+    `.trim()
+      )
+      .join(`\n${indent}`);
+  }
 
-    function renderConstructors(constructors, indent) {
-        return constructors.map(({ name, argsConfig }) => {
-            const argKeys = Object.keys(argsConfig)
+  function renderConstructors(constructors, indent) {
+    return constructors
+      .map(({ name, argsConfig }) => {
+        const argKeys = Object.keys(argsConfig);
 
-            if (!argKeys.length) {
-                return `export class ${upperFirst(name)} extends VirtualClass<void> {};`
-            }
+        if (!argKeys.length) {
+          return `export class ${upperFirst(name)} extends VirtualClass<void> {};`;
+        }
 
-            let hasRequiredArgs = argKeys.some((argName) => !isFlagArg(argName) && !argsConfig[argName].isFlag)
+        const hasRequiredArgs = argKeys.some(
+          (argName) => !isFlagArg(argName) && !argsConfig[argName].isFlag
+        );
 
-            return `
+        return `
       export class ${upperFirst(name)} extends VirtualClass<{
 ${indent}  ${Object.keys(argsConfig)
-            .map((argName) => `
+          .map((argName) =>
+            `
         ${renderArg(argName, argsConfig[argName])};
-      `.trim())
-            .join(`\n${indent}  `)}
+      `.trim()
+          )
+          .join(`\n${indent}  `)}
 ${indent}}${!hasRequiredArgs ? ` | void` : ''}> {
 ${indent}  ${Object.keys(argsConfig)
-            .map((argName) => `
+          .map((argName) =>
+            `
         ${renderArg(argName, argsConfig[argName])};
-      `.trim())
-            .join(`\n${indent}  `)}
-${indent}};`.trim()
-        })
-        .join(`\n${indent}`)
-    }
+      `.trim()
+          )
+          .join(`\n${indent}  `)}
+${indent}};`.trim();
+      })
+      .join(`\n${indent}`);
+  }
 
-    function renderRequests(requests, indent) {
-        return requests.map(({ name, argsConfig, result }) => {
-            const argKeys = Object.keys(argsConfig)
-            const renderedResult = renderResult(result);
+  function renderRequests(requests, indent) {
+    return requests
+      .map(({ name, argsConfig, result }) => {
+        const argKeys = Object.keys(argsConfig);
+        const renderedResult = renderResult(result);
 
-            if (!argKeys.length) {
-                return `export class ${upperFirst(name)} extends Request<void, ${renderedResult}> {};`
-            }
+        if (!argKeys.length) {
+          return `export class ${upperFirst(name)} extends Request<void, ${renderedResult}> {};`;
+        }
 
-            let hasRequiredArgs = argKeys.some((argName) => !isFlagArg(argName) && !argsConfig[argName].isFlag)
+        const hasRequiredArgs = argKeys.some(
+          (argName) => !isFlagArg(argName) && !argsConfig[argName].isFlag
+        );
 
-            return `
+        return `
       export class ${upperFirst(name)} extends Request<Partial<{
-${indent}  ${argKeys.map((argName) => `
+${indent}  ${argKeys
+          .map((argName) =>
+            `
         ${renderArg(argName, argsConfig[argName])};
-      `.trim())
-            .join(`\n${indent}  `)}
+      `.trim()
+          )
+          .join(`\n${indent}  `)}
 ${indent}}${!hasRequiredArgs ? ` | void` : ''}>, ${renderedResult}> {
-${indent}  ${argKeys.map((argName) => `
+${indent}  ${argKeys
+          .map((argName) =>
+            `
         ${renderArg(argName, argsConfig[argName])};
-      `.trim())
-            .join(`\n${indent}  `)}
-${indent}};`.trim()
-        })
-        .join(`\n${indent}`)
+      `.trim()
+          )
+          .join(`\n${indent}  `)}
+${indent}};`.trim();
+      })
+      .join(`\n${indent}`);
+  }
+
+  function renderResult(result) {
+    const vectorMatch = result.match(/[Vv]ector<([\w\d.]+)>/);
+    const isVector = Boolean(vectorMatch);
+    const scalarValue = isVector ? vectorMatch[1] : result;
+    const isTlType =
+      Boolean(scalarValue.match(/^[A-Z]/)) || scalarValue.includes('.');
+
+    return renderValueType(scalarValue, isVector, isTlType);
+  }
+
+  function renderArg(argName, argConfig) {
+    const { isVector, isFlag, skipConstructorId, type } = argConfig;
+
+    const valueType = renderValueType(type, isVector, !skipConstructorId);
+
+    return `${isFlagArg(argName) ? '// ' : ''}${argName}${isFlag ? '?' : ''}: ${valueType}`;
+  }
+
+  function renderValueType(type, isVector, isTlType) {
+    if (RAW_TYPES.has(type)) {
+      return isVector ? `${type}[]` : type;
     }
 
-    function renderResult(result) {
-        const vectorMatch = result.match(/[Vv]ector<([\w\d.]+)>/)
-        const isVector = Boolean(vectorMatch)
-        const scalarValue = isVector ? vectorMatch[1] : result
-        const isTlType = Boolean(scalarValue.match(/^[A-Z]/)) || scalarValue.includes('.')
+    let resType;
 
-        return renderValueType(scalarValue, isVector, isTlType)
+    if (typeof type === 'string' && isTlType) {
+      resType = renderTypeName(type);
+    } else {
+      resType = type;
     }
 
-    function renderArg(argName, argConfig) {
-        const {
-            isVector, isFlag, skipConstructorId, type
-        } = argConfig
-
-        const valueType = renderValueType(type, isVector, !skipConstructorId)
-
-        return `${isFlagArg(argName) ? '// ' : ''}${argName}${isFlag ? '?' : ''}: ${valueType}`
+    if (isVector) {
+      resType = `${resType}[]`;
     }
 
-    function renderValueType(type, isVector, isTlType) {
-        if (RAW_TYPES.has(type)) {
-            return isVector ? `${type}[]` : type;
-        }
+    return resType;
+  }
 
-        let resType
+  function renderTypeName(typeName) {
+    return typeName.includes('.')
+      ? typeName.replace('.', '.Type')
+      : `Api.Type${typeName}`;
+  }
 
-        if (typeof type === 'string' && isTlType) {
-            resType = renderTypeName(type);
-        } else {
-            resType = type;
-        }
+  function upperFirst(str) {
+    return `${str[0].toUpperCase()}${str.slice(1)}`;
+  }
 
-        if (isVector) {
-            resType = `${resType}[]`;
-        }
+  const typesByNs = groupByKey(types, 'namespace');
+  const constructorsByNs = groupByKey(constructors, 'namespace');
+  const requestsByNs = groupByKey(functions, 'namespace');
 
-        return resType;
-    }
-
-    function renderTypeName(typeName) {
-        return typeName.includes('.') ? typeName.replace('.', '.Type') : `Api.Type${typeName}`
-    }
-
-    function upperFirst(str) {
-        return `${str[0].toUpperCase()}${str.slice(1)}`
-    }
-
-    const typesByNs = groupByKey(types, 'namespace')
-    const constructorsByNs = groupByKey(constructors, 'namespace')
-    const requestsByNs = groupByKey(functions, 'namespace')
-
-    // language=TypeScript
-    return `
+  // language=TypeScript
+  return `
 // This file is autogenerated. All changes will be overwritten.
 
 import { BigInteger } from 'big-integer';
@@ -191,36 +212,52 @@ namespace Api {
 
   ${renderTypes(typesByNs._, '  ')}
   ${Object.keys(typesByNs)
-        .map(namespace => namespace !== '_' ? `
+    .map((namespace) =>
+      namespace !== '_'
+        ? `
   export namespace ${namespace} {
     ${renderTypes(typesByNs[namespace], '    ')}
-  }` : '')
-        .join('\n')}
+  }`
+        : ''
+    )
+    .join('\n')}
 
   ${renderConstructors(constructorsByNs._, '  ')}
   ${Object.keys(constructorsByNs)
-        .map(namespace => namespace !== '_' ? `
+    .map((namespace) =>
+      namespace !== '_'
+        ? `
   export namespace ${namespace} {
     ${renderConstructors(constructorsByNs[namespace], '    ')}
-  }` : '')
-        .join('\n')}
+  }`
+        : ''
+    )
+    .join('\n')}
 
   ${renderRequests(requestsByNs._, '  ')}
   ${Object.keys(requestsByNs)
-        .map(namespace => namespace !== '_' ? `
+    .map((namespace) =>
+      namespace !== '_'
+        ? `
   export namespace ${namespace} {
     ${renderRequests(requestsByNs[namespace], '    ')}
-  }` : '')
-        .join('\n')}
+  }`
+        : ''
+    )
+    .join('\n')}
 
-  export type AnyRequest = ${requestsByNs._.map(({ name }) => upperFirst(name))
-        .join(' | ')}
+  export type AnyRequest = ${requestsByNs._.map(({ name }) =>
+    upperFirst(name)
+  ).join(' | ')}
     | ${Object.keys(requestsByNs)
-        .filter(ns => ns !== '_')
-        .map(ns => requestsByNs[ns].map(({ name }) => `${ns}.${upperFirst(name)}`)
-            .join(' | '))
-        .join('\n    | ')};
+      .filter((ns) => ns !== '_')
+      .map((ns) =>
+        requestsByNs[ns]
+          .map(({ name }) => `${ns}.${upperFirst(name)}`)
+          .join(' | ')
+      )
+      .join('\n    | ')};
 
 }
-`
-}
+`;
+};

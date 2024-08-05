@@ -1,16 +1,14 @@
-import { blue, yellow } from "colors/safe";
-import BigInt from "big-integer";
+import BigInt from 'big-integer';
+import { yellow } from 'colors/safe';
 
-import GramJs from "../common/gramjs/tl/api";
-
-import { Dialogue } from "../@types/Dialogue";
-
+import { Dialogue } from '../@types/Dialogue';
+import GramJs from '../common/gramjs/tl/api';
 import {
   getDialogue,
   getManualControlDialogues,
   getPingDialogues,
   updateBlockedDialogue,
-} from "../db/dialogues";
+} from '../db/dialogues';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -56,7 +54,7 @@ export const getDialogs = async (client: any, accountId: string) => {
     ...pingDialogIds,
     ...manualControlDialogIds,
   ]) {
-    if (!dialogId || dialogId === "undefined") {
+    if (!dialogId || dialogId === 'undefined') {
       continue;
     }
 
@@ -83,7 +81,7 @@ export const getDialogs = async (client: any, accountId: string) => {
       );
 
       if (!allMessages?.messages?.length) {
-        await updateBlockedDialogue(accountId, dialogId, "messages-length");
+        await updateBlockedDialogue(accountId, dialogId, 'messages-length');
         continue;
       }
 
@@ -134,7 +132,7 @@ export const getDialogs = async (client: any, accountId: string) => {
 
         let text;
         if (dialogMessage.fwdFrom) {
-          text = "[FORWARDED MESSAGE]";
+          text = '[FORWARDED MESSAGE]';
         } else if (dialogMessage.message) {
           text = dialogMessage.message;
         } else if (voice || round) {
@@ -143,22 +141,22 @@ export const getDialogs = async (client: any, accountId: string) => {
               id: [dialogMessage.id],
             })
           );
-          text = "[VOICE MESSAGE]";
+          text = '[VOICE MESSAGE]';
         } else if (photo) {
-          text = "[PHOTO]";
+          text = '[PHOTO]';
         } else if (video) {
-          text = "[VIDEO]";
+          text = '[VIDEO]';
         } else if (document) {
-          text = "[DOCUMENT]";
+          text = '[DOCUMENT]';
         } else if (spoiler) {
-          text = "[SPOILER MESSAGE]";
+          text = '[SPOILER MESSAGE]';
         } else {
-          text = "[UNKNOWN MESSAGE]";
+          text = '[UNKNOWN MESSAGE]';
         }
 
         dialogMessages.push({
           id: dialogMessage.id,
-          text: text,
+          text,
           fromId: String(fromId?.userId || user.id),
           date: dialogMessage.date,
         });

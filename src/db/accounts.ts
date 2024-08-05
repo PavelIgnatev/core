@@ -1,14 +1,14 @@
-import { Account } from "../@types/Account";
-import { DB } from "./db";
+import { DB } from './db';
+import { Account } from '../@types/Account';
 
 const getAccountCollection = async () => {
-  return (await DB()).collection("accounts");
+  return (await DB()).collection('accounts');
 };
 
 export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
-  const accounts = await accountCollection.distinct("accountId", {
+  const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
     stopped: { $ne: true },
   });
@@ -26,7 +26,7 @@ export const getAccountById = async (accountId: string) => {
 
 export const updateAccountById = async (
   accountId: string,
-  accountData: Object
+  accountData: object
 ) => {
   const accountCollection = await getAccountCollection();
 

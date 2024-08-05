@@ -1,6 +1,4 @@
-import { blue } from "colors/safe";
-
-import GramJs from "../../common/gramjs/tl/api";
+import GramJs from '../../common/gramjs/tl/api';
 
 export const setOffline = async (
   client: any,

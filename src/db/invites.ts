@@ -1,8 +1,8 @@
-import { Account } from "../@types/Account";
-import { DB } from "./db";
+import { DB } from './db';
+import { Account } from '../@types/Account';
 
 const getInvitesCollection = async () => {
-  return (await DB()).collection("invites");
+  return (await DB()).collection('invites');
 };
 
 export const getInviteById = async (
@@ -22,7 +22,7 @@ export const getInviteById = async (
 export const updateInviteByAccountId = async (
   accountId: string,
   inviteBotName: string,
-  accountData: Object
+  accountData: object
 ) => {
   const invitesCollection = await getInvitesCollection();
 

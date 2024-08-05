@@ -1,17 +1,17 @@
 const StorageSession = require('./StorageSession');
 
 class LocalStorageSession extends StorageSession {
-    _delete() {
-        return localStorage.removeItem(this._storageKey);
-    }
+  _delete() {
+    return localStorage.removeItem(this._storageKey);
+  }
 
-    _fromCache() {
-        return localStorage.getItem(this._storageKey);
-    }
+  _fromCache() {
+    return localStorage.getItem(this._storageKey);
+  }
 
-    _saveToCache(data) {
-        return localStorage.setItem(this._storageKey, data);
-    }
+  _saveToCache(data) {
+    return localStorage.setItem(this._storageKey, data);
+  }
 }
 
 module.exports = LocalStorageSession;

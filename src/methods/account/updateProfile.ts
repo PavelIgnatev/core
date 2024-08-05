@@ -1,4 +1,4 @@
-import GramJs from "../../common/gramjs/tl/api";
+import GramJs from '../../common/gramjs/tl/api';
 
 export const updateProfile = (
   client: any,
@@ -14,9 +14,9 @@ export const updateProfile = (
   }
 ) => {
   const newProfile = {
-    firstName: firstName || "",
-    lastName: lastName || "",
-    about: about || "",
+    firstName: firstName || '',
+    lastName: lastName || '',
+    about: about || '',
   };
   console.log(`[${accountId}] Update me, new profile data:`, newProfile);
 

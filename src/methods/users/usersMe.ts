@@ -1,7 +1,7 @@
-import { blue } from "colors/safe";
-import GramJs from "../../common/gramjs/tl/api";
+import { blue } from 'colors/safe';
 
-import { updateAccountById } from "../../db/accounts";
+import GramJs from '../../common/gramjs/tl/api';
+import { updateAccountById } from '../../db/accounts';
 
 export const usersMe = async (
   client: any,
@@ -10,20 +10,20 @@ export const usersMe = async (
 ) => {
   if (!tgAccountId) {
     console.log(
-      `[${accountId}] Get full ${blue("InputUserSelf")} user information`
+      `[${accountId}] Get full ${blue('InputUserSelf')} user information`
     );
 
-    const usersMe = await client.invoke(
+    const usersMeResponse = await client.invoke(
       new GramJs.users.GetFullUser({
         id: new GramJs.InputUserSelf(),
       })
     );
 
     await updateAccountById(accountId, {
-      id: String(usersMe.fullUser.id),
+      id: String(usersMeResponse.fullUser.id),
     });
 
-    return String(usersMe.fullUser.id);
+    return String(usersMeResponse.fullUser.id);
   }
 
   return tgAccountId;

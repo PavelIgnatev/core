@@ -13,7 +13,9 @@ export default class Deferred<T = void> {
   }
 
   static resolved(): Deferred<void>;
+
   static resolved<T>(value: T): Deferred<T>;
+
   static resolved<T>(value?: T): Deferred<T | void> {
     const deferred = new Deferred<T | void>();
     deferred.resolve(value);

@@ -1,24 +1,19 @@
-import "dotenv/config";
-import util from "util";
+import 'dotenv/config';
+import { exec as childExec } from 'child_process';
+import { black, red, yellow } from 'colors/safe';
+import util from 'util';
 
-import { exec as childExec } from "child_process";
-import { black, red, yellow } from "colors/safe";
+import TelegramClient from './common/gramjs/client/TelegramClient';
+import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
+import { initClient } from './helpers/initClient';
+import { sendToBot } from './helpers/sendToBot';
+import { setOffline } from './methods/account/setOffline';
+import { usersMe } from './methods/users/usersMe';
+import { accountSetup } from './modules/accountSetup';
+import { autoResponse } from './modules/autoResponse';
+import { autoSender } from './modules/autoSender';
 
-import { getAccountById, getAccounts, updateAccountById } from "./db/accounts";
-
-import { initClient } from "./helpers/initClient";
-import { sendToBot } from "./helpers/sendToBot";
-
-import { usersMe } from "./methods/users/usersMe";
-import { setOffline } from "./methods/account/setOffline";
-
-import { autoResponse } from "./modules/autoResponse";
-import { autoSender } from "./modules/autoSender";
-import { accountSetup } from "./modules/accountSetup";
-
-import TelegramClient from "./common/gramjs/client/TelegramClient";
-
-import "./helpers/setConsole.log";
+import './helpers/setConsole.log';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -32,7 +27,7 @@ const main = async (ID: string) => {
   try {
     const account = await getAccountById(ID);
     if (!account) {
-      throw new Error("Account not defined");
+      throw new Error('Account not defined');
     }
 
     const {
@@ -46,7 +41,7 @@ const main = async (ID: string) => {
     } = account;
 
     if (![accountId, dcId, platform, userAgent].every(Boolean)) {
-      throw new Error("Insufficient number of parameters to start");
+      throw new Error('Insufficient number of parameters to start');
     }
 
     client = await initClient(account, ID, () => (isAutoResponse = true));
@@ -83,9 +78,9 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          const account = await getAccountById(ID);
-          if (!account) {
-            throw new Error("Account not defined");
+          const accountByID = await getAccountById(ID);
+          if (!accountByID) {
+            throw new Error('Account not defined');
           }
 
           if (isAutoResponse) {
@@ -97,7 +92,7 @@ const main = async (ID: string) => {
             client,
             accountId,
             tgAccountId,
-            account.remainingTime || null
+            accountByID.remainingTime || null
           );
 
           await new Promise((res) => setTimeout(res, 60000));
@@ -117,41 +112,40 @@ const main = async (ID: string) => {
   } catch (e: any) {
     console.log(red(`[${ID}] Main error: ${e.message}`));
 
-    if (e.message.includes("AUTH_KEY_DUPLICATED")) {
+    if (e.message.includes('AUTH_KEY_DUPLICATED')) {
       await updateAccountById(ID, {
         banned: true,
-        reason: "AUTH_KEY_DUPLICATED",
+        reason: 'AUTH_KEY_DUPLICATED',
       });
       await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
-      await exec("pm2 kill");
-    } else if (e.message.includes("Global Error")) {
-    } else if (e.message.includes("Stopped")) {
+      await exec('pm2 kill');
+    } else if (e.message.includes('Global Error')) {
+      console.log(red(`[${ID}] Stop account: ${e.message}`));
+    } else if (e.message.includes('Stopped')) {
       await updateAccountById(ID, {
         stopped: true,
       });
+    } else if (
+      [
+        'USER_DEACTIVATED_BAN',
+        'AUTH_KEY_UNREGISTERED',
+        'AUTH_KEY_INVALID',
+        'USER_DEACTIVATED',
+        'SESSION_REVOKED',
+        'SESSION_EXPIRED',
+        'AUTH_KEY_PERM_EMPTY',
+        'SESSION_PASSWORD_NEEDED',
+      ].includes(e.message)
+    ) {
+      await updateAccountById(ID, {
+        banned: true,
+        reason: e.message,
+      });
+      await sendToBot(`!!!БАН АККАУНТА!!! ID: ${ID}; Error: ${e.message}`);
     } else {
-      if (
-        [
-          "USER_DEACTIVATED_BAN",
-          "AUTH_KEY_UNREGISTERED",
-          "AUTH_KEY_INVALID",
-          "USER_DEACTIVATED",
-          "SESSION_REVOKED",
-          "SESSION_EXPIRED",
-          "AUTH_KEY_PERM_EMPTY",
-          "SESSION_PASSWORD_NEEDED",
-        ].includes(e.message)
-      ) {
-        await updateAccountById(ID, {
-          banned: true,
-          reason: e.message,
-        });
-        await sendToBot(`!!!БАН АККАУНТА!!! ID: ${ID}; Error: ${e.message}`);
-      } else {
-        await sendToBot(
-          `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
-        );
-      }
+      await sendToBot(
+        `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
+      );
     }
   }
 
@@ -164,10 +158,7 @@ const main = async (ID: string) => {
   if (client) {
     await client.destroy();
   }
-
-  return;
 };
-
 
 getAccounts().then((accounts) => {
   accounts.forEach((accountId: string) => {

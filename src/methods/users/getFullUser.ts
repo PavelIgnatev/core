@@ -1,7 +1,7 @@
-import BigInt from "big-integer";
-import { blue } from "colors/safe";
+import BigInt from 'big-integer';
+import { blue } from 'colors/safe';
 
-import GramJs from "../../common/gramjs/tl/api";
+import GramJs from '../../common/gramjs/tl/api';
 
 export const getFullUser = async (
   client: any,

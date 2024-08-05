@@ -9,17 +9,16 @@ const crypto = require('./crypto/crypto');
  * @returns {bigInt.BigInteger}
  */
 function readBigIntFromBuffer(buffer, little = true, signed = false) {
-    let randBuffer = Buffer.from(buffer);
-    const bytesNumber = randBuffer.length;
-    if (little) {
-        randBuffer = randBuffer.reverse();
-    }
-    let bigInt = BigInt(randBuffer.toString('hex'), 16);
-    if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
-        bigInt = bigInt.subtract(BigInt(2)
-            .pow(BigInt(bytesNumber * 8)));
-    }
-    return bigInt;
+  let randBuffer = Buffer.from(buffer);
+  const bytesNumber = randBuffer.length;
+  if (little) {
+    randBuffer = randBuffer.reverse();
+  }
+  let bigInt = BigInt(randBuffer.toString('hex'), 16);
+  if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
+    bigInt = bigInt.subtract(BigInt(2).pow(BigInt(bytesNumber * 8)));
+  }
+  return bigInt;
 }
 
 /**
@@ -29,13 +28,12 @@ function readBigIntFromBuffer(buffer, little = true, signed = false) {
  * @returns {Buffer}
  */
 function toSignedLittleBuffer(big, number = 8) {
-    const bigNumber = BigInt(big);
-    const byteArray = [];
-    for (let i = 0; i < number; i++) {
-        byteArray[i] = bigNumber.shiftRight(8 * i)
-            .and(255);
-    }
-    return Buffer.from(byteArray);
+  const bigNumber = BigInt(big);
+  const byteArray = [];
+  for (let i = 0; i < number; i++) {
+    byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
+  }
+  return Buffer.from(byteArray);
 }
 
 /**
@@ -46,37 +44,42 @@ function toSignedLittleBuffer(big, number = 8) {
  * @param signed
  * @returns {Buffer}
  */
-function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-    bigInt = BigInt(bigInt);
-    const bitLength = bigInt.bitLength().toJSNumber();
+function readBufferFromBigInt(
+  bigInt,
+  bytesNumber,
+  little = true,
+  signed = false
+) {
+  bigInt = BigInt(bigInt);
+  const bitLength = bigInt.bitLength().toJSNumber();
 
-    const bytes = Math.ceil(bitLength / 8);
-    if (bytesNumber < bytes) {
-        throw new Error('OverflowError: int too big to convert');
-    }
-    if (!signed && bigInt.lesser(BigInt(0))) {
-        throw new Error('Cannot convert to unsigned');
-    }
-    let below = false;
-    if (bigInt.lesser(BigInt(0))) {
-        below = true;
-        bigInt = bigInt.abs();
-    }
+  const bytes = Math.ceil(bitLength / 8);
+  if (bytesNumber < bytes) {
+    throw new Error('OverflowError: int too big to convert');
+  }
+  if (!signed && bigInt.lesser(BigInt(0))) {
+    throw new Error('Cannot convert to unsigned');
+  }
+  let below = false;
+  if (bigInt.lesser(BigInt(0))) {
+    below = true;
+    bigInt = bigInt.abs();
+  }
 
-    const hex = bigInt.toString(16).padStart(bytesNumber * 2, '0');
-    let buffer = Buffer.from(hex, 'hex');
+  const hex = bigInt.toString(16).padStart(bytesNumber * 2, '0');
+  let buffer = Buffer.from(hex, 'hex');
 
-    if (signed && below) {
-        buffer[buffer.length - 1] = 256 - buffer[buffer.length - 1];
-        for (let i = 0; i < buffer.length - 1; i++) {
-            buffer[i] = 255 - buffer[i];
-        }
+  if (signed && below) {
+    buffer[buffer.length - 1] = 256 - buffer[buffer.length - 1];
+    for (let i = 0; i < buffer.length - 1; i++) {
+      buffer[i] = 255 - buffer[i];
     }
-    if (little) {
-        buffer = buffer.reverse();
-    }
+  }
+  if (little) {
+    buffer = buffer.reverse();
+  }
 
-    return buffer;
+  return buffer;
 }
 
 /**
@@ -84,7 +87,7 @@ function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false
  * @returns {BigInteger}
  */
 function generateRandomLong(signed = true) {
-    return readBigIntFromBuffer(generateRandomBytes(8), true, signed);
+  return readBigIntFromBuffer(generateRandomBytes(8), true, signed);
 }
 
 /**
@@ -94,7 +97,7 @@ function generateRandomLong(signed = true) {
  * @returns {number}
  */
 function mod(n, m) {
-    return ((n % m) + m) % m;
+  return ((n % m) + m) % m;
 }
 
 /**
@@ -104,7 +107,7 @@ function mod(n, m) {
  * @returns {BigInt}
  */
 function bigIntMod(n, m) {
-    return ((n.remainder(m)).add(m)).remainder(m);
+  return n.remainder(m).add(m).remainder(m);
 }
 
 /**
@@ -113,7 +116,7 @@ function bigIntMod(n, m) {
  * @returns {Buffer}
  */
 function generateRandomBytes(count) {
-    return Buffer.from(crypto.randomBytes(count));
+  return Buffer.from(crypto.randomBytes(count));
 }
 
 /**
@@ -151,28 +154,32 @@ async function calcKey(sharedKey, msgKey, client) {
  * @returns {{key: Buffer, iv: Buffer}}
  */
 async function generateKeyDataFromNonce(serverNonce, newNonce) {
-    serverNonce = toSignedLittleBuffer(serverNonce, 16);
-    newNonce = toSignedLittleBuffer(newNonce, 32);
-    const [hash1, hash2, hash3] = await Promise.all([
-        sha1(Buffer.concat([newNonce, serverNonce])),
-        sha1(Buffer.concat([serverNonce, newNonce])),
-        sha1(Buffer.concat([newNonce, newNonce])),
-    ]);
-    const keyBuffer = Buffer.concat([hash1, hash2.slice(0, 12)]);
-    const ivBuffer = Buffer.concat([hash2.slice(12, 20), hash3, newNonce.slice(0, 4)]);
-    return {
-        key: keyBuffer,
-        iv: ivBuffer,
-    };
+  serverNonce = toSignedLittleBuffer(serverNonce, 16);
+  newNonce = toSignedLittleBuffer(newNonce, 32);
+  const [hash1, hash2, hash3] = await Promise.all([
+    sha1(Buffer.concat([newNonce, serverNonce])),
+    sha1(Buffer.concat([serverNonce, newNonce])),
+    sha1(Buffer.concat([newNonce, newNonce])),
+  ]);
+  const keyBuffer = Buffer.concat([hash1, hash2.slice(0, 12)]);
+  const ivBuffer = Buffer.concat([
+    hash2.slice(12, 20),
+    hash3,
+    newNonce.slice(0, 4),
+  ]);
+  return {
+    key: keyBuffer,
+    iv: ivBuffer,
+  };
 }
 
 function convertToLittle(buf) {
-    const correct = Buffer.alloc(buf.length * 4);
+  const correct = Buffer.alloc(buf.length * 4);
 
-    for (let i = 0; i < buf.length; i++) {
-        correct.writeUInt32BE(buf[i], i * 4);
-    }
-    return correct;
+  for (let i = 0; i < buf.length; i++) {
+    correct.writeUInt32BE(buf[i], i * 4);
+  }
+  return correct;
 }
 
 /**
@@ -181,9 +188,9 @@ function convertToLittle(buf) {
  * @returns {Promise}
  */
 function sha1(data) {
-    const shaSum = crypto.createHash('sha1');
-    shaSum.update(data);
-    return shaSum.digest();
+  const shaSum = crypto.createHash('sha1');
+  shaSum.update(data);
+  return shaSum.digest();
 }
 
 /**
@@ -192,9 +199,9 @@ function sha1(data) {
  * @returns {Promise}
  */
 function sha256(data) {
-    const shaSum = crypto.createHash('sha256');
-    shaSum.update(data);
-    return shaSum.digest();
+  const shaSum = crypto.createHash('sha256');
+  shaSum.update(data);
+  return shaSum.digest();
 }
 
 /**
@@ -205,20 +212,20 @@ function sha256(data) {
  * @returns {bigInt.BigInteger}
  */
 function modExp(a, b, n) {
-    a = a.remainder(n);
-    let result = BigInt.one;
-    let x = a;
-    while (b.greater(BigInt.zero)) {
-        const leastSignificantBit = b.remainder(BigInt(2));
-        b = b.divide(BigInt(2));
-        if (leastSignificantBit.eq(BigInt.one)) {
-            result = result.multiply(x);
-            result = result.remainder(n);
-        }
-        x = x.multiply(x);
-        x = x.remainder(n);
+  a = a.remainder(n);
+  let result = BigInt.one;
+  let x = a;
+  while (b.greater(BigInt.zero)) {
+    const leastSignificantBit = b.remainder(BigInt(2));
+    b = b.divide(BigInt(2));
+    if (leastSignificantBit.eq(BigInt.one)) {
+      result = result.multiply(x);
+      result = result.remainder(n);
     }
-    return result;
+    x = x.multiply(x);
+    x = x.remainder(n);
+  }
+  return result;
 }
 
 /**
@@ -228,9 +235,9 @@ function modExp(a, b, n) {
  * @returns {Buffer}
  */
 function getByteArray(integer, signed = false) {
-    const bits = integer.toString(2).length;
-    const byteLength = Math.floor((bits + 8 - 1) / 8);
-    return readBufferFromBigInt(BigInt(integer), byteLength, false, signed);
+  const bits = integer.toString(2).length;
+  const byteLength = Math.floor((bits + 8 - 1) / 8);
+  return readBufferFromBigInt(BigInt(integer), byteLength, false, signed);
 }
 
 /**
@@ -240,9 +247,9 @@ function getByteArray(integer, signed = false) {
  * @returns {number}
  */
 function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
@@ -250,9 +257,10 @@ function getRandomInt(min, max) {
  * @param ms time in milliseconds
  * @returns {Promise}
  */
-const sleep = (ms) => new Promise((resolve) => {
+const sleep = (ms) =>
+  new Promise((resolve) => {
     setTimeout(resolve, ms);
-});
+  });
 
 /**
  * Helper to export two buffers of same length
@@ -260,11 +268,11 @@ const sleep = (ms) => new Promise((resolve) => {
  */
 
 function bufferXor(a, b) {
-    const res = [];
-    for (let i = 0; i < a.length; i++) {
-        res.push(a[i] ^ b[i]);
-    }
-    return Buffer.from(res);
+  const res = [];
+  for (let i = 0; i < a.length; i++) {
+    res.push(a[i] ^ b[i]);
+  }
+  return Buffer.from(res);
 }
 
 /**
@@ -292,54 +300,54 @@ function isArrayLike(obj) {
 
 // Taken from https://stackoverflow.com/questions/18638900/javascript-crc32/18639999#18639999
 function makeCRCTable() {
-    let c;
-    const crcTable = [];
-    for (let n = 0; n < 256; n++) {
-        c = n;
-        for (let k = 0; k < 8; k++) {
-            c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
-        }
-        crcTable[n] = c;
+  let c;
+  const crcTable = [];
+  for (let n = 0; n < 256; n++) {
+    c = n;
+    for (let k = 0; k < 8; k++) {
+      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
     }
-    return crcTable;
+    crcTable[n] = c;
+  }
+  return crcTable;
 }
 
 let crcTable;
 
 function crc32(buf) {
-    if (!crcTable) {
-        crcTable = makeCRCTable();
-    }
-    if (!Buffer.isBuffer(buf)) {
-        buf = Buffer.from(buf);
-    }
-    let crc = -1;
+  if (!crcTable) {
+    crcTable = makeCRCTable();
+  }
+  if (!Buffer.isBuffer(buf)) {
+    buf = Buffer.from(buf);
+  }
+  let crc = -1;
 
-    for (let index = 0; index < buf.length; index++) {
-        const byte = buf[index];
-        crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
-    }
-    return (crc ^ (-1)) >>> 0;
+  for (let index = 0; index < buf.length; index++) {
+    const byte = buf[index];
+    crc = crcTable[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  }
+  return (crc ^ -1) >>> 0;
 }
 
 module.exports = {
-    readBigIntFromBuffer,
-    readBufferFromBigInt,
-    generateRandomLong,
-    mod,
-    crc32,
-    generateRandomBytes,
-    // calcKey,
-    generateKeyDataFromNonce,
-    sha1,
-    sha256,
-    bigIntMod,
-    modExp,
-    getRandomInt,
-    sleep,
-    getByteArray,
-    // isArrayLike,
-    toSignedLittleBuffer,
-    convertToLittle,
-    bufferXor,
+  readBigIntFromBuffer,
+  readBufferFromBigInt,
+  generateRandomLong,
+  mod,
+  crc32,
+  generateRandomBytes,
+  // calcKey,
+  generateKeyDataFromNonce,
+  sha1,
+  sha256,
+  bigIntMod,
+  modExp,
+  getRandomInt,
+  sleep,
+  getByteArray,
+  // isArrayLike,
+  toSignedLittleBuffer,
+  convertToLittle,
+  bufferXor,
 };

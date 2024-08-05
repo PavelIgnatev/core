@@ -1,54 +1,51 @@
-import BigInt from "big-integer";
-import { red, yellow } from "colors/safe";
+import BigInt from 'big-integer';
+import { red, yellow } from 'colors/safe';
 
-import GramJs from "../common/gramjs/tl/api";
-import { uploadFile } from "../common/gramjs/client/uploadFile";
-
-import { updateAccountById } from "../db/accounts";
-
-import { generateUser } from "../helpers/generateUser";
-import { sleep } from "../helpers/sleep";
-
-import { updateProfile } from "../methods/account/updateProfile";
-import { getProfileFiles } from "../helpers/getProfileFiles";
-import { generateRandomString } from "../helpers/generateRandomString";
+import { uploadFile } from '../common/gramjs/client/uploadFile';
+import GramJs from '../common/gramjs/tl/api';
+import { updateAccountById } from '../db/accounts';
+import { generateRandomString } from '../helpers/generateRandomString';
+import { generateUser } from '../helpers/generateUser';
+import { getProfileFiles } from '../helpers/getProfileFiles';
+import { sleep } from '../helpers/sleep';
+import { updateProfile } from '../methods/account/updateProfile';
 
 const emojis = [
-  "🌎",
-  "🌍",
-  "🌏",
-  "🪐",
-  "♻️",
-  "🌿",
-  "🧩",
-  "☘️",
-  "🍀",
-  "🦕",
-  "🍃",
-  "🧳",
-  "💼",
-  "🚀",
-  "🌊",
-  "📌",
-  "🎯",
-  "👋",
-  "🤝",
-  "👨‍💻",
-  "🌳",
-  "🐢",
-  "🦖",
-  "🌵",
-  "🌀",
-  "⛰️",
-  "🍁",
-  "🍂",
-  "🦔",
-  "🥑",
-  "🏆",
-  "🐌",
-  "🧬",
-  "🐊",
-  "🌔",
+  '🌎',
+  '🌍',
+  '🌏',
+  '🪐',
+  '♻️',
+  '🌿',
+  '🧩',
+  '☘️',
+  '🍀',
+  '🦕',
+  '🍃',
+  '🧳',
+  '💼',
+  '🚀',
+  '🌊',
+  '📌',
+  '🎯',
+  '👋',
+  '🤝',
+  '👨‍💻',
+  '🌳',
+  '🐢',
+  '🦖',
+  '🌵',
+  '🌀',
+  '⛰️',
+  '🍁',
+  '🍂',
+  '🦔',
+  '🥑',
+  '🏆',
+  '🐌',
+  '🧬',
+  '🐊',
+  '🌔',
 ];
 
 export const accountSetup = async (
@@ -61,14 +58,19 @@ export const accountSetup = async (
     return firstName as string;
   }
 
-  console.log(`[${accountId}] Initialize module`, yellow("ACCOUNT SETUP"));
+  console.log(`[${accountId}] Initialize module`, yellow('ACCOUNT SETUP'));
 
   let user;
 
   while (true) {
     try {
       const genUser = generateUser();
-      const { firstName, lastName, username, randomElseUsername } = genUser;
+      const {
+        firstName: genFirstName,
+        lastName,
+        username,
+        randomElseUsername,
+      } = genUser;
 
       await client.invoke(
         new GramJs.account.UpdateUsername({
@@ -77,9 +79,8 @@ export const accountSetup = async (
       );
 
       await updateProfile(client, accountId, {
-        firstName,
-        lastName:
-          lastName + ` ${emojis[Math.floor(Math.random() * emojis.length)]}`,
+        firstName: genFirstName,
+        lastName: `${lastName} ${emojis[Math.floor(Math.random() * emojis.length)]}`,
         about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
       });
 
@@ -99,7 +100,7 @@ export const accountSetup = async (
       userId: new GramJs.InputUserSelf(),
       limit: 40,
       offset: 0,
-      maxId: BigInt("0"),
+      maxId: BigInt('0'),
     })
   );
 

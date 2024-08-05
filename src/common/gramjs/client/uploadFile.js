@@ -1,12 +1,12 @@
-import { Blob } from "buffer";
+import { Blob } from 'buffer';
 
 // eslint-disable-next-line import/no-named-default
-import { default as Api } from "../tl/api";
+import { default as Api } from '../tl/api';
 
-import { generateRandomBytes, readBigIntFromBuffer, sleep } from "../Helpers";
-import { getUploadPartSize } from "../Utils";
-import errors from "../errors";
-import { Foreman } from "../foreman";
+import { generateRandomBytes, readBigIntFromBuffer, sleep } from '../Helpers';
+import { getUploadPartSize } from '../Utils';
+import errors from '../errors';
+import { Foreman } from '../foreman';
 
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
@@ -98,6 +98,6 @@ export async function uploadFile(client, reailFile) {
         id: fileId,
         parts: partCount,
         name,
-        md5Checksum: "",
+        md5Checksum: '',
       });
 }

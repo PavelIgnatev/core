@@ -1,13 +1,13 @@
-const BinaryWriter = require("./BinaryWriter");
-const BinaryReader = require("./BinaryReader");
-const PromisedWebSockets = require("./PromisedWebSockets");
-const MessagePacker = require("./MessagePacker");
-const AsyncQueue = require("./AsyncQueue");
+const BinaryWriter = require('./BinaryWriter');
+const BinaryReader = require('./BinaryReader');
+const PromisedWebSockets = require('./PromisedWebSockets');
+const MessagePacker = require('./MessagePacker');
+const AsyncQueue = require('./AsyncQueue');
 
 module.exports = {
-    BinaryWriter,
-    BinaryReader,
-    MessagePacker,
-    AsyncQueue,
-    PromisedWebSockets,
+  BinaryWriter,
+  BinaryReader,
+  MessagePacker,
+  AsyncQueue,
+  PromisedWebSockets,
 };

@@ -1,7 +1,7 @@
-import { DB } from "./db";
+import { DB } from './db';
 
 const getMessagesCollection = async () => {
-  return (await DB()).collection("messages");
+  return (await DB()).collection('messages');
 };
 
 export const updateFailedMessage = async (username: string) => {

@@ -1,14 +1,14 @@
-import fs from "fs";
-import path from "path";
+import fs from 'fs';
+import path from 'path';
 
-import { CustomFile } from "../common/gramjs/CustomFile";
+import { CustomFile } from '../common/gramjs/CustomFile';
 
 export const getProfileFiles = () => {
   let files: string[] = [];
-  let folderName = "";
+  let folderName = '';
 
   const getFilesFromFolder = () => {
-    const folders = fs.readdirSync(path.join(__dirname, "/src/common/images"));
+    const folders = fs.readdirSync(path.join(__dirname, '/src/common/images'));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
     folderName = path.basename(randomFolder);

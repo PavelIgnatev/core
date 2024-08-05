@@ -1,7 +1,7 @@
-import BigInt from "big-integer";
-import { blue } from "colors/safe";
+import BigInt from 'big-integer';
+import { blue } from 'colors/safe';
 
-import GramJs from "../../common/gramjs/tl/api";
+import GramJs from '../../common/gramjs/tl/api';
 
 export const getMessages = async (
   client: any,
@@ -13,7 +13,7 @@ export const getMessages = async (
   console.log(
     `[${accountId}] Get history by`,
     blue(`${userId}:${accessHash}`),
-    "with",
+    'with',
     blue(`minimumId=${minId}`)
   );
 

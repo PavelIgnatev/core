@@ -1,81 +1,20 @@
-import BigInt from "big-integer";
+import BigInt from 'big-integer';
+import { blue, yellow } from 'colors/safe';
 
-import { blue, red, yellow } from "colors/safe";
-
-import GramJs from "../common/gramjs/tl/api";
-
-import { checkSpamBlock } from "./checkSpamBlock";
-
-import { updateAccountById } from "../db/accounts";
-
-import { generateRandomString } from "../helpers/generateRandomString";
-import { sendToBot } from "../helpers/sendToBot";
-
-import { sendMessage } from "../methods/messages/sendMessage";
-import { editFolder } from "../methods/folders/editFolder";
-import { getRecipient } from "../methods/recipients/getRecipient";
-import { saveRecipient } from "./saveRecipient";
-import { resolvePhone } from "../methods/contacts/resolvePhone";
-import { getFullUser } from "../methods/users/getFullUser";
-import { muteNotification } from "../methods/account/muteNotification";
-import { updateFailedMessage } from "../db/messages";
-import TelegramClient from "../common/gramjs/client/TelegramClient";
-import { resolveUsername } from "../methods/contacts/resolveUsername";
-
-const removeSpaces = (str: string) => {
-  return str.replace(/\s+/g, "").toLowerCase();
-};
-
-export const generateRandomTime = () => {
-  const minTime = 360000;
-  const maxTime = 3600000;
-
-  const randomTime =
-    Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
-  const currentTime = new Date();
-  const futureTime = new Date(currentTime.getTime() + randomTime);
-  return futureTime;
-};
-
-export const resolveUser = async (
-  client: TelegramClient,
-  accountId: string,
-  recipient: Record<string, string | number>
-) => {
-  const resolveMethod = String(recipient.username).includes("+")
-    ? resolvePhone
-    : resolveUsername;
-  const userByUsername = await resolveMethod(
-    client,
-    accountId,
-    String(recipient.username)
-  );
-  const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-  const recipientFull = await getFullUser(
-    client,
-    accountId,
-    userId,
-    accessHash
-  );
-
-  if (
-    !userId ||
-    !accessHash ||
-    !recipientFull ||
-    !(userByUsername?.users?.[0] instanceof GramJs.User)
-  ) {
-    console.log(
-      red(
-        `[${accountId}] Chat with username ${recipient.username}:${userId} not resolved`
-      )
-    );
-
-    await updateFailedMessage(String(recipient.username));
-    return;
-  }
-
-  return recipientFull;
-};
+import { checkSpamBlock } from './checkSpamBlock';
+import { saveRecipient } from './saveRecipient';
+import GramJs from '../common/gramjs/tl/api';
+import { updateAccountById } from '../db/accounts';
+import { updateFailedMessage } from '../db/messages';
+import { generateRandomString } from '../helpers/generateRandomString';
+import { generateRandomTime } from '../helpers/generateRandomTime';
+import { rmSpLc } from '../helpers/removeSpacesAndLowerCase';
+import { sendToBot } from '../helpers/sendToBot';
+import { muteNotification } from '../methods/account/muteNotification';
+import { resolveContact } from '../methods/contacts/resolveContact';
+import { editFolder } from '../methods/folders/editFolder';
+import { sendMessage } from '../methods/messages/sendMessage';
+import { getRecipient } from '../methods/recipients/getRecipient';
 
 export const autoSender = async (
   client: any,
@@ -83,10 +22,10 @@ export const autoSender = async (
   tgAccountId: string,
   tgRmainingTime: string | null
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow("AUTO SENDER"));
+  console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
 
   if (!tgRmainingTime) {
-    const remainingTime = generateRandomTime();
+    const remainingTime = generateRandomTime(360000, 3600000);
     await updateAccountById(accountId, {
       remainingTime,
     });
@@ -100,7 +39,7 @@ export const autoSender = async (
   }
 
   const currentTime = new Date();
-  let remainingTime = new Date(tgRmainingTime || currentTime);
+  const remainingTime = new Date(tgRmainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
@@ -111,7 +50,11 @@ export const autoSender = async (
     const recipient = await getRecipient(accountId);
 
     try {
-      const recipientFull = await resolveUser(client, accountId, recipient);
+      const recipientFull = await resolveContact(
+        client,
+        accountId,
+        recipient.username
+      );
 
       const {
         id,
@@ -160,13 +103,17 @@ export const autoSender = async (
         })
       );
       const messages = (allHistory.messages || [])
-        .filter((m: GramJs.Message) => m.className === "Message" && m.out)
+        .filter((m: GramJs.Message) => m.className === 'Message' && m.out)
         .reverse();
       const isSame =
         messages.length === 2 &&
-        removeSpaces(messages[0].message) === removeSpaces(firstMessage) &&
-        removeSpaces(messages[1].message) === removeSpaces(secondMessage);
-      const fullRecipient = await resolveUser(client, accountId, recipient);
+        rmSpLc(messages[0].message) === rmSpLc(firstMessage) &&
+        rmSpLc(messages[1].message) === rmSpLc(secondMessage);
+      const fullRecipient = await resolveContact(
+        client,
+        accountId,
+        recipient.username
+      );
       const fullUser = fullRecipient.users[0];
       const isBlocked =
         messages.length === 0 ||
@@ -207,25 +154,25 @@ Real second message: ${messages?.[1]?.message}`);
             date: Math.round(Date.now() / 1000),
           },
         ],
-        "create"
+        'create'
       );
     } catch (e: any) {
       if (
         ![
-          "PEER_FLOOD",
-          "PHONE_NOT_OCCUPIED",
-          "USERNAME_NOT_OCCUPIED",
-          "USERNAME_INVALID",
+          'PEER_FLOOD',
+          'PHONE_NOT_OCCUPIED',
+          'USERNAME_NOT_OCCUPIED',
+          'USERNAME_INVALID',
         ].includes(e.message)
       ) {
         await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
       }
 
-      if (!e.message.includes("PEER_FLOOD")) {
+      if (!e.message.includes('PEER_FLOOD')) {
         await updateFailedMessage(recipient.username);
       }
 
-      throw new Error("Global Error");
+      throw new Error('Global Error');
     }
   } else {
     console.log(

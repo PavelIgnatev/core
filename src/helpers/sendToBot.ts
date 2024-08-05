@@ -1,11 +1,11 @@
-import axios from "axios";
-import { red } from "colors/safe";
+import axios from 'axios';
+import { red } from 'colors/safe';
 
 export const sendToBot = async (text: string) => {
-  const token = "6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo";
+  const token = '6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
-  const chatIds = ["483779758", "324820826", "6957002018"];
+  const chatIds = ['483779758', '324820826', '6957002018'];
 
   try {
     await Promise.all(

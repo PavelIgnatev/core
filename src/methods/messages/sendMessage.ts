@@ -1,11 +1,11 @@
-import BigInt from "big-integer";
+import BigInt from 'big-integer';
+import { blue, gray } from 'colors/safe';
 
-import GramJs from "../../common/gramjs/tl/api";
-import { sendToBot } from "../../helpers/sendToBot";
-import { blue, gray } from "colors/safe";
+import GramJs from '../../common/gramjs/tl/api';
+import { sendToBot } from '../../helpers/sendToBot';
 
 function reduceSpaces(string: string) {
-  return string.replace(/\s+/g, " ").trim();
+  return string.replace(/\s+/g, ' ').trim();
 }
 
 function capitalizeFirstLetter(string: string) {
@@ -13,11 +13,11 @@ function capitalizeFirstLetter(string: string) {
 }
 
 function removeNonAlphaPrefix(string: string) {
-  if (string === "/start") {
+  if (string === '/start') {
     return string;
   }
 
-  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+  return string.replace(/^[^a-zA-Zа-яА-Я]+/, '');
 }
 
 export const sendMessage = async (
