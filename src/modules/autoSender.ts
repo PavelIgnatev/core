@@ -1,3 +1,5 @@
+import BigInt from "big-integer";
+
 import { blue, red, yellow } from "colors/safe";
 
 import GramJs from "../common/gramjs/tl/api";
@@ -13,11 +15,16 @@ import { sendMessage } from "../methods/messages/sendMessage";
 import { editFolder } from "../methods/folders/editFolder";
 import { getRecipient } from "../methods/recipients/getRecipient";
 import { saveRecipient } from "./saveRecipient";
-import { resolveUsername } from "../methods/contacts/resolveUsername";
 import { resolvePhone } from "../methods/contacts/resolvePhone";
 import { getFullUser } from "../methods/users/getFullUser";
 import { muteNotification } from "../methods/account/muteNotification";
 import { updateFailedMessage } from "../db/messages";
+import TelegramClient from "../common/gramjs/client/TelegramClient";
+import { resolveUsername } from "../methods/contacts/resolveUsername";
+
+const removeSpaces = (str: string) => {
+  return str.replace(/\s+/g, "");
+};
 
 export const generateRandomTime = () => {
   const minTime = 360000;
@@ -28,6 +35,46 @@ export const generateRandomTime = () => {
   const currentTime = new Date();
   const futureTime = new Date(currentTime.getTime() + randomTime);
   return futureTime;
+};
+
+export const resolveUser = async (
+  client: TelegramClient,
+  accountId: string,
+  recipient: Record<string, string | number>
+) => {
+  const resolveMethod = String(recipient.username).includes("+")
+    ? resolvePhone
+    : resolveUsername;
+  const userByUsername = await resolveMethod(
+    client,
+    accountId,
+    String(recipient.username)
+  );
+  const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
+  const recipientFull = await getFullUser(
+    client,
+    accountId,
+    userId,
+    accessHash
+  );
+
+  if (
+    !userId ||
+    !accessHash ||
+    !recipientFull ||
+    !(userByUsername?.users?.[0] instanceof GramJs.User)
+  ) {
+    console.log(
+      red(
+        `[${accountId}] Chat with username ${recipient.username}:${userId} not resolved`
+      )
+    );
+
+    await updateFailedMessage(String(recipient.username));
+    return;
+  }
+
+  return recipientFull;
 };
 
 export const autoSender = async (
@@ -55,58 +102,27 @@ export const autoSender = async (
   const currentTime = new Date();
   let remainingTime = new Date(tgRmainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime <= remainingTime) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
     if (spamBlockDate) {
       return;
     }
 
     const recipient = await getRecipient(accountId);
-    let recipientUserId;
 
     try {
-      const resolveMethod = recipient.username.includes("+")
-        ? resolvePhone
-        : resolveUsername;
-      const userByUsername = await resolveMethod(
-        client,
-        accountId,
-        recipient.username
-      );
-      const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-      const recipientFull = await getFullUser(
-        client,
-        accountId,
-        userId,
-        accessHash
-      );
-
-      if (
-        !userId ||
-        !accessHash ||
-        !recipientFull ||
-        !(userByUsername?.users?.[0] instanceof GramJs.User)
-      ) {
-        console.log(
-          red(
-            `[${accountId}] Chat with username ${recipient.username}:${userId} not resolved`
-          )
-        );
-
-        await updateFailedMessage(recipient.username);
-        return;
-      }
-
-      recipientUserId = userId;
+      const recipientFull = await resolveUser(client, accountId, recipient);
 
       const {
+        id,
+        accessHash,
         self,
         deleted,
         bot,
         support,
         contactRequirePremium,
         botBusiness,
-      } = userByUsername.users[0];
+      } = recipientFull.users[0];
       if (self) {
         return;
       }
@@ -120,64 +136,76 @@ export const autoSender = async (
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       const sentFirstMessage = await sendMessage(
         client,
-        userId,
+        id,
         accessHash,
         firstMessage,
         accountId
       );
       const sentSecondMessage = await sendMessage(
         client,
-        userId,
+        id,
         accessHash,
         secondMessage,
         accountId
       );
 
-      await editFolder(client, accountId, userId, accessHash, 1);
-      await muteNotification(client, accountId, userId, accessHash, 2147483647);
-
-      const clientDialogs = await client.invoke(
-        new GramJs.messages.GetDialogs({
-          offsetPeer: new GramJs.InputPeerEmpty(),
-          folderId: 1,
-          limit: 100000,
+      await editFolder(client, accountId, id, accessHash, 1);
+      await muteNotification(client, accountId, id, accessHash, 2147483647);
+      const { messages } = await client.invoke(
+        new GramJs.messages.GetHistory({
+          peer: new GramJs.InputPeerUser({
+            userId: BigInt(id),
+            accessHash: BigInt(accessHash),
+          }),
+          limit: 2,
         })
       );
-      const isSender = clientDialogs.users.find(
-        (e: GramJs.User) => String(e.id) === String(userId)
-      );
+      const isSame =
+        messages.length === 2 &&
+        removeSpaces(messages[1].message) === removeSpaces(firstMessage) &&
+        removeSpaces(messages[0].message) === removeSpaces(secondMessage);
+      const fullRecipient = await resolveUser(client, accountId, recipient);
+      const fullUser = fullRecipient.users[0];
+      const isBlocked =
+        messages.length === 0 ||
+        !fullUser.status ||
+        fullUser.status instanceof GramJs.UserStatusEmpty;
 
-      if (isSender) {
-        await saveRecipient(
-          accountId,
-          recipientFull,
-          recipient,
-          [
-            {
-              id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
-              text: firstMessage,
-              fromId: String(tgAccountId),
-              date: Math.round(Date.now() / 1000),
-            },
-            {
-              id:
-                sentSecondMessage.id ||
-                (sentSecondMessage.id
-                  ? sentSecondMessage.id + 1
-                  : Math.floor(Math.random() * 9e5) + 1e5),
-              text: secondMessage,
-              fromId: String(tgAccountId),
-              date: Math.round(Date.now() / 1000),
-            },
-          ],
-          "create"
-        );
-      } else {
+      if (!isBlocked && !isSame) {
         await sendToBot(`!!!ОТПРАВКА НЕ БЫЛА ЯВНО ЗАФИКСИРОВАНА!!!
 Group ID: ${recipient.groupId}
 Account ID: ${accountId}
-User ID: ${userId}`);
+User ID: ${id}
+First Message: ${firstMessage}
+Second Message: ${secondMessage}
+Real first message: ${messages?.[1]?.message}
+Real second message: ${messages?.[0]?.message}`);
       }
+
+      await saveRecipient(
+        accountId,
+        recipientFull,
+        recipient,
+        [
+          {
+            id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
+            text: firstMessage,
+            fromId: String(tgAccountId),
+            date: Math.round(Date.now() / 1000),
+          },
+          {
+            id:
+              sentSecondMessage.id ||
+              (sentSecondMessage.id
+                ? sentSecondMessage.id + 1
+                : Math.floor(Math.random() * 9e5) + 1e5),
+            text: secondMessage,
+            fromId: String(tgAccountId),
+            date: Math.round(Date.now() / 1000),
+          },
+        ],
+        "create"
+      );
     } catch (e: any) {
       if (
         ![
@@ -187,9 +215,7 @@ User ID: ${userId}`);
           "USERNAME_INVALID",
         ].includes(e.message)
       ) {
-        await sendToBot(
-          `Username: ${recipient.username}; UserId: ${recipientUserId}; Error: ${e.message}`
-        );
+        await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
       }
 
       if (!e.message.includes("PEER_FLOOD")) {
