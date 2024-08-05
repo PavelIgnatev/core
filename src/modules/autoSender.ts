@@ -1,4 +1,4 @@
-import { blue, gray, red, yellow } from "colors/safe";
+import { blue, red, yellow } from "colors/safe";
 
 import GramJs from "../common/gramjs/tl/api";
 
@@ -55,11 +55,11 @@ export const autoSender = async (
   const currentTime = new Date();
   let remainingTime = new Date(tgRmainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
-    const spamBlockDate = await checkSpamBlock(client, accountId);
-    if (spamBlockDate) {
-      return;
-    }
+  if (currentTime <= remainingTime) {
+    // const spamBlockDate = await checkSpamBlock(client, accountId);
+    // if (spamBlockDate) {
+    //   return;
+    // }
 
     const recipient = await getRecipient(accountId);
     let recipientUserId;
@@ -135,30 +135,49 @@ export const autoSender = async (
 
       await editFolder(client, accountId, userId, accessHash, 1);
       await muteNotification(client, accountId, userId, accessHash, 2147483647);
-      await saveRecipient(
-        accountId,
-        recipientFull,
-        recipient,
-        [
-          {
-            id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
-            text: firstMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1000),
-          },
-          {
-            id:
-              sentSecondMessage.id ||
-              (sentSecondMessage.id
-                ? sentSecondMessage.id + 1
-                : Math.floor(Math.random() * 9e5) + 1e5),
-            text: secondMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1000),
-          },
-        ],
-        "create"
+
+      const clientDialogs = await client.invoke(
+        new GramJs.messages.GetDialogs({
+          offsetPeer: new GramJs.InputPeerEmpty(),
+          folderId: 1,
+          limit: 100000,
+        })
       );
+      const isSender = clientDialogs.users.find(
+        (e: GramJs.User) => String(e.id) === String(userId)
+      );
+
+      if (isSender) {
+        await saveRecipient(
+          accountId,
+          recipientFull,
+          recipient,
+          [
+            {
+              id: sentFirstMessage.id || Math.floor(Math.random() * 9e5) + 1e5,
+              text: firstMessage,
+              fromId: String(tgAccountId),
+              date: Math.round(Date.now() / 1000),
+            },
+            {
+              id:
+                sentSecondMessage.id ||
+                (sentSecondMessage.id
+                  ? sentSecondMessage.id + 1
+                  : Math.floor(Math.random() * 9e5) + 1e5),
+              text: secondMessage,
+              fromId: String(tgAccountId),
+              date: Math.round(Date.now() / 1000),
+            },
+          ],
+          "create"
+        );
+      } else {
+        await sendToBot(`!!!ОТПРАВКА НЕ БЫЛА ЯВНО ЗАФИКСИРОВАНА!!!
+Group ID: ${recipient.groupId}
+Account ID: ${accountId}
+User ID: ${userId}`);
+      }
     } catch (e: any) {
       if (
         ![

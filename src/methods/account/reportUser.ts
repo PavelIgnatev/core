@@ -71,8 +71,6 @@ I need you to paraphrase a message (which is inside '''') while maintaining its 
       message: "",
     })
   );
-  console.log(reportFirst);
-  console.log(reportSecond);
 
   await sendToFormBot(`**** REPORT SPAM ****
 ДО: ${firstIterationReportMessage}

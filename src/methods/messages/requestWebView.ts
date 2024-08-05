@@ -38,8 +38,6 @@ export const requestWebView = async (client: any, accountId: string) => {
     })
   );
 
-  console.log(result);
-
   await updateAccountById(accountId, { invite: true });
   await updateInviteByAccountId(accountId, botLink, {
     shortName,
