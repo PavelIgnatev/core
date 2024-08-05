@@ -151,15 +151,16 @@ export const autoSender = async (
 
       await editFolder(client, accountId, id, accessHash, 1);
       await muteNotification(client, accountId, id, accessHash, 2147483647);
-      const { messages } = await client.invoke(
+      const allHistory = await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
             userId: BigInt(id),
             accessHash: BigInt(accessHash),
           }),
-          limit: 2,
         })
       );
+      const messages = (allHistory.messages || []).reverse();
+
       const isSame =
         messages.length === 2 &&
         removeSpaces(messages[1].message) === removeSpaces(firstMessage) &&
