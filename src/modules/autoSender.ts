@@ -160,7 +160,7 @@ export const autoSender = async (
         })
       );
       const messages = (allHistory.messages || [])
-        .filter((m: GramJs.Message) => m.className === "Message")
+        .filter((m: GramJs.Message) => m.className === "Message" && m.out)
         .reverse();
       const isSame =
         messages.length === 2 &&

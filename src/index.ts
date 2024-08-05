@@ -168,6 +168,7 @@ const main = async (ID: string) => {
   return;
 };
 
+
 getAccounts().then((accounts) => {
   accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
