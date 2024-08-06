@@ -1,14 +1,14 @@
 import { red, yellow } from 'colors/safe';
 
+import GramJs from '../common/gramjs/tl/api';
+
 import { getDialogs } from './getDialogs';
 import { makeRequestComplete } from './makeRequestComplete';
 import { makeRequestGpt } from './makeRequestGpt';
 import { saveRecipient } from './saveRecipient';
-import { updateBlockedDialogue } from '../db/dialogues';
 import { getGroupId } from '../db/groupId';
 import { converterName } from '../helpers/converterName';
 import { generateRandomString } from '../helpers/generateRandomString';
-import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { getDateNow } from '../helpers/getDateNow';
 import { sendToFormBot } from '../helpers/sendToFormBot';
 import { sendMessage } from '../methods/messages/sendMessage';
@@ -63,10 +63,10 @@ export const autoResponse = async (
       groupId: dialogGroupId,
       firstName,
       lastName = '',
+      stage,
     } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
-    const combinedMessages = getCombinedMessages(messages);
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({
@@ -75,23 +75,12 @@ export const autoResponse = async (
       }))
       .slice(-30);
 
-    const currentStage = combinedMessages.filter(
-      (m) => m.fromId === String(id)
-    ).length;
     const userName = `${firstName} ${lastName}`
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
 
-    if (currentStage > 25) {
-      console.log(red(`[${accountId}] MAXIMUM STAGE in ${accountId}:${id}`));
-      await updateBlockedDialogue(accountId, id, 'dialogs-max-stage');
-      continue;
-    }
-
     const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId, id, 'dialogs-not-resolved');
       continue;
     }
 
@@ -110,14 +99,14 @@ export const autoResponse = async (
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
 
     let promptGoal = '';
-    if (currentStage === 1) {
+    if (stage === 1) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
     }
-    if (currentStage >= 2) {
+    if (stage >= 2) {
       promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER). ${goal}.!!!!`;
     }
 
-    const parted = currentStage === 2 && part ? part : null;
+    const parted = stage === 2 && part ? part : null;
     const wresponseMessage = await makeRequestComplete(
       `
 ## CONTEXT
@@ -142,10 +131,10 @@ ${promptGoal} ${
           text: addedInformation,
         },
       ],
-      currentStage === 1,
-      currentStage <= 2,
-      currentStage <= 2 ? 2 : 1,
-      currentStage === 2 ? part : null,
+      stage === 1,
+      stage <= 2,
+      stage <= 2 ? 2 : 1,
+      stage === 2 ? part : null,
       chatHistory,
       dialogGroupId,
       accountId
@@ -156,7 +145,7 @@ ${promptGoal} ${
       dialogGroupId,
       accountId,
       `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`,
-      currentStage === 2 ? part : null
+      stage === 2 ? part : null
     );
 
     await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
@@ -177,7 +166,7 @@ ${promptGoal} ${
       date: Math.round(Date.now() / 1000),
     });
 
-    if (currentStage === 1 && addedQuestion) {
+    if (stage === 1 && addedQuestion) {
       const genQuestion = generateRandomString(addedQuestion);
       const genAddedQuestion = await gptRequestWrapper(
         language,
@@ -206,7 +195,7 @@ ${promptGoal} ${
 ПОСЛЕ: ${genAddedQuestion}`);
     }
 
-    if (currentStage === 2 && secondAddedQuestion) {
+    if (stage === 2 && secondAddedQuestion) {
       const genQuestion = generateRandomString(secondAddedQuestion);
       const genAddedQuestion = await gptRequestWrapper(
         language,
@@ -244,8 +233,6 @@ ${promptGoal} ${
     const groupId = await getGroupId(dialogGroupId);
     const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(accountId, id, 'ping-not-resolved');
       continue;
     }
 
@@ -282,9 +269,6 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
       null
     );
 
-    await sendToFormBot(`**** PING MESSAGE (${language}) ****
-${pingMessage}`);
-
     const sentPingMessage = await sendMessage(
       client,
       id,
@@ -300,6 +284,9 @@ ${pingMessage}`);
       date: Math.round(Date.now() / 1000),
     });
 
+    await sendToFormBot(`**** PING MESSAGE (${language}) ****
+    ${pingMessage}`);
+
     await saveRecipient(accountId, recipientFull, dialog, messages, 'update', {
       ping: true,
     });
@@ -310,12 +297,6 @@ ${pingMessage}`);
 
     const recipientFull = await getFullUser(client, accountId, id, accessHash);
     if (!recipientFull) {
-      console.log(red(`[${accountId}] Chat with username ${id} not resolved`));
-      await updateBlockedDialogue(
-        accountId,
-        id,
-        'manual-control-dialogs-not-resolved'
-      );
       continue;
     }
 

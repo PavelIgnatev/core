@@ -1,4 +1,3 @@
-import BigInt from 'big-integer';
 import { blue, yellow } from 'colors/safe';
 
 import { checkSpamBlock } from './checkSpamBlock';
@@ -16,6 +15,7 @@ import { editFolder } from '../methods/folders/editFolder';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { getRecipient } from '../methods/recipients/getRecipient';
 import { getMessages } from '../methods/messages/getMessages';
+import { deleteMessages } from '../methods/messages/deleteHistory';
 
 export const autoSender = async (
   client: any,
@@ -76,63 +76,38 @@ export const autoSender = async (
         return;
       }
 
+      await deleteMessages(client, accountId, id, accessHash);
       const firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
-      await sendMessage(client, id, accessHash, firstMessage, accountId);
-      await sendMessage(client, id, accessHash, secondMessage, accountId);
-      const gettedMessages = await getMessages(
+      const sentFirstMessage = await sendMessage(
         client,
-        accountId,
         id,
-        accessHash
+        accessHash,
+        firstMessage,
+        accountId
+      );
+      const sentSecondMessage = await sendMessage(
+        client,
+        id,
+        accessHash,
+        secondMessage,
+        accountId
       );
       await editFolder(client, accountId, id, accessHash, 1);
       await muteNotification(client, accountId, id, accessHash, 2147483647);
-      const fullRecipient = await resolveContact(
-        client,
-        accountId,
-        recipient.username
-      );
-
-      const messages = gettedMessages.reverse();
-      const fullUser = fullRecipient.users[0];
-      const sentFirstMessage = messages.find(
-        ({ message }: GramJs.Message) =>
-          rmSpLc(message) === rmSpLc(firstMessage)
-      );
-      const sentSecondMessage = messages.find(
-        ({ message }: GramJs.Message) =>
-          rmSpLc(message) === rmSpLc(secondMessage)
-      );
-      const isBlocked =
-        !fullUser.status || fullUser.status instanceof GramJs.UserStatusEmpty;
-
-      if (!isBlocked && (!sentFirstMessage || !sentSecondMessage)) {
-        await sendToBot(`!!!НЕКОРРЕКТНАЯ ОТПРАВКА!!!
-Group ID: ${recipient.groupId}
-Account ID: ${accountId}
-User ID: ${id}
-First Message: ${firstMessage}
-Real first message (#${sentFirstMessage?.id}): ${sentFirstMessage?.message}
-Second Message: ${secondMessage}
-Real second message (#${sentSecondMessage?.id}): ${sentSecondMessage?.message}
-Messages: ${JSON.stringify(messages.map((m: GramJs.Message) => ({ id: m.id, message: m.message })))}
-`);
-      }
-
       await saveRecipient(
         accountId,
         recipientFull,
         recipient,
         [
           {
-            id: sentFirstMessage?.id || Math.floor(Math.random() * 9e5),
+            id: sentFirstMessage.id,
             text: firstMessage,
             fromId: String(tgAccountId),
             date: Math.round(Date.now() / 1000),
           },
           {
-            id: sentSecondMessage?.id || Math.floor(Math.random() * 9e9),
+            id: sentSecondMessage.id,
             text: secondMessage,
             fromId: String(tgAccountId),
             date: Math.round(Date.now() / 1000),
@@ -152,7 +127,10 @@ Messages: ${JSON.stringify(messages.map((m: GramJs.Message) => ({ id: m.id, mess
         await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
       }
 
-      if (!e.message.includes('PEER_FLOOD')) {
+      if (
+        !e.message.includes('PEER_FLOOD') &&
+        !e.message.includes('MESSAGE ERROR')
+      ) {
         await updateFailedMessage(recipient.username);
       }
 

@@ -27,6 +27,7 @@ export const sendMessage = async (
   message: string,
   accountId: string
 ) => {
+  let sentMessage = null;
   try {
     console.log(
       `[${accountId}] Send ${gray(message)} to ${blue(
@@ -34,7 +35,7 @@ export const sendMessage = async (
       )}`
     );
 
-    const sentMessage = await client.invoke(
+    sentMessage = await client.invoke(
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))
@@ -48,12 +49,30 @@ export const sendMessage = async (
       })
     );
 
+    if (message !== '/start') {
+      if (!sentMessage?.id) {
+        throw new Error('MESSAGE ERROR');
+      }
+
+      await client.invoke(
+        new GramJs.messages.ReadHistory({
+          peer: new GramJs.InputPeerUser({
+            userId: BigInt(userId),
+            accessHash: BigInt(accessHash),
+          }),
+          maxId: sentMessage.id,
+        })
+      );
+    }
+
     return sentMessage;
   } catch (e: any) {
     await sendToBot(
-      `Error: ${JSON.stringify(
-        e.message
-      )}\nAccountId: ${accountId}.\nUserId: ${userId}\nMessage: ${message}.`
+      `*** ERRPR: ${e.message} ***
+AccountId: ${accountId}
+UserId: ${userId}
+Message: ${message}
+Sent message: ${JSON.stringify(sentMessage)}`
     );
 
     throw new Error(e.message);

@@ -1,5 +1,5 @@
 import BigInt from 'big-integer';
-import { yellow } from 'colors/safe';
+import { red, yellow } from 'colors/safe';
 
 import { Dialogue } from '../@types/Dialogue';
 import GramJs from '../common/gramjs/tl/api';
@@ -9,6 +9,9 @@ import {
   getPingDialogues,
   updateBlockedDialogue,
 } from '../db/dialogues';
+import { sendToBot } from '../helpers/sendToBot';
+import { deleteMessages } from '../methods/messages/deleteHistory';
+import { getCombinedMessages } from '../helpers/getCombinedMessages';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -55,6 +58,10 @@ export const getDialogs = async (client: any, accountId: string) => {
     ...manualControlDialogIds,
   ]) {
     if (!dialogId || dialogId === 'undefined') {
+      sendToBot(`!!!!Не найден Dialog Id !!!!
+Dialogs IDS: ${JSON.stringify(dialogIds)}
+Ping Dialogs IDS: ${JSON.stringify(pingDialogIds)}
+Manual Control Dialogs IDS: ${JSON.stringify(manualControlDialogIds)}`);
       continue;
     }
 
@@ -68,7 +75,7 @@ export const getDialogs = async (client: any, accountId: string) => {
       !user.bot &&
       !user.support &&
       !user.self &&
-      !(user.status instanceof GramJs.UserStatusEmpty)
+      !(!user.status || user.status instanceof GramJs.UserStatusEmpty)
     ) {
       const allHistory = await client.invoke(
         new GramJs.messages.GetHistory({
@@ -86,32 +93,15 @@ export const getDialogs = async (client: any, accountId: string) => {
       }
 
       const dialogDb = await getDialogue(accountId, String(user.id));
+
       const {
         messages: dialogMessages = [],
         groupId = 13228671259,
         blocked = false,
       } = dialogDb || {};
 
-      // if not group id
-
       if (blocked) {
-        await client.invoke(
-          new GramJs.contacts.Block({
-            id: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-          })
-        );
-        await client.invoke(
-          new GramJs.messages.DeleteHistory({
-            peer: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-            revoke: true,
-          })
-        );
+        await deleteMessages(client, accountId, user.id, user.accessHash);
         continue;
       }
 
@@ -165,17 +155,20 @@ export const getDialogs = async (client: any, accountId: string) => {
         });
       }
 
-      await client.invoke(
-        new GramJs.messages.ReadHistory({
-          peer: new GramJs.InputPeerUser({
-            userId: user.id,
-            accessHash: user.accessHash,
-          }),
-        })
-      );
+      const combinedMessages = getCombinedMessages(dialogMessages);
+      const stage = combinedMessages.filter(
+        (m) => m.fromId === String(user.id)
+      ).length;
+      if (stage > 25) {
+        await updateBlockedDialogue(accountId, dialogId, 'dialogs-max-stage');
+        await deleteMessages(client, accountId, user.id, user.accessHash);
+        continue;
+      }
+
       const dialogData = {
         ...user,
         ...dialogDb,
+        stage,
         groupId,
         messages: dialogMessages,
       };
@@ -190,21 +183,8 @@ export const getDialogs = async (client: any, accountId: string) => {
     } else {
       await updateBlockedDialogue(accountId, dialogId, `user-not-resolved`);
 
-      if (
-        user &&
-        user.id &&
-        user.accessHash &&
-        (user.deleted || user.bot || user.support || user.self)
-      ) {
-        await client.invoke(
-          new GramJs.messages.DeleteHistory({
-            peer: new GramJs.InputPeerUser({
-              userId: BigInt(user.id),
-              accessHash: BigInt(user.accessHash),
-            }),
-            revoke: true,
-          })
-        );
+      if (user && user.id && user.accessHash) {
+        await deleteMessages(client, accountId, user.id, user.accessHash);
       }
     }
   }

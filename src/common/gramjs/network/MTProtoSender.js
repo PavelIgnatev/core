@@ -481,13 +481,7 @@ class MTProtoSender {
         return;
       }
 
-      if (!onlyUpdateStatus) {
-        console.log(
-          `[${this._accountId}] Encrypting...`,
-          allClassNames,
-          `message(s) in ${blue(data.length)} bytes for sending`
-        );
-      }
+      
 
       data = await this._state.encryptMessageData(data);
 
