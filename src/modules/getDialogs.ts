@@ -70,7 +70,7 @@ export const getDialogs = async (client: any, accountId: string) => {
       !user.self &&
       !(user.status instanceof GramJs.UserStatusEmpty)
     ) {
-      const allMessages = await client.invoke(
+      const allHistory = await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
             userId: BigInt(user.id),
@@ -80,7 +80,7 @@ export const getDialogs = async (client: any, accountId: string) => {
         })
       );
 
-      if (!allMessages?.messages?.length) {
+      if (!allHistory?.messages?.length) {
         await updateBlockedDialogue(accountId, dialogId, 'messages-length');
         continue;
       }
@@ -115,7 +115,10 @@ export const getDialogs = async (client: any, accountId: string) => {
         continue;
       }
 
-      for (const dialogMessage of allMessages.messages.reverse()) {
+      const dialogsMessages = (allHistory.messages || [])
+        .filter((m: GramJs.Message) => m.className === 'Message')
+        .reverse();
+      for (const dialogMessage of dialogsMessages) {
         if (dialogMessages.find((m: any) => m.id === dialogMessage.id)) {
           continue;
         }

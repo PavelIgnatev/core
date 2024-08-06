@@ -71,17 +71,7 @@ export const makeRequestGpt = async (
         gray(message)
       );
 
-      if (
-        message.includes('[') ||
-        message.includes(']') ||
-        message.includes('{') ||
-        message.includes('}') ||
-        message.includes('<') ||
-        message.includes('>') ||
-        message.includes('(') ||
-        message.includes(')') ||
-        message.includes('*')
-      ) {
+      if (message.includes('[') || message.includes(']')) {
         throw new Error('The response contains suspicious characters');
       }
 

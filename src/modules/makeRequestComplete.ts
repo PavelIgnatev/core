@@ -137,17 +137,7 @@ export const makeRequestComplete = async (
           .replace('[LINKTOGOAL]', part);
       }
 
-      if (
-        message.includes('[') ||
-        message.includes(']') ||
-        message.includes('{') ||
-        message.includes('}') ||
-        message.includes('<') ||
-        message.includes('>') ||
-        message.includes('(') ||
-        message.includes(')') ||
-        message.includes('*')
-      ) {
+      if (message.includes('[') || message.includes(']')) {
         throw new Error('The response contains suspicious characters');
       }
 
@@ -211,7 +201,7 @@ export const makeRequestComplete = async (
           .replace('good afternoon', '')
       );
 
-      if (varMessage.length < 60) {
+      if (minimalProposalLength === 2 && varMessage.length < 60) {
         throw new Error('Minimum length 60 characters');
       }
 
@@ -272,3 +262,156 @@ _____________
 
   throw new Error('Stopped');
 };
+
+[
+  {
+    CONSTRUCTOR_ID: 592953125,
+    SUBCLASS_OF_ID: 2030045667,
+    className: 'Message',
+    classType: 'constructor',
+    flags: 258,
+    out: true,
+    mentioned: false,
+    mediaUnread: false,
+    silent: false,
+    post: false,
+    fromScheduled: false,
+    legacy: false,
+    editHide: false,
+    pinned: false,
+    noforwards: false,
+    invertMedia: false,
+    flags2: 0,
+    offline: false,
+    id: 285,
+    fromId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '6572337261',
+    },
+    peerId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '425173584',
+    },
+    date: 1722901802,
+    message: 'Здравствуйте!',
+  },
+  {
+    CONSTRUCTOR_ID: 592953125,
+    SUBCLASS_OF_ID: 2030045667,
+    className: 'Message',
+    classType: 'constructor',
+    flags: 258,
+    out: true,
+    mentioned: false,
+    mediaUnread: false,
+    silent: false,
+    post: false,
+    fromScheduled: false,
+    legacy: false,
+    editHide: false,
+    pinned: false,
+    noforwards: false,
+    invertMedia: false,
+    flags2: 0,
+    offline: false,
+    id: 286,
+    fromId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '6572337261',
+    },
+    peerId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '425173584',
+    },
+    date: 1722901813,
+    message:
+      'Я рад, что в итоге нашел вас здесь)). Подскажите, вы ещё нуждаетесь в знающих сотрудниках для развития вашего текущего проекта?',
+  },
+  {
+    CONSTRUCTOR_ID: 592953125,
+    SUBCLASS_OF_ID: 2030045667,
+    className: 'Message',
+    classType: 'constructor',
+    flags: 258,
+    out: true,
+    mentioned: false,
+    mediaUnread: false,
+    silent: false,
+    post: false,
+    fromScheduled: false,
+    legacy: false,
+    editHide: false,
+    pinned: false,
+    noforwards: false,
+    invertMedia: false,
+    flags2: 0,
+    offline: false,
+    id: 289,
+    fromId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '6572337261',
+    },
+    peerId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '425173584',
+    },
+    date: 1722902238,
+    message: 'Здравствуйте!',
+  },
+  {
+    CONSTRUCTOR_ID: 592953125,
+    SUBCLASS_OF_ID: 2030045667,
+    className: 'Message',
+    classType: 'constructor',
+    flags: 258,
+    out: true,
+    mentioned: false,
+    mediaUnread: false,
+    silent: false,
+    post: false,
+    fromScheduled: false,
+    legacy: false,
+    editHide: false,
+    pinned: false,
+    noforwards: false,
+    invertMedia: false,
+    flags2: 0,
+    offline: false,
+    id: 290,
+    fromId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '6572337261',
+    },
+    peerId: {
+      CONSTRUCTOR_ID: 1498486562,
+      SUBCLASS_OF_ID: 47470215,
+      className: 'PeerUser',
+      classType: 'constructor',
+      userId: '425173584',
+    },
+    date: 1722902248,
+    message:
+      'Я рад, что в итоге нашёл ваш профиль). Скажите, вы ещё нуждаетесь в опытных сотрудниках для вашего проекта?',
+  },
+];

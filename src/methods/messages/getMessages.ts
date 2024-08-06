@@ -17,7 +17,7 @@ export const getMessages = async (
     blue(`minimumId=${minId}`)
   );
 
-  const { messages } = await client.invoke(
+  const allHistory = await client.invoke(
     new GramJs.messages.GetHistory({
       peer: new GramJs.InputPeerUser({
         userId: BigInt(userId),
@@ -28,5 +28,7 @@ export const getMessages = async (
     })
   );
 
-  return messages;
+  return (allHistory.messages || []).filter(
+    (m: GramJs.Message) => m.className === 'Message'
+  );
 };
