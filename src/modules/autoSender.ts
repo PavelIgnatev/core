@@ -2,19 +2,16 @@ import { blue, yellow } from 'colors/safe';
 
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
-import GramJs from '../common/gramjs/tl/api';
 import { updateAccountById } from '../db/accounts';
 import { updateFailedMessage } from '../db/messages';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { generateRandomTime } from '../helpers/generateRandomTime';
-import { rmSpLc } from '../helpers/removeSpacesAndLowerCase';
 import { sendToBot } from '../helpers/sendToBot';
 import { muteNotification } from '../methods/account/muteNotification';
 import { resolveContact } from '../methods/contacts/resolveContact';
 import { editFolder } from '../methods/folders/editFolder';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { getRecipient } from '../methods/recipients/getRecipient';
-import { getMessages } from '../methods/messages/getMessages';
 import { deleteMessages } from '../methods/messages/deleteHistory';
 
 export const autoSender = async (
