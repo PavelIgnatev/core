@@ -80,14 +80,14 @@ export const autoSender = async (
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       await sendMessage(client, id, accessHash, firstMessage, accountId);
       await sendMessage(client, id, accessHash, secondMessage, accountId);
-      await editFolder(client, accountId, id, accessHash, 1);
-      await muteNotification(client, accountId, id, accessHash, 2147483647);
       const gettedMessages = await getMessages(
         client,
         accountId,
         id,
         accessHash
       );
+      await editFolder(client, accountId, id, accessHash, 1);
+      await muteNotification(client, accountId, id, accessHash, 2147483647);
       const fullRecipient = await resolveContact(
         client,
         accountId,

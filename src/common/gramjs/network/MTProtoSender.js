@@ -480,23 +480,15 @@ class MTProtoSender {
         this._send_loop_handle = undefined;
         return;
       }
-      const classNames = batch.map((m) => m.request.className);
-      const randomDelay =
-        classNames.includes('account.GetAuthorizations') ||
-        classNames.includes('account.UpdateStatus') ||
-        classNames.includes('InvokeWithLayer')
-          ? 0
-          : Math.floor(Math.random() * 10000) + 2000;
 
       if (!onlyUpdateStatus) {
         console.log(
-          `[${this._accountId}] Encrypting (${randomDelay}ms)...`,
+          `[${this._accountId}] Encrypting...`,
           allClassNames,
           `message(s) in ${blue(data.length)} bytes for sending`
         );
       }
 
-      await new Promise((r) => setTimeout(r, randomDelay));
       data = await this._state.encryptMessageData(data);
 
       try {

@@ -33,6 +33,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     return true;
   }
 
+  await new Promise((res) => setTimeout(res, 5000));
   const messages = await getMessages(
     client,
     accountId,
