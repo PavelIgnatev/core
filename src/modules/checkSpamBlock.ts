@@ -27,7 +27,9 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     '/start',
     accountId
   );
-  const { maxId } = sentMessage?.updates?.[2] ?? {};
+
+  const { id: maxId } = sentMessage;
+
   if (!maxId) {
     console.log(red(`[${accountId}] MaxId from SpamBot not defined`));
     return true;

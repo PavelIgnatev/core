@@ -3,6 +3,7 @@ import { blue, gray } from 'colors/safe';
 
 import GramJs from '../../common/gramjs/tl/api';
 import { sendToBot } from '../../helpers/sendToBot';
+import { rmSpLc } from '../../helpers/removeSpacesAndLowerCase';
 
 function reduceSpaces(string: string) {
   return string.replace(/\s+/g, ' ').trim();
@@ -49,9 +50,16 @@ export const sendMessage = async (
       })
     );
 
+    if (sentMessage.updates) {
+      sentMessage = sentMessage.updates.find(
+        (update: any) =>
+          rmSpLc(update?.message?.message || '') === rmSpLc(message)
+      )?.message;
+    }
+
     if (message !== '/start') {
       if (!sentMessage?.id) {
-        throw new Error('MESSAGE ERROR');
+        throw new Error('MESSAGE_ERROR');
       }
 
       await client.invoke(
@@ -68,11 +76,11 @@ export const sendMessage = async (
     return sentMessage;
   } catch (e: any) {
     await sendToBot(
-      `*** ERRPR: ${e.message} ***
+      `*** ${e.message} ***
 AccountId: ${accountId}
 UserId: ${userId}
 Message: ${message}
-Sent message: ${JSON.stringify(sentMessage)}`
+Send Message: ${Boolean(sentMessage)}`
     );
 
     throw new Error(e.message);

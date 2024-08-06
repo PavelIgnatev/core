@@ -58,11 +58,6 @@ export const getDialogs = async (client: any, accountId: string) => {
     ...manualControlDialogIds,
   ]) {
     if (!dialogId || dialogId === 'undefined') {
-      sendToBot(`!!!! Dialog Id Not Defined !!!!
-Account ID: ${accountId}
-Dialogs IDS: ${JSON.stringify(dialogIds)}
-Ping Dialogs IDS: ${JSON.stringify(pingDialogIds)}
-Manual Control Dialogs IDS: ${JSON.stringify(manualControlDialogIds)}`);
       continue;
     }
 

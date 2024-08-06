@@ -119,6 +119,7 @@ export const autoSender = async (
           'PHONE_NOT_OCCUPIED',
           'USERNAME_NOT_OCCUPIED',
           'USERNAME_INVALID',
+          'MESSAGE_ERROR',
         ].includes(e.message)
       ) {
         await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
@@ -126,7 +127,7 @@ export const autoSender = async (
 
       if (
         !e.message.includes('PEER_FLOOD') &&
-        !e.message.includes('MESSAGE ERROR')
+        !e.message.includes('MESSAGE_ERROR')
       ) {
         await updateFailedMessage(recipient.username);
       }
