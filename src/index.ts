@@ -154,7 +154,7 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  accounts.slice(0, 100).forEach((accountId: string) => {
+  accounts.slice(0, 1000).forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 
