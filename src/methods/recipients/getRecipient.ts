@@ -10,6 +10,7 @@ const defaultSecondMessagePrompt =
 export const getRecipient = async (accountId: string) => {
   while (true) {
     try {
+      console.log(`[${accountId}] Init get recipient`);
       const response = await fetch(`${process.env.RECIPIENT_URL}`);
       const user = await response.json();
 
