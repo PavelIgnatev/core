@@ -71,7 +71,7 @@ const main = async (ID: string) => {
               rej(
                 new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
               ),
-            1800000
+            3600000
           ))
       );
 
@@ -154,7 +154,7 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
-  accounts.slice(0, 1000).forEach((accountId: string) => {
+  accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 
