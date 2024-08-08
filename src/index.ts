@@ -19,7 +19,7 @@ const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
 const accountsInWork: Record<string, number> = {};
 
-const main = async (ID: string) => {  
+const main = async (ID: string) => {
   let isAutoResponse = true;
   let setOnlineInterval: any = null;
   let client: TelegramClient | null = null;
