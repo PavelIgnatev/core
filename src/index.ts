@@ -172,6 +172,7 @@ getAccounts().then((accounts) => {
     }
 
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
+
     process.exit(1);
   });
 
