@@ -155,14 +155,26 @@ const main = async (ID: string) => {
 
 getAccounts(Number(process.env.START), Number(process.env.END)).then(
   (accounts) => {
+    const startTime = performance.now();
     accounts.forEach((accountId: string) => {
       promises.push(main(accountId));
     });
 
     Promise.all(promises).then(async () => {
-      await sendToBot(`____________________________
-all proccess done
-____________________________`);
+      const time = Math.round((performance.now() - startTime) / 1000);
+      const minutes = Math.floor(time / 60);
+      const seconds = time % 60;
+
+      let timeString;
+      if (minutes > 0) {
+        timeString = `${minutes}m ${seconds}s`;
+      } else {
+        timeString = `${seconds}s`;
+      }
+
+      await sendToBot(
+        `💥 ITERATION ${process.env.START}:${process.env.END} (${timeString}) 💥`
+      );
       process.exit(1);
     });
 
