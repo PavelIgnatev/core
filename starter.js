@@ -42,7 +42,7 @@ const starter = async () => {
   );
 
   let start = 0;
-  let end = 1;
+  let end = 10;
 
   const accountCounts = await getTotalAccounts();
   const step = Math.ceil(accountCounts / 100);
@@ -53,8 +53,8 @@ const starter = async () => {
       `START=${start} END=${end} pm2 start out.js --name "${start}:${end}"`
     );
 
-    start += 1;
-    end += 1;
+    start += 10;
+    end += 10;
   }
 
   return;
