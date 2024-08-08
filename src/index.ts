@@ -153,22 +153,24 @@ const main = async (ID: string) => {
   }
 };
 
-getAccounts().then((accounts) => {
-  accounts.slice(0, 200).forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+getAccounts(Number(process.env.START), Number(process.env.END)).then(
+  (accounts) => {
+    accounts.forEach((accountId: string) => {
+      promises.push(main(accountId));
+    });
 
-  Promise.all(promises).then(async () => {
-    await sendToBot(`____________________________
+    Promise.all(promises).then(async () => {
+      await sendToBot(`____________________________
 all proccess done
 ____________________________`);
-    process.exit(1);
-  });
+      process.exit(1);
+    });
 
-  setInterval(() => {
-    console.log(
-      black(JSON.stringify(accountsInWork)),
-      yellow(String(Object.keys(accountsInWork).length))
-    );
-  }, 60000);
-});
+    setInterval(() => {
+      console.log(
+        black(JSON.stringify(accountsInWork)),
+        yellow(String(Object.keys(accountsInWork).length))
+      );
+    }, 60000);
+  }
+);
