@@ -153,36 +153,32 @@ const main = async (ID: string) => {
   }
 };
 
-getAccounts(Number(process.env.START), Number(process.env.END)).then(
-  (accounts) => {
-    const startTime = performance.now();
-    accounts.forEach((accountId: string) => {
-      promises.push(main(accountId));
-    });
+getAccounts().then((accounts) => {
+  const startTime = performance.now();
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
-    Promise.all(promises).then(async () => {
-      const time = Math.round((performance.now() - startTime) / 1000);
-      const minutes = Math.floor(time / 60);
-      const seconds = time % 60;
+  Promise.all(promises).then(async () => {
+    const time = Math.round((performance.now() - startTime) / 1000);
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
 
-      let timeString;
-      if (minutes > 0) {
-        timeString = `${minutes}m ${seconds}s`;
-      } else {
-        timeString = `${seconds}s`;
-      }
+    let timeString;
+    if (minutes > 0) {
+      timeString = `${minutes}m ${seconds}s`;
+    } else {
+      timeString = `${seconds}s`;
+    }
 
-      await sendToBot(
-        `💥 ITERATION ${process.env.START}:${process.env.END} (${timeString}) 💥`
-      );
-      process.exit(1);
-    });
+    await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
+    process.exit(1);
+  });
 
-    setInterval(() => {
-      console.log(
-        black(JSON.stringify(accountsInWork)),
-        yellow(String(Object.keys(accountsInWork).length))
-      );
-    }, 60000);
-  }
-);
+  setInterval(() => {
+    console.log(
+      black(JSON.stringify(accountsInWork)),
+      yellow(String(Object.keys(accountsInWork).length))
+    );
+  }, 60000);
+});
