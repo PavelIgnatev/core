@@ -69,9 +69,9 @@ const main = async (ID: string) => {
           (timer = setTimeout(
             () =>
               rej(
-                new Error(`Iteration [${i + 1}] took longer than 10 minutes.`)
+                new Error(`Iteration [${i + 1}] took longer than 30 minutes.`)
               ),
-            600000
+            1800000
           ))
       );
 
