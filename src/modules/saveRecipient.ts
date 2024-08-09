@@ -7,6 +7,7 @@ import { updateDialogue } from '../db/dialogues';
 import { incrementCurrentCount } from '../db/groupId';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { sleep } from '../helpers/sleep';
+import { updateSendMessage } from '../db/groupIdUsers';
 
 export const saveRecipient = async (
   accountId: string,
@@ -35,17 +36,18 @@ export const saveRecipient = async (
     username: varSecondUsername,
     recipientPhone,
   } = recipientDb;
+  const recUsername = (
+    username ||
+    recipientUsername ||
+    varSecondUsername ||
+    ''
+  ).toLowerCase()
 
   const data = {
     groupId,
     accountId,
     recipientId: String(recipientId),
-    recipientUsername: (
-      username ||
-      recipientUsername ||
-      varSecondUsername ||
-      ''
-    ).toLowerCase(),
+    recipientUsername: recUsername,
     recipientTitle: `${firstName} ${lastName}`.trim(),
     recipientBio: about || '',
     recipientPhone: phone || recipientPhone || null,
@@ -63,6 +65,7 @@ export const saveRecipient = async (
         await updateAccountById(accountId, {
           remainingTime: new Date(new Date().getTime() + 18000000),
         });
+        await updateSendMessage(recUsername, Number(groupId))
 
         await incrementMessageCount(accountId);
         await incrementCurrentCount(groupId);

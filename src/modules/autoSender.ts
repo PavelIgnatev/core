@@ -3,7 +3,7 @@ import { blue, yellow } from 'colors/safe';
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
 import { updateAccountById } from '../db/accounts';
-import { updateFailedMessage } from '../db/messages';
+import { updateFailedMessage } from '../db/groupIdUsers';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { generateRandomTime } from '../helpers/generateRandomTime';
 import { sendToBot } from '../helpers/sendToBot';
@@ -51,7 +51,8 @@ export const autoSender = async (
       const recipientFull = await resolveContact(
         client,
         accountId,
-        recipient.username
+        recipient.username,
+        recipient.groupId
       );
 
       const {
@@ -68,7 +69,7 @@ export const autoSender = async (
         return;
       }
       if (deleted || bot || support || contactRequirePremium || botBusiness) {
-        await updateFailedMessage(recipient.username);
+        await updateFailedMessage(recipient.username, Number(recipient.groupId));
 
         return;
       }
@@ -76,6 +77,7 @@ export const autoSender = async (
       await deleteMessages(client, accountId, id, accessHash);
       const firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
+      await new Promise((res) => setTimeout(res, 5000))
       const sentFirstMessage = await sendMessage(
         client,
         id,
@@ -129,7 +131,7 @@ export const autoSender = async (
         !e.message.includes('PEER_FLOOD') &&
         !e.message.includes('MESSAGE_ERROR')
       ) {
-        await updateFailedMessage(recipient.username);
+        await updateFailedMessage(recipient.username, Number(recipient.groupId));
       }
 
       throw new Error('Global Error');

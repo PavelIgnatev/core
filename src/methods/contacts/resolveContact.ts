@@ -2,13 +2,14 @@ import { resolvePhone } from './resolvePhone';
 import { resolveUsername } from './resolveUsername';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
-import { updateFailedMessage } from '../../db/messages';
+import { updateFailedMessage } from '../../db/groupIdUsers';
 import { getFullUser } from '../users/getFullUser';
 
 export const resolveContact = async (
   client: TelegramClient,
   accountId: string,
-  username: string
+  username: string,
+  groupId: string
 ) => {
   const resolveMethod = username.includes('+') ? resolvePhone : resolveUsername;
   const userByUsername = await resolveMethod(client, accountId, username);
@@ -26,7 +27,7 @@ export const resolveContact = async (
     !recipientFull ||
     !(userByUsername?.users?.[0] instanceof GramJs.User)
   ) {
-    await updateFailedMessage(username);
+    await updateFailedMessage(username, Number(groupId));
     throw new Error('USERNAME_INVALID');
   }
 
