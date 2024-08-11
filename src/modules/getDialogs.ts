@@ -9,7 +9,6 @@ import {
   getPingDialogues,
   updateBlockedDialogue,
 } from '../db/dialogues';
-import { sendToBot } from '../helpers/sendToBot';
 import { deleteMessages } from '../methods/messages/deleteHistory';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 
