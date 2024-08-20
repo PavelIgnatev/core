@@ -23,6 +23,4 @@ export interface Account {
   setuped?: boolean;
 
   remainingTime?: string;
-
-  lastProcessedBy?: Date;
 }

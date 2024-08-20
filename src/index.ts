@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { exec as childExec } from 'child_process';
 import { black, red, yellow } from 'colors/safe';
 import util from 'util';
-
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import { initClient } from './helpers/initClient';

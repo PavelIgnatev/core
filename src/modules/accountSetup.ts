@@ -185,12 +185,13 @@ export const accountSetup = async (
     })
   );
 
+  const { randomElseUsername, ...fullUser } = user;
+
   await updateAccountById(accountId, {
-    ...user,
+    ...fullUser,
     setuped: true,
     banned: false,
     messageCount: 0,
-    lastProcessedBy: new Date(),
   });
 
   return user.firstName;

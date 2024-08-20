@@ -64,18 +64,15 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     ? untilDateMatch[1].replace('UTC', '')
     : 'INFINITY';
 
-  const currentDate = new Date();
-  const nextDay = new Date(currentDate);
-
-  nextDay.setDate(currentDate.getDate() + 1);
+  const nextSpamBlockDay = new Date(spamBlockDate + 'Z');
 
   await updateAccountById(accountId, {
-    remainingTime: String(nextDay),
-    spamBlockDate,
+    remainingTime: nextSpamBlockDay,
+    spamInitDate: new Date(),
   });
 
   console.log(
-    `[${accountId}] Account has a spamblock to ${blue(String(spamBlockDate))}`
+    `[${accountId}] Account has a spamblock to ${blue(String(nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' })))}`
   );
 
   return spamBlockDate;

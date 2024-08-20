@@ -12,7 +12,8 @@ export const updateFailedMessage = async (
 
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { f: true, p: false } }
+    { $set: { f: true, p: new Date() } },
+    { upsert: true }
   );
 };
 
@@ -21,6 +22,8 @@ export const updateSendMessage = async (username: string, groupId: number) => {
 
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { s: true, p: new Date() } }
+    { $set: { s: true, p: new Date() } },
+    { upsert: true }
   );
 };
+

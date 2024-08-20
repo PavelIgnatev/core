@@ -30,7 +30,7 @@ export const autoSender = async (
 
     console.log(
       `[${accountId}] Remaining time not defined, new remaining time:`,
-      blue(String(remainingTime))
+      blue(String(remainingTime.toLocaleString("en-US", { timeZone: 'UTC' })))
     );
 
     return;
@@ -69,7 +69,10 @@ export const autoSender = async (
         return;
       }
       if (deleted || bot || support || contactRequirePremium || botBusiness) {
-        await updateFailedMessage(recipient.username, Number(recipient.groupId));
+        await updateFailedMessage(
+          recipient.username,
+          Number(recipient.groupId)
+        );
 
         return;
       }
@@ -77,7 +80,7 @@ export const autoSender = async (
       await deleteMessages(client, accountId, id, accessHash);
       const firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
-      await new Promise((res) => setTimeout(res, 5000))
+      await new Promise((res) => setTimeout(res, 5000));
       const sentFirstMessage = await sendMessage(
         client,
         id,
@@ -131,7 +134,10 @@ export const autoSender = async (
         !e.message.includes('PEER_FLOOD') &&
         !e.message.includes('MESSAGE_ERROR')
       ) {
-        await updateFailedMessage(recipient.username, Number(recipient.groupId));
+        await updateFailedMessage(
+          recipient.username,
+          Number(recipient.groupId)
+        );
       }
 
       throw new Error('Global Error');
@@ -139,7 +145,7 @@ export const autoSender = async (
   } else {
     console.log(
       `[${accountId}] Next message can be sent after`,
-      blue(String(remainingTime.toLocaleString()))
+      blue(String(remainingTime.toLocaleString("en-US", { timeZone: 'UTC' })))
     );
   }
 };
