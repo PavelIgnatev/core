@@ -14,7 +14,7 @@ export const saveRecipient = async (
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
-  status: 'create' | 'update' | 'update-1',
+  status: 'create' | 'update',
   addedData: Record<string, unknown> = {}
 ) => {
   console.log(`[${accountId}] Initialize sub module`, yellow('SAVE RECIPIENT'));
@@ -55,10 +55,6 @@ export const saveRecipient = async (
     step: getCombinedMessages(messages).length,
     ...addedData,
   } as Dialogue;
-
-  if (status === 'update-1') {
-    data['userRepliedDate'] = new Date();
-  }
 
   let isSave = false;
   while (!isSave) {

@@ -229,7 +229,7 @@ ${promptGoal} ${
       recipientFull,
       dialog,
       messages,
-      stage === 1 ? 'update-1' : 'update'
+    'update'
     );
   }
 

@@ -13,5 +13,4 @@ export interface Dialogue {
 
   dateCreated?: Date;
   dateUpdated?: Date;
-  userRepliedDate?: Date;
 }
