@@ -224,13 +224,7 @@ ${promptGoal} ${
 ПОСЛЕ: ${genAddedQuestion}`);
     }
 
-    await saveRecipient(
-      accountId,
-      recipientFull,
-      dialog,
-      messages,
-    'update'
-    );
+    await saveRecipient(accountId, recipientFull, dialog, messages, 'update');
   }
 
   for (const dialog of pingDialogs) {
