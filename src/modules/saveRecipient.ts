@@ -14,7 +14,7 @@ export const saveRecipient = async (
   recipient: GramJs.users.UserFull,
   recipientDb: Dialogue & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
-  status: 'create' | 'update',
+  status: 'create' | 'update' | 'update-1',
   addedData: Record<string, unknown> = {}
 ) => {
   console.log(`[${accountId}] Initialize sub module`, yellow('SAVE RECIPIENT'));
@@ -41,7 +41,7 @@ export const saveRecipient = async (
     recipientUsername ||
     varSecondUsername ||
     ''
-  ).toLowerCase()
+  ).toLowerCase();
 
   const data = {
     groupId,
@@ -54,7 +54,11 @@ export const saveRecipient = async (
     messages,
     step: getCombinedMessages(messages).length,
     ...addedData,
-  };
+  } as Dialogue;
+
+  if (status === 'update-1') {
+    data['userRepliedDate'] = new Date();
+  }
 
   let isSave = false;
   while (!isSave) {
@@ -65,7 +69,7 @@ export const saveRecipient = async (
         await updateAccountById(accountId, {
           remainingTime: new Date(new Date().getTime() + 18000000),
         });
-        await updateSendMessage(recUsername, Number(groupId))
+        await updateSendMessage(recUsername, Number(groupId));
 
         await incrementMessageCount(accountId);
         await incrementCurrentCount(groupId);

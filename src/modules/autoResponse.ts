@@ -224,7 +224,13 @@ ${promptGoal} ${
 ПОСЛЕ: ${genAddedQuestion}`);
     }
 
-    await saveRecipient(accountId, recipientFull, dialog, messages, 'update');
+    await saveRecipient(
+      accountId,
+      recipientFull,
+      dialog,
+      messages,
+      stage === 1 ? 'update-1' : 'update'
+    );
   }
 
   for (const dialog of pingDialogs) {
@@ -242,7 +248,7 @@ ${promptGoal} ${
       username = '',
     } = recipientFull?.users?.[0] || {};
 
-    const { language = "RUSSIAN" } = groupId || { language: 'RUSSIAN' };
+    const { language = 'RUSSIAN' } = groupId || { language: 'RUSSIAN' };
 
     const chatHistory = messages
       .map((m: { id: number; text: string; fromId: string; date: number }) => ({

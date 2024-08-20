@@ -1,4 +1,4 @@
-import {  DB2 } from './db';
+import { DB2 } from './db';
 
 const getGroupIdCollection = async () => {
   return (await DB2()).collection('groupId');
@@ -11,10 +11,7 @@ export const getGroupId = async (groupId: string) => {
     {
       groupId: Number(groupId),
     },
-    { projection: { history: 0,
-      database: 0,
-      dateUpdated: 0,
-      _id: 0,} }
+    { projection: { history: 0, database: 0, dateUpdated: 0, _id: 0 } }
   );
 
   return result;
