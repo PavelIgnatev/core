@@ -68,6 +68,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
 
   await updateAccountById(accountId, {
     remainingTime: nextSpamBlockDay,
+    spamBlockDate: nextSpamBlockDay,
     spamInitDate: new Date(),
   });
 
