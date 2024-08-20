@@ -76,5 +76,5 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     `[${accountId}] Account has a spamblock to ${blue(String(nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' })))}`
   );
 
-  return spamBlockDate;
+  return true;
 };
