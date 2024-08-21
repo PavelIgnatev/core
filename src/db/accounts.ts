@@ -6,26 +6,7 @@ const getAccountCollection = async () => {
 };
 
 export const getAccounts = async () => {
-  // if (
-  //   typeof start !== 'number' ||
-  //   typeof end !== 'number' ||
-  //   Number.isNaN(start) ||
-  //   Number.isNaN(end)
-  // ) {
-  //   throw new Error('Start or end parameter incorrect');
-  // }
-
   const accountCollection = await getAccountCollection();
-
-  // const accounts = await accountCollection
-  //   .find({}, { projection: { _id: 0, accountId: 1, banned: 1, stopped: 1 } })
-  //   .skip(start)
-  //   .limit(end - start)
-  //   .toArray();
-
-  // const ids = accounts
-  //   .filter((e) => !e.banned && !e.stopped)
-  //   .map(({ accountId }) => accountId);
 
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
