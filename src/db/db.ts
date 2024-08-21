@@ -13,7 +13,12 @@ export const DB = async () => {
       console.log('Start 1', client)
 
       const connect = await client.connect();
+      console.log('Start 1', connect)
+
       db = connect.db('core');
+
+      console.log('Start 1', db)
+
       break;
     } catch {
       await sendToBot('DB not inited. Dangerous mistake. Retry.');
