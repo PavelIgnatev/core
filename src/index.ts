@@ -152,7 +152,9 @@ const main = async (ID: string) => {
   }
 };
 
+console.log('sadsa')
 getAccounts().then((accounts) => {
+  console.log('sads2a')
   const startTime = performance.now();
   // accounts.forEach((accountId: string) => {
     promises.push(main("447498792494"));
