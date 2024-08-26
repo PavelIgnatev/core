@@ -83,8 +83,10 @@ export const makeRequestComplete = async (
       const {
         data: { text: data },
       } = await axios.post('http://91.198.220.234/chat', {
-        k: 300,
-        temperature: 1,
+        k: 30,
+        temperature: 0.8,
+        presence_penalty: 0.5,
+        p: 0.9,
         model: 'command-r-plus',
         prompt_truncation: 'AUTO_PRESERVE_ORDER',
         preamble,

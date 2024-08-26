@@ -94,6 +94,7 @@ export const autoResponse = async (
       secondAddedQuestion = '',
       styleGuide = '',
       language = 'RUSSIAN',
+      flowHandling = '',
     } = groupId || ({} as any);
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
@@ -125,6 +126,10 @@ ${promptGoal} ${
         {
           title: 'YOUR_COMPANY_DESCRIPTION',
           text: companyDescription,
+        },
+        {
+          title: 'YOUR_COMMON_FLOW_HANDLING',
+          text: flowHandling,
         },
         {
           title: 'YOUR_COMPANY_ADDED_INFORMATION',
