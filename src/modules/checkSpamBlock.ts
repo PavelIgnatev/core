@@ -54,6 +54,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     console.log(`[${accountId}] Account is spamblock-free`);
     await updateAccountById(accountId, {
       spamBlockDate: null,
+      spamInitDate: null,
     });
     return false;
   }
