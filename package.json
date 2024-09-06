@@ -17,6 +17,7 @@
     "mongodb": "^6.7.0",
     "node-fetch": "^3.3.2",
     "pako": "^2.1.0",
+    "petrovich": "^0.2.1",
     "unique-names-generator": "^4.7.1",
     "ws": "^8.16.0"
   },
