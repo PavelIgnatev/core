@@ -77,7 +77,7 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
   });
 
   console.log(
-    `[${accountId}] Account has a spamblock to ${blue(String(untilDateMatch ? nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' }) : 'INFINITY'))}`
+    `[${accountId}] Account has a spamblock to ${blue(String(untilDateMatch ? nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' }) : 'INFINITY'))}.`
   );
 
   return true;
