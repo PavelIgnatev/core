@@ -78,7 +78,7 @@ const main = async (ID: string) => {
         (async () => {
           const accountByID = await getAccountById(ID);
           if (!accountByID) {
-            throw new Error('Account NOT defined');
+            throw new Error('Account not defined');
           }
 
           if (isAutoResponse) {

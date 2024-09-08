@@ -19,20 +19,19 @@ const gptRequestWrapper = async (
   message: string,
   dialogGroupId: string,
   accountId: string,
-  addedContextString: string = '',
+  meName: string,
+  aiRole: string,
+  styleGuide: string,
   part: string = ''
 ) => {
   const result = await makeRequestGpt(
-    `## CONTEXT
-${addedContextString}
-Today's date is ${getDateNow()}.
-
-## STYLE GUIDE
-${addedContextString}
-Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
-
+    `## STYLE GUIDE
+You **${meName}**, assume the role of a chatbot (role: CHATBOT) and take on the identity of **${aiRole}**. 
+${styleGuide}.
+Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. RESPONSE LANGUAGE: ${language}.
+    
 ## INSTRUCTIONS
-I need you to paraphrase a message (which is inside '''') while maintaining its original meaning, structure, and character count. Make sure the resulting message is the same length as the original, and conveys the same thought in a unique but similar way to the original message. RESPONSE LANGUAGE: ${language}. Make sure that the result does not contain any words other than ${language} (except for proper names).`,
+Paraphrase the text within the quotes ('''') while adhering to the style guide. Maintain the original message's meaning, structure, and character count. Use only ${language} and ensure the paraphrased text is distinct yet similar to the original. Avoid unnecessary changes and do not include any additional words or phrases`,
     `A message where the wording needs to be changed: ''''${message}''''`,
     dialogGroupId,
     accountId,
@@ -98,48 +97,48 @@ export const autoResponse = async (
     } = groupId || ({} as any);
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
+    const parted = stage === 2 && part ? part : null;
 
     let promptGoal = '';
     if (stage === 1) {
-      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER).!!!!`;
+      promptGoal = `!!!!REPLY to the last message from **${userName}** (role: USER)!!!!`;
     }
     if (stage >= 2) {
-      promptGoal = `!!!!Reply to the last message "${userName}" (ROLE USER). ${goal}.!!!!`;
+      promptGoal = `!!!!REPLY to the last message from **${userName}** (role: USER). ${goal}.!!!!`;
     }
 
-    const parted = stage === 2 && part ? part : null;
     const wresponseMessage = await makeRequestComplete(
-      `
-## CONTEXT
-You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON). You are ${aiRole}. You (${meName}) have previously initiated a conversation with the interlocutor "${userName}" (ROLE USER) in the messenger Telegram. The contact of the interlocutor "${userName}" (ROLE USER) was found in one of Telegram chat rooms, the exact information in which one is not available. Today's date is ${getDateNow()};
-
-## STYLE GUIDE
-${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. RESPONSE LANGUAGE: ${language}.
-
-## INSTRUCTIONS
-${promptGoal} ${
+      `## REPLY CONTEXT
+You **${meName}** (man, male, male gender), assume the role of a chatbot (role: CHATBOT) and take on the identity of **${aiRole}**. 
+Your conversational partner **${userName}** (role: USER), is an individual with whom you initiated contact in one of the shared Telegram chat rooms. While specific details about the chat room are unavailable, it's important to note that **${userName}** is a real person found in one of the common chat rooms. The conversation now takes place in a private setting, focusing on creating a natural and engaging interaction. Current date is **${getDateNow()}**.
+      
+## REPLY GUIDELINES
+${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The response language is set to **${language}**. ${
         parted
-          ? `!!!!A mandatory part that should definitely be in the answer: ${part}!!!!`
+          ? `!!!!Remember to include a part to **${parted}** in your response.!!!!`
           : ''
-      }`,
+      }
+              
+## REPLY INSTRUCTIONS
+${promptGoal}`,
       [
         {
           title: 'YOUR_COMPANY_DESCRIPTION',
-          text: companyDescription,
+          text: companyDescription || '',
         },
         {
           title: 'YOUR_COMMON_FLOW_HANDLING',
-          text: flowHandling,
+          text: flowHandling || '',
         },
         {
           title: 'YOUR_COMPANY_ADDED_INFORMATION',
-          text: addedInformation,
+          text: addedInformation || '',
         },
       ],
       stage === 1,
       stage <= 2,
       stage <= 2 ? 2 : 1,
-      stage === 2 ? part : null,
+      parted,
       chatHistory,
       dialogGroupId,
       accountId
@@ -149,8 +148,10 @@ ${promptGoal} ${
       wresponseMessage,
       dialogGroupId,
       accountId,
-      `You are "${meName}" (man, male, male gender, ROLE PERSON, REAL PERSON).`,
-      stage === 2 ? part : null
+      meName,
+      aiRole,
+      styleGuide,
+      parted
     );
 
     await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
@@ -178,7 +179,10 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
+        meName,
+        aiRole,
+        styleGuide,
+        parted
       );
 
       const sentAddedQuestion = await sendMessage(
@@ -207,7 +211,10 @@ ${promptGoal} ${
         genQuestion,
         dialogGroupId,
         accountId,
-        `You are "${meName}" (person, male, male gender, PERSON ROLE, REAL PERSON). !!!!Use 'YOU' when addressing the person you are talking to because their gender is unknown!!!!`
+        meName,
+        aiRole,
+        styleGuide,
+        parted
       );
       const sentSecondAddedQuestion = await sendMessage(
         client,
