@@ -20,7 +20,7 @@ const gptRequestWrapper = async (
   dialogGroupId: string,
   accountId: string,
   meName: string,
-  part: string
+  part: string | null
 ) => {
   const result = await makeRequestGpt(
     `## CLARIFICATION CONTEXT
@@ -190,7 +190,7 @@ ${promptGoal} ${
         dialogGroupId,
         accountId,
         meName,
-        parted
+        null
       );
 
       const sentAddedQuestion = await sendMessage(
@@ -220,7 +220,7 @@ ${promptGoal} ${
         dialogGroupId,
         accountId,
         meName,
-        parted
+        null
       );
       const sentSecondAddedQuestion = await sendMessage(
         client,
