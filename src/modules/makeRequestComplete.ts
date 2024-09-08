@@ -122,13 +122,12 @@ export const makeRequestComplete = async (
           .replace(part, '[LINKTOGOAL]');
       }
 
-      if (deleteQuestion && message.includes("?")) {
+      if (deleteQuestion && message.includes('?')) {
         console.log(
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
-        throw new Error("В ответе содержится вопрос");
+        throw new Error('В ответе содержится вопрос');
       }
-
 
       if (part) {
         message = message
@@ -137,7 +136,18 @@ export const makeRequestComplete = async (
           .replace('[LINKTOGOAL]', part);
       }
 
-      if (message.includes('[') || message.includes(']')) {
+      if (
+        message.includes('[') ||
+        message.includes(']') ||
+        message.includes('{') ||
+        message.includes('}') ||
+        message.includes('<') ||
+        message.includes('>') ||
+        message.includes('*')
+      ) {
+        console.log(
+          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
+        );
         throw new Error('The response contains suspicious characters');
       }
 
