@@ -20,19 +20,19 @@ const gptRequestWrapper = async (
   dialogGroupId: string,
   accountId: string,
   meName: string,
-  aiRole: string,
-  styleGuide: string,
-  part: string = ''
+  part: string
 ) => {
   const result = await makeRequestGpt(
-    `## STYLE GUIDE
-You **${meName}**, assume the role of a chatbot (role: CHATBOT) and take on the identity of **${aiRole}**. 
-${styleGuide}.
-Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. RESPONSE LANGUAGE: ${language}.
-    
-## INSTRUCTIONS
-Paraphrase the text within the quotes ('''') while adhering to the style guide. Maintain the original message's meaning, structure, and character count. Use only ${language} and ensure the paraphrased text is distinct yet similar to the original. Avoid unnecessary changes and do not include any additional words or phrases`,
-    `A message where the wording needs to be changed: ''''${message}''''`,
+    `## CLARIFICATION CONTEXT
+You are **${meName}** (man).
+
+## CLARIFICATION GUIDELINES
+- Ensure the response is in **${language}**.
+- The original meaning must be **completely** preserved, without any deviation.
+
+## CLARIFICATION INSTRUCTIONS
+Clarify the text within quotes (***) while following the GUIDELINES. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
+    `TEXT TO CLARIFY: ***${message}***`,
     dialogGroupId,
     accountId,
     part
@@ -101,26 +101,38 @@ export const autoResponse = async (
 
     let promptGoal = '';
     if (stage === 1) {
-      promptGoal = `!!!!REPLY to the last message from **${userName}** (role: USER)!!!!`;
+      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER)!!`;
     }
     if (stage >= 2) {
-      promptGoal = `!!!!REPLY to the last message from **${userName}** (role: USER). ${goal}.!!!!`;
+      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER). ${goal}.!!`;
     }
 
     const wresponseMessage = await makeRequestComplete(
       `## REPLY CONTEXT
-You **${meName}** (man, male, male gender), assume the role of a chatbot (role: CHATBOT) and take on the identity of **${aiRole}**. 
+You **${meName}** (man), take on the identity of **${aiRole}**.
 Your conversational partner **${userName}** (role: USER), is an individual with whom you initiated contact in one of the shared Telegram chat rooms. While specific details about the chat room are unavailable, it's important to note that **${userName}** is a real person found in one of the common chat rooms. The conversation now takes place in a private setting, focusing on creating a natural and engaging interaction. Current date is **${getDateNow()}**.
       
 ## REPLY GUIDELINES
-${styleGuide}. Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The response language is set to **${language}**. ${
-        parted
-          ? `!!!!Remember to include a part to **${parted}** in your response.!!!!`
+${
+  stage <= 2
+    ? `- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences.`
+    : '- **Ask one clear question** directly tied to the goal in **REPLY INSTRUCTIONS**, with no extra details.'
+}
+- **Do not** use unnecessary greetings or filler phrases.${
+        part
+          ? `\n- Include part of the conversation from **${part}** in your response.`
           : ''
       }
-              
+- Avoid special characters like: [], {}, <>, |, *.
+- Follow the style guide: **${styleGuide}**.
+- Ensure the response is in **${language}**.
+
 ## REPLY INSTRUCTIONS
-${promptGoal}`,
+${promptGoal} ${
+        part
+          ? `!!!! Include part of the conversation from **${part}** in your response!!!!`
+          : ''
+      }`,
       [
         {
           title: 'YOUR_COMPANY_DESCRIPTION',
@@ -149,8 +161,6 @@ ${promptGoal}`,
       dialogGroupId,
       accountId,
       meName,
-      aiRole,
-      styleGuide,
       parted
     );
 
@@ -180,8 +190,6 @@ ${promptGoal}`,
         dialogGroupId,
         accountId,
         meName,
-        aiRole,
-        styleGuide,
         parted
       );
 
@@ -212,8 +220,6 @@ ${promptGoal}`,
         dialogGroupId,
         accountId,
         meName,
-        aiRole,
-        styleGuide,
         parted
       );
       const sentSecondAddedQuestion = await sendMessage(

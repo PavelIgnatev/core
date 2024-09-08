@@ -8,12 +8,6 @@ function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function removeQuestionAndExclamationSentences(text: string) {
-  const pattern = /[^.!?]*(?:[!?])/g;
-  const result = text.replace(pattern, '');
-  return result.trim();
-}
-
 function countSentences(paragraph: string) {
   const sentenceEnders = ['.', '!', '?'];
   let sentenceCount = 0;
@@ -128,9 +122,13 @@ export const makeRequestComplete = async (
           .replace(part, '[LINKTOGOAL]');
       }
 
-      if (deleteQuestion && message.includes('?')) {
-        message = removeQuestionAndExclamationSentences(message);
+      if (deleteQuestion && message.includes("?")) {
+        console.log(
+          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
+        );
+        throw new Error("В ответе содержится вопрос");
       }
+
 
       if (part) {
         message = message
@@ -143,65 +141,7 @@ export const makeRequestComplete = async (
         throw new Error('The response contains suspicious characters');
       }
 
-      const varMessage = capitalizeFirstLetter(
-        message
-          .replace('Приветствую!', '')
-          .replace('Приветствую,', '')
-          .replace('Приветствую', '')
-          .replace('приветствую', '')
-
-          .replace('Привет,', '')
-          .replace('Привет!', '')
-          .replace('Привет', '')
-          .replace('привет', '')
-
-          .replace('Здравствуйте,', '')
-          .replace('Здравствуйте!', '')
-          .replace('Здравствуйте', '')
-          .replace('здравствуйте', '')
-
-          .replace('Здравствуй,', '')
-          .replace('Здравствуй!', '')
-          .replace('Здравствуй', '')
-          .replace('здравствуй', '')
-
-          .replace('Доброе утро,', '')
-          .replace('Доброе утро!', '')
-          .replace('Доброе утро', '')
-          .replace('доброе утро', '')
-
-          .replace('Добрый вечер,', '')
-          .replace('Добрый вечер!', '')
-          .replace('Добрый вечер', '')
-          .replace('добрый вечер', '')
-
-          .replace('Добрый день,', '')
-          .replace('Добрый день!', '')
-          .replace('Добрый день', '')
-          .replace('добрый день', '')
-
-          .replace('Hi,', '')
-          .replace('Hi! ', '')
-          .replace('Hi!', '')
-          .replace('Hello,', '')
-          .replace('Hello! ', '')
-          .replace('Hello!', '')
-          .replace('Good morning,', '')
-          .replace('Good morning! ', '')
-          .replace('Good morning!', '')
-          .replace('Good morning', '')
-          .replace('good morning', '')
-          .replace('Good evening,', '')
-          .replace('Good evening! ', '')
-          .replace('Good evening!', '')
-          .replace('Good evening', '')
-          .replace('good evening', '')
-          .replace('Good afternoon,', '')
-          .replace('Good afternoon! ', '')
-          .replace('Good afternoon!', '')
-          .replace('Good afternoon', '')
-          .replace('good afternoon', '')
-      );
+      const varMessage = capitalizeFirstLetter(message);
 
       if (minimalProposalLength === 2 && varMessage.length < 60) {
         throw new Error('Minimum length 60 characters');

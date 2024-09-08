@@ -66,6 +66,8 @@ export const makeRequestGpt = async (
         .replace(/\n/g, '')
         .replace(/['"`]/g, '')
         .replace(/!/g, '.')
+        .replace('***', '')
+        .replace('***', '')
         .trim();
 
       console.log(
@@ -85,65 +87,7 @@ export const makeRequestGpt = async (
         throw new Error('The potential message contains Chinese words');
       }
 
-      const varMessage = capitalizeFirstLetter(
-        message
-          .replace('Приветствую!', '')
-          .replace('Приветствую,', '')
-          .replace('Приветствую', '')
-          .replace('приветствую', '')
-
-          .replace('Привет,', '')
-          .replace('Привет!', '')
-          .replace('Привет', '')
-          .replace('привет', '')
-
-          .replace('Здравствуйте,', '')
-          .replace('Здравствуйте!', '')
-          .replace('Здравствуйте', '')
-          .replace('здравствуйте', '')
-
-          .replace('Здравствуй,', '')
-          .replace('Здравствуй!', '')
-          .replace('Здравствуй', '')
-          .replace('здравствуй', '')
-
-          .replace('Доброе утро,', '')
-          .replace('Доброе утро!', '')
-          .replace('Доброе утро', '')
-          .replace('доброе утро', '')
-
-          .replace('Добрый вечер,', '')
-          .replace('Добрый вечер!', '')
-          .replace('Добрый вечер', '')
-          .replace('добрый вечер', '')
-
-          .replace('Добрый день,', '')
-          .replace('Добрый день!', '')
-          .replace('Добрый день', '')
-          .replace('добрый день', '')
-
-          .replace('Hi,', '')
-          .replace('Hi! ', '')
-          .replace('Hi!', '')
-          .replace('Hello,', '')
-          .replace('Hello! ', '')
-          .replace('Hello!', '')
-          .replace('Good morning,', '')
-          .replace('Good morning! ', '')
-          .replace('Good morning!', '')
-          .replace('Good morning', '')
-          .replace('good morning', '')
-          .replace('Good evening,', '')
-          .replace('Good evening! ', '')
-          .replace('Good evening!', '')
-          .replace('Good evening', '')
-          .replace('good evening', '')
-          .replace('Good afternoon,', '')
-          .replace('Good afternoon! ', '')
-          .replace('Good afternoon!', '')
-          .replace('Good afternoon', '')
-          .replace('good afternoon', '')
-      );
+      const varMessage = capitalizeFirstLetter(message);
 
       if (part && !message.includes(part)) {
         throw new Error(
