@@ -41,7 +41,7 @@ Clarify the text within quotes (***) while following the **CLARIFICATION GUIDELI
   return result;
 };
 
-export const autoSender = async (
+export const autoResponse = async (
   client: any,
   accountId: string,
   tgAccountId: string,
