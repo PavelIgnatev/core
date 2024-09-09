@@ -11,9 +11,10 @@ export const getAccounts = async () => {
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
     stopped: { $ne: true },
+    setuped: { $ne: true },
   });
 
-  return accounts;
+  return accounts.slice(0, 100);
 };
 
 export const getAccountById = async (accountId: string) => {
