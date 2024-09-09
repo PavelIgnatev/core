@@ -1777,11 +1777,11 @@ You are **${s}** (man).
 
 ## CLARIFICATION INSTRUCTIONS
 Clarify the text within quotes (***) while following the GUIDELINES. Preserve the original meaning, structure, and number of sentences. Use only **${t}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,`TEXT TO CLARIFY: ***${e}***`,r,n,i),hq=async(t,e,r,n)=>{var a;console.log(`[${e}] Initialize module`,(0,pq.yellow)("AUTO RESPONSE"));let[s,i,o]=await sq(t,e);for(let u of s){let{id:l,accessHash:d,messages:p,groupId:g,firstName:C,lastName:b="",stage:w}=u,T=await O8(g),O=p.map(ct=>({role:ct.fromId===String(l)?"USER":"CHATBOT",message:ct.text})).slice(-30),D=`${C} ${b}`.trim().replace(/[^a-zA-Zа-яА-Я0-9\s]/g,""),H=await Yd(t,e,l,d);if(!H)continue;let{aiRole:L="",companyDescription:ne="",addedInformation:ie="",goal:ae="",part:Ce="",addedQuestion:de="",secondAddedQuestion:se="",styleGuide:ee="",language:ue="RUSSIAN",flowHandling:Ee=""}=T||{},xe=ue==="RUSSIAN"?lq(n):n,ut=w===2&&Ce?Ce:null,nt="";w===1&&(nt=`!!REPLY to the last message from **${D}** (role: USER)!!`),w>=2&&(nt=`!!REPLY to the last message from **${D}** (role: USER). ${ae}.!!`);let be=await iq(`## REPLY CONTEXT
-You **${xe}** (man), take on the identity of **${L}**.
-Your conversational partner **${D}** (role: USER), is an individual with whom you initiated contact in one of the shared Telegram chat rooms. While specific details about the chat room are unavailable, it's important to note that **${D}** is a real person found in one of the common chat rooms. The conversation now takes place in a private setting, focusing on creating a natural and engaging interaction. Current date is **${R8()}**.
+You **${xe}**, take on the identity of **${L}**.
+Your conversation partner **${D}** (role: USER) is the person you started chatting with on Telegram. While specific details about where you met are not available, it is important to note that **${D}** is a real person. The conversation is private and the focus is on creating a natural and engaging interaction. The current date is **$${R8()}**.
       
 ## REPLY GUIDELINES
-${w<=2?"- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences.":"- **Ask one clear question** directly tied to the goal in **REPLY INSTRUCTIONS**, with no extra details."}
+${w<=2?"- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences.":""}
 - **Do not** use unnecessary greetings or filler phrases.${Ce?`
 - Include part of the conversation from **${Ce}** in your response.`:""}
 - Avoid special characters like: [], {}, <>, |, *.

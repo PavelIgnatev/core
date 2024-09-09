@@ -27,11 +27,11 @@ const gptRequestWrapper = async (
 You are **${meName}** (man).
 
 ## CLARIFICATION GUIDELINES
-- Ensure the response is in **${language}**.
+- Ensure the reply is in **${language}**.
 - The original meaning must be **completely** preserved, without any deviation.
 
 ## CLARIFICATION INSTRUCTIONS
-Clarify the text within quotes (***) while following the GUIDELINES. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
+Clarify the text within quotes (***) while following the **CLARIFICATION GUIDELINES**. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
     `TEXT TO CLARIFY: ***${message}***`,
     dialogGroupId,
     accountId,
@@ -41,13 +41,13 @@ Clarify the text within quotes (***) while following the GUIDELINES. Preserve th
   return result;
 };
 
-export const autoResponse = async (
+export const autoreply = async (
   client: any,
   accountId: string,
   tgAccountId: string,
   tgFirstName: string
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow('AUTO RESPONSE'));
+  console.log(`[${accountId}] Initialize module`, yellow('AUTO reply'));
 
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
@@ -101,36 +101,35 @@ export const autoResponse = async (
 
     let promptGoal = '';
     if (stage === 1) {
-      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER)!!`;
+      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***!!`;
     }
     if (stage >= 2) {
-      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER). ${goal}.!!`;
+      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${goal}.!!`;
     }
 
-    const wresponseMessage = await makeRequestComplete(
+    const wreplyMessage = await makeRequestComplete(
       `## REPLY CONTEXT
-You **${meName}** (man), take on the identity of **${aiRole}**.
-Your conversational partner **${userName}** (role: USER), is an individual with whom you initiated contact in one of the shared Telegram chat rooms. While specific details about the chat room are unavailable, it's important to note that **${userName}** is a real person found in one of the common chat rooms. The conversation now takes place in a private setting, focusing on creating a natural and engaging interaction. Current date is **${getDateNow()}**.
+You **${meName}**, take on the identity of **${aiRole}**.
+Your conversation partner **${userName}** (role: USER) is the person you started chatting with on Telegram. While specific details about where you met are not available, it is important to note that **${userName}** is a real person. The conversation is private and the focus is on creating a natural and engaging interaction. The current date is **$${getDateNow()}**.
       
 ## REPLY GUIDELINES
 ${
   stage <= 2
     ? `- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences.`
-    : '- **Ask one clear question** directly tied to the goal in **REPLY INSTRUCTIONS**, with no extra details.'
+    : ''
 }
-- **Do not** use unnecessary greetings or filler phrases.${
-        part
-          ? `\n- Include part of the conversation from **${part}** in your response.`
-          : ''
-      }
-- Avoid special characters like: [], {}, <>, |, *.
+- **Do not** use unnecessary greetings or filler phrases.
 - Follow the style guide: **${styleGuide}**.
-- Ensure the response is in **${language}**.
+- Ensure the reply is in **${language}**.${
+  part
+    ? `\n- !!!! Include part of the conversation from **${part}** in your reply. !!!!`
+    : ""
+}
 
 ## REPLY INSTRUCTIONS
 ${promptGoal} ${
         part
-          ? `!!!! Include part of the conversation from **${part}** in your response!!!!`
+          ? `!!!! Include part of the conversation from **${part}** in your reply!!!!`
           : ''
       }`,
       [
@@ -155,29 +154,29 @@ ${promptGoal} ${
       dialogGroupId,
       accountId
     );
-    const responseMessage = await gptRequestWrapper(
+    const replyMessage = await gptRequestWrapper(
       language,
-      wresponseMessage,
+      wreplyMessage,
       dialogGroupId,
       accountId,
       meName,
       parted
     );
 
-    await sendToFormBot(`**** AUTO RESPONSE MESSAGE (${language}) ****
-ДО: ${wresponseMessage}
-ПОСЛЕ: ${responseMessage}`);
-    const sentResponseMessage = await sendMessage(
+    await sendToFormBot(`**** AUTO reply MESSAGE (${language}) ****
+ДО: ${wreplyMessage}
+ПОСЛЕ: ${replyMessage}`);
+    const sentreplyMessage = await sendMessage(
       client,
       id,
       accessHash,
-      responseMessage,
+      replyMessage,
       accountId
     );
 
     messages.push({
-      id: sentResponseMessage.id,
-      text: responseMessage,
+      id: sentreplyMessage.id,
+      text: replyMessage,
       fromId: tgAccountId,
       date: Math.round(Date.now() / 1000),
     });
@@ -272,7 +271,7 @@ ${promptGoal} ${
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
     const pingMessage = await makeRequestGpt(
-      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE RESPONSE: ${language}. Only ${language}.`,
+      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
       `## STYLE GUIDE
 Maximum length of reminder message 100 characters
 
