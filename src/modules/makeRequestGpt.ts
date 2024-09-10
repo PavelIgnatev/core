@@ -3,7 +3,7 @@ import { blue, gray, red, yellow } from 'colors/safe';
 
 import { sendToBot } from '../helpers/sendToBot';
 
-function capitalizeFirstLetter(str: string) {
+function a(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 function hasMixedLanguageWords(str: string) {
@@ -68,6 +68,10 @@ export const makeRequestGpt = async (
         .replace(/!/g, '.')
         .replace('***', '')
         .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
         .trim();
 
       console.log(
@@ -90,6 +94,13 @@ export const makeRequestGpt = async (
         throw new Error('The response contains suspicious characters');
       }
 
+      if (message.length < 60) {
+        console.log(
+          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
+        );
+        throw new Error("Минимальная длина 60 символов");
+      }
+
       if (hasMixedLanguageWords(message)) {
         throw new Error('The potential message contains English-Russian words');
       }
@@ -98,7 +109,7 @@ export const makeRequestGpt = async (
         throw new Error('The potential message contains Chinese words');
       }
 
-      const varMessage = capitalizeFirstLetter(message);
+      const varMessage = a(message);
 
       if (part && !message.includes(part)) {
         throw new Error(

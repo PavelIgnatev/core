@@ -1,6 +1,4 @@
-import { red, yellow } from 'colors/safe';
-
-import GramJs from '../common/gramjs/tl/api';
+import { yellow } from 'colors/safe';
 
 import { getDialogs } from './getDialogs';
 import { makeRequestComplete } from './makeRequestComplete';
@@ -98,40 +96,28 @@ export const autoResponse = async (
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
     const parted = stage === 2 && part ? part : null;
-
-    let promptGoal = '';
-    if (stage === 1) {
-      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***!!`;
-    }
-    if (stage >= 2) {
-      promptGoal = `!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${goal}.!!`;
-    }
-
     const wreplyMessage = await makeRequestComplete(
       `## REPLY CONTEXT
 You **${meName}**, take on the identity of **${aiRole}**.
-Your conversation partner **${userName}** (role: USER) is the person you started chatting with on Telegram. While specific details about where you met are not available, it is important to note that **${userName}** is a real person. The conversation is private and the focus is on creating a natural and engaging interaction. The current date is **$${getDateNow()}**.
-      
-## REPLY GUIDELINES
-${
-  stage <= 2
-    ? `- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences.`
-    : ''
-}
-- **Do not** use unnecessary greetings or filler phrases.
-- Follow the style guide: **${styleGuide}**.
-- Ensure the reply is in **${language}**.${
-  part
-    ? `\n- !!!! Include part of the conversation from **${part}** in your reply. !!!!`
-    : ""
-}
+Your conversation partner **${userName}** (role: USER) is the person you started chatting with on Telegram. While specific details about where you met are not available, it is important to note that **${userName}** is a real person. The conversation is private and the focus is on creating a natural and engaging interaction. The current date is **${getDateNow()}**.
+
+## REPLY GUIDELINES${
+        part
+          ? `\n- **Include part** of the conversation from **${part}** in your reply (!!IMPORTANT!!);`
+          : ''
+      }${
+        stage <= 2
+          ? `\n- **Minimum 2 messages (100 characters) in REPLY**\n- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences;`
+          : ''
+      }
+- **Do not** use unnecessary greetings or filler phrases ([], {}, <> and etc);
+- Follow the style guide: **${styleGuide}**;
+- Ensure the reply is in **${language}**;
 
 ## REPLY INSTRUCTIONS
-${promptGoal} ${
-        part
-          ? `!!!! Include part of the conversation from **${part}** in your reply!!!!`
-          : ''
-      }`,
+!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${
+        stage >= 2 ? `***${goal}***` : ''
+      }!!`,
       [
         {
           title: 'YOUR_COMPANY_DESCRIPTION',

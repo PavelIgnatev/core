@@ -21,6 +21,60 @@ function countSentences(paragraph: string) {
   return sentenceCount;
 }
 
+function removeGreetings(text: string) {
+  const greetings = [
+    'Приветствую',
+    'приветствую',
+    'Привет',
+    'привет',
+    'Здравствуйте',
+    'здравствуйте',
+    'Здравствуй',
+    'здравствуй',
+    'Доброе утро',
+    'доброе утро',
+    'Добрый вечер',
+    'добрый вечер',
+    'Добрый день',
+    'добрый день',
+    'Доброго утра',
+    'доброго утра',
+    'Доброго вечера',
+    'доброго вечера',
+    'Доброго дня',
+    'доброго дня',
+    'Приветики',
+    'приветики',
+    'Доброго времени суток',
+    'доброго времени суток',
+    'Рад видеть',
+    'рад видеть',
+    'Рада видеть',
+    'рада видеть',
+    'С добрым утром',
+    'с добрым утром',
+    'С добрым днем',
+    'с добрым днем',
+    'С добрым вечером',
+    'с добрым вечером',
+    'С добрым утречком',
+    'с добрым утречком',
+    'Доброго',
+    'доброго',
+  ];
+
+  greetings.forEach((greeting) => {
+    text = text
+      .replace(new RegExp(`${greeting},`, 'gi'), '')
+      .replace(new RegExp(`${greeting}!`, 'gi'), '')
+      .replace(new RegExp(`${greeting}\\s`, 'gi'), '')
+      .replace(new RegExp(`${greeting}$`, 'gi'), '')
+      .replace(new RegExp(`${greeting}`, 'gi'), '');
+  });
+
+  return text.trim();
+}
+
 export const makeRequestComplete = async (
   preamble: string,
   documents: { title: string; text: string }[],
@@ -109,17 +163,11 @@ export const makeRequestComplete = async (
         /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
       const hasTextLink = message.match(pattern);
 
+      message = removeGreetings(message);
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply contains a link at a stage where it is forbidden to send links'
         );
-      }
-
-      if (part) {
-        message = message
-          .replace(part, '[LINKTOGOAL]')
-          .replace(part, '[LINKTOGOAL]')
-          .replace(part, '[LINKTOGOAL]');
       }
 
       if (deleteQuestion && message.includes('?')) {
@@ -127,13 +175,6 @@ export const makeRequestComplete = async (
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
         throw new Error('В ответе содержится вопрос');
-      }
-
-      if (part) {
-        message = message
-          .replace('[LINKTOGOAL]', part)
-          .replace('[LINKTOGOAL]', part)
-          .replace('[LINKTOGOAL]', part);
       }
 
       if (
@@ -153,7 +194,7 @@ export const makeRequestComplete = async (
 
       const varMessage = capitalizeFirstLetter(message);
 
-      if (minimalProposalLength === 2 && varMessage.length < 60) {
+      if (varMessage.length < 60) {
         throw new Error('Minimum length 60 characters');
       }
 
