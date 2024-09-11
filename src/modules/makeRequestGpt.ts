@@ -94,13 +94,6 @@ export const makeRequestGpt = async (
         throw new Error('The response contains suspicious characters');
       }
 
-      if (message.length < 60) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error("Минимальная длина 60 символов");
-      }
-
       if (hasMixedLanguageWords(message)) {
         throw new Error('The potential message contains English-Russian words');
       }
