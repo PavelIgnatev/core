@@ -60,7 +60,6 @@ export const makeRequestGpt = async (
       if (!data || !data.trim()) {
         throw new Error('Blank message');
       }
-      generations.push(data);
 
       const message = data
         .replace(/\n/g, '')
@@ -74,6 +73,8 @@ export const makeRequestGpt = async (
         .replace('***', '')
         .trim();
 
+      generations.push(message);
+
       console.log(
         `[${accountId}] Generated message before filters:`,
         gray(message)
@@ -83,10 +84,7 @@ export const makeRequestGpt = async (
         message.includes('[') ||
         message.includes(']') ||
         message.includes('{') ||
-        message.includes('}') ||
-        message.includes('<') ||
-        message.includes('>') ||
-        message.includes('*')
+        message.includes('}')
       ) {
         console.log(
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`

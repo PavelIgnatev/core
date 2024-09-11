@@ -146,13 +146,20 @@ export const makeRequestComplete = async (
       if (!data || !data.trim()) {
         throw new Error('Blank message');
       }
-      generations.push(data);
 
       let message = data
         .replace(/\n/g, '')
         .replace(/['"`]/g, '')
         .replace(/!/g, '.')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
+        .replace('***', '')
         .trim();
+
+      generations.push(message);
 
       console.log(
         `[${accountId}] Generated message before filters:`,
@@ -181,10 +188,7 @@ export const makeRequestComplete = async (
         message.includes('[') ||
         message.includes(']') ||
         message.includes('{') ||
-        message.includes('}') ||
-        message.includes('<') ||
-        message.includes('>') ||
-        message.includes('*')
+        message.includes('}')
       ) {
         console.log(
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
@@ -194,7 +198,7 @@ export const makeRequestComplete = async (
 
       const varMessage = capitalizeFirstLetter(message);
 
-      if (varMessage.length < 60) {
+      if (deleteQuestion && varMessage.length < 60) {
         throw new Error('Minimum length 60 characters');
       }
 
