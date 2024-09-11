@@ -7,11 +7,6 @@ function a(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function hasMixedLanguageWords(str: string) {
-  const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
-  return mixedPattern.test(str);
-}
-
 function containsChinese(text: string) {
   const chineseRegex = /[\u4e00-\u9fa5]/;
   return chineseRegex.test(text);
@@ -86,10 +81,6 @@ export const makeRequestGpt = async (
           `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
         );
         throw new Error('The response contains suspicious characters');
-      }
-
-      if (hasMixedLanguageWords(message)) {
-        throw new Error('The potential message contains English-Russian words');
       }
 
       if (containsChinese(message)) {
