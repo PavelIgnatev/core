@@ -107,7 +107,7 @@ Your conversation partner **${userName}** (role: USER) is the person you started
           : ''
       }${
         stage <= 2
-          ? `\n- **Minimum 2 messages (100 characters) in REPLY**\n- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences;`
+          ? `\n- **Minimum 2 messages (100 characters) in REPLY**\n- **Do not ask questions under any circumstances**; The text should contain only affirmative sentences;`
           : ''
       }
 - **Do not** use unnecessary greetings or filler phrases ([], {}, <> and etc);
