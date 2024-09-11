@@ -150,13 +150,8 @@ export const makeRequestComplete = async (
       let message = data
         .replace(/\n/g, '')
         .replace(/['"`]/g, '')
+        .replace(/\*/g, '')
         .replace(/!/g, '.')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
         .trim();
 
       generations.push(message);

@@ -6,6 +6,7 @@ import { sendToBot } from '../helpers/sendToBot';
 function a(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
 function hasMixedLanguageWords(str: string) {
   const mixedPattern = /[а-яА-Я][a-zA-Z]|[a-zA-Z][а-яА-Я]/;
   return mixedPattern.test(str);
@@ -64,13 +65,8 @@ export const makeRequestGpt = async (
       const message = data
         .replace(/\n/g, '')
         .replace(/['"`]/g, '')
+        .replace(/\*/g, '')
         .replace(/!/g, '.')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
-        .replace('***', '')
         .trim();
 
       generations.push(message);
