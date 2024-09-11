@@ -2,10 +2,8 @@ import { blue, yellow } from 'colors/safe';
 
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
-import { updateAccountById } from '../db/accounts';
 import { updateFailedMessage } from '../db/groupIdUsers';
 import { generateRandomString } from '../helpers/generateRandomString';
-import { generateRandomTime } from '../helpers/generateRandomTime';
 import { sendToBot } from '../helpers/sendToBot';
 import { muteNotification } from '../methods/account/muteNotification';
 import { resolveContact } from '../methods/contacts/resolveContact';
@@ -21,20 +19,6 @@ export const autoSender = async (
   tgRmainingTime: string | null
 ) => {
   console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
-
-  if (!tgRmainingTime) {
-    const remainingTime = generateRandomTime(360000, 3600000);
-    await updateAccountById(accountId, {
-      remainingTime,
-    });
-
-    console.log(
-      `[${accountId}] Remaining time not defined, new remaining time:`,
-      blue(String(remainingTime.toLocaleString("en-US", { timeZone: 'UTC' })))
-    );
-
-    return;
-  }
 
   const currentTime = new Date();
   const remainingTime = new Date(tgRmainingTime || currentTime);
