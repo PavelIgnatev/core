@@ -3,7 +3,7 @@ import { blue, gray, red, yellow } from 'colors/safe';
 
 import { sendToBot } from '../helpers/sendToBot';
 
-function a(str: string) {
+function firstLetterToUpperCase(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -13,7 +13,7 @@ function containsChinese(text: string) {
 }
 
 export const makeRequestGpt = async (
-  preamble: string,
+  gptPreamble: string,
   prompt: string,
   groupId: string,
   accountId: string,
@@ -23,6 +23,7 @@ export const makeRequestGpt = async (
     `[${accountId}] Initialize sub module`,
     yellow('MAKE REQUEST GPT')
   );
+  let preamble = gptPreamble;
 
   console.log(
     `[${accountId}] Current preamble before generation:`,
@@ -87,7 +88,7 @@ export const makeRequestGpt = async (
         throw new Error('The potential message contains Chinese words');
       }
 
-      const varMessage = a(message);
+      const varMessage = firstLetterToUpperCase(message);
 
       if (part && !message.includes(part)) {
         throw new Error(
