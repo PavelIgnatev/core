@@ -27,6 +27,7 @@ You are **${meName}** (man).
 ## CLARIFICATION GUIDELINES
 - Ensure the reply is in **${language}**.
 - The original meaning must be **completely** preserved, without any deviation.
+- Use the formal "You" when addressing others to maintain a respectful tone in communication;
 
 ## CLARIFICATION INSTRUCTIONS
 Clarify the text within quotes (***) while following the **CLARIFICATION GUIDELINES**. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
@@ -115,7 +116,9 @@ Your conversation partner **${userName}** (role: USER) is the person you started
 - Ensure the reply is in **${language}**;
 
 ## REPLY INSTRUCTIONS
-!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${
+${
+  parted ? `**!!REPLY WITH ${parted}, MAKE IT APPROPRIATE!!** ` : ""
+}!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${
         stage >= 2 ? `***${goal}***` : ''
       }!!`,
       [
