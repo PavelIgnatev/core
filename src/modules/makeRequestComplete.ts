@@ -110,10 +110,6 @@ export const makeRequestComplete = async (
     blue(disableLink ? 'on' : 'off')
   );
   console.log(
-    `[${accountId}] Deleting a question:`,
-    blue(deleteQuestion ? 'on' : 'off')
-  );
-  console.log(
     `[${accountId}] Minimum number of messages in a reply:`,
     blue(String(minimalProposalLength))
   );
@@ -172,13 +168,6 @@ export const makeRequestComplete = async (
         );
       }
 
-      if (deleteQuestion && message.includes('?')) {
-        console.log(
-          `\x1b[4mПотенциальное сообщение:\x1b[0m \x1b[36m${message}\x1b[0m`
-        );
-        throw new Error('В ответе содержится вопрос');
-      }
-
       if (
         message.includes('[') ||
         message.includes(']') ||
@@ -235,7 +224,6 @@ ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}
 _____________
 Удаление ссылки: ${disableLink ? 'включено' : 'выключено'}
-Удаление вопроса: ${deleteQuestion ? 'включено' : 'выключено'}
 Минимальное количество сообщений в ответе: ${minimalProposalLength}
 Проверка на составную часть: ${part ? `включено (${part})` : 'выключено'}`);
   } catch (e: any) {
