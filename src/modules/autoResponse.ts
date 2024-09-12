@@ -117,7 +117,7 @@ Your conversation partner **${userName}** (role: USER) is the person you started
 
 ## REPLY INSTRUCTIONS
 ${
-  parted ? `**!!REPLY WITH ${parted}, MAKE IT APPROPRIATE!!** ` : ""
+  parted ? `**!!REPLY WITH ${parted}, MAKE IT APPROPRIATE!!** ` : ''
 }!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${
         stage >= 2 ? `***${goal}***` : ''
       }!!`,
