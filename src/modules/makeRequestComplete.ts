@@ -115,7 +115,6 @@ export const makeRequestComplete = async (
   );
   console.log(`[${accountId}] Part check:`, part || 'off');
 
-  let forceIncludePart = false;
   const generations = [];
   const errors = [];
 
@@ -125,8 +124,8 @@ export const makeRequestComplete = async (
         throw new Error('Last dialog message not defined');
       }
 
-      if (forceIncludePart && part) {
-        preamble += `**!!REPLY WITH ${part}, MAKE IT APPROPRIATE!!**\n`;
+      if (part) {
+        preamble += `\n!!!!"${part}" is required to appear in the reply. All other parts of the response should be adjusted to ensure this phrase is included seamlessly and appropriately. This is a non-negotiable instruction.!!!!!\n`;
       }
 
       const {
@@ -196,7 +195,6 @@ export const makeRequestComplete = async (
       }
 
       if (part && !message.includes(part)) {
-        forceIncludePart = true;
         throw new Error(
           `The potential message does not contain the ${part} part, although it should`
         );
