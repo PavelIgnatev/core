@@ -126,8 +126,7 @@ export const makeRequestComplete = async (
       }
 
       if (forceIncludePart && part) {
-        preamble =
-          `**!!REPLY WITH ${part}, MAKE IT APPROPRIATE!!**\n` + preamble;
+        preamble += `**!!REPLY WITH ${part}, MAKE IT APPROPRIATE!!**\n`;
       }
 
       const {
