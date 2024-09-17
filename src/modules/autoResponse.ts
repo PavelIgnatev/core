@@ -21,17 +21,16 @@ const gptRequestWrapper = async (
   part: string | null
 ) => {
   const result = await makeRequestGpt(
-    `## CLARIFICATION CONTEXT
+    `## CONTEXT
 You are **${meName}** (man).
-
-## CLARIFICATION GUIDELINES
-- Ensure the reply is in **${language}**.
-- The original meaning must be **completely** preserved, without any deviation.
-- Use the formal "You" when addressing others to maintain a respectful tone in communication;
-
-## CLARIFICATION INSTRUCTIONS
-Clarify the text within quotes (***) while following the **CLARIFICATION GUIDELINES**. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
-    `TEXT TO CLARIFY: ***${message}***`,
+Today's date is ${getDateNow()}.
+    
+## STYLE GUIDE
+You are **${meName}** (man). Avoid including unnecessary greetings and third-party characters like: [],{},{},|,<>,(),* and etc. The resulting response language should be consistent with the original message. RESPONSE LANGUAGE: ${language}.
+    
+## INSTRUCTIONS
+I need you to paraphrase a message (which is inside '''') while maintaining its original meaning, structure, and character count. Make sure the resulting message is the same length as the original, and conveys the same thought in a unique but similar way to the original message. RESPONSE LANGUAGE: ${language}. Make sure that the result does not contain any words other than ${language} (except for proper names).`,
+    `A message where the wording needs to be changed: ''''${message}''''`,
     dialogGroupId,
     accountId,
     part
