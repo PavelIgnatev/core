@@ -94,7 +94,7 @@ export const makeRequestComplete = async (
   const lastDialog = chatHistory.pop();
   console.log(
     `[${accountId}] Current preamble before generation:`,
-    gray(preamble.replace(/\n/g, ''))
+    gray(preamble.replace(/\n/g, ' '))
   );
   console.log(
     `[${accountId}] Current dialog history [${chatHistory.length}]:`,
@@ -102,7 +102,7 @@ export const makeRequestComplete = async (
   );
   console.log(
     `[${accountId}] Last message from interlocutor:`,
-    gray(String(lastDialog?.message).replace(/\n/g, ''))
+    gray(String(lastDialog?.message).replace(/\n/g, ' '))
   );
   console.log(`[${accountId}] Additional filters:`);
   console.log(
