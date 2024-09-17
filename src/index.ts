@@ -56,6 +56,7 @@ const main = async (ID: string) => {
     );
     const tgAccountId = await usersMe(client, accountId, id);
 
+    await new Promise((res) => setTimeout(res, 60000))
 
     // for (let i = 0; i < 30; i++) {
     //   accountsInWork[ID] = i + 1;
