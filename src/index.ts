@@ -153,7 +153,7 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  accounts.slice(0, 60).forEach((accountId: string) => {
+  accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 
