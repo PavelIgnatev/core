@@ -55,7 +55,7 @@ export const autoSender = async (
       if (deleted || bot || support || contactRequirePremium || botBusiness) {
         await updateFailedMessage(
           recipient.username,
-          Number(recipient.groupId)
+          String(recipient.groupId)
         );
 
         return;
@@ -120,7 +120,7 @@ export const autoSender = async (
       ) {
         await updateFailedMessage(
           recipient.username,
-          Number(recipient.groupId)
+          String(recipient.groupId)
         );
       }
 

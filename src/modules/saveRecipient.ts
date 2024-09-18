@@ -65,10 +65,10 @@ export const saveRecipient = async (
         await updateAccountById(accountId, {
           remainingTime: new Date(new Date().getTime() + 18000000),
         });
-        await updateSendMessage(recUsername, Number(groupId));
+        await updateSendMessage(recUsername, String(groupId));
 
         await incrementMessageCount(accountId);
-        await incrementCurrentCount(groupId);
+        await incrementCurrentCount(String(groupId));
       }
 
       console.log(

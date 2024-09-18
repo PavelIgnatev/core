@@ -1,5 +1,5 @@
 export interface Dialogue {
-  groupId: number;
+  groupId: string;
   accountId: string;
   recipientId: string;
   recipientUsername: string;

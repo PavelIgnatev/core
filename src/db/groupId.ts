@@ -9,7 +9,7 @@ export const getGroupId = async (groupId: string) => {
 
   const result = await groupIdCollection.findOne(
     {
-      groupId: Number(groupId),
+      groupId: String(groupId),
     },
     { projection: { history: 0, database: 0, dateUpdated: 0, _id: 0 } }
   );
@@ -17,7 +17,7 @@ export const getGroupId = async (groupId: string) => {
   return result;
 };
 
-export const incrementCurrentCount = async (groupId: number) => {
+export const incrementCurrentCount = async (groupId: string) => {
   const groupIdCollection = await getGroupIdCollection();
 
   await groupIdCollection.updateOne(

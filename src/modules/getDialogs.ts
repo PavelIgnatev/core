@@ -11,6 +11,7 @@ import {
 } from '../db/dialogues';
 import { deleteMessages } from '../methods/messages/deleteHistory';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
+import { sendToBot } from '../helpers/sendToBot';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -91,9 +92,15 @@ export const getDialogs = async (client: any, accountId: string) => {
 
       const {
         messages: dialogMessages = [],
-        groupId = 13228671259,
+        groupId,
         blocked = false,
       } = dialogDb || {};
+
+      if (!groupId) {
+        await sendToBot(`~GROUP ID NOT DEFINED~
+AccountId: ${accountId}`);
+        return [];
+      }
 
       if (blocked) {
         await deleteMessages(client, accountId, user.id, user.accessHash);

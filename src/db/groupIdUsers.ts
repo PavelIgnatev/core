@@ -6,7 +6,7 @@ const getGroupIdUsersCollection = async () => {
 
 export const updateFailedMessage = async (
   username: string,
-  groupId: number
+  groupId: string
 ) => {
   const messagesCollection = await getGroupIdUsersCollection();
 
@@ -17,7 +17,7 @@ export const updateFailedMessage = async (
   );
 };
 
-export const updateSendMessage = async (username: string, groupId: number) => {
+export const updateSendMessage = async (username: string, groupId: string) => {
   const messagesCollection = await getGroupIdUsersCollection();
 
   await messagesCollection.updateOne(

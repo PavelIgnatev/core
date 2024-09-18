@@ -85,12 +85,12 @@ const main = async (ID: string) => {
             await autoResponse(client, accountId, tgAccountId, tgFirstName);
           }
 
-          // await autoSender(
-          //   client,
-          //   accountId,
-          //   tgAccountId,
-          //   accountByID.remainingTime || null
-          // );
+          await autoSender(
+            client,
+            accountId,
+            tgAccountId,
+            accountByID.remainingTime || null
+          );
 
           await new Promise((res) => setTimeout(res, 60000));
           console.log(`[${accountId}]`, yellow(`End iteration [${i + 1}]`));
@@ -153,7 +153,7 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
+  accounts.slice(0, 30).forEach((accountId: string) => {
     promises.push(main(accountId));
   });
 
