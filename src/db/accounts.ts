@@ -13,7 +13,7 @@ export const getAccounts = async () => {
     stopped: { $ne: true },
   });
 
-  return accounts
+  return accounts;
 };
 
 export const getAccountById = async (accountId: string) => {
@@ -53,4 +53,27 @@ export const getTotalAccounts = async () => {
   const totalAccounts = await accountCollection.countDocuments();
 
   return totalAccounts;
+};
+
+export const stopAccountsByPrefix = async (prefix: string) => {
+  const accountCollection = await getAccountCollection();
+
+  const accountIds = await accountCollection.distinct('accountId', {
+    banned: { $ne: true },
+    stopped: { $ne: true },
+  });
+
+  const filteredAccountIds = accountIds.filter((accountId: string) =>
+    accountId.includes(prefix)
+  );
+  console.log(filteredAccountIds)
+
+  if (filteredAccountIds.length > 0) {
+    await accountCollection.updateMany(
+      { accountId: { $in: filteredAccountIds } },
+      { $set: { stopped: true } }
+    );
+  }
+
+  return filteredAccountIds;
 };
