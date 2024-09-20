@@ -30,36 +30,29 @@ const main = async (ID: string) => {
     }
 
     const {
-      accountId,
       dcId,
       platform,
       userAgent,
       setuped = false,
-      id,
+      id: tgId,
       firstName,
     } = account;
 
-    if (![accountId, dcId, platform, userAgent].every(Boolean)) {
+    if (![dcId, platform, userAgent].every(Boolean)) {
       throw new Error('Insufficient number of parameters to start');
     }
 
     client = await initClient(account, ID, () => (isAutoResponse = true));
 
     setOnlineInterval = setInterval(() => {
-      setOffline(client, accountId, false);
+      setOffline(client, ID, false);
     }, 60000);
-    const tgFirstName = await accountSetup(
-      client,
-      accountId,
-      setuped,
-      firstName
-    );
-    const tgAccountId = await usersMe(client, accountId, id);
+    const tgFirstName = await accountSetup(client, ID, setuped, firstName);
+    const tgAccountId = await usersMe(client, ID, tgId);
 
     for (let i = 0; i < 30; i++) {
+      console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
       accountsInWork[ID] = i + 1;
-
-      console.log(`[${accountId}]`, yellow(`Init iteration [${i + 1}]`));
 
       let timer;
       const timeout = new Promise(
@@ -75,25 +68,15 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          const accountByID = await getAccountById(ID);
-          if (!accountByID) {
-            throw new Error('Account not defined');
-          }
-
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, accountId, tgAccountId, tgFirstName);
+            await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
-          await autoSender(
-            client,
-            accountId,
-            tgAccountId,
-            accountByID.remainingTime || null
-          );
+          await autoSender(client, ID, tgAccountId);
 
           await new Promise((res) => setTimeout(res, 60000));
-          console.log(`[${accountId}]`, yellow(`End iteration [${i + 1}]`));
+          console.log(`[${ID}]`, yellow(`End iteration [${i + 1}]`));
         })(),
         timeout,
       ]);

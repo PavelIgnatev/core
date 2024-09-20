@@ -11,17 +11,47 @@ import { editFolder } from '../methods/folders/editFolder';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { getRecipient } from '../methods/recipients/getRecipient';
 import { deleteMessages } from '../methods/messages/deleteHistory';
+import { getAccountById } from '../db/accounts';
 
 export const autoSender = async (
   client: any,
   accountId: string,
-  tgAccountId: string,
-  tgRmainingTime: string | null
+  tgAccountId: string
 ) => {
   console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
 
   const currentTime = new Date();
-  const remainingTime = new Date(tgRmainingTime || currentTime);
+  const currentUTCHours = currentTime.getUTCHours();
+
+  if (currentUTCHours < 6 || currentUTCHours >= 13) {
+    console.log(
+      `[${accountId}]`,
+      blue('Sender has been stopped (working time 6:00-13:00 UTC)')
+    );
+    return;
+  }
+
+  if (!accountId.includes('-prefix-')) {
+    const weekday = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(new Date());
+
+    if (weekday === 'Fri' || weekday === 'Sun') {
+      console.log(
+        `[${accountId}]`,
+        blue('Sender has been stopped (working days Mon-Fri)')
+      );
+      return;
+    }
+  }
+
+  const accountByID = await getAccountById(accountId);
+  if (!accountByID) {
+    throw new Error('Account not defined');
+  }
+
+  const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
@@ -129,7 +159,7 @@ export const autoSender = async (
   } else {
     console.log(
       `[${accountId}] Next message can be sent after`,
-      blue(String(remainingTime.toLocaleString("en-US", { timeZone: 'UTC' })))
+      blue(String(remainingTime.toLocaleString('en-US', { timeZone: 'UTC' })))
     );
   }
 };
