@@ -37,7 +37,7 @@ export const autoSender = async (
       timeZone: 'UTC',
     }).format(new Date());
 
-    if (weekday === 'Fri' || weekday === 'Sun') {
+    if (weekday === 'Sat' || weekday === 'Sun') {
       console.log(
         `[${accountId}]`,
         blue('Sender has been stopped (working days Mon-Fri)')
