@@ -143,11 +143,11 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  // if (!accountId.includes('test-efiopbl-nigerbl')) {
-  promises.push(main('+79088651354-256-after-lolz-new-19-sep-prefix-aisender'));
-  // }
-  // });
+  accounts.forEach((accountId: string) => {
+    if (!accountId.includes('test-efiopbl-nigerbl')) {
+      promises.push(main(accountId));
+    }
+  });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
