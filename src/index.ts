@@ -144,9 +144,7 @@ const main = async (ID: string) => {
 getAccounts().then((accounts) => {
   const startTime = performance.now();
   accounts.forEach((accountId: string) => {
-    if (!accountId.includes('test-efiopbl-nigerbl')) {
-      promises.push(main(accountId));
-    }
+    promises.push(main(accountId));
   });
 
   Promise.all(promises).then(async () => {
