@@ -144,7 +144,7 @@ const main = async (ID: string) => {
 getAccounts().then((accounts) => {
   const startTime = performance.now();
   accounts.forEach((accountId: string) => {
-    if (!accountId.includes('-prefix-aisender')) {
+    if (accountId.includes('-prefix-aisender')) {
       promises.push(main(accountId));
     }
   });
