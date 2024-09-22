@@ -1,7 +1,10 @@
 import { red, yellow } from 'colors/safe';
 
-import { Dialogue } from '../@types/Dialogue';
 import GramJs from '../common/gramjs/tl/api';
+
+import { Dialogue } from '../@types/Dialogue';
+import { Account } from '../@types/Account';
+
 import { incrementMessageCount, updateAccountById } from '../db/accounts';
 import { updateDialogue } from '../db/dialogues';
 import { incrementCurrentCount } from '../db/groupId';
@@ -15,7 +18,8 @@ export const saveRecipient = async (
   recipientDb: Dialogue & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: 'create' | 'update',
-  addedData: Record<string, unknown> = {}
+  addedData: Record<string, unknown> = {},
+  accountByID: Account | null = null
 ) => {
   console.log(`[${accountId}] Initialize sub module`, yellow('SAVE RECIPIENT'));
 
@@ -62,8 +66,16 @@ export const saveRecipient = async (
       await updateDialogue(data);
 
       if (status === 'create') {
+        const messageCount = accountByID?.messageCount || 0;
+        const multiplier =
+          messageCount < 20
+            ? 3
+            : messageCount < 40
+              ? 1.5
+              : 1
+        console.log(messageCount, multiplier)
         await updateAccountById(accountId, {
-            remainingTime: new Date(new Date().getTime() + 6300000),
+          remainingTime: new Date(new Date().getTime() + 7200000 * multiplier),
         });
         await updateSendMessage(recUsername, String(groupId));
 

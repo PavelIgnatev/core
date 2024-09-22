@@ -49,7 +49,7 @@ const main = async (ID: string) => {
     }, 60000);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 26);
+    const randomI = 0;
 
     for (let i = 0; i < 30; i++) {
       console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
