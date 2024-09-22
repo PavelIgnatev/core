@@ -46,7 +46,7 @@ export const autoResponse = async (
   tgAccountId: string,
   tgFirstName: string
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow('AUTO reply'));
+  console.log(`[${accountId}] Initialize module`, yellow('AUTO REPLY'));
 
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
@@ -150,7 +150,7 @@ Your conversation partner **${userName}** (role: USER) is the person you started
       parted
     );
 
-    await sendToFormBot(`**** AUTO reply MESSAGE (${language}) ****
+    await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ДО: ${wreplyMessage}
 ПОСЛЕ: ${replyMessage}`);
     const sentreplyMessage = await sendMessage(

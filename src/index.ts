@@ -49,6 +49,7 @@ const main = async (ID: string) => {
     }, 60000);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
+    const randomI = Math.floor(Math.random() * 26);
 
     for (let i = 0; i < 30; i++) {
       console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
@@ -73,7 +74,13 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
-          await autoSender(client, ID, tgAccountId);
+          if (i === randomI) {
+            await autoSender(client, ID, tgAccountId);
+          } else if (i < randomI) {
+            console.log(
+              `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${randomI + 1}`
+            );
+          }
 
           await new Promise((res) => setTimeout(res, 60000));
           console.log(`[${ID}]`, yellow(`End iteration [${i + 1}]`));
