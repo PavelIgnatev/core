@@ -78,7 +78,7 @@ const main = async (ID: string) => {
             await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
-              `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${randomI + 1}`
+              `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${yellow(String(randomI + 1))}`
             );
           }
 
