@@ -82,9 +82,9 @@ class PromisedWebSockets {
     this.website = this.getWebSocketLink(ip, port);
 
     this.client = new WebSocket(this.website, 'binary', {
-      agent: new HttpsProxyAgent(
-        'http://Z9mpa6bxGXhroj80Ci-dc-ANY:FRW8pUkog6179El@gw.thunderproxy.net:5959'
-      ),
+      // agent: new HttpsProxyAgent(
+      //   'http://Z9mpa6bxGXhroj80Ci-dc-ANY:FRW8pUkog6179El@gw.thunderproxy.net:5959'
+      // ),
     });
     return new Promise((resolve, reject) => {
       let hasResolved = false;
