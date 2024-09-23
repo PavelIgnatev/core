@@ -67,7 +67,7 @@ export const saveRecipient = async (
 
       if (status === 'create') {
         const messageCount = accountByID?.messageCount || 0;
-        const multiplier = messageCount < 20 ? 3 : messageCount < 40 ? 1.5 : 1;
+        const multiplier = messageCount < 20 ? 2.5 : messageCount < 40 ? 1.5 : 1;
         await updateAccountById(accountId, {
           remainingTime: new Date(new Date().getTime() + 7200000 * multiplier),
           multiplier,
