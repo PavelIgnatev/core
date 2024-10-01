@@ -10,7 +10,6 @@ import { Foreman } from '../foreman';
 
 const KB_TO_BYTES = 1024;
 const LARGE_FILE_THRESHOLD = 10 * 1024 * 1024;
-const DISCONNECT_SLEEP = 1000;
 const MAX_CONCURRENT_CONNECTIONS = 3;
 const MAX_CONCURRENT_CONNECTIONS_PREMIUM = 6;
 const MAX_WORKERS_PER_CONNECTION = 10;
@@ -61,7 +60,6 @@ export async function uploadFile(client, reailFile) {
             );
           } catch (err) {
             if (sender && !sender.isConnected()) {
-              await sleep(DISCONNECT_SLEEP);
               continue;
             } else if (err instanceof errors.FloodWaitError) {
               await sleep(err.seconds * 1000);

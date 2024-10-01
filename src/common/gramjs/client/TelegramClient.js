@@ -1,5 +1,5 @@
 const os = require('os');
-const { red } = require('colors/safe');
+const { red, yellow } = require('colors/safe');
 
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
@@ -36,7 +36,6 @@ class TelegramClient {
       requestRetries: 5,
       connectionRetries: Infinity,
       retryDelay: 1000,
-      retryMainConnectionDelay: 10000,
       autoReconnect: true,
       ...opts,
     };
@@ -49,14 +48,13 @@ class TelegramClient {
     this._requestRetries = args.requestRetries;
     this._connectionRetries = args.connectionRetries;
     this._retryDelay = args.retryDelay || 0;
-    this._retryMainConnectionDelay = args.retryMainConnectionDelay || 0;
     this._timeout = args.timeout;
     this._autoReconnect = args.autoReconnect;
     this._connection = ConnectionTCPObfuscated;
     this._accountId = args.accountId;
 
     this._initWith = (x) => {
-      console.log(`[${this._accountId}] Account layer initialization`);
+      console.log(`[${this._accountId}] ${yellow('Account layer initialization')}`);
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
@@ -78,14 +76,7 @@ class TelegramClient {
     };
 
     this._args = args;
-    this._config = undefined;
-    this.phoneCodeHashes = [];
-    this._exportedSenderPromises = {};
-    this._exportedSenderRefCounter = {};
-    this._waitingForAuthKey = {};
-    this._exportedSenderReleaseTimeouts = {};
     this._loopStarted = false;
-    this._isSwitchingDc = false;
     this._destroyed = false;
     this._connectedDeferred = new Deferred();
   }
@@ -100,7 +91,6 @@ class TelegramClient {
         dcId: this.session.dcId,
         retries: this._connectionRetries,
         delay: this._retryDelay,
-        retryMainConnectionDelay: this._retryMainConnectionDelay,
         autoReconnect: this._autoReconnect,
         connectTimeout: this._timeout,
         updateCallback: this._handleUpdate.bind(this),
@@ -139,7 +129,6 @@ class TelegramClient {
       this._loopStarted = true;
     }
     this._connectedDeferred.resolve();
-    this._isSwitchingDc = false;
   }
 
   async _initSession() {
@@ -148,7 +137,7 @@ class TelegramClient {
 
   async _updateLoop() {
     while (!this._destroyed) {
-      await Helpers.sleep(60000);
+      await Helpers.sleep(10000);
     }
     await this.disconnect();
   }
@@ -161,34 +150,6 @@ class TelegramClient {
     if (this._sender) {
       await this._sender.disconnect();
     }
-
-    await Promise.all(
-      Object.values(this._exportedSenderPromises)
-        .map((promises) => {
-          return Object.values(promises).map((promise) => {
-            return (
-              promise &&
-              promise.then((sender) => {
-                if (sender) {
-                  return sender.disconnect();
-                }
-                return undefined;
-              })
-            );
-          });
-        })
-        .flat()
-    );
-
-    Object.values(this._exportedSenderReleaseTimeouts).forEach((timeouts) => {
-      Object.values(timeouts).forEach((releaseTimeout) => {
-        clearTimeout(releaseTimeout);
-      });
-    });
-
-    this._exportedSenderRefCounter = {};
-    this._exportedSenderPromises = {};
-    this._waitingForAuthKey = {};
   }
 
   /**
@@ -208,7 +169,6 @@ class TelegramClient {
     this.session.delete();
     this._eventBuilders = [];
   }
-
 
   getSender() {
     return Promise.resolve(this._sender);
@@ -244,7 +204,6 @@ class TelegramClient {
               `[${this._accountId}] Telegram is having internal issues ${e.constructor.name}`
             )
           );
-          await sleep(2000);
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError

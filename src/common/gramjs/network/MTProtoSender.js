@@ -1,4 +1,4 @@
-const { red, blue } = require('colors/safe');
+const { red, blue, green, yellow } = require('colors/safe');
 
 const { RPCError } = require('../errors');
 
@@ -53,8 +53,7 @@ class MTProtoSender {
   static DEFAULT_OPTIONS = {
     logger: null,
     retries: Infinity,
-    delay: 2000,
-    retryMainConnectionDelay: 10000,
+    delay: 0,
     autoReconnect: true,
     connectTimeout: undefined,
     authKeyCallback: undefined,
@@ -77,7 +76,6 @@ class MTProtoSender {
     this._senderIndex = args.senderIndex;
     this._retries = args.retries;
     this._delay = args.delay;
-    this._retryMainConnectionDelay = args.retryMainConnectionDelay;
     this._autoReconnect = args.autoReconnect;
     this._connectTimeout = args.connectTimeout;
     this._updateCallback = args.updateCallback;
@@ -196,9 +194,9 @@ class MTProtoSender {
 
     for (let attempt = 0; attempt < attempt + 1; attempt++) {
       try {
-        console.log(`[${this._accountId}] Connecting...`);
+        console.log(`[${this._accountId}] ${green('Connecting...')}`);
         await this._connect(this.getConnection());
-        console.log(`[${this._accountId}] Connected!`);
+        console.log(`[${this._accountId}] ${green('Connected!')}`);
         if (!this._isExported) {
           this._updateCallback?.(
             new UpdateConnectionState(UpdateConnectionState.connected)
@@ -219,17 +217,13 @@ class MTProtoSender {
           )
         );
         // eslint-disable-next-line no-console
-
+            
         await Helpers.sleep(this._delay);
       }
     }
     this.isConnecting = false;
 
     return true;
-  }
-
-  async tryReconnectToMain() {
-    await Helpers.sleep(2000);
   }
 
   isConnected() {
@@ -301,10 +295,13 @@ class MTProtoSender {
   async _connect(connection) {
     if (!connection.isConnected()) {
       console.log(
-        `[${this._accountId}] Connecting to {0}...`.replace('{0}', connection)
+        `[${this._accountId}] ${green('Connecting to {0}...')}`.replace(
+          '{0}',
+          yellow(connection._ip)
+        )
       );
       await connection.connect();
-      console.log(`[${this._accountId}] Connection success!`);
+      console.log(`[${this._accountId}] ${green('Connection success!')}`);
     }
 
     if (!this.authKey.getKey()) {
@@ -313,18 +310,20 @@ class MTProtoSender {
       );
     } else {
       this._authenticated = true;
-      console.log(`[${this._accountId}] Already have an auth key ...`);
+      console.log(
+        `[${this._accountId}] ${green('Already have an auth key ...')}`
+      );
     }
     this._user_connected = true;
     this.isReconnecting = false;
 
     if (!this._send_loop_handle) {
-      console.log(`[${this._accountId}] Starting send loop`);
+      console.log(`[${this._accountId}] ${green('Starting send loop')}`);
       this._send_loop_handle = this._sendLoop();
     }
 
     if (!this._recv_loop_handle) {
-      console.log(`[${this._accountId}] Starting receive loop`);
+      console.log(`[${this._accountId}] ${green('Starting receive loop')}`);
       this._recv_loop_handle = this._recvLoop();
     }
 
@@ -338,9 +337,9 @@ class MTProtoSender {
     // as failing to reconnect or any unexpected error.
 
     console.log(
-      `[${this._accountId}] Connection to %s complete!`.replace(
+      `[${this._accountId}] ${green('Connection to %s complete!')}`.replace(
         '%s',
-        connection.toString()
+        yellow(connection.toString())
       )
     );
   }
@@ -404,7 +403,7 @@ class MTProtoSender {
         allClassNames.length === 1 &&
         allClassNames[0] === 'account.UpdateStatus';
 
-      if (!onlyUpdateStatus) {
+      if (!onlyUpdateStatus || process.env.DEBUG === 'true') {
         console.log(
           `[${this._accountId}] Init sending...`,
           allClassNames,
@@ -464,7 +463,7 @@ class MTProtoSender {
           }
         }
 
-        if (!onlyUpdateStatus) {
+        if (!onlyUpdateStatus || process.env.DEBUG === 'true') {
           console.log(`[${this._accountId}]`, 'Done sending...', allClassNames);
         }
       }
@@ -956,10 +955,7 @@ class MTProtoSender {
   reconnect() {
     if (this._user_connected && !this.isReconnecting) {
       this.isReconnecting = true;
-      // TODO Should we set this?
-      // this._user_connected = false
-      // we want to wait a second between each reconnect try to not flood the server with reconnects
-      // in case of internal server issues.
+
       Helpers.sleep(1000).then(() => {
         console.log(red(`[${this._accountId}] Reconnecting...`));
         console.log(red(`[${this._accountId}] Started reconnecting`));

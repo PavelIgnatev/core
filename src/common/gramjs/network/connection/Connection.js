@@ -1,7 +1,7 @@
 const PromisedWebSockets = require('../../extensions/PromisedWebSockets');
 const HttpStream = require('../../extensions/HttpStream').default;
 const AsyncQueue = require('../../extensions/AsyncQueue');
-const { red } = require('colors/safe');
+const { red, green } = require('colors/safe');
 
 /**
  * The `Connection` class is a wrapper around ``asyncio.open_connection``.
@@ -43,10 +43,11 @@ class Connection {
   }
 
   async _connect() {
-    console.log(`[${this._accountId}] Connecting`);
+    console.log(`[${this._accountId}] ${green('Connecting')}`);
     this._codec = new this.PacketCodecClass(this);
     await this.socket.connect(this._port, this._ip, this._accountId);
-    console.log(`[${this._accountId}] Finished connecting`);
+    console.log(`[${this._accountId}] ${green('Finished connecting')}`);
+
     await this._initConn();
   }
 
@@ -117,9 +118,6 @@ class Connection {
           throw new Error('no data received');
         }
       } catch (e) {
-        console.log(red(`[${this._accountId}] connection closed`));
-
-        this.disconnect();
         return;
       }
       await this._recvArray.push(data);

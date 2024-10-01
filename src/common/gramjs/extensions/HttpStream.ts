@@ -1,5 +1,4 @@
 const closeError = new Error('HttpStream was closed');
-const REQUEST_TIMEOUT = 10000;
 
 AbortSignal.timeout ??= function timeout(ms) {
   const ctrl = new AbortController();

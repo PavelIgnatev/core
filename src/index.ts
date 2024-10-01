@@ -11,9 +11,9 @@ import { usersMe } from './methods/users/usersMe';
 import { accountSetup } from './modules/accountSetup';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
+import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
-import { handleUpdate } from './modules/handleUpdate';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -46,14 +46,33 @@ const main = async (ID: string) => {
     client = await initClient(account, ID, (update: any) =>
       handleUpdate(ID, update, () => (isAutoResponse = true))
     );
-    setOffline(client, false);
 
-    setOnlineInterval = setInterval(() => {
-      setOffline(client, false);
-    }, 60000);
+    setOnlineInterval = setInterval(async () => {
+      try {
+        if (
+          !client?._sender._user_connected ||
+          client?._sender?.isReconnecting
+        ) {
+          return;
+        }
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            reject(new Error('Not connected'));
+          }, 30000);
+        });
+
+        await Promise.race([setOffline(client, false), timeoutPromise]);
+      } catch (error: any) {
+        console.log(red(`[${ID}] Error in setOffline: ${error.message}`));
+
+        client?._sender?.reconnect();
+      }
+    }, 30000);
+
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = 0;
+    const randomI = Math.floor(Math.random() * 26);
 
     for (let i = 0; i < 30; i++) {
       console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
@@ -79,7 +98,7 @@ const main = async (ID: string) => {
           }
 
           if (i === randomI) {
-            // await autoSender(client, ID, tgAccountId);
+            await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
               `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${yellow(String(randomI + 1))}`
@@ -146,9 +165,9 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  promises.push(main('+79504965469-256-after-lolz-new-19-sep-prefix-premium'));
-  // });
+  accounts.forEach((accountId: string) => {
+  promises.push(main(accountId));
+  });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
