@@ -690,42 +690,18 @@ function getDC(dcId, downloadDC = false) {
     default:
       throw new Error(`Cannot find the DC with the ID of ${dcId}`);
   }
-  // TODO chose based on current connection method
-  /*
-    if (!this._config) {
-        this._config = await this.invoke(new requests.help.GetConfig())
-    }
-    if (cdn && !this._cdnConfig) {
-        this._cdnConfig = await this.invoke(new requests.help.GetCdnConfig())
-        for (const pk of this._cdnConfig.publicKeys) {
-            addKey(pk.publicKey)
-        }
-    }
-    for (const DC of this._config.dcOptions) {
-        if (DC.id === dcId && Boolean(DC.ipv6) === this._useIPV6 && Boolean(DC.cdn) === cdn) {
-            return DC
-        }
-    } */
 }
 
 module.exports = {
   getMessageId,
-  // _getEntityPair,
-  // getInputMessage,
-  // getInputDialog,
-  // getInputUser,
-  // getInputChannel,
+
   getInputPeer,
-  // parsePhone,
-  // parseUsername,
-  // getPeer,
-  // getPeerId,
+
   getDisplayName,
-  // resolveId,
-  // isListLike,
+
   getDownloadPartSize,
   getUploadPartSize,
-  // getInputLocation,
+
   strippedPhotoToJpg,
   getDC,
 };

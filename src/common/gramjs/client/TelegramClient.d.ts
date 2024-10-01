@@ -30,12 +30,6 @@ declare class TelegramClient {
     ttl?: number
   ): Promise<TmpPasswordResult>;
 
-  setPingCallback(callback: () => Promise<void>);
-
-  setForceHttpTransport: (forceHttpTransport: boolean) => void;
-
-  setAllowHttpTransport: (allowHttpTransport: boolean) => void;
-
   // Untyped methods.
   [prop: string]: any;
 }

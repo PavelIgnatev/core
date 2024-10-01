@@ -16370,7 +16370,6 @@ namespace Api {
       Partial<{
         phoneNumber: string;
         apiId: int;
-        apiHash: string;
         settings: Api.TypeCodeSettings;
       }>,
       auth.TypeSentCode
@@ -16379,7 +16378,6 @@ namespace Api {
 
       apiId: int;
 
-      apiHash: string;
 
       settings: Api.TypeCodeSettings;
     }
@@ -16466,7 +16464,6 @@ namespace Api {
       Partial<{
         // flags: int;
         apiId: int;
-        apiHash: string;
         botAuthToken: string;
       }>,
       auth.TypeAuthorization
@@ -16474,7 +16471,6 @@ namespace Api {
       // flags: int;
       apiId: int;
 
-      apiHash: string;
 
       botAuthToken: string;
     }
@@ -16536,14 +16532,12 @@ namespace Api {
     export class ExportLoginToken extends Request<
       Partial<{
         apiId: int;
-        apiHash: string;
         exceptIds: long[];
       }>,
       auth.TypeLoginToken
     > {
       apiId: int;
 
-      apiHash: string;
 
       exceptIds: long[];
     }
@@ -16574,14 +16568,12 @@ namespace Api {
     export class ImportWebTokenAuthorization extends Request<
       Partial<{
         apiId: int;
-        apiHash: string;
         webAuthToken: string;
       }>,
       auth.TypeAuthorization
     > {
       apiId: int;
 
-      apiHash: string;
 
       webAuthToken: string;
     }

@@ -26,7 +26,7 @@ export const getDialogs = async (client: any, accountId: string) => {
       limit: 100,
     })
   );
-
+  
   if (!clientDialogs?.users?.length) {
     return [];
   }

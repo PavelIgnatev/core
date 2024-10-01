@@ -41,34 +41,17 @@ class HttpStream {
     return data;
   }
 
-  static getURL(
-    ip: string,
-    port: number,
-    testServers: boolean,
-    isPremium: boolean
-  ) {
-    if (port === 443) {
-      return `https://${ip}:${port}/apiw1${testServers ? '_test' : ''}${
-        isPremium ? '_premium' : ''
-      }`;
-    }
-    return `http://${ip}:${port}/apiw1${testServers ? '_test' : ''}${
-      isPremium ? '_premium' : ''
-    }`;
+  static getURL(ip: string, port: number) {
+    return `https://${ip}:${port}/apiw1`;
   }
 
-  async connect(
-    port: number,
-    ip: string,
-    testServers = false,
-    isPremium = false
-  ) {
+  async connect(port: number, ip: string) {
     this.stream = [];
     this.canRead = new Promise((resolve, reject) => {
       this.resolveRead = resolve;
       this.rejectRead = reject;
     });
-    this.url = HttpStream.getURL(ip, port, testServers, isPremium);
+    this.url = HttpStream.getURL(ip, port);
 
     this.isClosed = false;
   }

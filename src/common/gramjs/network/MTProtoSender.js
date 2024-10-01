@@ -34,10 +34,7 @@ const { SecurityError } = require('../errors/Common');
 const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
-
-const LONGPOLL_MAX_WAIT = 3000;
-const LONGPOLL_MAX_DELAY = 500;
-const LONGPOLL_WAIT_AFTER = 150;
+const { sendToBot } = require('../../../helpers/sendToBot');
 
 /**
  * MTProto Mobile Protocol sender
@@ -56,11 +53,8 @@ class MTProtoSender {
   static DEFAULT_OPTIONS = {
     logger: null,
     retries: Infinity,
-    retriesToFallback: 1000000000000,
     delay: 2000,
     retryMainConnectionDelay: 10000,
-    shouldForceHttpTransport: false,
-    shouldAllowHttpTransport: false,
     autoReconnect: true,
     connectTimeout: undefined,
     authKeyCallback: undefined,
@@ -69,7 +63,6 @@ class MTProtoSender {
     isMainSender: undefined,
     onConnectionBreak: undefined,
     isExported: undefined,
-    getShouldDebugExportedSenders: undefined,
   };
 
   /**
@@ -79,26 +72,19 @@ class MTProtoSender {
   constructor(authKey, opts) {
     const args = { ...MTProtoSender.DEFAULT_OPTIONS, ...opts };
     this._connection = undefined;
-    this._fallbackConnection = undefined;
-    this._shouldForceHttpTransport = args.shouldForceHttpTransport;
-    this._shouldAllowHttpTransport = args.shouldAllowHttpTransport;
     this.log = null;
     this._dcId = args.dcId;
     this._senderIndex = args.senderIndex;
     this._retries = args.retries;
-    this._retriesToFallback = args.retriesToFallback;
     this._delay = args.delay;
     this._retryMainConnectionDelay = args.retryMainConnectionDelay;
     this._autoReconnect = args.autoReconnect;
     this._connectTimeout = args.connectTimeout;
-    this._authKeyCallback = args.authKeyCallback;
     this._updateCallback = args.updateCallback;
     this._autoReconnectCallback = args.autoReconnectCallback;
     this._isMainSender = args.isMainSender;
     this._isExported = args.isExported;
     this._onConnectionBreak = args.onConnectionBreak;
-    this._isFallback = false;
-    this._getShouldDebugExportedSenders = args.getShouldDebugExportedSenders;
     this._accountId = args.accountId;
 
     /**
@@ -196,10 +182,9 @@ class MTProtoSender {
    * Connects to the specified given connection using the given auth key.
    * @param connection
    * @param [force]
-   * @param fallbackConnection
    * @returns {Promise<boolean>}
    */
-  async connect(connection, force, fallbackConnection) {
+  async connect(connection, force) {
     this.userDisconnected = false;
 
     if (this._user_connected && !force) {
@@ -207,15 +192,9 @@ class MTProtoSender {
       return false;
     }
     this.isConnecting = true;
-    this._isFallback = false;
     this._connection = connection;
-    this._fallbackConnection = fallbackConnection;
 
-    for (
-      let attempt = 0;
-      attempt < this._retries + this._retriesToFallback;
-      attempt++
-    ) {
+    for (let attempt = 0; attempt < attempt + 1; attempt++) {
       try {
         console.log(`[${this._accountId}] Connecting...`);
         await this._connect(this.getConnection());
@@ -329,31 +308,9 @@ class MTProtoSender {
     }
 
     if (!this.authKey.getKey()) {
-      const plain = new MtProtoPlainSender(connection, console.log);
-      console.log(red(`[${this._accountId}] New auth_key attempt ...`));
-      const res = await doAuthentication(plain, console.log);
-      console.log(
-        red(`[${this._accountId}] Generated new auth_key successfully`)
+      await sendToBot(
+        `[${this._accountId}] Auth Key Get Key not defined, !!dangerous!!`
       );
-      await this.authKey.setKey(res.authKey);
-
-      this._state.timeOffset = res.timeOffset;
-
-      if (!this._isExported) {
-        this._updateCallback?.(
-          new UpdateServerTimeOffset(this._state.timeOffset)
-        );
-      }
-
-      /**
-       * This is *EXTREMELY* important since we don't control
-       * external references to the authorization key, we must
-       * notify whenever we change it. This is crucial when we
-       * switch to different data centers.
-       */
-      if (this._authKeyCallback) {
-        await this._authKeyCallback(this.authKey, this._dcId);
-      }
     } else {
       this._authenticated = true;
       console.log(`[${this._accountId}] Already have an auth key ...`);
@@ -480,8 +437,6 @@ class MTProtoSender {
         this._send_loop_handle = undefined;
         return;
       }
-
-      
 
       data = await this._state.encryptMessageData(data);
 
@@ -1031,21 +986,10 @@ class MTProtoSender {
       this._connection._ip,
       this._connection._port,
       this._connection._dcId,
-      this._connection._log,
-      this._connection._testServers,
-      false,
       this._accountId
     );
-    const newFallbackConnection = new this._fallbackConnection.constructor(
-      this._connection._ip,
-      this._connection._port,
-      this._connection._dcId,
-      this._connection._log,
-      this._connection._testServers,
-      false,
-      this._accountId
-    );
-    await this.connect(newConnection, true, newFallbackConnection);
+
+    await this.connect(newConnection, true);
 
     this.isReconnecting = false;
     this._send_queue.prepend(this._pending_state.values());

@@ -17,12 +17,10 @@ const { red } = require('colors/safe');
 class Connection {
   PacketCodecClass = undefined;
 
-  constructor(ip, port, dcId, loggers, testServers, isPremium, accountId) {
+  constructor(ip, port, dcId, accountId) {
     this._ip = ip;
     this._port = port;
     this._dcId = dcId;
-    this._testServers = testServers;
-    this._isPremium = isPremium;
     this._connected = false;
     this._sendTask = undefined;
     this._recvTask = undefined;
@@ -187,47 +185,9 @@ class PacketCodec {
   }
 }
 
-class HttpConnection extends Connection {
-  constructor(ip, port, dcId, loggers, testServers, isPremium, accountId) {
-    super(ip, port, dcId, loggers, testServers, isPremium, accountId);
-    this.shouldLongPoll = true;
-    this.socket = new HttpStream(this.disconnectCallback.bind(this));
-    this.href = HttpStream.getURL(
-      this._ip,
-      this._port,
-      this._testServers,
-      this._isPremium
-    );
-  }
-
-  send(data) {
-    return this.socket.write(data);
-  }
-
-  recv() {
-    return this.socket.read();
-  }
-
-  async _connect() {
-    console.log(`[${this._accountId}] Connecting`);
-    await this.socket.connect(
-      this._port,
-      this._ip,
-      this._testServers,
-      this._isPremium
-    );
-    console.log(`[${this._accountId}] Finished connecting`);
-  }
-
-  async connect() {
-    await this._connect();
-    this._connected = true;
-  }
-}
 
 module.exports = {
   Connection,
   PacketCodec,
   ObfuscatedConnection,
-  HttpConnection,
 };

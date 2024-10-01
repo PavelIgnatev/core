@@ -6,14 +6,12 @@ const {
   ConnectionTCPFull,
   ConnectionTCPAbridged,
   ConnectionTCPObfuscated,
-  HttpConnection,
 } = require('./connection');
 
 const { UpdateConnectionState, UpdateServerTimeOffset } = require('./updates');
 
 module.exports = {
   Connection,
-  HttpConnection,
   ConnectionTCPFull,
   ConnectionTCPAbridged,
   ConnectionTCPObfuscated,

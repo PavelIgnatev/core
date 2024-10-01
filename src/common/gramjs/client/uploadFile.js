@@ -42,11 +42,7 @@ export async function uploadFile(client, reailFile) {
         while (true) {
           let sender;
           try {
-            sender = await client.getSender(
-              client.session.dcId,
-              senderIndex,
-              false
-            );
+            sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
 
             await sender.send(

@@ -1,16 +1,8 @@
-import BigInt from 'big-integer';
-import { yellow } from 'colors/safe';
-
 import GramJs from './tl/api';
 import CallbackSession from './sessions/CallbackSession';
 import TelegramClient from './client/TelegramClient';
 
-import { getDialogue } from '../../db/dialogues';
-
 import { Account } from '../../@types/Account';
-
-const DEFAULT_USER_AGENT = 'Unknown UserAgent';
-const DEFAULT_PLATFORM = 'Unknown platform';
 
 export async function init(
   accountData: Account,
@@ -33,27 +25,11 @@ export async function init(
   };
   const session = new CallbackSession(sessionData, () => {});
 
-  const client = new TelegramClient(
-    session,
-    2496,
-    '8da85b0d5bfe62527e5b244c209159c3',
-    {
-      deviceModel: userAgent || DEFAULT_USER_AGENT,
-      systemVersion: platform || DEFAULT_PLATFORM,
-      appVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
-        Math.random() * 10
-      )}.${Math.floor(Math.random() * 10)} A`,
-      useWSS: true,
-      additionalDcsDisabled: false,
-      shouldDebugExportedSenders: undefined,
-      shouldForceHttpTransport: undefined,
-      shouldAllowHttpTransport: true,
-      testServers: false,
-      dcId: undefined,
-      langCode: 'en',
-      accountId,
-    }
-  );
+  const client = new TelegramClient(session, 2496, {
+    deviceModel: userAgent,
+    systemVersion: platform,
+    accountId,
+  });
 
   if (!client) {
     throw new Error('Client not inited');
@@ -66,44 +42,7 @@ export async function init(
       if (!(update instanceof GramJs.UpdatesTooLong)) {
         const updates = 'updates' in update ? update.updates : [update];
         updates.forEach(async (update: any) => {
-          if (
-            update instanceof GramJs.UpdateNewMessage ||
-            update instanceof GramJs.UpdateShortMessage
-          ) {
-            const {
-              userId: varUserId,
-              message: { peerId: { userId: peerUserId } = {} as any } = {},
-            } = update as any;
-            const userId = varUserId || peerUserId;
-
-            const isDialogInDb = await getDialogue(
-              accountData.accountId,
-              String(userId)
-            );
-
-            if (isDialogInDb && userId instanceof BigInt) {
-              console.log(
-                `[${accountData.accountId}]`,
-                yellow(
-                  `New message "${
-                    update.message
-                  }" from user by id#${String(userId)}`
-                )
-              );
-
-              onUpdate(userId);
-            } else if (update.className !== 'UpdateConnectionState') {
-              console.log(
-                `[${accountData.accountId}]`,
-                yellow(`Update handler: "${update.className}"`)
-              );
-            }
-          } else if (update.className !== 'UpdateConnectionState') {
-            console.log(
-              `[${accountData.accountId}]`,
-              yellow(`Update handler: "${update.className}"`)
-            );
-          }
+          onUpdate(update);
         });
       }
     },

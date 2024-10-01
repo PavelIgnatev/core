@@ -13,6 +13,7 @@ import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 
 import './helpers/setConsole.log';
+import { handleUpdate } from './modules/handleUpdate';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -42,14 +43,17 @@ const main = async (ID: string) => {
       throw new Error('Insufficient number of parameters to start');
     }
 
-    client = await initClient(account, ID, () => (isAutoResponse = true));
+    client = await initClient(account, ID, (update: any) =>
+      handleUpdate(ID, update, () => (isAutoResponse = true))
+    );
+    setOffline(client, false);
 
     setOnlineInterval = setInterval(() => {
-      setOffline(client, ID, false);
+      setOffline(client, false);
     }, 60000);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 26);
+    const randomI = 0;
 
     for (let i = 0; i < 30; i++) {
       console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
@@ -75,15 +79,14 @@ const main = async (ID: string) => {
           }
 
           if (i === randomI) {
-            await autoSender(client, ID, tgAccountId);
+            // await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
               `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${yellow(String(randomI + 1))}`
             );
           }
-
-          await new Promise((res) => setTimeout(res, 60000));
           console.log(`[${ID}]`, yellow(`End iteration [${i + 1}]`));
+          await new Promise((res) => setTimeout(res, 60000));
         })(),
         timeout,
       ]);
@@ -143,9 +146,9 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('+79504965469-256-after-lolz-new-19-sep-prefix-premium'));
+  // });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
