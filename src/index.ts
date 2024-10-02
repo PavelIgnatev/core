@@ -168,11 +168,9 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  promises.push(
-    main('678aeed1-a0a7-450b-83f4-5830493608a1-25906019-uk-test-50')
-  );
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
