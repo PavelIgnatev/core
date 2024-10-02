@@ -98,7 +98,7 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
-          if (true) {
+          if (i === randomI) {
             await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
