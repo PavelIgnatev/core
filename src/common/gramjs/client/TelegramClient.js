@@ -54,7 +54,9 @@ class TelegramClient {
     this._accountId = args.accountId;
 
     this._initWith = (x) => {
-      console.log(`[${this._accountId}] ${yellow('Account layer initialization')}`);
+      console.log(
+        `[${this._accountId}] ${yellow('Account layer initialization')}`
+      );
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
@@ -251,8 +253,6 @@ class TelegramClient {
     if (!this.isConnected()) {
       await this.connect();
     }
-
-    await clearAuthorizations(this);
   }
 
   uploadFile(fileParams) {

@@ -9,12 +9,12 @@ export const initClient = async (
   account: Account,
   accountId: string,
   onUpdate: any
-) => {
+): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error('Global Error (timeout)'));
-      }, 90000);
+        reject(new Error('TIMEOUT_ERROR'));
+      }, 90000); 
     });
 
     const client = await Promise.race([
@@ -28,6 +28,13 @@ export const initClient = async (
 
     return client as TelegramClient;
   } catch (e: any) {
+    if (e.message === 'TIMEOUT_ERROR') {
+      console.log(
+        red(`[${account.accountId}] Timeout error. Retrying init client...`)
+      );
+      return await initClient(account, accountId, onUpdate);
+    }
+
     if (
       [
         'USER_DEACTIVATED_BAN',

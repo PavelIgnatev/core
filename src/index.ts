@@ -14,6 +14,7 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
+import { clearAuthorizations } from './common/gramjs/client/auth';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -71,6 +72,7 @@ const main = async (ID: string) => {
     }, 10000);
 
     await new Promise((res) => setTimeout(res, 30000));
+    await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 26);
@@ -166,9 +168,11 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(
+    main('678aeed1-a0a7-450b-83f4-5830493608a1-25906019-uk-test-50')
+  );
+  // });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
