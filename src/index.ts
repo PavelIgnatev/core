@@ -58,18 +58,19 @@ const main = async (ID: string) => {
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            reject(new Error('Not connected'));
-          }, 30000);
+            reject(new Error());
+          }, 10000);
         });
 
         await Promise.race([setOffline(client, false), timeoutPromise]);
       } catch (error: any) {
-        console.log(red(`[${ID}] Error in setOffline: ${error.message}`));
+        console.log(red(`[${ID}] reconnect due to set offline`));
 
         client?._sender?.reconnect();
       }
-    }, 30000);
+    }, 10000);
 
+    await new Promise((res) => setTimeout(res, 30000));
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 26);
@@ -97,7 +98,7 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
-          if (i === randomI) {
+          if (true) {
             await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
@@ -165,9 +166,9 @@ const main = async (ID: string) => {
 
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-  promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('+79526738275-256-after-lolz-new-19-sep-prefix-premium'));
+  // });
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);

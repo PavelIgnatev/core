@@ -26,9 +26,9 @@ export const getDialogs = async (client: any, accountId: string) => {
       limit: 100,
     })
   );
-  
+
   if (!clientDialogs?.users?.length) {
-    return [];
+    return [[], [], []];
   }
 
   const pingDialogsDB = await getPingDialogues(accountId);
@@ -98,8 +98,11 @@ export const getDialogs = async (client: any, accountId: string) => {
 
       if (!groupId) {
         await sendToBot(`~GROUP ID NOT DEFINED~
-AccountId: ${accountId}`);
-        return [];
+AccountId: ${accountId}
+UserID: ${user.id}`);
+        await deleteMessages(client, accountId, user.id, user.accessHash);
+
+        return [[], [], []];
       }
 
       if (blocked) {

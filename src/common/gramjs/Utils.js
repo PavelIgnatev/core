@@ -589,12 +589,6 @@ function parseUsername(username) {
     }
 }
 
-function rtrim(s, mask) {
-    while (~mask.indexOf(s[s.length - 1])) {
-        s = s.slice(0, -1)
-    }
-    return s
-}
 
  */
 
