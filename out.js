@@ -75197,7 +75197,9 @@ var main = async (ID) => {
 };
 getAccounts().then((accounts) => {
   const startTime = performance.now();
-  promises.push(main("+79526738275-256-after-lolz-new-19-sep-prefix-premium"));
+  accounts.forEach((accountId2) => {
+    promises.push(main(accountId2));
+  });
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1e3);
     const minutes = Math.floor(time / 60);
