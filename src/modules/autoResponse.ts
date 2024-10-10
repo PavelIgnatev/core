@@ -1,7 +1,6 @@
 import { yellow } from 'colors/safe';
 
 import { getDialogs } from './getDialogs';
-import { makeRequestComplete } from './makeRequestComplete';
 import { makeRequestGpt } from './makeRequestGpt';
 import { saveRecipient } from './saveRecipient';
 import { getGroupId } from '../db/groupId';
@@ -11,34 +10,7 @@ import { getDateNow } from '../helpers/getDateNow';
 import { sendToFormBot } from '../helpers/sendToFormBot';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { getFullUser } from '../methods/users/getFullUser';
-
-const gptRequestWrapper = async (
-  language: string,
-  message: string,
-  dialogGroupId: string,
-  accountId: string,
-  meName: string,
-  part: string | null
-) => {
-  const result = await makeRequestGpt(
-    `## CLARIFICATION CONTEXT
-You are **${meName}** (man).
-
-## CLARIFICATION GUIDELINES
-- Ensure the reply is in **${language}**.
-- The original meaning must be **completely** preserved, without any deviation.
-- Use the formal "You" when addressing others to maintain a respectful tone in communication;
-
-## CLARIFICATION INSTRUCTIONS
-Clarify the text within quotes (***) while following the **CLARIFICATION GUIDELINES**. Preserve the original meaning, structure, and number of sentences. Use only **${language}**. Ensure the text remains distinct, but similar to the original, with an emphasis on clarity. Avoid excessive rephrasing and ensure precision without adding extra words or phrases.`,
-    `TEXT TO CLARIFY: ***${message}***`,
-    dialogGroupId,
-    accountId,
-    part
-  );
-
-  return result;
-};
+import { extractLastQuestion } from '../helpers/extractLastQuestion';
 
 export const autoResponse = async (
   client: any,
@@ -90,142 +62,160 @@ export const autoResponse = async (
       part = '',
       addedQuestion = '',
       secondAddedQuestion = '',
-      styleGuide = '',
       language = 'RUSSIAN',
       flowHandling = '',
+      messagesCount = 4,
     } = groupId || ({} as any);
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
-    const parted = stage === 2 && part ? part : null;
-    const wreplyMessage = await makeRequestComplete(
-      `## REPLY CONTEXT
-You **${meName}**, take on the identity of **${aiRole}**.
-Your conversation partner **${userName}** (role: USER) is the person you started chatting with on Telegram. While specific details about where you met are not available, it is important to note that **${userName}** is a real person. The conversation is private and the focus is on creating a natural and engaging interaction. The current date is **${getDateNow()}**.
+    const parted = stage === 2 && part ? part : '';
+    const hasQuestion =
+      stage === 1 && addedQuestion
+        ? addedQuestion
+        : stage === 2 && secondAddedQuestion
+          ? secondAddedQuestion
+          : '';
 
-## REPLY GUIDELINES${
-        part
-          ? `\n- **Include part** of the conversation from **${part}** in your reply (!!IMPORTANT!!);`
+    const replyMessage = await makeRequestGpt(
+      `!!Your goal is meaningfully reply to the interlocutor (role: **INTERLOCUTOR MESSAGE**) while following the guidelines ***REPLY GUIDELINES*** in **${language}** language. ${
+        stage === 2 && goal ? `***${goal}***` : ''
+      }!!
+          
+## REPLY CONTEXT
+Your role: **MY MESSAGE**. 
+Your first name **${meName}** (role: **MY MESSAGE**) ${
+        stage <= 2 ? `, take on the identity of **${aiRole}**` : ''
+      }. The conversation is private and the focus is on creating a natural and engaging interaction.${
+        stage === 1
+          ? '\nThe conversation was initiated by **MY MESSAGE** to ask a question, establish a connection, and eventually present a tailored offer to the interlocutor. '
           : ''
-      }${
-        stage <= 2
-          ? `\n- **Minimum 2 messages (100 characters) in REPLY**\n- **Do not ask questions under any circumstances**. The text should contain only affirmative sentences;`
+      }Your chat interlocutor "${userName}" (role: **INTERLOCUTOR MESSAGE**) is the person you are chatting with within the Telegram messenger. You do not know each other and have not seen each other in real life. While specific details about where you met are not available, it is important to note that **INTERLOCUTOR MESSAGE** is a real person, human. The current date is **${getDateNow()}**.
+
+## REPLY GUIDELINES
+- Ensure the reply is in **${language}**;
+- Always reference the **INTERLOCUTOR MESSAGE** directly in your reply, ensuring your response logically follows from and adds value to their last statement or question;
+- Reply must contain **strictly** **${
+        hasQuestion ? `${messagesCount || 4}` : '2'
+      } affirmative sentences** ${
+        hasQuestion
+          ? `plus **1 question '${generateRandomString(hasQuestion)}'**`
+          : ''
+      }, but small deviations are acceptable if they help to improve the message.${
+        parted
+          ? `\n- The phrase "${parted}" must appear in the reply. Adjust the rest of the response to include this phrase seamlessly.`
           : ''
       }
-- **Do not** use unnecessary greetings or filler phrases ([], {}, <> and etc);
-- Follow the style guide: **${styleGuide}**;
-- Ensure the reply is in **${language}**;
+- **Do not** ever introduce yourself a first name **${meName}**;
+- **Do not** use unnecessary greetings;
+- **Do not** use filler phrases ([], {}, <> and etc);`,
+      `## CURRENT DIALOG HISTORY
+${messages
+  .map(
+    (m: { id: number; text: string; fromId: string; date: number }) =>
+      `${m.fromId === String(id) ? '**INTERLOCUTOR MESSAGE**' : '**MY MESSAGE**'}: ${m.text.slice(0, 500)}`
+  )
+  .join('\n')}
 
-## REPLY INSTRUCTIONS
-!!REPLY to the last message from **${userName}** (role: USER) while following the ***REPLY GUIDELINES***. ${
-        stage >= 2 ? `***${goal}***` : ''
-      }!!`,
+**MY NEW MESSAGE FOR REPLY (in **${language}** language, ${
+        hasQuestion
+          ? `${messagesCount || 4} sentences + 1 question`
+          : '2 sentences'
+      })**:`,
+      parted,
       [
         {
-          title: 'YOUR_COMPANY_DESCRIPTION',
-          text: companyDescription || '',
+          data: {
+            title: 'CURRENT_DIALOG_HISTORY',
+            text:
+              stage === 1
+                ? `## CURRENT DIALOG HISTORY
+${messages
+  .map(
+    (m: { id: number; text: string; fromId: string; date: number }) =>
+      `${m.fromId === String(id) ? '**INTERLOCUTOR MESSAGE**' : '**MY MESSAGE**'}: ${m.text.slice(0, 500)}`
+  )
+  .join('\n')}
+
+The conversation was initiated by **MY MESSAGE** to ask a question, establish a connection, and eventually present a tailored offer to the interlocutor. 
+In the **CURRENT DIALOG HISTORY**, **MY MESSAGE** represents your **${meName} messages**, and **INTERLOCUTOR MESSAGE** represents the messages from the other **person ${userName}**.`
+                : '',
+          },
         },
         {
-          title: 'YOUR_COMMON_FLOW_HANDLING',
-          text: flowHandling || '',
+          data: {
+            title: 'YOUR_COMPANY_DESCRIPTION',
+            text: companyDescription || '',
+          },
         },
         {
-          title: 'YOUR_COMPANY_ADDED_INFORMATION',
-          text: addedInformation || '',
+          data: {
+            title: 'YOUR_COMMON_FLOW_HANDLING',
+            text: flowHandling || '',
+          },
+        },
+        {
+          data: {
+            title: 'YOUR_COMPANY_ADDED_INFORMATION',
+            text: addedInformation || '',
+          },
         },
       ],
+      language,
       stage === 1,
       stage <= 2,
-      stage <= 2 ? 2 : 1,
-      parted,
-      chatHistory,
-      dialogGroupId,
-      accountId
-    );
-    const replyMessage = await gptRequestWrapper(
-      language,
-      wreplyMessage,
-      dialogGroupId,
+      stage <= 2 ? 3 : 1,
       accountId,
-      meName,
-      parted
+      dialogGroupId
     );
 
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
-ДО: ${wreplyMessage}
-ПОСЛЕ: ${replyMessage}`);
-    const sentreplyMessage = await sendMessage(
-      client,
-      id,
-      accessHash,
-      replyMessage,
-      accountId
-    );
+${replyMessage}`);
 
-    messages.push({
-      id: sentreplyMessage.id,
-      text: replyMessage,
-      fromId: tgAccountId,
-      date: Math.round(Date.now() / 1000),
-    });
-
-    if (stage === 1 && addedQuestion) {
-      const genQuestion = generateRandomString(addedQuestion);
-      const genAddedQuestion = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId,
-        meName,
-        null
-      );
-
-      const sentAddedQuestion = await sendMessage(
+    const lastQuestion = extractLastQuestion(replyMessage);
+    if (lastQuestion) {
+      const sentReplyMessage = await sendMessage(
         client,
         id,
         accessHash,
-        genAddedQuestion,
+        replyMessage.replace(lastQuestion, ''),
         accountId
       );
-      messages.push({
-        id: sentAddedQuestion.id,
-        text: genAddedQuestion,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1000),
-      });
 
-      await sendToFormBot(`**** FIRST ADDED MESSAGE (${language}) ****
-ДО: ${genQuestion}
-ПОСЛЕ: ${genAddedQuestion}`);
-    }
-
-    if (stage === 2 && secondAddedQuestion) {
-      const genQuestion = generateRandomString(secondAddedQuestion);
-      const genAddedQuestion = await gptRequestWrapper(
-        language,
-        genQuestion,
-        dialogGroupId,
-        accountId,
-        meName,
-        null
-      );
-      const sentSecondAddedQuestion = await sendMessage(
+      const sentQuestionMessage = await sendMessage(
         client,
         id,
         accessHash,
-        genAddedQuestion,
+        lastQuestion,
         accountId
       );
 
       messages.push({
-        id: sentSecondAddedQuestion.id,
-        text: genAddedQuestion,
+        id: sentReplyMessage.id,
+        text: replyMessage.replace(lastQuestion, ''),
         fromId: tgAccountId,
         date: Math.round(Date.now() / 1000),
       });
+      messages.push({
+        id: sentQuestionMessage.id,
+        text: lastQuestion,
+        fromId: tgAccountId,
+        date: Math.round(Date.now() / 1000),
+      });
+    } else {
+      const sentReplyMessage = await sendMessage(
+        client,
+        id,
+        accessHash,
+        replyMessage,
+        accountId
+      );
 
-      await sendToFormBot(`**** SECOND ADDED MESSAGE (${language}) ****
-ДО: ${genQuestion}
-ПОСЛЕ: ${genAddedQuestion}`);
+      messages.push({
+        id: sentReplyMessage.id,
+        text: replyMessage,
+        fromId: tgAccountId,
+        date: Math.round(Date.now() / 1000),
+      });
     }
 
     await saveRecipient(accountId, recipientFull, dialog, messages, 'update');
@@ -268,9 +258,14 @@ Today's date is ${getDateNow()};
       
 ## DIALOG
 ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
-      dialogGroupId,
+      '',
+      [],
+      'ANY',
+      false,
+      false,
+      1,
       accountId,
-      null
+      dialogGroupId
     );
 
     const sentPingMessage = await sendMessage(

@@ -1,4 +1,3 @@
-const MTProtoPlainSender = require('./MTProtoPlainSender');
 const MTProtoSender = require('./MTProtoSender');
 
 const {
@@ -15,7 +14,6 @@ module.exports = {
   ConnectionTCPFull,
   ConnectionTCPAbridged,
   ConnectionTCPObfuscated,
-  MTProtoPlainSender,
   MTProtoSender,
   UpdateConnectionState,
   UpdateServerTimeOffset,

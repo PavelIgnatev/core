@@ -26,13 +26,6 @@ class MTProtoState {
      the concept of "copying" sessions with the unnecessary entities or
      updates state for these connections doesn't make sense.
 
-     While it would be possible to have a `MTProtoPlainState` that does no
-     encryption so that it was usable through the `MTProtoLayer` and thus
-     avoid the need for a `MTProtoPlainSender`, the `MTProtoLayer` is more
-     focused to efficiency and this state is also more advanced (since it
-     supports gzipping and invoking after other message IDs). There are too
-     many methods that would be needed to make it convenient to use for the
-     authentication process, at which point the `MTProtoPlainSender` is better
      * @param authKey
      * @param loggers
      * @param isCall

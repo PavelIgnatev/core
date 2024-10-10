@@ -2,11 +2,9 @@ const { red, blue, green, yellow } = require('colors/safe');
 
 const { RPCError } = require('../errors');
 
-const MtProtoPlainSender = require('./MTProtoPlainSender');
 const MTProtoState = require('./MTProtoState');
 const Helpers = require('../Helpers');
 const AuthKey = require('../crypto/AuthKey');
-const { doAuthentication } = require('./Authenticator');
 const RPCResult = require('../tl/core/RPCResult');
 const MessageContainer = require('../tl/core/MessageContainer');
 const GZIPPacked = require('../tl/core/GZIPPacked');
