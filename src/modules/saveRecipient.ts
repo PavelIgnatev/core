@@ -15,7 +15,7 @@ import { updateSendMessage } from '../db/groupIdUsers';
 export const saveRecipient = async (
   accountId: string,
   recipient: GramJs.users.UserFull,
-  recipientDb: Dialogue & { username?: string },
+  recipientDb: Dialogue & { username: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: 'create' | 'update',
   addedData: Record<string, unknown> = {},
@@ -82,7 +82,7 @@ export const saveRecipient = async (
           });
         }
 
-        await updateSendMessage(recUsername, String(groupId));
+        await updateSendMessage(recipientDb.username, String(groupId));
 
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
