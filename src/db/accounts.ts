@@ -11,6 +11,7 @@ export const getAccounts = async () => {
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
     stopped: { $ne: true },
+    setuped: { $ne: true },
   });
 
   return accounts;
@@ -66,7 +67,7 @@ export const stopAccountsByPrefix = async (prefix: string) => {
   const filteredAccountIds = accountIds.filter((accountId: string) =>
     accountId.includes(prefix)
   );
-  console.log(filteredAccountIds)
+  console.log(filteredAccountIds);
 
   if (filteredAccountIds.length > 0) {
     await accountCollection.updateMany(
