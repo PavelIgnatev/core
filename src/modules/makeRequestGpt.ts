@@ -12,7 +12,7 @@ const validateText = (
   }
 
   const companyDataLowerCase = companyData.toLowerCase();
-  const words = inputString.replace(/[.,!?;:'`"()«»…—\-]/g, ' ').split(/\s+/);
+  const words = inputString.replace(/[.,!?;:'`"()«»…—\-/]/g, ' ').split(/\s+/);
   const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
   const englishRegex = /^[a-z]+$/i;
 
@@ -164,15 +164,17 @@ function removeGreetings(text: string) {
 }
 
 export async function makeRequestGpt(
-  preamble: string,
-  message: string,
+  accountId: string,
+  messages: {
+    role: 'assistant' | 'system' | 'user';
+    content: string;
+  }[],
   part: string,
-  documents: { data: { title: string; text: string } }[],
   language: 'ENGLISH' | 'RUSSIAN' | 'UKRAINIAN' | 'ANY',
   disableLink: boolean,
   mandatoryQuestion: boolean,
   minimalProposalLength: number,
-  accountId: string,
+  isRemoveGreetings: boolean,
   groupId: string | null
 ) {
   const generations = [];
@@ -184,27 +186,8 @@ export async function makeRequestGpt(
   );
   console.log(
     `[${accountId}] Current preamble :`,
-    gray(preamble.replace(/\n/g, ''))
+    gray(JSON.stringify(messages, null, 2))
   );
-  console.log(
-    `[${accountId}] Current message for preamble:`,
-    gray(message.replace(/\n/g, ''))
-  );
-
-  const generateData: Record<string, unknown> = {
-    messages: [
-      { role: 'system', content: preamble },
-      {
-        role: 'user',
-        content: message,
-      },
-    ],
-  };
-  const gptDocuments = documents.filter((data) => data?.data?.text);
-
-  if (gptDocuments.length > 0) {
-    generateData['documents'] = gptDocuments;
-  }
 
   for (let i = 0; i < 5; i++) {
     try {
@@ -216,7 +199,7 @@ export async function makeRequestGpt(
           presence_penalty: 0.8,
           p: 0.95,
           model: 'command-r-plus-08-2024',
-          ...generateData,
+          messages,
         }
       );
       const data = resultData?.message?.content?.[0]?.text || '';
@@ -236,7 +219,8 @@ export async function makeRequestGpt(
         /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
       const hasTextLink = message.match(pattern);
 
-      message = removeGreetings(message);
+      message = isRemoveGreetings ? removeGreetings(message) : message;
+      console.log(`[${accountId}] Var message: ${message}`)
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply contains a link at a stage where it is not allowed to send links'
@@ -275,11 +259,7 @@ export async function makeRequestGpt(
         );
       }
 
-      const text = validateText(
-        JSON.stringify(generateData),
-        varMessage,
-        language
-      );
+      const text = validateText(JSON.stringify(messages), varMessage, language);
       if (text) {
         throw new Error(
           `There is a word ${text} that is not in the original context, it must be added there by all means`
@@ -293,7 +273,7 @@ export async function makeRequestGpt(
       );
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
-      
+
       console.log(red(`[${accountId}] Request Gpt Error: ${error.message}`));
       errors.push(error.message);
     }

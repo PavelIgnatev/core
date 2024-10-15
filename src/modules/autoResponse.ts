@@ -77,94 +77,73 @@ export const autoResponse = async (
           : '';
 
     const replyMessage = await makeRequestGpt(
-      `!!Your goal is meaningfully reply to the interlocutor (role: **INTERLOCUTOR MESSAGE**) while following the guidelines ***REPLY GUIDELINES*** in **${language}** language. ${
-        stage === 2 && goal ? `***${goal}***` : ''
-      }!!
-          
-## REPLY CONTEXT
-Your role: **MY MESSAGE**. 
-Your first name **${meName}** (role: **MY MESSAGE**) ${
-        stage <= 2 ? `, take on the identity of **${aiRole}**` : ''
-      }. The conversation is private and the focus is on creating a natural and engaging interaction.${
-        stage === 1
-          ? '\nThe conversation was initiated by **MY MESSAGE** to ask a question, establish a connection, and eventually present a tailored offer to the interlocutor. '
-          : ''
-      }Your chat interlocutor "${userName}" (role: **INTERLOCUTOR MESSAGE**) is the person you are chatting with within the Telegram messenger. You do not know each other and have not seen each other in real life. While specific details about where you met are not available, it is important to note that **INTERLOCUTOR MESSAGE** is a real person, human. The current date is **${getDateNow()}**.
-
-## REPLY GUIDELINES
-- Ensure the reply is in **${language}**;
-- Always reference the **INTERLOCUTOR MESSAGE** directly in your reply, ensuring your response logically follows from and adds value to their last statement or question;
-- Reply must contain **strictly** **${
-        hasQuestion ? `${messagesCount || 4}` : '2'
-      } affirmative sentences** ${
-        hasQuestion
-          ? `plus **1 question '${generateRandomString(hasQuestion)}'**`
-          : ''
-      }, but small deviations are acceptable if they help to improve the message.${
-        parted
-          ? `\n- The phrase "${parted}" must appear in the reply. Adjust the rest of the response to include this phrase seamlessly.`
-          : ''
-      }
-- **Do not** ever introduce yourself a first name **${meName}**;
-- **Do not** use unnecessary greetings;
-- **Do not** use filler phrases ([], {}, <> and etc);`,
-      `## CURRENT DIALOG HISTORY
-${messages
-  .map(
-    (m: { id: number; text: string; fromId: string; date: number }) =>
-      `${m.fromId === String(id) ? '**INTERLOCUTOR MESSAGE**' : '**MY MESSAGE**'}: ${m.text.slice(0, 500)}`
-  )
-  .join('\n')}
-
-**MY NEW MESSAGE FOR REPLY (in **${language}** language, ${
-        hasQuestion
-          ? `${messagesCount || 4} sentences + 1 question`
-          : '2 sentences'
-      })**:`,
-      parted,
+      accountId,
       [
         {
-          data: {
-            title: 'CURRENT_DIALOG_HISTORY',
-            text:
-              stage === 1
-                ? `## CURRENT DIALOG HISTORY
-${messages
-  .map(
-    (m: { id: number; text: string; fromId: string; date: number }) =>
-      `${m.fromId === String(id) ? '**INTERLOCUTOR MESSAGE**' : '**MY MESSAGE**'}: ${m.text.slice(0, 500)}`
-  )
-  .join('\n')}
+          role: 'system',
+          content: `You are "${meName}" (role assistant), acting as "${aiRole}". Fully adopt this identity as a real person whose task is to deeply engage the interlocutor in the context of the YOUR_COMPANY_DESCRIPTION.
 
-The conversation was initiated by **MY MESSAGE** to ask a question, establish a connection, and eventually present a tailored offer to the interlocutor. 
-In the **CURRENT DIALOG HISTORY**, **MY MESSAGE** represents your **${meName} messages**, and **INTERLOCUTOR MESSAGE** represents the messages from the other **person ${userName}**.`
-                : '',
-          },
+Your chat interlocutor is "${userName}" (role user). You are conversing within the Telegram messenger. It is important to note that neither you nor the interlocutor know each other and have not met in real life. The interlocutor doesn't know you or the context of your message. ${
+            stage === 1
+              ? `Be concise and don't reveal all the details at once.`
+              : `Do not repeat information you've already shared. Provide new insights based on the conversation.`
+          }${stage >= 2 && goal ? `\n\n***${goal}***` : ''}
+**As "${meName}" (role: assistant), place special emphasis on the user "${userName}" (role user) last message. Carefully consider it and ensure your response directly addresses their points, questions, or concerns, incorporating relevant details or clarifications.**
+
+Current date and time: ${getDateNow()}
+
+Guidelines for your response:
+- Carefully consider the user "${userName}" (role user) last message, and ensure your response directly addresses it, incorporating relevant details or clarifications.
+- Your response should be approximately ${
+            messagesCount * 10
+          } words, consisting of ${messagesCount} sentences.
+- Do not use generic greetings like "Hello" or "Hi".
+- Avoid using direct name-based greetings unless it is essential for emotional or contextual clarity. 
+- If a name is used, ensure it is the translated first name in ${language}, avoiding any last or middle names.            
+- Use the company description to craft your response, highlighting relevant points for the user.
+- Focus on providing value based on the company's offerings.
+- Avoid making assumptions about the user's profession or activities.${
+            hasQuestion
+              ? `\n- Incorporate the following question at the end of your response: "${generateRandomString(hasQuestion)}". Do not add any other questions.`
+              : '\n- Conclude your response with a relevant, open-ended question to engage the user further.'
+          }${
+            parted
+              ? `\n- The phrase "${part}" must appear in the reply. Adjust the rest of the response to include this phrase seamlessly.`
+              : ''
+          }
+
+${
+  companyDescription
+    ? `## YOUR_COMPANY_DESCRIPTION
+${companyDescription}`
+    : ''
+}
+${
+  flowHandling
+    ? `## YOUR_COMMON_FLOW_HANDLING
+${flowHandling}`
+    : ''
+}
+${
+  addedInformation
+    ? `## ADDED_INFORMATION
+${addedInformation}`
+    : ''
+}`,
         },
-        {
-          data: {
-            title: 'YOUR_COMPANY_DESCRIPTION',
-            text: companyDescription || '',
-          },
-        },
-        {
-          data: {
-            title: 'YOUR_COMMON_FLOW_HANDLING',
-            text: flowHandling || '',
-          },
-        },
-        {
-          data: {
-            title: 'YOUR_COMPANY_ADDED_INFORMATION',
-            text: addedInformation || '',
-          },
-        },
+        ...messages.map(
+          (m: { id: number; text: string; fromId: string; date: number }) => ({
+            role: m.fromId === String(id) ? 'user' : 'assistant',
+            content: m.text,
+          })
+        ),
       ],
+      parted,
       language,
       stage === 1,
       stage <= 2,
       stage <= 2 ? 3 : 1,
-      accountId,
+      stage <= 2,
       dialogGroupId
     );
 
@@ -248,8 +227,15 @@ ${replyMessage}`);
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
     const pingMessage = await makeRequestGpt(
-      `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
-      `## STYLE GUIDE
+      accountId,
+      [
+        {
+          role: 'system',
+          content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
+        },
+        {
+          role: 'user',
+          content: `## STYLE GUIDE
 Maximum length of reminder message 100 characters
 
 ## USER DATA
@@ -258,13 +244,14 @@ Today's date is ${getDateNow()};
       
 ## DIALOG
 ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
+        },
+      ],
       '',
-      [],
       'ANY',
       false,
       false,
       1,
-      accountId,
+      false,
       dialogGroupId
     );
 
