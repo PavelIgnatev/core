@@ -100,10 +100,10 @@ Guidelines for your response:
 - Your response should be approximately ${
             messagesCount * 10
           } words, consisting of ${messagesCount} sentences.${
-  stage === 2
-    ? `\n- You must always start your response with a brief acknowledgment of the user's last message. This acknowledgment is mandatory and should be minimal, without building your response around it.`
-    : ''
-}
+            stage <= 2
+              ? `\n- You must always start your response with a brief acknowledgment of the user's last message. This acknowledgment is mandatory and should be minimal, without building your response around it.`
+              : ''
+          }
 - Response language: **${language}**.
 - Do not use generic greetings like "Hello" or "Hi".
 - Do not use the interlocutor name or any form of personal address under any circumstances.                    
