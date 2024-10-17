@@ -2,7 +2,10 @@ import 'dotenv/config';
 import { exec as childExec } from 'child_process';
 import { black, red, yellow } from 'colors/safe';
 import util from 'util';
+
 import TelegramClient from './common/gramjs/client/TelegramClient';
+import { clearAuthorizations } from './common/gramjs/client/auth';
+
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import { initClient } from './helpers/initClient';
 import { sendToBot } from './helpers/sendToBot';
@@ -14,7 +17,6 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
-import { clearAuthorizations } from './common/gramjs/client/auth';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
