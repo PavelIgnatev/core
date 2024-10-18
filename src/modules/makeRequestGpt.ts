@@ -63,7 +63,7 @@ function capitalizeFirstLetter(str: string) {
 }
 
 function addSpaceAfterPunctuation(str: string) {
-  return str.replace(/([.,?!;:])(?=\S)/g, '$1 ');
+  return str.replace(/([,?!;:])(?=\S)/g, '$1 ');
 }
 
 function countSentences(paragraph: string) {
