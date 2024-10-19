@@ -130,7 +130,7 @@ ${companyDescription}`
     : ''
 }
 ${
-  stage !== 1 && flowHandling
+  flowHandling
     ? `## YOUR_COMMON_FLOW_HANDLING
 ${flowHandling}`
     : ''
@@ -157,7 +157,6 @@ ${addedInformation}`
       stage === 1,
       dialogGroupId
     );
-    
 
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ${replyMessage}`);
