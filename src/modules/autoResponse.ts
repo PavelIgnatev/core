@@ -157,6 +157,7 @@ ${addedInformation}`
       stage === 1,
       dialogGroupId
     );
+    
 
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ${replyMessage}`);

@@ -99,7 +99,7 @@ const main = async (ID: string) => {
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, ID, tgAccountId, tgFirstName);
+            // await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
           if (i === randomI) {
