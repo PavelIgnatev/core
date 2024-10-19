@@ -99,11 +99,11 @@ const main = async (ID: string) => {
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            // await autoResponse(client, ID, tgAccountId, tgFirstName);
+            await autoResponse(client, ID, tgAccountId, tgFirstName);
           }
 
           if (i === randomI) {
-            // await autoSender(client, ID, tgAccountId);
+            await autoSender(client, ID, tgAccountId);
           } else if (i < randomI) {
             console.log(
               `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${yellow(String(randomI + 1))}`
