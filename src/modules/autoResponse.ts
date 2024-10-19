@@ -104,7 +104,7 @@ Current date and time: ${getDateNow()}
               : ''
           }${
             hasQuestion
-              ? `\n- Qualitatively integrate the following question at the end of your answer: “${hasQuestion}”. Do not add any other questions.`
+              ? `\n- Qualitatively integrate the following question at the end of your answer: “${generateRandomString(hasQuestion)}”. Do not add any other questions.`
               : '\n- Conclude your response with a relevant, open-ended question to engage the user further.'
           }${
             parted
