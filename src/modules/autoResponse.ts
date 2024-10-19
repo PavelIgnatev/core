@@ -104,7 +104,7 @@ Guidelines for your response:${
               : ''
           }${
             hasQuestion
-              ? `\n- You must conclude your response by including the following question at the very end: "${generateRandomString(hasQuestion)}". Build your response to lead up to this question. The question may be adjusted slightly to fit naturally into your response, but it must be included **only at the end**.`
+              ? `\n- Qualitatively integrate the following question at the end of your answer: “${hasQuestion}”. Do not add any other questions.`
               : '\n- Conclude your response with a relevant, open-ended question to engage the user further.'
           }${
             parted
@@ -129,12 +129,16 @@ ${
 ${companyDescription}`
     : ''
 }
+
+## YOUR_COMMON_FLOW_HANDLING
 ${
-  flowHandling
-    ? `## YOUR_COMMON_FLOW_HANDLING
-${flowHandling}`
+  stage <= 2
+    ? `**Where did you get the user's contact?**
+The users contact was found in one of the chat rooms, the exact details of which I don't recall`
     : ''
 }
+${flowHandling}
+
 ${
   stage !== 1 && addedInformation
     ? `## ADDED_INFORMATION
