@@ -98,7 +98,7 @@ Your chat interlocutor is a user (role user). You are conversing within the Tele
           }
 Current date and time: ${getDateNow()}
 
-Guidelines for your response:${
+## GUIDELINES FOR RESPONSE${
             stage <= 2
               ? `\n- You must always start your response with a brief acknowledgment of the user's last message. This acknowledgment is mandatory and should be minimal, without building your response around it.`
               : ''
