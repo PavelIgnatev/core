@@ -31,20 +31,20 @@ export const autoSender = async (
     return;
   }
 
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = new Intl.DateTimeFormat('en-GB', {
-  //     weekday: 'short',
-  //     timeZone: 'UTC',
-  //   }).format(new Date());
+  if (!accountId.includes('-prefix-')) {
+    const weekday = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(new Date());
 
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     console.log(
-  //       `[${accountId}]`,
-  //       blue('Sender has been stopped (working days Mon-Fri)')
-  //     );
-  //     return;
-  //   }
-  // }
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      console.log(
+        `[${accountId}]`,
+        blue('Sender has been stopped (working days Mon-Fri)')
+      );
+      return;
+    }
+  }
 
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
