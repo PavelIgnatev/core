@@ -164,6 +164,7 @@ ${addedInformation}`
 
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ID: ${accountId}
+GID: ${dialogGroupId}
 ${replyMessage}`);
 
     const lastQuestion = extractLastQuestion(replyMessage);
@@ -288,6 +289,7 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
 
     await sendToFormBot(`**** PING MESSAGE (${language}) ****
 ID: ${accountId}
+GID: ${dialogGroupId}
 ${pingMessage}`);
 
     await saveRecipient(accountId, recipientFull, dialog, messages, 'update', {
