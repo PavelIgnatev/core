@@ -23,10 +23,10 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 6 || currentUTCHours >= 13) {
+  if (currentUTCHours < 5 || currentUTCHours > 15) {
     console.log(
       `[${accountId}]`,
-      blue('Sender has been stopped (working time 6:00-13:00 UTC)')
+      blue('Sender has been stopped (working time 5:00-15:00 UTC)')
     );
     return;
   }
