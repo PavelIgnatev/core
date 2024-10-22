@@ -39,6 +39,26 @@ export const getPingDialogues = async (accountId: string) => {
   return pingDialogs;
 };
 
+export const getGlobalCheckDialogues = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const twentyFiveHoursAgo = new Date();
+  twentyFiveHoursAgo.setHours(twentyFiveHoursAgo.getHours() - 25);
+
+  const fortyEightHoursAgo = new Date();
+  fortyEightHoursAgo.setHours(fortyEightHoursAgo.getHours() - 48);
+
+  const pingDialogs = await dialoguesCollection
+    .find<Dialogue>({
+      accountId,
+      dateUpdated: { $gte: fortyEightHoursAgo, $lte: twentyFiveHoursAgo },
+      globalCheck: { $ne: true },
+    })
+    .toArray();
+
+  return pingDialogs;
+};
+
 export const getManualControlDialogues = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 

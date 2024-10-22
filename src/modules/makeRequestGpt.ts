@@ -216,11 +216,11 @@ export async function makeRequestGpt(
       generations.push(message);
 
       const pattern =
-        /((http|https|www):\/\/.)?([a-zA-Z0-9'\/\.\-])+\.[a-zA-Z]{2,5}([a-zA-Z0-9\/\&\;\:\.\,\?\\=\-\_\+\%\'\~]*)/g;
+        /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
       const hasTextLink = message.match(pattern);
 
       message = isRemoveGreetings ? removeGreetings(message) : message;
-      console.log(`[${accountId}] Var message: ${message}`)
+      console.log(`[${accountId}] Var message: ${message}`);
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply contains a link at a stage where it is not allowed to send links'
