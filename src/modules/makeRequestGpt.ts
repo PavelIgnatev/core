@@ -89,13 +89,6 @@ function addSpaceAfterPunctuation(str: string) {
     }
   }
 
-  if (str !== result) {
-    console.log(`
-**ПРАВКИ ПУНКТУАЦИИ**
-СООБЩЕНИЕ ДО: ${str}
-СООБЩЕНИЕ ПОСЛЕ: ${result}`);
-  }
-
   return result;
 }
 
