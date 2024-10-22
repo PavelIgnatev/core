@@ -72,7 +72,7 @@ function addSpaceAfterPunctuation(str: string) {
     urls.push({ start: match.index, end: match.index + match[0].length });
   }
 
-  let result = "";
+  let result = '';
 
   for (let i = 0; i < str.length; i++) {
     const inUrl = urls.some((url) => i >= url.start && i < url.end);
@@ -83,7 +83,7 @@ function addSpaceAfterPunctuation(str: string) {
       i + 1 < str.length &&
       /\S/.test(str[i + 1])
     ) {
-      result += str[i] + " ";
+      result += str[i] + ' ';
     } else {
       result += str[i];
     }
