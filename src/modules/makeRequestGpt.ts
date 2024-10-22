@@ -63,7 +63,40 @@ function capitalizeFirstLetter(str: string) {
 }
 
 function addSpaceAfterPunctuation(str: string) {
-  return str.replace(/([,?!;:])(?=\S)/g, '$1 ');
+  const urlRegex =
+    /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\?\=\-\_\+\%\'\~\#]*)*/g;
+
+  let match;
+  let urls = [];
+  while ((match = urlRegex.exec(str)) !== null) {
+    urls.push({ start: match.index, end: match.index + match[0].length });
+  }
+
+  let result = "";
+
+  for (let i = 0; i < str.length; i++) {
+    const inUrl = urls.some((url) => i >= url.start && i < url.end);
+
+    if (
+      !inUrl &&
+      /[,.?!;:]/.test(str[i]) &&
+      i + 1 < str.length &&
+      /\S/.test(str[i + 1])
+    ) {
+      result += str[i] + " ";
+    } else {
+      result += str[i];
+    }
+  }
+
+  if (str !== result) {
+    console.log(`
+**ПРАВКИ ПУНКТУАЦИИ**
+СООБЩЕНИЕ ДО: ${str}
+СООБЩЕНИЕ ПОСЛЕ: ${result}`);
+  }
+
+  return result;
 }
 
 function countSentences(paragraph: string) {
