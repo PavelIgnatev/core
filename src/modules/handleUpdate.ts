@@ -39,6 +39,8 @@ export const handleUpdate = async (
       );
 
       newResponseUpdate();
+    } else if (String(userId) !== '178220800') {
+      await sendToBot(`Не найден диалог в дб для: ${JSON.stringify(update)}`);
     }
   } else if (update.className !== 'UpdateConnectionState') {
     console.log(
