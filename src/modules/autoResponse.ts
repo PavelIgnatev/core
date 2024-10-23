@@ -157,7 +157,7 @@ ${addedInformation}`
       language,
       stage === 1,
       stage <= 2,
-      stage <= 2 ? 3 : 1,
+      stage <= 2 ? 3 : 2,
       stage === 1,
       dialogGroupId
     );

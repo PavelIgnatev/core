@@ -49,17 +49,12 @@ export const handleUpdate = async (
     ) {
       const isDialogInDb = await getDialogue(accountId, String(userId));
       if (isDialogInDb) {
-        console.log(
-          `[${accountId}]`,
-          yellow(
-            `New message "${update.message}" from user by id#${String(userId)}`
-          )
-        );
-
         onNewMessage();
       } else if (String(userId) !== '178220800') {
         await sendToBot(`Не найден диалог в дб для: ${JSON.stringify(update)}`);
       }
+    } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
+      console.log(update);
     }
   }
 };
