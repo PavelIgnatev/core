@@ -4,6 +4,7 @@ import GramJs from '../common/gramjs/tl/api';
 
 import { yellow } from 'colors/safe';
 import { getDialogue } from '../db/dialogues';
+import { sendToBot } from '../helpers/sendToBot';
 
 export const handleUpdate = async (
   accountId: string,
@@ -32,15 +33,14 @@ export const handleUpdate = async (
 
       newResponseUpdate();
     } else if (update.className !== 'UpdateConnectionState') {
-      console.log(
-        `[${accountId}]`,
-        yellow(`Update handler: "${update.className}"`)
+      await sendToBot(
+        `Событие ${update instanceof GramJs.UpdateNewMessage}:${update instanceof GramJs.UpdateShortMessage}:${update.className}`
       );
     }
   } else if (update.className !== 'UpdateConnectionState') {
     console.log(
       `[${accountId}]`,
-      yellow(`Update handler: "${update.className}"`)
+      yellow(`Update handler 2: "${update.className}"`)
     );
   }
 };
