@@ -35,7 +35,6 @@ export const handleUpdate = async (
 
   if (
     update.className === 'UpdateConnectionState' ||
-    update.className === 'UpdateReadChannelOutbox' ||
     update.className === 'UpdateUserStatus'
   ) {
     return;
@@ -90,10 +89,10 @@ ${JSON.stringify(update)}`);
         })
       );
     } catch (e: any) {
-      await sendToBot(`** ОШИБКА ПРИ ВЫХОДЕ С КАНАЛА/ЧАТА ${e.message} **
-ACCOUNTID: ${accountId}
-ChannelId: ${channelId}
-${JSON.stringify(update)}`);
+//       await sendToBot(`** ОШИБКА ПРИ ВЫХОДЕ С КАНАЛА/ЧАТА ${e.message} **
+// ACCOUNTID: ${accountId}
+// ChannelId: ${channelId}
+// ${JSON.stringify(update)}`);
     }
   } else if (userId) {
     if (
