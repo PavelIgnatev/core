@@ -54,8 +54,8 @@ export const handleUpdate = async (
         await sendToBot(`Не найден диалог в дб для: ${JSON.stringify(update)}`);
       }
     } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
-      const dialog = await getDialogue(accountId, String(userId));
-      console.log(dialog, update);
+      // const dialog = await getDialogue(accountId, String(userId));
+      // console.log(dialog, update);
     }
   }
 };
