@@ -1,0 +1,81 @@
+{
+  "CONSTRUCTOR_ID": 522914557,
+  "SUBCLASS_OF_ID": 2676568142,
+  "className": "UpdateNewMessage",
+  "classType": "constructor",
+  "message": {
+    "CONSTRUCTOR_ID": 592953125,
+    "SUBCLASS_OF_ID": 2030045667,
+    "className": "Message",
+    "classType": "constructor",
+    "flags": 64,
+    "out": false,
+    "mentioned": false,
+    "mediaUnread": false,
+    "silent": false,
+    "post": false,
+    "fromScheduled": false,
+    "legacy": false,
+    "editHide": false,
+    "pinned": false,
+    "noforwards": false,
+    "invertMedia": false,
+    "flags2": 0,
+    "offline": false,
+    "id": 141,
+    "peerId": {
+      "CONSTRUCTOR_ID": 1498486562,
+      "SUBCLASS_OF_ID": 47470215,
+      "className": "PeerUser",
+      "classType": "constructor",
+      "userId": "178220800"
+    },
+    "date": 1729659607,
+    "message": "Good news, no limits are currently applied to your account. You’re free as a bird!",
+    "replyMarkup": {
+      "CONSTRUCTOR_ID": 2245892561,
+      "SUBCLASS_OF_ID": 3806400242,
+      "className": "ReplyKeyboardMarkup",
+      "classType": "constructor",
+      "flags": 1,
+      "resize": true,
+      "singleUse": false,
+      "selective": false,
+      "persistent": false,
+      "rows": [
+        {
+          "CONSTRUCTOR_ID": 2002815875,
+          "SUBCLASS_OF_ID": 2222403758,
+          "className": "KeyboardButtonRow",
+          "classType": "constructor",
+          "buttons": [
+            {
+              "CONSTRUCTOR_ID": 2734311552,
+              "SUBCLASS_OF_ID": 195916963,
+              "className": "KeyboardButton",
+              "classType": "constructor",
+              "text": "Cool, thanks"
+            }
+          ]
+        },
+        {
+          "CONSTRUCTOR_ID": 2002815875,
+          "SUBCLASS_OF_ID": 2222403758,
+          "className": "KeyboardButtonRow",
+          "classType": "constructor",
+          "buttons": [
+            {
+              "CONSTRUCTOR_ID": 2734311552,
+              "SUBCLASS_OF_ID": 195916963,
+              "className": "KeyboardButton",
+              "classType": "constructor",
+              "text": "But I can’t message non-contacts!"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "pts": 168,
+  "ptsCount": 1
+}

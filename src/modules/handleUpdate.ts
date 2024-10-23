@@ -21,9 +21,16 @@ export const handleUpdate = async (
       message: { peerId: { userId: peerUserId } = {} as any } = {},
     } = update as any;
     const userId = varUserId || peerUserId;
-    const isDialogInDb = await getDialogue(accountId, String(userId));
 
-    if (isDialogInDb && userId instanceof BigInt) {
+    if (!userId || !(userId instanceof BigInt)) {
+      await sendToBot(
+        `Не найден userId для UpdateNewMessage или UpdateShortMessage ${userId instanceof BigInt}|${JSON.stringify(update)}`
+      );
+      return;
+    }
+
+    const isDialogInDb = await getDialogue(accountId, String(userId));
+    if (isDialogInDb) {
       console.log(
         `[${accountId}]`,
         yellow(
