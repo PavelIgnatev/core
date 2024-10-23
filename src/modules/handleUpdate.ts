@@ -36,6 +36,13 @@ export const handleUpdate = async (
       await sendToBot(
         `Событие ${update instanceof GramJs.UpdateNewMessage}:${update instanceof GramJs.UpdateShortMessage}:${update.className}`
       );
+
+      if (
+        update.className === 'UpdateNewMessage' ||
+        update.className === 'UpdateShortMessage'
+      ) {
+        await sendToBot(`Событие ${JSON.stringify(update)}`);
+      }
     }
   } else if (update.className !== 'UpdateConnectionState') {
     console.log(
