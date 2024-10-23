@@ -40,61 +40,9 @@ export const handleUpdate = async (
     return;
   }
 
-  const channelId = findValue(update, 'channelId');
-  const chatId = findValue(update, 'chatId');
   const userId = findValue(update, 'userId');
 
-  if (chatId) {
-    await sendToBot(`** ЕСТЬ CHAT ID (ДА НУ НАХУЙ БЛЯТЬ?????? ГДЕЕЕЕ???) **
-${JSON.stringify(update)}
-AccountID: ${accountId}`);
-    await sendToBot(`** ЕСТЬ CHAT ID **
-${JSON.stringify(update)}
-AccountID: ${accountId}
-${JSON.stringify(update)}`);
-  } else if (channelId) {
-    try {
-      const channel = await client.invoke(
-        new GramJs.channels.GetChannels({
-          id: [
-            new GramJs.InputChannel({
-              channelId: BigInt(Number(channelId)),
-              accessHash: BigInt(0),
-            }),
-          ],
-        })
-      );
-
-      const chat = channel?.chats?.[0];
-      if (!chat || !chat.id || !chat.accessHash) {
-        await sendToBot(`
-** СОБЫТИЕ НА ЧАТ/КАНАЛ ПРИШЛО, НО ЧАТ/КАНАЛ НЕ НАЙДЕН**
-ACCOUNTID: ${accountId}
-CHATID: ${chat?.id}
-ACCESSHASH: ${chat?.accessHash}
-ChannelId; ${channelId}`);
-        await sendToBot(`
-** СОБЫТИЕ НА ЧАТ ПРИШЛО, НО ЧАТ НЕ НАЙДЕН**
-ACCOUNTID: ${accountId}
-ChannelId; ${channelId}
-${JSON.stringify(update)}`);
-      }
-
-      await client.invoke(
-        new GramJs.channels.LeaveChannel({
-          channel: new GramJs.InputChannel({
-            channelId: BigInt(Number(chat.id)),
-            accessHash: BigInt(chat.accessHash),
-          }),
-        })
-      );
-    } catch (e: any) {
-      await sendToBot(`** ОШИБКА ПРИ ВЫХОДЕ С КАНАЛА/ЧАТА ${e.message} **
-ACCOUNTID: ${accountId}
-ChannelId: ${channelId}
-${JSON.stringify(update)}`);
-    }
-  } else if (userId) {
+  if (userId) {
     if (
       update instanceof GramJs.UpdateNewMessage ||
       update instanceof GramJs.UpdateShortMessage
