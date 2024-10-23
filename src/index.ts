@@ -47,7 +47,7 @@ const main = async (ID: string) => {
     }
 
     client = await initClient(account, ID, (update: any) =>
-      handleUpdate(ID, update, () => (isAutoResponse = true))
+      handleUpdate(client, ID, update, () => (isAutoResponse = true))
     );
 
     setOnlineInterval = setInterval(async () => {
