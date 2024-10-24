@@ -1,5 +1,4 @@
 import BigInt from 'big-integer';
-import { red, yellow } from 'colors/safe';
 
 import { uploadFile } from '../common/gramjs/client/uploadFile';
 import GramJs from '../common/gramjs/tl/api';
@@ -57,9 +56,6 @@ export const accountSetup = async (
   if (setupped) {
     return firstName as string;
   }
-
-  console.log(`[${accountId}] Initialize module`, yellow('ACCOUNT SETUP'));
-
   let user;
 
   while (true) {
@@ -78,7 +74,7 @@ export const accountSetup = async (
         })
       );
 
-      await updateProfile(client, accountId, {
+      await updateProfile(client, {
         firstName: genFirstName,
         lastName: `${lastName} ${emojis[Math.floor(Math.random() * emojis.length)]}`,
         about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
@@ -88,9 +84,10 @@ export const accountSetup = async (
 
       break;
     } catch (error: any) {
-      console.log(
-        red(`[${accountId}] Error when updating user data: ${error.message}`)
-      );
+      console.error({
+        accountId,
+        message: new Error(`Error when updating user data: ${error.message}`),
+      });
 
       await sleep(3000);
     }

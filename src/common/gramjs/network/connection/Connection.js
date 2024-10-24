@@ -1,7 +1,5 @@
 const PromisedWebSockets = require('../../extensions/PromisedWebSockets');
-const HttpStream = require('../../extensions/HttpStream').default;
 const AsyncQueue = require('../../extensions/AsyncQueue');
-const { red, green } = require('colors/safe');
 
 /**
  * The `Connection` class is a wrapper around ``asyncio.open_connection``.
@@ -43,11 +41,8 @@ class Connection {
   }
 
   async _connect() {
-    console.log(`[${this._accountId}] ${green('Connecting')}`);
     this._codec = new this.PacketCodecClass(this);
     await this.socket.connect(this._port, this._ip, this._accountId);
-    console.log(`[${this._accountId}] ${green('Finished connecting')}`);
-
     await this._initConn();
   }
 
@@ -103,9 +98,12 @@ class Connection {
         await this._send(data);
       }
     } catch (e) {
-      console.log(
-        `[${this._accountId}] The server closed the connection while sending: ${e.message}`
-      );
+      console.error({
+        accountId: this._accountId,
+        message: new Error(
+          `The server closed the connection while sending: ${e.message}`
+        ),
+      });
     }
   }
 
@@ -182,7 +180,6 @@ class PacketCodec {
     throw new Error('Not Implemented');
   }
 }
-
 
 module.exports = {
   Connection,

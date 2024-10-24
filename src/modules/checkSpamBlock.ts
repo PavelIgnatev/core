@@ -1,22 +1,19 @@
-import { blue, red, yellow } from 'colors/safe';
-
 import { updateAccountById } from '../db/accounts';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { getMessages } from '../methods/messages/getMessages';
 import { sendMessage } from '../methods/messages/sendMessage';
 
 export const checkSpamBlock = async (client: any, accountId: string) => {
-  console.log(
-    `[${accountId}] Initialize sub module`,
-    yellow('CHECK SPAMBLOCK')
-  );
-
-  const result = await resolveUsername(client, accountId, 'spambot');
+  const result = await resolveUsername(client, 'spambot');
 
   const { id: userId, accessHash, username } = result?.users?.[0] ?? {};
 
   if (!userId || !accessHash || username !== 'SpamBot') {
-    console.log(red(`[${accountId}] Chat with SpamBot not defined`));
+    console.error({
+      accountId,
+      message: new Error('Chat with SpamBot not defined'),
+    });
+
     return true;
   }
 
@@ -31,27 +28,31 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
   const { id: maxId } = sentMessage;
 
   if (!maxId) {
-    console.log(red(`[${accountId}] MaxId from SpamBot not defined`));
+    console.error({
+      accountId,
+      message: new Error('MaxId from SpamBot not defined'),
+    });
     return true;
   }
 
   await new Promise((res) => setTimeout(res, 5000));
-  const messages = await getMessages(
-    client,
-    accountId,
-    userId,
-    accessHash,
-    maxId
-  );
+  const messages = await getMessages(client, userId, accessHash, maxId);
   if (!messages?.[0]) {
-    console.log(red(`[${accountId}] Messages from SpamBot not defined`));
+    console.error({
+      accountId,
+      message: new Error('Messages from SpamBot not defined'),
+    });
     return true;
   }
 
   const { message } = messages[0];
 
   if (message.includes('no limits are currently applied')) {
-    console.log(`[${accountId}] Account is spamblock-free`);
+    console.log({
+      accountId,
+      message: 'Account is spamblock-free',
+    });
+
     await updateAccountById(accountId, {
       spamBlockDate: null,
       spamInitDate: null,
@@ -76,9 +77,10 @@ export const checkSpamBlock = async (client: any, accountId: string) => {
     spamInitDate: new Date(),
   });
 
-  console.log(
-    `[${accountId}] Account has a spamblock to ${blue(String(untilDateMatch ? nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' }) : 'INFINITY'))}.`
-  );
+  console.log({
+    accountId,
+    message: `Account has a spamblock to ${String(untilDateMatch ? nextSpamBlockDay.toLocaleString('en-US', { timeZone: 'UTC' }) : 'INFINITY')}`,
+  });
 
   return true;
 };

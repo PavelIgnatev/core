@@ -1,5 +1,3 @@
-import { blue, yellow } from 'colors/safe';
-
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
 import { updateFailedMessage } from '../db/groupIdUsers';
@@ -18,16 +16,20 @@ export const autoSender = async (
   accountId: string,
   tgAccountId: string
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow('AUTO SENDER'));
+  console.log({
+    accountId,
+    message: '**AUTO SENDER**',
+  });
 
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
   if (currentUTCHours < 5 || currentUTCHours > 14 ) {
-    console.log(
-      `[${accountId}]`,
-      blue('Sender has been stopped (working time 5:00-14:59 UTC)')
-    );
+    console.log({
+      accountId,
+      message: 'Sender has been stopped (working time 5:00-14:59 UTC)',
+    });
+
     return;
   }
 
@@ -38,10 +40,10 @@ export const autoSender = async (
     }).format(new Date());
 
     if (weekday === 'Sat' || weekday === 'Sun') {
-      console.log(
-        `[${accountId}]`,
-        blue('Sender has been stopped (working days Mon-Fri)')
-      );
+      console.log({
+        accountId,
+        message: 'Sender has been stopped (working days Mon-Fri)',
+      });
       return;
     }
   }
@@ -64,7 +66,6 @@ export const autoSender = async (
     try {
       const recipientFull = await resolveContact(
         client,
-        accountId,
         recipient.username,
         recipient.groupId
       );
@@ -91,7 +92,7 @@ export const autoSender = async (
         return;
       }
 
-      await deleteMessages(client, accountId, id, accessHash);
+      await deleteMessages(client, id, accessHash);
       const firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       await new Promise((res) => setTimeout(res, 5000));
@@ -109,8 +110,8 @@ export const autoSender = async (
         secondMessage,
         accountId
       );
-      await editFolder(client, accountId, id, accessHash, 1);
-      await muteNotification(client, accountId, id, accessHash, 2147483647);
+      await editFolder(client, id, accessHash, 1);
+      await muteNotification(client, id, accessHash, 2147483647);
       await saveRecipient(
         accountId,
         recipientFull,
@@ -159,9 +160,9 @@ export const autoSender = async (
       throw new Error('Global Error');
     }
   } else {
-    console.log(
-      `[${accountId}] Next message can be sent after`,
-      blue(String(remainingTime.toLocaleString('en-US', { timeZone: 'UTC' })))
-    );
+    console.log({
+      accountId,
+      message: `Next message can be sent after ${String(remainingTime.toLocaleString('en-US', { timeZone: 'UTC' }))}`,
+    });
   }
 };

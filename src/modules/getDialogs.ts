@@ -1,5 +1,4 @@
 import BigInt from 'big-integer';
-import { red, yellow } from 'colors/safe';
 
 import { Dialogue } from '../@types/Dialogue';
 import GramJs from '../common/gramjs/tl/api';
@@ -17,8 +16,6 @@ type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
 
 export const getDialogs = async (client: any, accountId: string) => {
-  console.log(`[${accountId}] Initialize sub module`, yellow('GET DIALOGS'));
-
   const clientDialogs = await client.invoke(
     new GramJs.messages.GetDialogs({
       offsetPeer: new GramJs.InputPeerEmpty(),
@@ -100,13 +97,13 @@ export const getDialogs = async (client: any, accountId: string) => {
         await sendToBot(`~GROUP ID NOT DEFINED~
 AccountId: ${accountId}
 UserID: ${user.id}`);
-        await deleteMessages(client, accountId, user.id, user.accessHash);
+        await deleteMessages(client, user.id, user.accessHash);
 
         return [[], [], []];
       }
 
       if (blocked) {
-        await deleteMessages(client, accountId, user.id, user.accessHash);
+        await deleteMessages(client, user.id, user.accessHash);
         continue;
       }
 
@@ -166,7 +163,7 @@ UserID: ${user.id}`);
       ).length;
       if (stage > 25) {
         await updateBlockedDialogue(accountId, dialogId, 'dialogs-max-stage');
-        await deleteMessages(client, accountId, user.id, user.accessHash);
+        await deleteMessages(client, user.id, user.accessHash);
         continue;
       }
 
@@ -189,7 +186,7 @@ UserID: ${user.id}`);
       await updateBlockedDialogue(accountId, dialogId, `user-not-resolved`);
 
       if (user && user.id && user.accessHash) {
-        await deleteMessages(client, accountId, user.id, user.accessHash);
+        await deleteMessages(client, user.id, user.accessHash);
       }
     }
   }

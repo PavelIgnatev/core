@@ -1,5 +1,3 @@
-import { yellow } from 'colors/safe';
-
 import { getDialogs } from './getDialogs';
 import { makeRequestGpt } from './makeRequestGpt';
 import { saveRecipient } from './saveRecipient';
@@ -18,7 +16,10 @@ export const autoResponse = async (
   tgAccountId: string,
   tgFirstName: string
 ) => {
-  console.log(`[${accountId}] Initialize module`, yellow('AUTO REPLY'));
+  console.log({
+    accountId,
+    message: '**AUTO RESPONSE**',
+  });
 
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
@@ -49,7 +50,7 @@ export const autoResponse = async (
       .trim()
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
 
-    const recipientFull = await getFullUser(client, accountId, id, accessHash);
+    const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       continue;
     }
@@ -221,7 +222,7 @@ ${replyMessage}`);
     const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
-    const recipientFull = await getFullUser(client, accountId, id, accessHash);
+    const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       continue;
     }
@@ -300,7 +301,7 @@ ${pingMessage}`);
   for (const dialog of manualControlDialogs) {
     const { id, accessHash, messages, managerMessage } = dialog;
 
-    const recipientFull = await getFullUser(client, accountId, id, accessHash);
+    const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       continue;
     }

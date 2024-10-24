@@ -66,10 +66,9 @@ export const stopAccountsByPrefix = async (prefix: string) => {
   const filteredAccountIds = accountIds.filter((accountId: string) =>
     accountId.includes(prefix)
   );
-  console.log(filteredAccountIds)
 
   if (filteredAccountIds.length > 0) {
-    await accountCollection.updateMany(
+     await accountCollection.updateMany(
       { accountId: { $in: filteredAccountIds } },
       { $set: { stopped: true } }
     );

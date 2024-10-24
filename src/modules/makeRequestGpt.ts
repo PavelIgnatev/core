@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { sendToBot } from '../helpers/sendToBot';
-import { gray, red, yellow } from 'colors/safe';
 
 const validateText = (
   companyData: string,
@@ -206,14 +205,11 @@ export async function makeRequestGpt(
   const generations = [];
   const errors = [];
 
-  console.log(
-    `[${accountId}] Initialize sub module`,
-    yellow('MAKE REQUEST GPT')
-  );
-  console.log(
-    `[${accountId}] Current preamble :`,
-    gray(JSON.stringify(messages, null, 2))
-  );
+  console.log({
+    accountId,
+    message: `**MAKE REQUEST GPT**`,
+    messages,
+  });
 
   for (let i = 0; i < 5; i++) {
     try {
@@ -246,7 +242,11 @@ export async function makeRequestGpt(
       const hasTextLink = message.match(pattern);
 
       message = isRemoveGreetings ? removeGreetings(message) : message;
-      console.log(`[${accountId}] Var message: ${message}`);
+      console.log({
+        accountId,
+        message: `**REQUEST GPT MESSAGE**`,
+        varianMessage: message
+      });
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply contains a link at a stage where it is not allowed to send links'
@@ -300,7 +300,11 @@ export async function makeRequestGpt(
     } catch (error: any) {
       await new Promise((res) => setTimeout(res, 2500));
 
-      console.log(red(`[${accountId}] Request Gpt Error: ${error.message}`));
+      console.error({
+        accountId,
+        message: new Error(`Request Gpt Error: ${error.message}`),
+      });
+
       errors.push(error.message);
     }
   }
@@ -315,7 +319,10 @@ ${generations.map((g, i) => `${i + 1}: ${g}`).join('\n')}
 ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}`);
   } catch (e: any) {
-    console.log(red(`[${accountId}] GPT GENERATION ERROR: ${e.message}`));
+    console.error({
+      accountId,
+      message: new Error(`GPT GENERATION ERROR: ${e.message}`),
+    });
   }
 
   if (generations[0]) {

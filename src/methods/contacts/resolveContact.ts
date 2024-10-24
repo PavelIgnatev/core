@@ -7,19 +7,13 @@ import { getFullUser } from '../users/getFullUser';
 
 export const resolveContact = async (
   client: TelegramClient,
-  accountId: string,
   username: string,
   groupId: string
 ) => {
   const resolveMethod = username.includes('+') ? resolvePhone : resolveUsername;
-  const userByUsername = await resolveMethod(client, accountId, username);
+  const userByUsername = await resolveMethod(client, username);
   const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-  const recipientFull = await getFullUser(
-    client,
-    accountId,
-    userId,
-    accessHash
-  );
+  const recipientFull = await getFullUser(client, userId, accessHash);
 
   if (
     !userId ||

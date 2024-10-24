@@ -1,5 +1,3 @@
-import { red } from 'colors/safe';
-
 import { Account } from '../@types/Account';
 import { init } from '../common/gramjs';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
@@ -14,7 +12,7 @@ export const initClient = async (
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('TIMEOUT_ERROR'));
-      }, 90000); 
+      }, 90000);
     });
 
     const client = await Promise.race([
@@ -29,9 +27,10 @@ export const initClient = async (
     return client as TelegramClient;
   } catch (e: any) {
     if (e.message === 'TIMEOUT_ERROR') {
-      console.log(
-        red(`[${account.accountId}] Timeout error. Retrying init client...`)
-      );
+      console.error({
+        accountId,
+        message: new Error(`Timeout error. Retrying init client...`),
+      });
       return await initClient(account, accountId, onUpdate);
     }
 
@@ -47,7 +46,11 @@ export const initClient = async (
         'SESSION_PASSWORD_NEEDED',
       ].includes(e.message)
     ) {
-      console.log(red(`[${account.accountId}] ${e.message}`));
+      console.error({
+        accountId,
+        message: new Error(e.message),
+      });
+
       await updateAccountById(account.accountId, {
         banned: true,
         reason: e.message,

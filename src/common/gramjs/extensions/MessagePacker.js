@@ -1,5 +1,3 @@
-const { red } = require('colors/safe');
-
 const MessageContainer = require('../tl/core/MessageContainer');
 const TLMessage = require('../tl/core/TLMessage');
 const BinaryWriter = require('./BinaryWriter');
@@ -107,13 +105,13 @@ class MessagePacker {
 
       return buffer.getValue();
     }
-    console.log(
-      red(
-        `[${accountId}] Message payload for ${
-          state.request.className || state.request.constructor.name
-        } is too long ${state.data.length} and cannot be sent`
-      )
-    );
+    console.log({
+      accountId: this._accountId,
+      message: `Message payload for ${
+        state.request.className || state.request.constructor.name
+      } is too long ${state.data.length} and cannot be sent`,
+    });
+
     state.reject('Request Payload is too big');
 
     return undefined;
@@ -175,13 +173,13 @@ class MessagePacker {
         break;
       }
 
-      console.log(
-        red(
-          `[${accountId}] Message payload for ${
-            state.request.className || state.request.constructor.name
-          } is too long ${state.data.length} and cannot be sent`
-        )
-      );
+      console.log({
+        accountId: this._accountId,
+        message: `Message payload for ${
+          state.request.className || state.request.constructor.name
+        } is too long ${state.data.length} and cannot be sent`,
+      });
+  
       state.reject('Request Payload is too big');
       size = 0;
     }

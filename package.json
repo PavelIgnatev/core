@@ -6,6 +6,8 @@
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
+    "@logtail/node": "^0.5.2",
+    "@logtail/winston": "^0.5.2",
     "async-mutex": "^0.5.0",
     "axios": "^1.6.8",
     "axios-proxy-fix": "^0.16.3",
@@ -19,6 +21,9 @@
     "pako": "^2.1.0",
     "petrovich": "^0.2.1",
     "unique-names-generator": "^4.7.1",
+    "winston": "^3.15.0",
+    "winston-daily-rotate-file": "^5.0.0",
+    "winston-loggly-bulk": "^3.3.2",
     "ws": "^8.16.0"
   },
   "devDependencies": {

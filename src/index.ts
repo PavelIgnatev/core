@@ -1,7 +1,7 @@
 import 'dotenv/config';
-import { exec as childExec } from 'child_process';
-import { black, red, yellow } from 'colors/safe';
 import util from 'util';
+
+import { exec as childExec } from 'child_process';
 
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { clearAuthorizations } from './common/gramjs/client/auth';
@@ -17,6 +17,7 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
+import { sleep } from './helpers/sleep';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -67,7 +68,10 @@ const main = async (ID: string) => {
 
         await Promise.race([setOffline(client, false), timeoutPromise]);
       } catch (error: any) {
-        console.log(red(`[${ID}] reconnect due to set offline`));
+        console.error({
+          accountId: ID,
+          message: new Error('Reconnect due to set offline'),
+        });
 
         client?._sender?.reconnect();
       }
@@ -80,7 +84,10 @@ const main = async (ID: string) => {
     const randomI = Math.floor(Math.random() * 26);
 
     for (let i = 0; i < 30; i++) {
-      console.log(`[${ID}]`, yellow(`Init iteration [${i + 1}]`));
+      console.log({
+        accountId: ID,
+        message: `Init iteration [${i + 1}]`,
+      });
       accountsInWork[ID] = i + 1;
 
       let timer;
@@ -104,21 +111,23 @@ const main = async (ID: string) => {
 
           if (i === randomI) {
             await autoSender(client, ID, tgAccountId);
-          } else if (i < randomI) {
-            console.log(
-              `[${ID}] The module ${yellow('AUTO SENDER')} work at iteration ${yellow(String(randomI + 1))}`
-            );
           }
-          console.log(`[${ID}]`, yellow(`End iteration [${i + 1}]`));
           await new Promise((res) => setTimeout(res, 60000));
+          console.log({
+            accountId: ID,
+            message: `End iteration [${i + 1}]`,
+          });
         })(),
         timeout,
       ]);
 
-      clearTimeout(timer);
+      timer;
     }
   } catch (e: any) {
-    console.log(red(`[${ID}] Main error: ${e.message}`));
+    console.error({
+      accountId: ID,
+      message: new Error(`Main error: ${e.message}`),
+    });
 
     if (e.message.includes('AUTH_KEY_DUPLICATED')) {
       await updateAccountById(ID, {
@@ -128,7 +137,10 @@ const main = async (ID: string) => {
       await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
       await exec('pm2 kill');
     } else if (e.message.includes('Global Error')) {
-      console.log(red(`[${ID}] Stop account: ${e.message}`));
+      console.error({
+        accountId: ID,
+        message: new Error(`Stop Account: ${e.message}`),
+      });
     } else if (e.message.includes('Stopped')) {
       await updateAccountById(ID, {
         stopped: true,
@@ -169,10 +181,18 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then((accounts) => {
+  console.warn({ message: 'Restarting accounts' });
   const startTime = performance.now();
   accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
+
+  const interval = setInterval(() => {
+    console.warn({
+      message: accountsInWork,
+      count: Object.keys(accountsInWork).length,
+    });
+  }, 60000);
 
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
@@ -187,14 +207,8 @@ getAccounts().then((accounts) => {
     }
 
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
-
+    clearInterval(interval);
+    await sleep(30000);
     process.exit(1);
   });
-
-  setInterval(() => {
-    console.log(
-      black(JSON.stringify(accountsInWork)),
-      yellow(String(Object.keys(accountsInWork).length))
-    );
-  }, 60000);
 });

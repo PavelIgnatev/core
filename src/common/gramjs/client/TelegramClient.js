@@ -1,10 +1,6 @@
-const os = require('os');
-const { red, yellow } = require('colors/safe');
-
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
 const Helpers = require('../Helpers');
-const utils = require('../Utils');
 
 const { LAYER } = require('../tl/AllTLObjects');
 const { constructors, requests } = require('../tl');
@@ -54,9 +50,6 @@ class TelegramClient {
     this._accountId = args.accountId;
 
     this._initWith = (x) => {
-      console.log(
-        `[${this._accountId}] ${yellow('Account layer initialization')}`
-      );
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
@@ -79,7 +72,6 @@ class TelegramClient {
 
     this._args = args;
     this._loopStarted = false;
-    this._destroyed = false;
     this._connectedDeferred = new Deferred();
   }
 
@@ -137,12 +129,7 @@ class TelegramClient {
     await this.session.load();
   }
 
-  async _updateLoop() {
-    while (!this._destroyed) {
-      await Helpers.sleep(10000);
-    }
-    await this.disconnect();
-  }
+  async _updateLoop() {}
 
   /**
    * Disconnects from the Telegram server
@@ -159,13 +146,14 @@ class TelegramClient {
    * @returns {Promise<void>}
    */
   async destroy() {
-    this._destroyed = true;
-
     try {
       await this.disconnect();
       this._sender.destroy();
     } catch (err) {
-      // Do nothing
+      console.error({
+        accountId: this._accountId,
+        message: new Error(`Destroy Error ${err.message}`),
+      });
     }
 
     this.session.delete();
@@ -201,11 +189,10 @@ class TelegramClient {
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
-          console.log(
-            red(
-              `[${this._accountId}] Telegram is having internal issues ${e.constructor.name}`
-            )
-          );
+          console.log({
+            accountId: this._accountId,
+            message: `Telegram is having internal issues ${e.constructor.name}`,
+          });
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
@@ -213,12 +200,11 @@ class TelegramClient {
           await sendToBot(
             `[${this._accountId}] !!flood wait error!! (пиздец стремная хуйня). Error: ${e.message}`
           );
-
+          console.error({
+            accountId: this._accountId,
+            message: new Error(`Flood wait Error: ${e.message}`),
+          });
           if (e.seconds <= 60) {
-            console.log(
-              red(`[${this._accountId}] Flood wait Error: ${e.message}`)
-            );
-
             await sleep(e.seconds * 1000);
           } else {
             state.finished.resolve();

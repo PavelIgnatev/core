@@ -1,8 +1,5 @@
-import BigInt from 'big-integer';
-
 import GramJs from '../common/gramjs/tl/api';
 
-import { yellow } from 'colors/safe';
 import { getDialogue } from '../db/dialogues';
 import { sendToBot } from '../helpers/sendToBot';
 
@@ -28,10 +25,11 @@ export const handleUpdate = async (
     return;
   }
 
-  console.log(
-    `[${accountId}]`,
-    yellow(`Update handler: "${update.className}"`)
-  );
+  console.log({
+    accountId,
+    message: `New update: <${update.className}>`,
+    payload: JSON.parse(JSON.stringify(update))
+  });
 
   if (
     update.className === 'UpdateConnectionState' ||

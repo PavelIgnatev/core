@@ -2,8 +2,6 @@ import Api from '../tl/api';
 import type TelegramClient from './TelegramClient';
 
 export async function clearAuthorizations(client: TelegramClient) {
-  console.log(`[${client._accountId}] Check all account authorizations`);
-
   const { authorizations } = await client.invoke(
     new Api.account.GetAuthorizations()
   );
@@ -11,10 +9,10 @@ export async function clearAuthorizations(client: TelegramClient) {
   for (const authorization of authorizations) {
     try {
       if (!authorization.current && authorization.deviceModel !== 'Desktop') {
-        console.log(
-          `[${client._accountId}] Delete unknown account authorization:`,
-          authorization
-        );
+        console.log({
+          accountId: client._accountId,
+          message: `Delete unknown account authorization: ${JSON.stringify(authorization)}`,
+        });
 
         await client.invoke(
           new Api.account.ResetAuthorization({
@@ -22,6 +20,11 @@ export async function clearAuthorizations(client: TelegramClient) {
           })
         );
       }
-    } catch {}
+    } catch (error: any) {
+      console.error({
+        accountId: client._accountId,
+        message: new Error(`Reset Authorizations Error: ${error.message}`)
+      });
+    }
   }
 }

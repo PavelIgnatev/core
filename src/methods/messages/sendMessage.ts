@@ -1,5 +1,4 @@
 import BigInt from 'big-integer';
-import { blue, gray } from 'colors/safe';
 
 import GramJs from '../../common/gramjs/tl/api';
 import { sendToBot } from '../../helpers/sendToBot';
@@ -30,12 +29,6 @@ export const sendMessage = async (
 ) => {
   let sentMessage = null;
   try {
-    console.log(
-      `[${accountId}] Send ${gray(message)} to ${blue(
-        `${userId}:${accessHash}`
-      )}`
-    );
-
     sentMessage = await client.invoke(
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(
@@ -82,6 +75,11 @@ UserId: ${userId}
 Message: ${message}
 Send Message: ${Boolean(sentMessage)}`
     );
+    console.error({
+      accountId,
+      message: new Error(`Send Message Error: ${e.message}`),
+      payload: { userId, message, sentMessage: Boolean(sentMessage) },
+    });
 
     throw new Error(e.message);
   }
