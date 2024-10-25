@@ -28,7 +28,7 @@ export const handleUpdate = async (
   console.log({
     accountId,
     message: `New update: <${update.className}>`,
-    payload: JSON.parse(JSON.stringify(update))
+    payload: JSON.parse(JSON.stringify(update)),
   });
 
   if (
@@ -49,7 +49,8 @@ export const handleUpdate = async (
       if (dialog) {
         onNewMessage();
       } else if (String(userId) !== '178220800') {
-        await sendToBot(`Не найден диалог в дб для: ${JSON.stringify(update)}`);
+        await sendToBot(`Не найден диалог в дб для: ${JSON.stringify(update)}
+AccountId: ${accountId}`);
       }
     } else if (update instanceof GramJs.UpdateReadHistoryOutbox) {
       // const dialog = await getDialogue(accountId, String(userId));
