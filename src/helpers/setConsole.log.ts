@@ -1,4 +1,3 @@
-
 import winston from 'winston';
 
 import { Logtail } from '@logtail/node';
@@ -16,19 +15,19 @@ const logger = winston.createLogger({
   ),
   transports: [
     new winston.transports.Console(),
+    new winston.transports.File({ filename: 'combined.log' }),
     new LogtailTransport(new Logtail('dBpzLP1KpHpwLdZTCF2BBJdk')),
   ],
 });
 
-
 console.log = (...args) => {
-  logger.info(...args)
+  logger.info(...args);
 };
 
 console.error = (...args) => {
-  logger.error(...args)
+  logger.error(...args);
 };
 
 console.warn = (...args) => {
-  logger.warn(...args)
+  logger.warn(...args);
 };

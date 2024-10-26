@@ -182,8 +182,6 @@ const main = async (ID: string) => {
 
 getAccounts().then(async (accounts) => {
   console.warn({ message: '💥 ITERATION INIT 💥' });
-  await sendToBot(`💥 ITERATION INIT 💥`);
-
   const startTime = performance.now();
   accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
