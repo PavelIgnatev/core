@@ -7,8 +7,11 @@ import TelegramClient from './common/gramjs/client/TelegramClient';
 import { clearAuthorizations } from './common/gramjs/client/auth';
 
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
+
 import { initClient } from './helpers/initClient';
 import { sendToBot } from './helpers/sendToBot';
+import { sleep } from './helpers/sleep';
+
 import { setOffline } from './methods/account/setOffline';
 import { usersMe } from './methods/users/usersMe';
 import { accountSetup } from './modules/accountSetup';
@@ -17,7 +20,6 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
-import { sleep } from './helpers/sleep';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];

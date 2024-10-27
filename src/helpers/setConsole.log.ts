@@ -1,8 +1,5 @@
 import winston from 'winston';
 
-import { Logtail } from '@logtail/node';
-import { LogtailTransport } from '@logtail/winston';
-
 const { combine, timestamp, json, errors } = winston.format;
 const logger = winston.createLogger({
   level: 'http',
@@ -16,7 +13,6 @@ const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({ filename: 'combined.log' }),
-    new LogtailTransport(new Logtail('dBpzLP1KpHpwLdZTCF2BBJdk')),
   ],
 });
 
