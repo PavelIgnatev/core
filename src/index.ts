@@ -183,8 +183,8 @@ getAccounts().then(async (accounts) => {
 
   const interval = setInterval(() => {
     console.log({
-      message: accountsInWork,
-      count: Object.keys(accountsInWork).length,
+      message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
+      accountsInWork,
     });
   }, 60000);
 
