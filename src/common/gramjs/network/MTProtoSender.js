@@ -181,10 +181,6 @@ class MTProtoSender {
     this.userDisconnected = false;
 
     if (this._user_connected && !force) {
-      console.log({
-        accountId: this._accountId,
-        message: 'User is already connected!',
-      });
       return false;
     }
     this.isConnecting = true;
@@ -193,10 +189,7 @@ class MTProtoSender {
     for (let attempt = 0; attempt < attempt + 1; attempt++) {
       try {
         await this._connect(this.getConnection());
-        console.log({
-          accountId: this._accountId,
-          message: 'Connected!',
-        });
+
         if (!this._isExported) {
           this._updateCallback?.(
             new UpdateConnectionState(UpdateConnectionState.connected)
@@ -304,10 +297,6 @@ class MTProtoSender {
       });
 
       await connection.connect();
-      console.log({
-        accountId: this._accountId,
-        message: 'Connection success!',
-      });
     }
 
     if (!this.authKey.getKey()) {
@@ -322,18 +311,10 @@ class MTProtoSender {
     this.isReconnecting = false;
 
     if (!this._send_loop_handle) {
-      console.log({
-        accountId: this._accountId,
-        message: 'Starting send loop',
-      });
       this._send_loop_handle = this._sendLoop();
     }
 
     if (!this._recv_loop_handle) {
-      console.log({
-        accountId: this._accountId,
-        message: 'Starting receive loop',
-      });
       this._recv_loop_handle = this._recvLoop();
     }
 
@@ -407,7 +388,7 @@ class MTProtoSender {
         if (m.request.className !== 'account.UpdateStatus') {
           console.log({
             accountId: this._accountId,
-            message: `Send Loop: [${m.request.className}]`,
+            message: `[${m.request.className}]`,
             payload: JSON.parse(JSON.stringify(m.request)),
           });
         }
@@ -800,7 +781,7 @@ class MTProtoSender {
     console.error({
       accountId: this._accountId,
       message: new Error(
-        `Resend Loop: [${states.map((state) => state.request.className)}]`
+        `[${states.map((state) => state.request.className)}]`
       ),
     });
   }
@@ -856,7 +837,7 @@ class MTProtoSender {
     console.error({
       accountId: this._accountId,
       message: new Error(
-        `Resend Loop: [${states.map((state) => state.request.className)}]`
+        `[${states.map((state) => state.request.className)}]`
       ),
     });
   }

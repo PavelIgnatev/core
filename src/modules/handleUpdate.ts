@@ -27,7 +27,7 @@ export const handleUpdate = async (
 
   console.log({
     accountId,
-    message: `New update: <${update.className}>`,
+    message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update)),
   });
 

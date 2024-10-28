@@ -1,18 +1,22 @@
 import winston from 'winston';
+import winstonMongoDB from 'winston-mongodb';
 
 const { combine, timestamp, json, errors } = winston.format;
 const logger = winston.createLogger({
   level: 'http',
   format: combine(
-    errors({ stack: true }),
+    errors(),
     timestamp({
-      format: 'YYYY-MM-DD hh:mm:ss.SSS A',
+      format: () => new Date().toISOString(),
     }),
     json()
   ),
   transports: [
     new winston.transports.Console(),
-    new winston.transports.File({ filename: 'combined.log' }),
+    new winstonMongoDB.MongoDB({
+      db: 'mongodb://gen_user:%5C%7Dc%3C%24q%3C3j8O_%26g@193.108.115.154:27017/winston?authSource=admin&directConnection=true',
+      collection: 'winston',
+    }),
   ],
 });
 
@@ -22,8 +26,4 @@ console.log = (...args) => {
 
 console.error = (...args) => {
   logger.error(...args);
-};
-
-console.warn = (...args) => {
-  logger.warn(...args);
 };

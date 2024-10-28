@@ -86,10 +86,6 @@ const main = async (ID: string) => {
     const randomI = Math.floor(Math.random() * 26);
 
     for (let i = 0; i < 30; i++) {
-      console.log({
-        accountId: ID,
-        message: `Init iteration [${i + 1}]`,
-      });
       accountsInWork[ID] = i + 1;
 
       let timer;
@@ -115,10 +111,6 @@ const main = async (ID: string) => {
             await autoSender(client, ID, tgAccountId);
           }
           await new Promise((res) => setTimeout(res, 60000));
-          console.log({
-            accountId: ID,
-            message: `End iteration [${i + 1}]`,
-          });
         })(),
         timeout,
       ]);
@@ -183,14 +175,14 @@ const main = async (ID: string) => {
 };
 
 getAccounts().then(async (accounts) => {
-  console.warn({ message: '💥 ITERATION INIT 💥' });
+  console.log({ message: 'ITERATION INIT' });
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('112834976-rus-support'));
+  // });
 
   const interval = setInterval(() => {
-    console.warn({
+    console.log({
       message: accountsInWork,
       count: Object.keys(accountsInWork).length,
     });
@@ -211,6 +203,21 @@ getAccounts().then(async (accounts) => {
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
     await sleep(30000);
+    console.log({ message: 'ITERATION DONE' });
     process.exit(1);
   });
+});
+
+process.on('uncaughtException', async (err) => {
+  await sendToBot(`**** UncaughtException ****
+Error: ${err.message}`);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', async (reason, promise) => {
+  console.log(reason, promise);
+  await sendToBot(`**** UnhandledRejection ****
+Reason: ${reason}
+Promise: ${promise}`);
+  process.exit(1);
 });
