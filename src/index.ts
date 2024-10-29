@@ -70,9 +70,9 @@ const main = async (ID: string) => {
 
         await Promise.race([setOffline(client, false), timeoutPromise]);
       } catch (error: any) {
-        console.error({
+        console.warn({
           accountId: ID,
-          message: new Error('Reconnect due to set offline'),
+          message: 'Reconnect due to set offline',
         });
 
         client?._sender?.reconnect();
@@ -202,8 +202,8 @@ getAccounts().then(async (accounts) => {
 
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
-    await sleep(30000);
     console.log({ message: 'ITERATION DONE' });
+    await sleep(30000);
     process.exit(1);
   });
 });

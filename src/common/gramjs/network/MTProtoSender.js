@@ -203,11 +203,9 @@ class MTProtoSender {
           );
         }
 
-        console.error({
+        console.warn({
           accountId: this._accountId,
-          message: new Error(
-            `WebSocket error: ${err.message} [${attempt + 1} attempt(s)]`
-          ),
+          message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
         // eslint-disable-next-line no-console
 
@@ -229,9 +227,9 @@ class MTProtoSender {
    */
   async disconnect() {
     this.userDisconnected = true;
-    console.error({
+    console.warn({
       accountId: this._accountId,
-      message: new Error('Disconnecting...'),
+      message: 'Disconnecting...',
     });
 
     await this._disconnect(this.getConnection());
@@ -291,7 +289,7 @@ class MTProtoSender {
    */
   async _connect(connection) {
     if (!connection.isConnected()) {
-      console.log({
+      console.warn({
         accountId: this._accountId,
         message: 'Connecting to {0}...'.replace('{0}', connection._ip),
       });
@@ -326,7 +324,7 @@ class MTProtoSender {
       this._long_poll_loop_handle = this._longPollLoop();
     }
 
-    console.log({
+    console.warn({
       accountId: this._accountId,
       message: 'Connection to %s complete!'.replace(
         '%s',
@@ -350,11 +348,9 @@ class MTProtoSender {
       return;
     }
 
-    console.error({
+    console.warn({
       accountId: this._accountId,
-      message: new Error(
-        'Disconnecting from %s...'.replace('%s', connection.toString())
-      ),
+      message: 'Disconnecting from %s...'.replace('%s', connection.toString()),
     });
     this._user_connected = false;
     await connection.disconnect();
@@ -468,9 +464,9 @@ class MTProtoSender {
       } catch (e) {
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          console.error({
+          console.warn({
             accountId: this._accountId,
-            message: new Error(`Recv loop error: ${e.message}`),
+            message: `Recv loop error: ${e.message}`,
           });
 
           this.reconnect();
@@ -521,9 +517,9 @@ class MTProtoSender {
           this._recv_loop_handle = undefined;
           return;
         } else {
-          console.error({
+          console.warn({
             accountId: this._accountId,
-            message: new Error(`Recv loop error unhandled: ${e.message}`),
+            message: `Recv loop error unhandled: ${e.message}`,
           });
           this.reconnect();
           this._recv_loop_handle = undefined;
@@ -780,9 +776,7 @@ class MTProtoSender {
     this._send_queue.extend(states);
     console.error({
       accountId: this._accountId,
-      message: new Error(
-        `[${states.map((state) => state.request.className)}]`
-      ),
+      message: new Error(`[${states.map((state) => state.request.className)}]`),
     });
   }
 
@@ -836,9 +830,7 @@ class MTProtoSender {
 
     console.error({
       accountId: this._accountId,
-      message: new Error(
-        `[${states.map((state) => state.request.className)}]`
-      ),
+      message: new Error(`[${states.map((state) => state.request.className)}]`),
     });
   }
 
@@ -949,11 +941,6 @@ class MTProtoSender {
       this.isReconnecting = true;
 
       Helpers.sleep(1000).then(() => {
-        console.error({
-          accountId: this._accountId,
-          message: new Error(`Started reconnecting`),
-        });
-
         this._reconnect();
       });
     }
@@ -961,15 +948,15 @@ class MTProtoSender {
 
   async _reconnect() {
     try {
-      console.error({
+      console.warn({
         accountId: this._accountId,
-        message: new Error(`Closing current connection... Reconnect...`),
+        message: 'Closing current connection... Reconnect...',
       });
       await this._disconnect(this.getConnection());
     } catch (err) {
-      console.error({
+      console.warn({
         accountId: this._accountId,
-        message: new Error(`Reconnect error: ${err.message}`),
+        message: `Reconnect error: ${err.message}`,
       });
     }
 

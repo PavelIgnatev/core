@@ -98,11 +98,9 @@ class Connection {
         await this._send(data);
       }
     } catch (e) {
-      console.error({
+      console.warn({
         accountId: this._accountId,
-        message: new Error(
-          `The server closed the connection while sending: ${e.message}`
-        ),
+        message: `The server closed the connection while sending: ${e.message}`,
       });
     }
   }
