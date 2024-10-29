@@ -16,11 +16,6 @@ export const autoResponse = async (
   tgAccountId: string,
   tgFirstName: string
 ) => {
-  console.log({
-    accountId,
-    message: '**AUTO RESPONSE**',
-  });
-
   const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs(
     client,
     accountId
