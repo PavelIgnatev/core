@@ -9,11 +9,6 @@ export async function clearAuthorizations(client: TelegramClient) {
   for (const authorization of authorizations) {
     try {
       if (!authorization.current && authorization.deviceModel !== 'Desktop') {
-        console.log({
-          accountId: client._accountId,
-          message: `Delete unknown account authorization: ${JSON.stringify(authorization)}`,
-        });
-
         await client.invoke(
           new Api.account.ResetAuthorization({
             hash: authorization.hash,
@@ -23,7 +18,7 @@ export async function clearAuthorizations(client: TelegramClient) {
     } catch (error: any) {
       console.error({
         accountId: client._accountId,
-        message: new Error(`Reset Authorizations Error: ${error.message}`)
+        message: new Error(`Reset Authorizations Error: ${error.message}`),
       });
     }
   }

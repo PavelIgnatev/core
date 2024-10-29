@@ -16,37 +16,23 @@ export const autoSender = async (
   accountId: string,
   tgAccountId: string
 ) => {
-  console.log({
-    accountId,
-    message: '**AUTO SENDER**',
-  });
-
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14 ) {
-    console.log({
-      accountId,
-      message: 'Sender has been stopped (working time 5:00-14:59 UTC)',
-    });
-
+  if (currentUTCHours < 5 || currentUTCHours > 14) {
     return;
   }
 
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = new Intl.DateTimeFormat('en-GB', {
-  //     weekday: 'short',
-  //     timeZone: 'UTC',
-  //   }).format(new Date());
+  if (!accountId.includes('-prefix-')) {
+    const weekday = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(new Date());
 
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     console.log({
-  //       accountId,
-  //       message: 'Sender has been stopped (working days Mon-Fri)',
-  //     });
-  //     return;
-  //   }
-  // }
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
+  }
 
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
@@ -159,10 +145,5 @@ export const autoSender = async (
 
       throw new Error('Global Error');
     }
-  } else {
-    console.log({
-      accountId,
-      message: `Next message can be sent after ${String(remainingTime.toLocaleString('en-US', { timeZone: 'UTC' }))}`,
-    });
   }
 };

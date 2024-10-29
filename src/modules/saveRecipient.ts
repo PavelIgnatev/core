@@ -19,10 +19,6 @@ export const saveRecipient = async (
   addedData: Record<string, unknown> = {},
   accountByID: Account | null = null
 ) => {
-  console.log({
-    accountId,
-    message: `**SAVE RECIPIENT**`
-  });
   
   const {
     id: recipientId,
@@ -65,6 +61,11 @@ export const saveRecipient = async (
   while (!isSave) {
     try {
       await updateDialogue(data);
+      console.log({
+        accountId,
+        message: `**SAVE RECIPIENT**`,
+        data
+      });
 
       if (status === 'create') {
         const messageCount = accountByID?.messageCount || 0;
@@ -88,11 +89,6 @@ export const saveRecipient = async (
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
-
-      console.log({
-        accountId,
-        message: 'Saving the recipient information to the database is complete',
-      });
       isSave = true;
     } catch (error: any) {
       console.error({

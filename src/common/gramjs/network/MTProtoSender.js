@@ -289,11 +289,6 @@ class MTProtoSender {
    */
   async _connect(connection) {
     if (!connection.isConnected()) {
-      console.warn({
-        accountId: this._accountId,
-        message: 'Connecting to {0}...'.replace('{0}', connection._ip),
-      });
-
       await connection.connect();
     }
 
@@ -317,10 +312,6 @@ class MTProtoSender {
     }
 
     if (!this._long_poll_loop_handle && connection.shouldLongPoll) {
-      console.log({
-        accountId: this._accountId,
-        message: 'Starting long-poll loop',
-      });
       this._long_poll_loop_handle = this._longPollLoop();
     }
 
@@ -481,12 +472,12 @@ class MTProtoSender {
       try {
         message = await this._state.decryptMessageData(body);
       } catch (e) {
-        console.error({
-          accountId: this._accountId,
-          message: new Error(
-            `Error while receiving items from the network ${e.message}`
-          ),
-        });
+        // console.error({
+        //   accountId: this._accountId,
+        //   message: new Error(
+        //     `Error while receiving items from the network ${e.message}`
+        //   ),
+        // });
 
         if (e instanceof TypeNotFoundError) {
           console.error({
@@ -497,12 +488,12 @@ class MTProtoSender {
           });
           continue;
         } else if (e instanceof SecurityError) {
-          console.error({
-            accountId: this._accountId,
-            message: new Error(
-              `Security error while unpacking a received message: ${e.message}`
-            ),
-          });
+          // console.error({
+          //   accountId: this._accountId,
+          //   message: new Error(
+          //     `Security error while unpacking a received message: ${e.message}`
+          //   ),
+          // });
           continue;
         } else if (e instanceof InvalidBufferError) {
           // 404 means that the server has "forgotten" our auth key and we need to create a new one.
