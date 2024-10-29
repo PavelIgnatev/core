@@ -26,6 +26,12 @@ const promises: Promise<any>[] = [];
 const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
+  const startTime = performance.now();
+  console.log({
+    accountId: ID,
+    message: `💥 LOG IN ${ID} 💥`,
+  });
+
   let isAutoResponse = true;
   let setOnlineInterval: any = null;
   let client: TelegramClient | null = null;
@@ -172,10 +178,26 @@ const main = async (ID: string) => {
   if (client) {
     await client.destroy();
   }
+
+  const time = Math.round((performance.now() - startTime) / 1000);
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  let timeString;
+  if (minutes > 0) {
+    timeString = `${minutes}m ${seconds}s`;
+  } else {
+    timeString = `${seconds}s`;
+  }
+
+  console.log({
+    accountId: ID,
+    message: `💥 EXIT FROM ${ID} (${timeString}) 💥`,
+  });
 };
 
 getAccounts().then(async (accounts) => {
-  console.log({ message: 'ITERATION INIT' });
+  console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
   accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
@@ -202,7 +224,7 @@ getAccounts().then(async (accounts) => {
 
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
-    console.log({ message: 'ITERATION DONE' });
+    console.log({ message: `💥 ITERATION DONE (${timeString}) 💥` });
     await sleep(30000);
     process.exit(1);
   });

@@ -381,7 +381,10 @@ class MTProtoSender {
       let { data } = res;
       const { batch } = res;
       batch.forEach((m) => {
-        if (m.request.className !== 'account.UpdateStatus') {
+        if (
+          m.request.className !== 'account.UpdateStatus' &&
+          m.request.className !== 'InvokeWithLayer'
+        ) {
           console.log({
             accountId: this._accountId,
             message: `[${m.request.className}]`,
@@ -774,9 +777,13 @@ class MTProtoSender {
     this._state.salt = badSalt.newServerSalt;
     const states = this._popStates(badSalt.badMsgId);
     this._send_queue.extend(states);
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`[${states.map((state) => state.request.className)}]`),
+    states.forEach((state) => {
+      if (state.request.className !== 'InvokeWithLayer') {
+        console.error({
+          accountId: this._accountId,
+          message: new Error(`[${state.request.className}]`),
+        });
+      }
     });
   }
 
@@ -828,9 +835,13 @@ class MTProtoSender {
     // Messages are to be re-sent once we've corrected the issue
     this._send_queue.extend(states);
 
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`[${states.map((state) => state.request.className)}]`),
+    states.forEach((state) => {
+      if (state.request.className !== 'InvokeWithLayer') {
+        console.error({
+          accountId: this._accountId,
+          message: new Error(`[${state.request.className}]`),
+        });
+      }
     });
   }
 
