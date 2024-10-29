@@ -190,7 +190,7 @@ const main = async (ID: string) => {
     timeString = `${seconds}s`;
   }
 
-  await sleep(5000);
+  await sleep(30000);
   console.log({
     accountId: ID,
     message: `💥 EXIT FROM ${ID} (${timeString}) 💥`,
@@ -226,7 +226,7 @@ getAccounts().then(async (accounts) => {
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
     console.log({ message: `💥 ITERATION DONE (${timeString}) 💥` });
-    await sleep(30000);
+    await sleep(120000);
     process.exit(1);
   });
 });
