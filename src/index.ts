@@ -200,9 +200,9 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-    promises.push(main('112834976-rus-support'));
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
   const interval = setInterval(() => {
     console.log({
