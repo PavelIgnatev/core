@@ -25,12 +25,10 @@ export const handleUpdate = async (
     return;
   }
 
-  if (update.className === 'UpdateConnectionState') {
-    console.warn({
-      accountId,
-      message: `<${update.className}>`,
-      payload: JSON.parse(JSON.stringify(update)),
-    });
+  if (
+    update.className === 'UpdateConnectionState' ||
+    update.className === 'UpdateUserStatus'
+  ) {
     return;
   }
 
@@ -39,10 +37,6 @@ export const handleUpdate = async (
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update)),
   });
-
-  if (update.className === 'UpdateUserStatus') {
-    return;
-  }
 
   const userId = findValue(update, 'userId');
 
