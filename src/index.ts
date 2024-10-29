@@ -190,6 +190,7 @@ const main = async (ID: string) => {
     timeString = `${seconds}s`;
   }
 
+  await sleep(5000);
   console.log({
     accountId: ID,
     message: `💥 EXIT FROM ${ID} (${timeString}) 💥`,
