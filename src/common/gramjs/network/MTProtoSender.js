@@ -381,11 +381,16 @@ class MTProtoSender {
       let { data } = res;
       const { batch } = res;
       batch.forEach((m) => {
-        console.log({
-          accountId: this._accountId,
-          message: `[${m.request.className}]`,
-          payload: JSON.parse(JSON.stringify(m.request)),
-        });
+        if (
+          m.request.className !== 'account.UpdateStatus' &&
+          m.request.className !== 'InvokeWithLayer'
+        ) {
+          console.log({
+            accountId: this._accountId,
+            message: `[${m.request.className}]`,
+            payload: JSON.parse(JSON.stringify(m.request)),
+          });
+        }
       });
 
       for (const state of batch) {
@@ -773,10 +778,15 @@ class MTProtoSender {
     const states = this._popStates(badSalt.badMsgId);
     this._send_queue.extend(states);
     states.forEach((state) => {
-      console.error({
-        accountId: this._accountId,
-        message: new Error(`[${state.request.className}]`),
-      });
+      if (
+        state.request.className !== 'account.UpdateStatus' &&
+        state.request.className !== 'InvokeWithLayer'
+      ) {
+        console.error({
+          accountId: this._accountId,
+          message: new Error(`[${state.request.className}]`),
+        });
+      }
     });
   }
 
@@ -829,10 +839,15 @@ class MTProtoSender {
     this._send_queue.extend(states);
 
     states.forEach((state) => {
-      console.error({
-        accountId: this._accountId,
-        message: new Error(`[${state.request.className}]`),
-      });
+      if (
+        state.request.className !== 'account.UpdateStatus' &&
+        state.request.className !== 'InvokeWithLayer'
+      ) {
+        console.error({
+          accountId: this._accountId,
+          message: new Error(`[${state.request.className}]`),
+        });
+      }
     });
   }
 
