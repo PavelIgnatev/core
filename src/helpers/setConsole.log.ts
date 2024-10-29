@@ -27,3 +27,7 @@ console.log = (...args) => {
 console.error = (...args) => {
   logger.error(...args);
 };
+
+console.warn = (...args) => {
+  logger.warn(...args);
+};
