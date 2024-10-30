@@ -231,7 +231,12 @@ export async function makeRequestGpt(
       }
 
       let message = filterString(
-        data.replace(/\n/g, '').replace(/\*/g, '').replace(/!/g, '.').trim(),
+        data
+          .replace(/\n/g, '')
+          .replace(/\*/g, '')
+          .replace(/!/g, '.')
+          .replaceAll(/[«»„“”‘’'"`『』「」]/g, '')
+          .trim(),
         part || '',
         'mainlink'
       );
@@ -245,7 +250,7 @@ export async function makeRequestGpt(
       console.log({
         accountId,
         message: `**REQUEST GPT MESSAGE**`,
-        varianMessage: message
+        varianMessage: message,
       });
       if (hasTextLink && disableLink) {
         throw new Error(
