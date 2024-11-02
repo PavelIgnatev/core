@@ -16,6 +16,20 @@ export const getDialogue = async (accountId: string, recipientId: string) => {
   return dialogue;
 };
 
+export const getDialogueByMessageId = async (
+  accountId: string,
+  messageIds: number[]
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const dialogue = await dialoguesCollection.findOne<Dialogue>({
+    accountId,
+    messages: { $elemMatch: { id: { $in: messageIds } } },
+  });
+
+  return dialogue;
+};
+
 export const getPingDialogues = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -37,6 +51,27 @@ export const getPingDialogues = async (accountId: string) => {
     .toArray();
 
   return pingDialogs;
+};
+
+export const getDialogsAutomationCheck = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const now = new Date();
+  const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const automationDialogs = await dialoguesCollection
+    .find<Dialogue>({
+      accountId,
+      automationCheck: { $ne: true },
+      dateUpdated: {
+        $gte: twentyFourHoursAgo,
+        $lte: oneHourAgo,
+      },
+    })
+    .toArray();
+
+  return automationDialogs;
 };
 
 export const getGlobalCheckDialogues = async (accountId: string) => {
@@ -93,6 +128,29 @@ export const updateDialogue = async (dialogue: Dialogue) => {
     },
     {
       upsert: true,
+    }
+  );
+};
+
+export const updateMessagesViewedStatusById = async (
+  accountId: string,
+  recipientId: string,
+  messageId: number
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  await dialoguesCollection.updateOne(
+    {
+      accountId,
+      recipientId,
+    },
+    {
+      $set: {
+        'messages.$[element].viewed': true,
+      },
+    },
+    {
+      arrayFilters: [{ 'element.id': { $lte: messageId } }],
     }
   );
 };

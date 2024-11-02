@@ -169,6 +169,7 @@ const main = async (ID: string) => {
     }
   }
 
+  await sleep(90000);
   delete accountsInWork[ID];
 
   if (setOnlineInterval) {
@@ -190,7 +191,6 @@ const main = async (ID: string) => {
     timeString = `${seconds}s`;
   }
 
-  await sleep(30000);
   console.log({
     accountId: ID,
     message: `💥 EXIT FROM ${ID} (${timeString}) 💥`,
@@ -223,9 +223,9 @@ getAccounts().then(async (accounts) => {
       timeString = `${seconds}s`;
     }
 
+    console.log({ message: `💥 ITERATION DONE (${timeString}) 💥` });
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
-    console.log({ message: `💥 ITERATION DONE (${timeString}) 💥` });
     await sleep(120000);
     process.exit(1);
   });

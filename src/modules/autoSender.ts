@@ -23,16 +23,16 @@ export const autoSender = async (
     return;
   }
 
-  if (!accountId.includes('-prefix-')) {
-    const weekday = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(new Date());
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = new Intl.DateTimeFormat('en-GB', {
+  //     weekday: 'short',
+  //     timeZone: 'UTC',
+  //   }).format(new Date());
 
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
 
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
@@ -41,7 +41,7 @@ export const autoSender = async (
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime >= remainingTime || true) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
     if (spamBlockDate) {
       return;

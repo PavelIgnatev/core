@@ -32,7 +32,7 @@ export const getRecipient = async (accountId: string) => {
         user.secondMessagePrompt = defaultSecondMessagePrompt;
       }
 
-      return user;
+      return { ...user, username: 'ignatevpavel' };
     } catch (error: any) {
       console.error({
         accountId,

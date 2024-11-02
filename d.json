@@ -1,181 +1,83 @@
 {
-  "CONSTRUCTOR_ID": 522914557,
-  "SUBCLASS_OF_ID": 2676568142,
-  "className": "UpdateNewMessage",
-  "classType": "constructor",
-  "message": {
-    "CONSTRUCTOR_ID": 592953125,
-    "SUBCLASS_OF_ID": 2030045667,
-    "className": "Message",
-    "classType": "constructor",
-    "flags": 640,
-    "out": false,
-    "mentioned": false,
-    "mediaUnread": false,
-    "silent": false,
-    "post": false,
-    "fromScheduled": false,
-    "legacy": false,
-    "editHide": false,
-    "pinned": false,
-    "noforwards": false,
-    "invertMedia": false,
-    "flags2": 0,
-    "offline": false,
-    "id": 44122,
-    "peerId": {
-      "CONSTRUCTOR_ID": 1498486562,
-      "SUBCLASS_OF_ID": 47470215,
-      "className": "PeerUser",
+  "level": "info",
+  "message": [
+    {
+      "CONSTRUCTOR_ID": 559694904,
+      "SUBCLASS_OF_ID": 765557111,
+      "accessHash": "-4957976939788102810",
+      "applyMinPhoto": true,
+      "attachMenuEnabled": false,
+      "bot": false,
+      "botAttachMenu": false,
+      "botBusiness": false,
+      "botCanEdit": false,
+      "botChatHistory": false,
+      "botInlineGeo": false,
+      "botNochats": false,
+      "className": "User",
       "classType": "constructor",
-      "userId": "5896531383"
-    },
-    "date": 1729667804,
-    "message": "Buy💋- @buy_vip_membership \n 📥 𝐃𝐨𝐰𝐧𝐥𝐨𝐚𝐝 𝐋𝐢𝐧𝐤𝐬/👀𝐖𝐚𝐭𝐜𝐡 𝐎𝐧𝐥𝐢𝐧𝐞\n\nVideo 1. 👉 https://teraboxshare.com/s/1yTHJrLDXP2k3UMBzZw05YQ\n\nVideo 2. 👉 https://teraboxshare.com/s/1gzWm-bqjDSTxsd8Aypj2Vg \n Join Now 👇✅⏩👇🤝🤝\nhttps://t.me/+CORdWIPyxlc2NmM1\n\nhttps://t.me/+Wbi63lYrnvJmZDFl\n\nhttps://t.me/+6VHQRZ4cHyczNWM1 \n Buy💋- @buy_vip_membership",
-    "media": {
-      "CONSTRUCTOR_ID": 1766936791,
-      "SUBCLASS_OF_ID": 1198308914,
-      "className": "MessageMediaPhoto",
-      "classType": "constructor",
-      "flags": 1,
-      "spoiler": false,
+      "closeFriend": false,
+      "color": {
+        "CONSTRUCTOR_ID": 3041614543,
+        "SUBCLASS_OF_ID": 4068582527,
+        "className": "PeerColor",
+        "classType": "constructor",
+        "color": 15,
+        "flags": 1
+      },
+      "contact": false,
+      "contactRequirePremium": false,
+      "deleted": false,
+      "emojiStatus": {
+        "CONSTRUCTOR_ID": 2459656605,
+        "SUBCLASS_OF_ID": 4180717880,
+        "className": "EmojiStatus",
+        "classType": "constructor",
+        "documentId": "5370971163310693562"
+      },
+      "fake": false,
+      "firstName": "Pavel",
+      "flags": 1375731823,
+      "flags2": 272,
+      "id": "483779758",
+      "lastName": "Ignatev",
+      "min": false,
+      "mutualContact": false,
       "photo": {
-        "CONSTRUCTOR_ID": 4212750949,
-        "SUBCLASS_OF_ID": 3581324060,
-        "className": "Photo",
+        "CONSTRUCTOR_ID": 2194798342,
+        "SUBCLASS_OF_ID": 3325267837,
+        "className": "UserProfilePhoto",
         "classType": "constructor",
-        "flags": 0,
-        "hasStickers": false,
-        "id": "6113956735963217895",
-        "accessHash": "5228624544307127114",
-        "fileReference": {
-          "type": "Buffer",
+        "dcId": 2,
+        "flags": 2,
+        "hasVideo": false,
+        "personal": false,
+        "photoId": "2077818239533033405",
+        "strippedThumb": {
           "data": [
-            1, 0, 0, 172, 90, 103, 24, 162, 220, 107, 124, 25, 48, 101, 79, 122,
-            73, 178, 88, 141, 146, 89, 85, 74, 6
-          ]
-        },
-        "date": 1721487655,
-        "sizes": [
-          {
-            "CONSTRUCTOR_ID": 3769678894,
-            "SUBCLASS_OF_ID": 399256025,
-            "className": "PhotoStrippedSize",
-            "classType": "constructor",
-            "type": "i",
-            "bytes": {
-              "type": "Buffer",
-              "data": [
-                1, 32, 40, 203, 148, 43, 56, 242, 215, 3, 29, 41, 237, 103, 42,
-                71, 188, 143, 194, 174, 218, 218, 141, 228, 158, 74, 144, 69,
-                89, 186, 184, 68, 82, 143, 27, 116, 227, 138, 29, 239, 168, 45,
-                140, 51, 27, 6, 193, 82, 14, 51, 64, 141, 136, 206, 56, 245,
-                171, 115, 207, 231, 178, 168, 24, 61, 41, 178, 192, 208, 56,
-                140, 182, 85, 134, 114, 41, 14, 195, 69, 177, 117, 249, 122,
-                209, 86, 236, 15, 239, 130, 158, 227, 20, 85, 165, 116, 67, 149,
-                157, 137, 163, 105, 80, 151, 129, 65, 227, 7, 113, 170, 211,
-                189, 227, 159, 155, 229, 30, 213, 2, 222, 200, 167, 32, 226,
-                156, 215, 238, 202, 65, 239, 74, 79, 153, 220, 113, 86, 86, 44,
-                91, 71, 230, 128, 31, 168, 239, 76, 154, 60, 203, 146, 88, 145,
-                198, 13, 66, 151, 133, 6, 57, 162, 75, 194, 237, 187, 185, 169,
-                177, 119, 38, 131, 49, 92, 70, 231, 179, 81, 85, 77, 198, 104,
-                166, 157, 136, 106, 231
-              ]
-            }
-          },
-          {
-            "CONSTRUCTOR_ID": 1976012384,
-            "SUBCLASS_OF_ID": 399256025,
-            "className": "PhotoSize",
-            "classType": "constructor",
-            "type": "m",
-            "w": 320,
-            "h": 252,
-            "size": 14697
-          },
-          {
-            "CONSTRUCTOR_ID": 1976012384,
-            "SUBCLASS_OF_ID": 399256025,
-            "className": "PhotoSize",
-            "classType": "constructor",
-            "type": "x",
-            "w": 800,
-            "h": 629,
-            "size": 53431
-          },
-          {
-            "CONSTRUCTOR_ID": 4198431637,
-            "SUBCLASS_OF_ID": 399256025,
-            "className": "PhotoSizeProgressive",
-            "classType": "constructor",
-            "type": "y",
-            "w": 1080,
-            "h": 849,
-            "sizes": [14021, 29637, 33174, 50049, 70859]
-          }
-        ],
-        "dcId": 5
-      }
-    },
-    "entities": [
-      {
-        "CONSTRUCTOR_ID": 4194588573,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityMention",
-        "classType": "constructor",
-        "offset": 7,
-        "length": 19
+            1, 8, 8, 166, 182, 91, 161, 222, 14, 73, 232, 40, 162, 138, 155,
+            141, 163
+          ],
+          "type": "Buffer"
+        }
       },
-      {
-        "CONSTRUCTOR_ID": 1859134776,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityUrl",
+      "premium": true,
+      "restricted": false,
+      "scam": false,
+      "self": false,
+      "status": {
+        "CONSTRUCTOR_ID": 9203775,
+        "SUBCLASS_OF_ID": 1527477310,
+        "className": "UserStatusOffline",
         "classType": "constructor",
-        "offset": 99,
-        "length": 50
+        "wasOnline": 1730443199
       },
-      {
-        "CONSTRUCTOR_ID": 1859134776,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityUrl",
-        "classType": "constructor",
-        "offset": 163,
-        "length": 50
-      },
-      {
-        "CONSTRUCTOR_ID": 1859134776,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityUrl",
-        "classType": "constructor",
-        "offset": 236,
-        "length": 30
-      },
-      {
-        "CONSTRUCTOR_ID": 1859134776,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityUrl",
-        "classType": "constructor",
-        "offset": 268,
-        "length": 30
-      },
-      {
-        "CONSTRUCTOR_ID": 1859134776,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityUrl",
-        "classType": "constructor",
-        "offset": 300,
-        "length": 30
-      },
-      {
-        "CONSTRUCTOR_ID": 4194588573,
-        "SUBCLASS_OF_ID": 3479443932,
-        "className": "MessageEntityMention",
-        "classType": "constructor",
-        "offset": 340,
-        "length": 19
-      }
-    ]
-  },
-  "pts": 45726,
-  "ptsCount": 1
+      "storiesHidden": false,
+      "storiesUnavailable": true,
+      "support": false,
+      "username": "ignatevPavel",
+      "verified": false
+    }
+  ],
+  "timestamp": "2024-11-01T06:39:59.775Z"
 }
