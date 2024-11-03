@@ -26,17 +26,7 @@ export const automaticCheck = async (
     const { messages: dialogMessages = [] } = dialog || {};
 
     for (const dialogTG of dialogsTG) {
-      const sasa = await client.invoke(
-        new GramJs.messages.GetDialogs({
-          limit: 1,
-          offsetPeer: new GramJs.InputPeerUser({
-            userId: BigInt(dialogTG.id),
-            accessHash: BigInt(dialogTG.accessHash),
-          }),
-        })
-      );
 
-      console.log(JSON.parse(JSON.stringify(sasa)));
       const history = (await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
