@@ -90,7 +90,7 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = 0;
+    const randomI = Math.floor(Math.random() * 26);
 
     for (let i = 0; i < 30; i++) {
       accountsInWork[ID] = i + 1;
