@@ -20,6 +20,7 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
+import { automaticCheck } from './modules/automaticCheck';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -89,7 +90,7 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 26);
+    const randomI = 0;
 
     for (let i = 0; i < 30; i++) {
       accountsInWork[ID] = i + 1;
@@ -108,6 +109,10 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
+          // await automaticCheck(client, ID);
+          // await new Promise((res) => setTimeout(res, 60000));
+
+          // return;
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);
@@ -170,6 +175,7 @@ const main = async (ID: string) => {
   }
 
   await sleep(90000);
+
   delete accountsInWork[ID];
 
   if (setOnlineInterval) {
@@ -200,9 +206,9 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('447887839802-accs-market-15-oct'));
+  // });
 
   const interval = setInterval(() => {
     console.log({

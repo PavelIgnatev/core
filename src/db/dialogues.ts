@@ -155,6 +155,31 @@ export const updateMessagesViewedStatusById = async (
   );
 };
 
+export const updateAutomaticDialogue = async (
+  accountId: string,
+  recipientId: string,
+  addedData: Record<string, unknown>
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  await dialoguesCollection.updateOne(
+    {
+      accountId,
+      recipientId,
+    },
+    {
+      $set: {
+        ...addedData,
+        blocked: true,
+        stopped: true,
+        viewed: false,
+        managerMessage: null,
+        dateUpdated: new Date(),
+      },
+    }
+  );
+};
+
 export const updateBlockedDialogue = async (
   accountId: string,
   recipientId: string,
