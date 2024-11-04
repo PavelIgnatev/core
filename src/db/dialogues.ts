@@ -63,7 +63,7 @@ export const getDialogsAutomationCheck = async (accountId: string) => {
   const automationDialogs = await dialoguesCollection
     .find<Dialogue>({
       accountId,
-      automationCheck: { $ne: true },
+      automaticCheck: { $ne: true },
       dateUpdated: {
         $gte: twentyFourHoursAgo,
         $lte: oneHourAgo,

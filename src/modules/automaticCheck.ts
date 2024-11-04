@@ -7,9 +7,7 @@ import { getUserByDialogue } from './getUserByDialogue';
 import {
   getDialogsAutomationCheck,
   updateAutomaticDialogue,
-  updateBlockedDialogue,
 } from '../db/dialogues';
-import { getFullUser } from '../methods/users/getFullUser';
 
 export const automaticCheck = async (
   client: TelegramClient,
@@ -23,10 +21,14 @@ export const automaticCheck = async (
       continue;
     }
 
-    const { messages: dialogMessages = [] } = dialog || {};
+    const dialogMessages: {
+      id: string;
+      text: string;
+      fromId: string;
+      date: string;
+    }[] = [];
 
     for (const dialogTG of dialogsTG) {
-
       const history = (await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
@@ -41,10 +43,6 @@ export const automaticCheck = async (
         .reverse();
 
       for (const message of messages) {
-        if (dialogMessages.find((m) => m.id === message.id)) {
-          continue;
-        }
-
         const {
           photo = false,
           voice = false,
@@ -91,13 +89,15 @@ export const automaticCheck = async (
         dialogTG.status instanceof GramJs.UserStatusEmpty
       ) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
-          messages,
-          reason: 'blocked-automatic',
+          automaticMessages: messages,
+          automaticCheck: true,
+          automaticReason: 'blocked',
         });
       } else if (messages.length === 0) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
-          messages,
-          reason: 'messages-deleted-automatic',
+          automaticMessages: messages,
+          automaticCheck: true,
+          automaticReason: 'messages-deleted',
         });
       }
     }

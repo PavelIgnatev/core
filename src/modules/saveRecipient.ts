@@ -19,7 +19,6 @@ export const saveRecipient = async (
   addedData: Record<string, unknown> = {},
   accountByID: Account | null = null
 ) => {
-  
   const {
     id: recipientId,
     phone,
@@ -54,6 +53,7 @@ export const saveRecipient = async (
     recipientPhone: phone || recipientPhone || null,
     messages,
     step: getCombinedMessages(messages).length,
+    automaticCheck: false,
     ...addedData,
   } as Dialogue;
 
@@ -64,7 +64,7 @@ export const saveRecipient = async (
       console.log({
         accountId,
         message: `**SAVE RECIPIENT**`,
-        data
+        data,
       });
 
       if (status === 'create') {
@@ -93,7 +93,9 @@ export const saveRecipient = async (
     } catch (error: any) {
       console.error({
         accountId,
-        message: new Error(`Error occurred while saving recipient: ${error.message}`),
+        message: new Error(
+          `Error occurred while saving recipient: ${error.message}`
+        ),
       });
 
       await sleep(3000);
