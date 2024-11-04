@@ -4,6 +4,7 @@ import { resolvePhone } from '../methods/contacts/resolvePhone';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 
 import { Dialogue } from '../@types/Dialogue';
+import { sendToBot } from '../helpers/sendToBot';
 
 export const getUserByDialogue = async (
   client: TelegramClient,
@@ -15,19 +16,47 @@ export const getUserByDialogue = async (
 
   const dialogues = [];
 
-  if (dialog.recipientPhone) {
-    const phone = await resolvePhone(client, `+${dialog.recipientPhone}`);
-    const dialogue = phone?.users?.[0];
-    if (dialogue) {
-      dialogues.push(dialogue);
+  try {
+    if (dialog.recipientPhone) {
+      const phone = await resolvePhone(client, `+${dialog.recipientPhone}`);
+      const dialogue = phone?.users?.[0];
+      if (dialogue) {
+        dialogues.push(dialogue);
+      }
+    }
+  } catch (e: any) {
+    if (
+      ![
+        'PHONE_NOT_OCCUPIED',
+        'USERNAME_NOT_OCCUPIED',
+        'USERNAME_INVALID',
+      ].includes(e.message)
+    ) {
+      await sendToBot(`** RESOLVE PHONE ERROR **
+PHONE: ${dialog.recipientPhone};
+Error: ${e.message}`);
     }
   }
 
-  if (dialog.recipientUsername) {
-    const username = await resolveUsername(client, dialog.recipientUsername);
-    const dialgue = username?.users?.[0];
-    if (dialgue) {
-      dialogues.push(dialgue);
+  try {
+    if (dialog.recipientUsername) {
+      const username = await resolveUsername(client, dialog.recipientUsername);
+      const dialgue = username?.users?.[0];
+      if (dialgue) {
+        dialogues.push(dialgue);
+      }
+    }
+  } catch (e: any) {
+    if (
+      ![
+        'PHONE_NOT_OCCUPIED',
+        'USERNAME_NOT_OCCUPIED',
+        'USERNAME_INVALID',
+      ].includes(e.message)
+    ) {
+      await sendToBot(`** RESOLVE USERNAME ERROR **
+USERNAME: ${dialog.recipientUsername};
+Error: ${e.message}`);
     }
   }
 
