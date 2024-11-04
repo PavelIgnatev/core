@@ -184,10 +184,6 @@ UserID: ${user.id}`);
       }
     } else {
       await updateBlockedDialogue(accountId, dialogId, `user-not-resolved`);
-
-      if (user && user.id && user.accessHash) {
-        await deleteMessages(client, user.id, user.accessHash);
-      }
     }
   }
 
