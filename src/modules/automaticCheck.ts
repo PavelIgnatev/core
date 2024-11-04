@@ -99,6 +99,11 @@ export const automaticCheck = async (
           automaticCheck: true,
           automaticReason: 'messages-deleted',
         });
+      } else {
+        await updateAutomaticDialogue(accountId, String(dialogTG.id), {
+          automaticMessages: messages,
+          automaticCheck: true,
+        });
       }
     }
   }
