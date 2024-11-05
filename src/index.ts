@@ -20,7 +20,6 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
-import { automaticCheck } from './modules/automaticCheck';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
