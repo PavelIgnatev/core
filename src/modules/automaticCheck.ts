@@ -90,7 +90,6 @@ export const automaticCheck = async (
   accountId: string
 ) => {
   const [dialogs, lastDialogs] = await getDialogsAutomationCheck(accountId);
-  console.log(dialogs, lastDialogs);
 
   for (const dialog of dialogs) {
     const dialogsTG = await getUserByDialogue(client, dialog);
