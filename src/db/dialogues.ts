@@ -182,10 +182,6 @@ export const updateAutomaticDialogue = async (
     {
       $set: {
         ...addedData,
-        blocked: true,
-        stopped: true,
-        viewed: false,
-        managerMessage: null,
         dateUpdated: new Date(),
       },
     }

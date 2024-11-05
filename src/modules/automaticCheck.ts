@@ -90,6 +90,7 @@ export const automaticCheck = async (
   accountId: string
 ) => {
   const [dialogs, lastDialogs] = await getDialogsAutomationCheck(accountId);
+  console.log(dialogs, lastDialogs);
 
   for (const dialog of dialogs) {
     const dialogsTG = await getUserByDialogue(client, dialog);
@@ -105,12 +106,20 @@ export const automaticCheck = async (
         dialogTG.status instanceof GramJs.UserStatusEmpty
       ) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
+          blocked: true,
+          stopped: true,
+          viewed: false,
+          managerMessage: null,
           automaticMessages: messages,
           automaticCheckDate: new Date(),
           automaticReason: 'blocked',
         });
       } else if (messages.length === 0) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
+          blocked: true,
+          stopped: true,
+          viewed: false,
+          managerMessage: null,
           automaticMessages: messages,
           automaticCheckDate: new Date(),
           automaticReason: 'messages-deleted',
@@ -138,12 +147,20 @@ export const automaticCheck = async (
         dialogTG.status instanceof GramJs.UserStatusEmpty
       ) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
+          blocked: true,
+          stopped: true,
+          viewed: false,
+          managerMessage: null,
           lastAutomaticMessages: messages,
           lastAutomaticCheckDate: new Date(),
           lastAutomaticReason: 'blocked',
         });
       } else if (messages.length === 0) {
         await updateAutomaticDialogue(accountId, String(dialogTG.id), {
+          blocked: true,
+          stopped: true,
+          viewed: false,
+          managerMessage: null,
           lastAutomaticMessages: messages,
           lastAutomaticCheckDate: new Date(),
           lastAutomaticReason: 'messages-deleted',
