@@ -60,5 +60,27 @@ Error: ${e.message}`);
     }
   }
 
+  try {
+    if (dialog.recipientUsername.includes('+')) {
+      const username = await resolvePhone(client, dialog.recipientUsername);
+      const dialgue = username?.users?.[0];
+      if (dialgue) {
+        dialogues.push(dialgue);
+      }
+    }
+  } catch (e: any) {
+    if (
+      ![
+        'PHONE_NOT_OCCUPIED',
+        'USERNAME_NOT_OCCUPIED',
+        'USERNAME_INVALID',
+      ].includes(e.message)
+    ) {
+      await sendToBot(`** RESOLVE PHONE FROM USERNAME ERROR **
+USERNAME: ${dialog.recipientUsername};
+Error: ${e.message}`);
+    }
+  }
+
   return dialogues;
 };
