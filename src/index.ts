@@ -115,7 +115,6 @@ const main = async (ID: string) => {
           }
 
           if (i === randomI) {
-            await automaticCheck(client, ID);
             await autoSender(client, ID, tgAccountId);
           }
           await new Promise((res) => setTimeout(res, 60000));
