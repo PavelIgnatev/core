@@ -58,7 +58,6 @@ export const getDialogsAutomationCheck = async (accountId: string) => {
 
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
-  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const ninetySixHoursAgo = new Date(now.getTime() - 96 * 60 * 60 * 1000);
 
@@ -67,7 +66,7 @@ export const getDialogsAutomationCheck = async (accountId: string) => {
       accountId,
       automaticCheckDate: null,
       dateUpdated: {
-        $gte: twentyFourHoursAgo,
+        $gte: fortyEightHoursAgo,
         $lte: oneHourAgo,
       },
     })
