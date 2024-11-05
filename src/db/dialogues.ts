@@ -59,7 +59,8 @@ export const getDialogsAutomationCheck = async (accountId: string) => {
   const now = new Date();
   const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
   const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const seventyTwoHoursAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000);
+  const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+  const ninetySixHoursAgo = new Date(now.getTime() - 96 * 60 * 60 * 1000);
 
   const automationDialogs = await dialoguesCollection
     .find<Dialogue>({
@@ -76,9 +77,11 @@ export const getDialogsAutomationCheck = async (accountId: string) => {
     .find<Dialogue>({
       accountId,
       lastAutomaticCheckDate: null,
+      automaticReason: null,
+      lastAutomaticReason: null,
       automaticCheckDate: {
-        $gte: seventyTwoHoursAgo,
-        $lte: twentyFourHoursAgo,
+        $gte: ninetySixHoursAgo,
+        $lte: fortyEightHoursAgo,
       },
     })
     .toArray();
