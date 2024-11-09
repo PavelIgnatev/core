@@ -16,6 +16,13 @@ export const getDialogue = async (accountId: string, recipientId: string) => {
   return dialogue;
 };
 
+export const getDialogsIds = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const ids = await dialoguesCollection.distinct('recipientId', { accountId });
+  return ids;
+};
+
 export const getDialogueByMessageId = async (
   accountId: string,
   messageIds: number[]

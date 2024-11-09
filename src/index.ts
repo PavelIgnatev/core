@@ -20,6 +20,7 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 
 import './helpers/setConsole.log';
+import { automaticCheck } from './modules/automaticCheck';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -108,6 +109,10 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
+          // await automaticCheck(client, ID);
+          // await new Promise((res) => setTimeout(res, 600000));
+
+          // return;
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);
