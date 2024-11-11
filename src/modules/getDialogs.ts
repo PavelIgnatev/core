@@ -78,7 +78,7 @@ export const getDialogs = async (client: any, accountId: string) => {
         automaticReason = null,
       } = dialogDb || {};
 
-      if (!groupId) {
+      if (!dialogDb || !groupId) {
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
@@ -105,6 +105,13 @@ export const getDialogs = async (client: any, accountId: string) => {
 
       if (blocked || reason || automaticReason) {
         await editFolder(client, String(user.id), String(user.accessHash), 0);
+        if (!automaticReason) {
+          await updateAutomaticDialogue(
+            accountId,
+            String(user.id),
+            'automatic:manual-blocked'
+          );
+        }
         continue;
       }
 

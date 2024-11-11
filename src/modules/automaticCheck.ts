@@ -203,7 +203,7 @@ OFFSET DATE: ${offsetDate}`);
       }
     }
 
-    for (const userId of dialogsWithoutReasonIds) {
+    for (const userId of ['1871375148']) {
       const isMissing = !Object.keys(users).includes(userId);
 
       if (isMissing) {
@@ -230,13 +230,15 @@ MISSING ID: ${userId}`);
         ) {
           await updateAutomaticDialogue(accountId, userId, 'automatic:blocked');
         } else {
-          // TODO это потом убрать так как нет небходимости
           const messages = await getMessages(client, dialogTG);
 
           if (messages.length > 0) {
-            await sendToBot(`** МЕЖГАЛАКТИЧЕСКАЯ ОШИБКА!! **
-ACCOUNT ID: ${accountId}
-ID: ${userId}`);
+            await editFolder(
+              client,
+              String(dialogTG.id),
+              String(dialogTG.accessHash),
+              1
+            );
           } else {
             await updateAutomaticDialogue(
               accountId,
