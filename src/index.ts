@@ -109,8 +109,6 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          await automaticCheck(client, ID);
-
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);
