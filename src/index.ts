@@ -86,8 +86,8 @@ const main = async (ID: string) => {
       }
     }, 10000);
 
-    // await new Promise((res) => setTimeout(res, 30000));
-    // await clearAuthorizations(client);
+    await new Promise((res) => setTimeout(res, 30000));
+    await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 26);
@@ -205,11 +205,9 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  promises.push(
-    main('ff8798af-b848-4fc8-9336-3b112c8ea77c-25906101-uk-test-50')
-  );
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
   const interval = setInterval(() => {
     console.log({
