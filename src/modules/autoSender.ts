@@ -1,3 +1,5 @@
+import BigInt from 'big-integer';
+
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
 import { updateFailedMessage } from '../db/groupIdUsers';
@@ -96,7 +98,7 @@ export const autoSender = async (
         secondMessage,
         accountId
       );
-      await editFolder(client, id, accessHash, 1);
+      await editFolder(client, String(id), String(accessHash), 1);
       await muteNotification(client, id, accessHash, 2147483647);
       await saveRecipient(
         accountId,

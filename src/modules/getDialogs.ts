@@ -6,11 +6,10 @@ import {
   getDialogue,
   getManualControlDialogues,
   getPingDialogues,
-  updateBlockedDialogue,
+  updateAutomaticDialogue,
 } from '../db/dialogues';
-import { deleteMessages } from '../methods/messages/deleteHistory';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
-import { sendToBot } from '../helpers/sendToBot';
+import { editFolder } from '../methods/folders/editFolder';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -70,6 +69,20 @@ export const getDialogs = async (client: any, accountId: string) => {
       !user.self &&
       !(!user.status || user.status instanceof GramJs.UserStatusEmpty)
     ) {
+      const dialogDb = await getDialogue(accountId, String(user.id));
+      const {
+        messages: dialogMessages = [],
+        groupId,
+        blocked = false,
+        reason = null,
+        automaticReason = null,
+      } = dialogDb || {};
+
+      if (!groupId) {
+        await editFolder(client, String(user.id), String(user.accessHash), 0);
+        continue;
+      }
+
       const allHistory = await client.invoke(
         new GramJs.messages.GetHistory({
           peer: new GramJs.InputPeerUser({
@@ -81,29 +94,17 @@ export const getDialogs = async (client: any, accountId: string) => {
       );
 
       if (!allHistory?.messages?.length) {
-        await updateBlockedDialogue(accountId, dialogId, 'messages-length');
+        await editFolder(client, String(user.id), String(user.accessHash), 0);
+        await updateAutomaticDialogue(
+          accountId,
+          String(user.id),
+          'automatic:messages-length-not-defined'
+        );
         continue;
       }
 
-      const dialogDb = await getDialogue(accountId, String(user.id));
-
-      const {
-        messages: dialogMessages = [],
-        groupId,
-        blocked = false,
-      } = dialogDb || {};
-
-      if (!groupId) {
-        await sendToBot(`~GROUP ID NOT DEFINED~
-AccountId: ${accountId}
-UserID: ${user.id}`);
-        await deleteMessages(client, user.id, user.accessHash);
-
-        return [[], [], []];
-      }
-
-      if (blocked) {
-        await deleteMessages(client, user.id, user.accessHash);
+      if (blocked || reason || automaticReason) {
+        await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
 
@@ -162,8 +163,12 @@ UserID: ${user.id}`);
         (m) => m.fromId === String(user.id)
       ).length;
       if (stage > 25) {
-        await updateBlockedDialogue(accountId, dialogId, 'dialogs-max-stage');
-        await deleteMessages(client, user.id, user.accessHash);
+        await editFolder(client, String(user.id), String(user.accessHash), 0);
+        await updateAutomaticDialogue(
+          accountId,
+          String(user.id),
+          'automatic:max-stage-25'
+        );
         continue;
       }
 
@@ -182,8 +187,6 @@ UserID: ${user.id}`);
       } else {
         pingDialogs.push(dialogData);
       }
-    } else {
-      await updateBlockedDialogue(accountId, dialogId, `user-not-resolved`);
     }
   }
 

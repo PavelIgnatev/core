@@ -8,6 +8,9 @@ export interface Dialogue {
   recipientPhone: string | null;
   messages: Array<{ id: number; text: string; fromId: string; date: number }>;
 
+  reason?: string;
+  automaticReason?: string;
+
   viewed?: boolean;
   blocked?: boolean;
 

@@ -19,8 +19,15 @@ export const getDialogue = async (accountId: string, recipientId: string) => {
 export const getDialogsIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
-  const ids = await dialoguesCollection.distinct('recipientId', { accountId });
-  return ids;
+  const withoutReasonIds = await dialoguesCollection.distinct('recipientId', {
+    accountId,
+    automaticReason: null,
+  });
+  const withReasonIds = await dialoguesCollection.distinct('recipientId', {
+    accountId,
+    automaticReason: { $ne: null },
+  });
+  return [withoutReasonIds, withReasonIds];
 };
 
 export const getDialogueByMessageId = async (
@@ -35,6 +42,32 @@ export const getDialogueByMessageId = async (
   });
 
   return dialogue;
+};
+
+export const getMissingDialog = async (
+  accountId: string,
+  recipientId: string
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const dialogues = await dialoguesCollection.findOne<{
+    recipientPhone?: string;
+    recipientUsername?: string;
+  }>(
+    {
+      accountId,
+      recipientId,
+    },
+    {
+      projection: {
+        _id: 0,
+        recipientUsername: 1,
+        recipientPhone: 1,
+      },
+    }
+  );
+
+  return dialogues;
 };
 
 export const getPingDialogues = async (accountId: string) => {
@@ -179,7 +212,7 @@ export const updateMessagesViewedStatusById = async (
 export const updateAutomaticDialogue = async (
   accountId: string,
   recipientId: string,
-  addedData: Record<string, unknown>
+  automaticReason: string
 ) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -190,7 +223,11 @@ export const updateAutomaticDialogue = async (
     },
     {
       $set: {
-        ...addedData,
+        blocked: true,
+        stopped: true,
+        viewed: false,
+        managerMessage: null,
+        automaticReason,
         dateUpdated: new Date(),
       },
     }
@@ -217,6 +254,25 @@ export const updateBlockedDialogue = async (
         viewed: false,
         managerMessage: null,
         dateUpdated: new Date(),
+      },
+    }
+  );
+};
+
+export const updateDateCheckedIds = async (
+  accountId: string,
+  ids: string[]
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  await dialoguesCollection.updateMany(
+    {
+      accountId,
+      recipientId: { $in: ids },
+    },
+    {
+      $set: {
+        dateAutomaticCheck: new Date(),
       },
     }
   );

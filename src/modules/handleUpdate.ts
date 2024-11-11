@@ -56,13 +56,14 @@ export const handleUpdate = async (
   ) {
     if (userId) {
       const dialog = await getDialogue(accountId, String(userId));
-      if (dialog) {
+      if (dialog && !dialog.reason && !dialog.automaticReason) {
         onNewMessage();
-      } else if (String(userId) !== '178220800') {
-        await sendToBot(
-          `Не найден диалог в дб для: ${accountId}:${JSON.stringify(update)}`
-        );
-      }
+      } 
+      // else if (String(userId) !== '178220800') {
+      //   await sendToBot(
+      //     `Не найден диалог в дб для: ${accountId}:${JSON.stringify(update)}`
+      //   );
+      // }
     }
   }
   //   } else if (

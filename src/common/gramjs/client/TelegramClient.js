@@ -198,7 +198,9 @@ class TelegramClient {
           e instanceof errors.FloodTestPhoneWaitError
         ) {
           await sendToBot(
-            `[${this._accountId}] !!flood wait error!! (пиздец стремная хуйня). Error: ${e.message}`
+            `** FLOOD WAIT ERROR **
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`
           );
           console.error({
             accountId: this._accountId,
