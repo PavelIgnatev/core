@@ -5,6 +5,7 @@ import TelegramClient from '../common/gramjs/client/TelegramClient';
 
 import { sendToBot } from '../helpers/sendToBot';
 import {
+  blockedDialogsWithoutAutomaticReason,
   getDialogsIds,
   getMissingDialog,
   updateAutomaticDialogue,
@@ -112,6 +113,9 @@ export const automaticCheck = async (
     const [dialogsWithoutReasonIds, dialogsWithReasonIds] =
       await getDialogsIds(accountId);
 
+    const dialogsWithoutAutomaticReason =
+      await blockedDialogsWithoutAutomaticReason(accountId);
+
     while (true) {
       const dialogs = (await client.invoke(
         new GramJs.messages.GetDialogs({
@@ -205,6 +209,7 @@ OFFSET DATE: ${offsetDate}`);
 
     for (const userId of dialogsWithoutReasonIds) {
       const isMissing = !Object.keys(users).includes(userId);
+      const isReason = dialogsWithoutAutomaticReason.includes(userId);
 
       if (isMissing) {
         await sleep10();
@@ -222,6 +227,12 @@ MISSING ID: ${userId}`);
             accountId,
             userId,
             'automatic:data-not-actual'
+          );
+        } else if (isReason) {
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:manual-blocked'
           );
         } else if (
           (!dialogTG.status ||
@@ -253,7 +264,15 @@ ID: ${userId}`);
       } else {
         const { user } = users[userId];
 
-        if (user.deleted) {
+        if (isReason) {
+          await sleep10();
+          await editFolder(client, String(user.id), String(user.accessHash), 0);
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:manual-blocked'
+          );
+        } else if (user.deleted) {
           await sleep10();
           await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
@@ -261,9 +280,7 @@ ID: ${userId}`);
             userId,
             'automatic:account-deleted'
           );
-        }
-
-        if (
+        } else if (
           (!user.status || user.status instanceof GramJs.UserStatusEmpty) &&
           !user.photo
         ) {
