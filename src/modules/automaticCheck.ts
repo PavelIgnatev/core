@@ -128,6 +128,13 @@ export const automaticCheck = async (
       const clientChats = dialogs?.chats || [];
 
       for (const chat of clientChats) {
+        if (
+          chat instanceof GramJs.Channel &&
+          chat.username === 'HiddenSender'
+        ) {
+          continue;
+        }
+
         await sleep10();
         await client.invoke(
           new GramJs.channels.LeaveChannel({
