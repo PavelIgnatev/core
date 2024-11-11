@@ -233,6 +233,9 @@ MISSING ID: ${userId}`);
           const messages = await getMessages(client, dialogTG);
 
           if (messages.length > 0) {
+            await sendToBot(`** ПЕРЕКИНУЛ ОБРАТНО В АРХИВ **
+ACCOUNT ID: ${accountId}
+ID: ${userId}`);
             await editFolder(
               client,
               String(dialogTG.id),
