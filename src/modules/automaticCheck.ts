@@ -160,13 +160,10 @@ export const automaticCheck = async (
         ) {
           continue;
         }
-
         if (
           !dialogsWithoutReasonIds.includes(String(user.id)) &&
           !dialogsWithReasonIds.includes(String(user.id))
         ) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
           continue;
         }
 
@@ -190,12 +187,23 @@ ID: ${String(user.id)}`);
 
         users[String(user.id)] = { user, dialog, message };
       }
-
+      
       if (clientUsers.length < 100) {
         break;
       } else {
-        const lastMessage = clientMessages[clientMessages.length - 1];
-        if (lastMessage instanceof GramJs.MessageEmpty) {
+        const lastUser = clientUsers[clientUsers.length - 2];
+        if (!lastUser) {
+          await sendToBot(`** LAST USER NOT DEFINED **
+ACCOUNT ID: ${accountId}
+OFFSET DATE: ${offsetDate}`);
+          return;
+        }
+
+        const lastMessage = clientMessages.find(
+          // @ts-ignore
+          (message) => String(message.peerId?.userId) === String(lastUser.id)
+        );
+        if (!lastMessage || lastMessage instanceof GramJs.MessageEmpty) {
           await sendToBot(`** LAST MESSAGE NOT INSTANCEOF MESSAGE **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
@@ -244,7 +252,7 @@ MISSING ID: ${userId}`);
           const messages = await getMessages(client, dialogTG);
 
           if (messages.length > 0) {
-            await sendToBot(`** ПЕРЕКИНУЛ ОБРАТНО В АРХИВ **
+            await sendToBot(`** ПЕРЕКИНУЛ В АРХИВ **
 ACCOUNT ID: ${accountId}
 ID: ${userId}`);
             await editFolder(
