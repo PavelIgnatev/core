@@ -220,7 +220,7 @@ export async function makeRequestGpt(
           temperature: 1,
           presence_penalty: 0.8,
           p: 0.95,
-          model: 'command-r-plus',
+          model: 'command-r-plus-08-2024',
           messages,
         }
       );
