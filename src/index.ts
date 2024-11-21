@@ -19,7 +19,6 @@ import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
-import { sendToFormBot } from './helpers/sendToFormBot';
 
 import './helpers/setConsole.log';
 
