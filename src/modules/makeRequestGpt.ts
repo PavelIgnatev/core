@@ -376,7 +376,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         error.message !==
           'The answer must not contain Arabic characters or any hieroglyphics' &&
         error.message !==
-          'The question in the reply is mandatory. The question was not found. Add a question at the end of the line.'
+          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
       ) {
         i += 1;
       }
