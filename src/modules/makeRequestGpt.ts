@@ -251,8 +251,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         };
       });
 
-      console.log(fixedMessages);
-
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
