@@ -1,5 +1,30 @@
 import axios from 'axios';
+import emojiRegex from 'emoji-regex';
+
 import { sendToBot } from '../helpers/sendToBot';
+
+function hasConsecutiveQuestionSentences(text: string): boolean {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  let previousWasQuestion = false;
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
+    if (trimmedSentence.endsWith('?')) {
+      if (previousWasQuestion) {
+        return true;
+      }
+      previousWasQuestion = true;
+    } else {
+      previousWasQuestion = false;
+    }
+  }
+  return false;
+}
+
+function containsIdeographicOrArabic(str: string) {
+  const ideographicAndArabicRegex =
+    /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  return ideographicAndArabicRegex.test(str);
+}
 
 const validateText = (
   companyData: string,
@@ -11,7 +36,7 @@ const validateText = (
   }
 
   const companyDataLowerCase = companyData.toLowerCase();
-  const words = inputString.replace(/[.,!?;:'`"()«»…—\-/]/g, ' ').split(/\s+/);
+  const words = inputString.replace(/[.,!?;:'`"()@«»…—\-/]/g, ' ').split(/\s+/);
   const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
   const englishRegex = /^[a-z]+$/i;
 
@@ -118,6 +143,7 @@ function removeGreetings(text: string) {
     'Рад видеть',
     'Рада видеть',
     'Привет-привет',
+    'Доброе время суток',
     'Доброго времени суток',
     'Доброго времени',
     'Добрейшего дня',
@@ -203,16 +229,30 @@ export async function makeRequestGpt(
   groupId: string | null
 ) {
   const generations = [];
-  const errors = [];
+  const errors: string[] = [];
 
   console.log({
     accountId,
     message: `**MAKE REQUEST GPT**`,
     messages,
   });
+  let i = 0;
 
-  for (let i = 0; i < 5; i++) {
+  while (i !== 5) {
     try {
+      const fixedMessages = messages.map((message) => {
+        if (message.role !== 'system' || errors.length === 0) return message;
+
+        return {
+          ...message,
+          content: `${message.content}
+## MANDATORY REQUIREMENTS FOR REPLY
+${errors.map((error) => `- **${error}**`).join('\n')}`,
+        };
+      });
+
+      console.log(fixedMessages);
+
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
@@ -221,7 +261,7 @@ export async function makeRequestGpt(
           presence_penalty: 0.8,
           p: 0.95,
           model: 'command-r-plus-08-2024',
-          messages,
+          messages: fixedMessages,
         }
       );
       const data = resultData?.message?.content?.[0]?.text || '';
@@ -235,6 +275,9 @@ export async function makeRequestGpt(
           .replace(/\n/g, '')
           .replace(/\*/g, '')
           .replace(/!/g, '.')
+          .replace(emojiRegex(), '')
+          .replace('<ASSISTANT>:', '')
+          .replace('<ASSISTANT>', '')
           .replaceAll(/[«»„“”‘’'"`『』「」]/g, '')
           .trim(),
         part || '',
@@ -254,7 +297,13 @@ export async function makeRequestGpt(
       });
       if (hasTextLink && disableLink) {
         throw new Error(
-          'The reply contains a link at a stage where it is not allowed to send links'
+          'The reply should not contain any references at this stage'
+        );
+      }
+
+      if (hasConsecutiveQuestionSentences(message)) {
+        throw new Error(
+          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
         );
       }
 
@@ -262,38 +311,53 @@ export async function makeRequestGpt(
         message.includes('[') ||
         message.includes(']') ||
         message.includes('{') ||
-        message.includes('}')
+        message.includes('}') ||
+        message.includes('<') ||
+        message.includes('>') ||
+        message.includes('section') ||
+        message.includes('sign')
       ) {
-        throw new Error('The response contains suspicious [],{} characters');
+        throw new Error(
+          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
+        );
       }
 
       const varMessage = capitalizeFirstLetter(
         addSpaceAfterPunctuation(message)
       );
 
-      if (mandatoryQuestion && !varMessage.includes('?')) {
-        throw new Error('Question was not generated');
+      if (containsIdeographicOrArabic(varMessage)) {
+        throw new Error(
+          'The answer must not contain Arabic characters or any hieroglyphics'
+        );
       }
+
+      if (mandatoryQuestion && !varMessage.includes('?')) {
+        throw new Error(
+          'The question in the reply is mandatory. The question was not found. Add a question at the end of the line.'
+        );
+      }
+
       if (mandatoryQuestion && varMessage.length < 200) {
-        throw new Error('Minimum length 200 characters');
+        throw new Error('Minimum reply length 200 characters');
       }
 
       if (minimalProposalLength > countSentences(varMessage)) {
         throw new Error(
-          `The minimum number of messages is ${minimalProposalLength}`
+          `The minimum number of sentences is ${minimalProposalLength}`
         );
       }
 
       if (part && !varMessage.includes('mainlink')) {
         throw new Error(
-          `The response does not contain the "${part}", although it should`
+          `The response does not contain the unique “${part}” part, even though it should contain`
         );
       }
 
       const text = validateText(JSON.stringify(messages), varMessage, language);
       if (text) {
         throw new Error(
-          `There is a word ${text} that is not in the original context, it must be added there by all means`
+          `The word ${text} is not allowed in reply, its use is prohibited`
         );
       }
 
@@ -309,6 +373,15 @@ export async function makeRequestGpt(
         accountId,
         message: new Error(`Request Gpt Error: ${error.message}`),
       });
+
+      if (
+        error.message !==
+          'The answer must not contain Arabic characters or any hieroglyphics' &&
+        error.message !==
+          'The question in the reply is mandatory. The question was not found. Add a question at the end of the line.'
+      ) {
+        i += 1;
+      }
 
       errors.push(error.message);
     }

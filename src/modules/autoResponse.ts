@@ -65,43 +65,29 @@ export const autoResponse = async (
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
     const parted = stage === 2 && part ? part : '';
-    const hasQuestion =
-      stage === 1 && addedQuestion
-        ? addedQuestion
-        : stage === 2 && secondAddedQuestion
-          ? secondAddedQuestion
-          : '';
+    const hasQuestion = stage === 1 && addedQuestion ? addedQuestion : '';
 
     const replyMessage = await makeRequestGpt(
       accountId,
       [
         {
           role: 'system',
-          content: `You are "${meName}" (role assistant, man, male), acting as "${aiRole}". Fully adopt this identity as a real person whose task is to deeply engage the interlocutor in the context of the YOUR_COMPANY_DESCRIPTION. You "${meName}" (role assistant, man, male) have initiated the conversation with the user (role: user), intending to immerse them into the context of YOUR_COMPANY_DESCRIPTION.
-
-Your chat interlocutor is a user (role user). You are conversing within the Telegram messenger. It is important to note that neither you nor the interlocutor know each other and have not met in real life. The interlocutor doesn't know you or the context of your message. ${
-            stage === 1
-              ? `Be concise and don't reveal all the details at once.`
-              : ''
-          }${
-            stage === 2
-              ? `Do not repeat information you've already shared. Provide new insights based on the conversation.`
-              : ''
-          }${
+          content: `You are "${meName}" (role: assistant, <ASSISTANT>, man, male), acting as "${aiRole}". Fully adopt this identity as a real person whose task is to deeply engage the interlocutor within the context of YOUR_COMPANY_DESCRIPTION. You have initiated the conversation with the user (role: user) with the intention of immersing them into the context of YOUR_COMPANY_DESCRIPTION. ${
             stage >= 2 && goal
-              ? `*As assistant "${meName}" (role assistant, man, male) ${goal}*`
+              ? ` *As assistant <ASSISTANT> "${meName}" (role assistant, <ASSISTANT>, man, male), ${goal}*`
               : ''
           }
-Current date and time: ${getDateNow()}
 
-## GUIDELINES FOR RESPONSE${
+## GUIDELINES FOR <ASSISTANT> RESPONSE${
             stage <= 2
-              ? `\n- You must always start your response with a brief acknowledgment of the user's last message. This acknowledgment is mandatory and should be minimal, without building your response around it.`
+              ? `\n- You should always start your reply with a brief response to the user's last post. The reply is mandatory and should be minimal, without building a reply around it.`
               : ''
           }${
             hasQuestion
-              ? `\n- Qualitatively integrate the following question at the end of your answer: “${generateRandomString(hasQuestion)}”. Do not add any other questions.`
-              : '\n- Conclude your response with a relevant, open-ended question to engage the user further.'
+              ? `\n- Smoothly weave the following question into the end of your response in a way that feels natural and relevant: “${generateRandomString(hasQuestion)}”. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**`
+              : stage <= 2
+                ? '\n- **BE SURE TO ASK A LEADING QUESTION TO INTEREST THE USER EVEN MORE**. Conclude your response with a simple, easy-to-answer question that naturally follows from the conversation and further engages the user. The question should be quick to respond to, possibly even rhetorical, and should not require the user to spend much time writing an answer. Ensure it is relevant and seamlessly integrated into your reply.'
+                : ''
           }${
             parted
               ? `\n- Ensure the phrase "${part}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.`
@@ -113,11 +99,17 @@ Current date and time: ${getDateNow()}
             messagesCount * 10
           } words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.
 - Response language: **${language}**.
+- Never apologize in your responses, under any circumstances. **don't apologize**
 - Do not use generic greetings like "Hello" or "Hi".
-- Do not use the interlocutor name or any form of personal address under any circumstances.           
+- Never use the name of the interlocutor, any form of personal address, or title such as “client,” “interlocutor,” “respected,” and so on
 - Use the company description to craft your response, highlighting relevant points for the user.
 - Focus on providing value based on the company's offerings.
 - Avoid making assumptions about the user's profession or activities.
+
+## CONTEXT FOR <ASSISTANT>
+You "${meName}" (role: assistant, <ASSISTANT>, man, male) handle cold traffic, conducting unsolicited outreach to potential clients via Telegram messenger. Your interactions are cold, meaning you initiate contact with <USER> who have not previously interacted with you. It is important to note that neither you  (role: assistant, <ASSISTANT>, man, male) nor the interlocutor (role: user, <USER>) know each other and have not met in real life. The interlocutor (role: user, <USER>) doesn't know you (role: assistant, <ASSISTANT>, man, male) or the context of your message. You (role: assistant, <ASSISTANT>, man, male) offer various services and solutions, aiming to convert these cold leads into engaged clients. Never apologize in your responses, under any circumstances.
+
+Current date and time: ${getDateNow()}
 
 ${
   companyDescription
@@ -154,7 +146,7 @@ ${addedInformation}`
       stage === 1,
       stage <= 2,
       stage <= 2 ? 3 : 2,
-      stage === 1,
+      true,
       dialogGroupId
     );
 
