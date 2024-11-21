@@ -134,12 +134,16 @@ ${addedInformation}`
     : ''
 }`,
         },
-        ...messages.map(
-          (m: { id: number; text: string; fromId: string; date: number }) => ({
-            role: m.fromId === String(id) ? 'user' : 'assistant',
-            content: m.text,
-          })
-        ),
+        {
+          role: 'user',
+          content: `${messages
+            .map(
+              (m: { id: number; text: string; fromId: string; date: number }) =>
+                `<${m.fromId === String(id) ? 'USER' : 'ASSISTANT'}>: ${m.text}`
+            )
+            .join('\n')}
+<ASSISTANT>:`,
+        },
       ],
       parted,
       language,
@@ -153,6 +157,7 @@ ${addedInformation}`
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ID: ${accountId}
 GID: ${dialogGroupId}
+RID: ${id}
 ${replyMessage}`);
 
     const lastQuestion = extractLastQuestion(replyMessage);
