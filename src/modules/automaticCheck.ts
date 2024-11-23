@@ -5,9 +5,7 @@ import TelegramClient from '../common/gramjs/client/TelegramClient';
 
 import { sendToBot } from '../helpers/sendToBot';
 import {
-  getBlockedIds,
   getDialogs,
-  getDialogsIds,
   getRecipientUsernameAndPhone,
   updateAutomaticDialogue,
   updateAutomaticDialogueWithoutReason,
@@ -121,7 +119,7 @@ export const automaticCheck = async (
       .filter((d) => d.automaticReason)
       .map((d) => d.recipientId);
     const blockedIds = dialogs
-      .filter((d) => d.blocked)
+      .filter((d) => d.blocked || d.stopped || d.reason)
       .map((d) => d.recipientId);
     const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
 
@@ -329,7 +327,8 @@ ID: ${userId}`);
         if (
           dialog &&
           dialog instanceof GramJs.Dialog &&
-          dialog.topMessage === dialog.readOutboxMaxId &&
+          (dialog.topMessage <= dialog.readOutboxMaxId ||
+            dialog.topMessage <= dialog.readInboxMaxId) &&
           !readIds.includes(userId)
         ) {
           await updateAutomaticDialogueWithoutReason(accountId, userId, {

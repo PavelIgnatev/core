@@ -47,8 +47,10 @@ export const getDialogs = async (accountId: string) => {
   const dialogues = await dialoguesCollection
     .find<{
       recipientId: string;
+      reason?: string;
       automaticReason?: string;
       blocked?: boolean;
+      stopped?: boolean;
       read?: boolean;
     }>(
       {
@@ -59,8 +61,10 @@ export const getDialogs = async (accountId: string) => {
           _id: 0,
           recipientId: 1,
           blocked: 1,
+          stopped: 1,
           automaticReason: 1,
           read: 1,
+          reason: 1,
         },
       }
     )
