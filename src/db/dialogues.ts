@@ -121,6 +121,9 @@ export const getPingDialogues = async (accountId: string) => {
   const hours24Ago = new Date();
   hours24Ago.setHours(hours24Ago.getHours() - 24);
 
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
   const pingDialogs = await dialoguesCollection
     .find<Dialogue>({
       accountId,
@@ -129,6 +132,7 @@ export const getPingDialogues = async (accountId: string) => {
       stopped: { $ne: true },
       blocked: { $ne: true },
       dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
+      dateCreated: { $gte: oneWeekAgo },
     })
     .toArray();
 
