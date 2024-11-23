@@ -119,7 +119,7 @@ export const automaticCheck = async (
       .filter((d) => d.automaticReason)
       .map((d) => d.recipientId);
     const blockedIds = dialogs
-      .filter((d) => d.blocked || d.stopped || d.reason)
+      .filter((d) => d.blocked || d.reason)
       .map((d) => d.recipientId);
     const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
 

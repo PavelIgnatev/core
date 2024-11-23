@@ -61,7 +61,6 @@ export const getDialogs = async (accountId: string) => {
           _id: 0,
           recipientId: 1,
           blocked: 1,
-          stopped: 1,
           automaticReason: 1,
           read: 1,
           reason: 1,
