@@ -19,6 +19,8 @@ export interface Account {
   messageCount?: number;
   aiContactCount?: number;
 
+  spamBlockDate?: Date;
+
   banned?: boolean;
   setuped?: boolean;
 

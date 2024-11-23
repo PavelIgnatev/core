@@ -3,6 +3,20 @@ import BigInt from 'big-integer';
 import GramJs from '../../common/gramjs/tl/api';
 import { sendToBot } from '../../helpers/sendToBot';
 import { rmSpLc } from '../../helpers/removeSpacesAndLowerCase';
+import { getAccountById } from '../../db/accounts';
+import { getDialogue } from '../../db/dialogues';
+
+function formatDateToUTC(date: Date) {
+  const utcDate = new Date(date);
+  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, '0')}-${String(
+    utcDate.getUTCDate()
+  ).padStart(
+    2,
+    '0'
+  )} ${String(utcDate.getUTCHours()).padStart(2, '0')}:${String(
+    utcDate.getUTCMinutes()
+  ).padStart(2, '0')}`;
+}
 
 function reduceSpaces(string: string) {
   return string.replace(/\s+/g, ' ').trim();
@@ -68,13 +82,37 @@ export const sendMessage = async (
 
     return sentMessage;
   } catch (e: any) {
-    await sendToBot(
-      `*** ${e.message} ***
+    if (e.message === 'PEER_FLOOD' && message.length > 15) {
+      const fullAccount = await getAccountById(accountId);
+      const dialog = await getDialogue(accountId, String(userId));
+      const createdDateFormatted = dialog?.dateCreated
+        ? formatDateToUTC(dialog.dateCreated)
+        : 'N/A';
+      const updatedDateFormatted = dialog?.dateUpdated
+        ? formatDateToUTC(dialog.dateUpdated)
+        : 'N/A';
+      const spamBlockDateFormatted = fullAccount?.spamBlockDate
+        ? formatDateToUTC(fullAccount.spamBlockDate)
+        : 'N/A';
+
+      await sendToBot(
+        `*** ${e.message} ***
+QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
+MESSAGE: ${message}
+
+SPAMBLOCK DATE: ${spamBlockDateFormatted}
+DIALOG CREATED DATE: ${createdDateFormatted}
+DIALOG UPDATED DATE: ${updatedDateFormatted}`
+      );
+    } else {
+      await sendToBot(
+        `*** ${e.message} ***
 AccountId: ${accountId}
 UserId: ${userId}
-Message: ${message}
-Send Message: ${Boolean(sentMessage)}`
-    );
+Message: ${message}`
+      );
+    }
+
     console.error({
       accountId,
       message: new Error(`Send Message Error: ${e.message}`),
