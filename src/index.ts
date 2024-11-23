@@ -19,6 +19,7 @@ import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
+import { sendToFormBot } from './helpers/sendToFormBot';
 
 import './helpers/setConsole.log';
 
@@ -109,6 +110,10 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
+          // await automaticCheck(client, ID);
+          // await new Promise((res) => setTimeout(res, 60000));
+
+          // return
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);

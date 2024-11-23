@@ -5,7 +5,7 @@ import TelegramClient from '../common/gramjs/client/TelegramClient';
 
 import { sendToBot } from '../helpers/sendToBot';
 import {
-  blockedDialogsWithoutAutomaticReason,
+  getBlockedIds,
   getDialogsIds,
   getMissingDialog,
   updateAutomaticDialogue,
@@ -112,9 +112,7 @@ export const automaticCheck = async (
 
     const [dialogsWithoutReasonIds, dialogsWithReasonIds] =
       await getDialogsIds(accountId);
-
-    const dialogsWithoutAutomaticReason =
-      await blockedDialogsWithoutAutomaticReason(accountId);
+    const blockedIds = await getBlockedIds(accountId);
 
     while (true) {
       const dialogs = (await client.invoke(
@@ -170,7 +168,7 @@ export const automaticCheck = async (
         const dialog = clientDialogs.find(
           (d) =>
             d.peer instanceof GramJs.PeerUser &&
-            String(d.peer.userId) === String(user.id)
+            String(d.peer.userId) === String(user.id) 
         );
         const message = clientMessages.find(
           (m) =>
@@ -185,20 +183,27 @@ ID: ${String(user.id)}`);
           return;
         }
 
+        //@ts-ignore
+        // console.log(dialog)
+        // console.log(dialog.topMessage, dialog.readOutboxMaxId, dialog.readInboxMaxId)
         users[String(user.id)] = { user, dialog, message };
       }
-      
+
       if (clientUsers.length < 100) {
         break;
       } else {
-        const lastUser = clientUsers[clientUsers.length - 2];
+        const filtredUsers = clientUsers.filter(
+          (user) => String(user.id) !== '136817688'
+        );
+        const lastUser = filtredUsers[filtredUsers.length - 2];
+
         if (!lastUser) {
           await sendToBot(`** LAST USER NOT DEFINED **
 ACCOUNT ID: ${accountId}
 OFFSET DATE: ${offsetDate}`);
           return;
         }
-
+        // @ts-ignore
         const lastMessage = clientMessages.find(
           // @ts-ignore
           (message) => String(message.peerId?.userId) === String(lastUser.id)
@@ -217,13 +222,13 @@ OFFSET DATE: ${offsetDate}`);
 
     for (const userId of dialogsWithoutReasonIds) {
       const isMissing = !Object.keys(users).includes(userId);
-      const isReason = dialogsWithoutAutomaticReason.includes(userId);
+      const isBlocked = blockedIds.includes(userId);
 
       if (isMissing) {
         await sleep10();
         const missingDialog = await getMissingDialog(accountId, userId);
         if (!missingDialog) {
-          await sendToBot(`** MISSING DIALOG NOT DEFINED**
+          await sendToBot(`** MISSING DIALOG NOT DEFINED **
 ACCOUNT ID: ${accountId}
 MISSING ID: ${userId}`);
           continue;
@@ -236,7 +241,7 @@ MISSING ID: ${userId}`);
             userId,
             'automatic:data-not-actual'
           );
-        } else if (isReason) {
+        } else if (isBlocked) {
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -272,7 +277,7 @@ ID: ${userId}`);
       } else {
         const { user } = users[userId];
 
-        if (isReason) {
+        if (isBlocked) {
           await sleep10();
           await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(

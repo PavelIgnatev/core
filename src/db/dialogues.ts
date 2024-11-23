@@ -30,9 +30,7 @@ export const getDialogsIds = async (accountId: string) => {
   return [withoutReasonIds, withReasonIds];
 };
 
-export const blockedDialogsWithoutAutomaticReason = async (
-  accountId: string
-) => {
+export const getBlockedIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
   const ids = await dialoguesCollection.distinct('recipientId', {
@@ -41,6 +39,32 @@ export const blockedDialogsWithoutAutomaticReason = async (
   });
 
   return ids;
+};
+
+export const getDialog = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const dialogues = await dialoguesCollection
+    .find<{
+      recipientId: string;
+      blocked?: boolean;
+      automaticReason?: string;
+    }>(
+      {
+        accountId,
+      },
+      {
+        projection: {
+          _id: 0,
+          recipientId: 1,
+          blocked: 1,
+          automaticReason: 1,
+        },
+      }
+    )
+    .toArray();
+
+  return dialogues;
 };
 
 export const getDialogueByMessageId = async (
