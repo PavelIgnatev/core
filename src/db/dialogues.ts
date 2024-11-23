@@ -41,14 +41,15 @@ export const getBlockedIds = async (accountId: string) => {
   return ids;
 };
 
-export const getDialog = async (accountId: string) => {
+export const getDialogs = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
   const dialogues = await dialoguesCollection
     .find<{
       recipientId: string;
-      blocked?: boolean;
       automaticReason?: string;
+      blocked?: boolean;
+      read?: boolean;
     }>(
       {
         accountId,
@@ -59,6 +60,7 @@ export const getDialog = async (accountId: string) => {
           recipientId: 1,
           blocked: 1,
           automaticReason: 1,
+          read: 1,
         },
       }
     )
@@ -81,7 +83,7 @@ export const getDialogueByMessageId = async (
   return dialogue;
 };
 
-export const getMissingDialog = async (
+export const getRecipientUsernameAndPhone = async (
   accountId: string,
   recipientId: string
 ) => {
@@ -223,10 +225,10 @@ export const updateDialogue = async (dialogue: Dialogue) => {
   );
 };
 
-export const updateMessagesViewedStatusById = async (
+export const updateAutomaticDialogueWithoutReason = async (
   accountId: string,
   recipientId: string,
-  messageId: number
+  additionalData?: Record<string, unknown>
 ) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -237,19 +239,17 @@ export const updateMessagesViewedStatusById = async (
     },
     {
       $set: {
-        'messages.$[element].viewed': true,
+        ...additionalData,
+        dateUpdated: new Date(),
       },
-    },
-    {
-      arrayFilters: [{ 'element.id': { $lte: messageId } }],
     }
   );
 };
-
 export const updateAutomaticDialogue = async (
   accountId: string,
   recipientId: string,
-  automaticReason: string
+  automaticReason: string,
+  additionalData?: Record<string, unknown>
 ) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -265,6 +265,7 @@ export const updateAutomaticDialogue = async (
         viewed: false,
         managerMessage: null,
         automaticReason,
+        ...additionalData,
         dateUpdated: new Date(),
       },
     }

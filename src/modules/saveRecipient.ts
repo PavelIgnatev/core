@@ -53,6 +53,7 @@ export const saveRecipient = async (
     recipientPhone: phone || recipientPhone || null,
     messages,
     step: getCombinedMessages(messages).length,
+    read: false,
     ...addedData,
   } as Dialogue;
 

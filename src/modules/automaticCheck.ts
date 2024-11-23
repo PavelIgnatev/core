@@ -6,9 +6,11 @@ import TelegramClient from '../common/gramjs/client/TelegramClient';
 import { sendToBot } from '../helpers/sendToBot';
 import {
   getBlockedIds,
+  getDialogs,
   getDialogsIds,
-  getMissingDialog,
+  getRecipientUsernameAndPhone,
   updateAutomaticDialogue,
+  updateAutomaticDialogueWithoutReason,
   updateDateCheckedIds,
 } from '../db/dialogues';
 import { editFolder } from '../methods/folders/editFolder';
@@ -110,9 +112,18 @@ export const automaticCheck = async (
     > = {};
     let offsetDate = 0;
 
-    const [dialogsWithoutReasonIds, dialogsWithReasonIds] =
-      await getDialogsIds(accountId);
-    const blockedIds = await getBlockedIds(accountId);
+    const dialogs = await getDialogs(accountId);
+
+    const dialogsWithoutReasonIds = dialogs
+      .filter((d) => !d.automaticReason)
+      .map((d) => d.recipientId);
+    const dialogsWithReasonIds = dialogs
+      .filter((d) => d.automaticReason)
+      .map((d) => d.recipientId);
+    const blockedIds = dialogs
+      .filter((d) => d.blocked)
+      .map((d) => d.recipientId);
+    const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
 
     while (true) {
       const dialogs = (await client.invoke(
@@ -168,7 +179,7 @@ export const automaticCheck = async (
         const dialog = clientDialogs.find(
           (d) =>
             d.peer instanceof GramJs.PeerUser &&
-            String(d.peer.userId) === String(user.id) 
+            String(d.peer.userId) === String(user.id)
         );
         const message = clientMessages.find(
           (m) =>
@@ -183,9 +194,6 @@ ID: ${String(user.id)}`);
           return;
         }
 
-        //@ts-ignore
-        // console.log(dialog)
-        // console.log(dialog.topMessage, dialog.readOutboxMaxId, dialog.readInboxMaxId)
         users[String(user.id)] = { user, dialog, message };
       }
 
@@ -226,11 +234,14 @@ OFFSET DATE: ${offsetDate}`);
 
       if (isMissing) {
         await sleep10();
-        const missingDialog = await getMissingDialog(accountId, userId);
+        const missingDialog = await getRecipientUsernameAndPhone(
+          accountId,
+          userId
+        );
         if (!missingDialog) {
-          await sendToBot(`** MISSING DIALOG NOT DEFINED **
+          await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
 ACCOUNT ID: ${accountId}
-MISSING ID: ${userId}`);
+RECIPIENT ID: ${userId}`);
           continue;
         }
 
@@ -239,20 +250,27 @@ MISSING ID: ${userId}`);
           await updateAutomaticDialogue(
             accountId,
             userId,
-            'automatic:data-not-actual'
+            'automatic:data-not-actual',
+            { read: true }
           );
         } else if (isBlocked) {
           await updateAutomaticDialogue(
             accountId,
             userId,
-            'automatic:manual-blocked'
+            'automatic:manual-blocked',
+            { read: true }
           );
         } else if (
           (!dialogTG.status ||
             dialogTG.status instanceof GramJs.UserStatusEmpty) &&
           !dialogTG.photo
         ) {
-          await updateAutomaticDialogue(accountId, userId, 'automatic:blocked');
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:blocked',
+            { read: true }
+          );
         } else {
           const messages = await getMessages(client, dialogTG);
 
@@ -270,12 +288,13 @@ ID: ${userId}`);
             await updateAutomaticDialogue(
               accountId,
               userId,
-              'automatic:messages-deleted'
+              'automatic:messages-deleted',
+              { read: true }
             );
           }
         }
       } else {
-        const { user } = users[userId];
+        const { user, dialog } = users[userId];
 
         if (isBlocked) {
           await sleep10();
@@ -299,7 +318,23 @@ ID: ${userId}`);
         ) {
           await sleep10();
           await editFolder(client, String(user.id), String(user.accessHash), 0);
-          await updateAutomaticDialogue(accountId, userId, 'automatic:blocked');
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:blocked',
+            { read: true }
+          );
+        }
+
+        if (
+          dialog &&
+          dialog instanceof GramJs.Dialog &&
+          dialog.topMessage === dialog.readOutboxMaxId &&
+          !readIds.includes(userId)
+        ) {
+          await updateAutomaticDialogueWithoutReason(accountId, userId, {
+            read: true,
+          });
         }
       }
     }

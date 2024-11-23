@@ -207,7 +207,9 @@ ${replyMessage}`);
       });
     }
 
-    await saveRecipient(accountId, recipientFull, dialog, messages, 'update');
+    await saveRecipient(accountId, recipientFull, dialog, messages, 'update', {
+      viewed: false,
+    });
   }
 
   for (const dialog of pingDialogs) {

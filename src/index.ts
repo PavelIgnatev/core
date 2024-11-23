@@ -110,10 +110,6 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          // await automaticCheck(client, ID);
-          // await new Promise((res) => setTimeout(res, 60000));
-
-          // return
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);
