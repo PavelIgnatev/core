@@ -110,10 +110,6 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          await automaticCheck(client, ID);
-          await new Promise((res) => setTimeout(res, 60000));
-          return;
-
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, tgAccountId, tgFirstName);
@@ -208,9 +204,9 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  promises.push(main('181-7-september-9-sep'));
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
 
   const interval = setInterval(() => {
     console.log({
