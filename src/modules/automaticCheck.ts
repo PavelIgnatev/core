@@ -199,10 +199,13 @@ ID: ${String(user.id)}`);
         break;
       } else {
         const filtredUsers = clientUsers.filter(
-          (user) => String(user.id) !== '136817688'
+          (user) =>
+            String(user.id) !== '136817688' &&
+            (user instanceof GramJs.User ? !user.bot : true)
         );
         const lastUser = filtredUsers[filtredUsers.length - 2];
 
+        console.log(lastUser);
         if (!lastUser) {
           await sendToBot(`** LAST USER NOT DEFINED **
 ACCOUNT ID: ${accountId}
