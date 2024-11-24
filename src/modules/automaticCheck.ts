@@ -205,7 +205,6 @@ ID: ${String(user.id)}`);
         );
         const lastUser = filtredUsers[filtredUsers.length - 2];
 
-        console.log(lastUser);
         if (!lastUser) {
           await sendToBot(`** LAST USER NOT DEFINED **
 ACCOUNT ID: ${accountId}
