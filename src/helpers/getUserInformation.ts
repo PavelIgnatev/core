@@ -1,17 +1,31 @@
 import axios from 'axios';
 import { sendToNameBot } from './sendToNameBot';
 
-const language = 'RUSSIAN';
-
-const isCyrillic = (str: string) => {
+const isRussian = (str: string) => {
   return /^[А-Яа-яЁё]+$/.test(str);
+};
+
+const isEnglish = (str: string) => {
+  return /^[A-Za-z]+$/.test(str);
 };
 
 const capitalizeFirstLetter = (string: string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-export const getUserInformation = async (content: string) => {
+export const getUserInformation = async (
+  userContent: string,
+  language: string
+) => {
+  if (language !== 'RUSSIAN' && language !== 'ENGLISH') {
+    return { name: null, gender: null };
+  }
+
+  const content = userContent
+    .replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
   for (let i = 0; i < 5; i++) {
     try {
       const { data: resultData } = await axios.post(
@@ -58,28 +72,29 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
 
       const userInfo = JSON.parse(resultData?.message?.content?.[0]?.text);
       if (!userInfo.name || !userInfo.gender) {
-        await sendToNameBot(`DATA: ${content}
-RESULT: ${JSON.stringify({ name: null, gender: null })}`);
-
-        return { name: null, gender: null };
+        throw new Error('Name or Gender not defined');
       }
 
-      if (!isCyrillic(userInfo.name)) {
+      if (
+        (language === 'RUSSIAN' && !isRussian(userInfo.name)) ||
+        (language === 'ENGLISH' && !isEnglish(userInfo.name))
+      ) {
         throw new Error('Incorrect name');
       }
 
-      await sendToNameBot(`DATA: ${content}
+      await sendToNameBot(`DATA: ${content} (${i + 1} times)
 RESULT: ${JSON.stringify(userInfo)}`);
 
       return {
-        name: capitalizeFirstLetter(userInfo.name),
+        name: capitalizeFirstLetter(userInfo.name.toLowerCase()),
         gender: userInfo.gender,
       };
     } catch (error) {
       await new Promise((res) => setTimeout(res, 1000));
     }
   }
-  await sendToNameBot(`DATA: ${content}
+
+  await sendToNameBot(`DATA: ${content} (limit times)
 RESULT: ${JSON.stringify({ name: null, gender: null })}`);
 
   return { name: null, gender: null };

@@ -91,10 +91,11 @@ export const autoSender = async (
       let firstMessage = generateRandomString(recipient.firstMessagePrompt);
       //&& recipient.smartGreeting
       //&& recipient.smartQuestion
-      if (recipient.language === 'RUSSIAN' && recipient.smartGreeting) {
+      if (recipient.language && recipient.smartGreeting) {
         const greeting = getGreeting();
         const userInformation = await getUserInformation(
-          `${firstName || ''} ${lastName || ''} ${username || ''} `.trim()
+          `${firstName || ''} ${lastName || ''} ${username || ''}`,
+          recipient.language
         );
 
         if (userInformation.name) {
