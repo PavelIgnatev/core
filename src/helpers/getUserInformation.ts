@@ -60,8 +60,8 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
       const userInfo = JSON.parse(resultData?.message?.content?.[0]?.text);
       if (!userInfo.name || !userInfo.gender) {
         await sendToNameBot(`
-        DATA: ${content}
-        RESULT: ${JSON.stringify({ name: null, gender: null })}`);
+DATA: ${content}
+RESULT: ${JSON.stringify({ name: null, gender: null })}`);
 
         return { name: null, gender: null };
       }
