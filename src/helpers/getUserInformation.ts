@@ -55,6 +55,10 @@ export const getUserInformation = async (content: string) => {
 
       const userInfo = JSON.parse(resultData?.message?.content?.[0]?.text);
       if (!userInfo.name || !userInfo.gender) {
+        await sendToNameBot(`
+        DATA: ${content}
+        RESULT: ${JSON.stringify({ name: null, gender: null })}`);
+
         return { name: null, gender: null };
       }
 
@@ -74,6 +78,9 @@ RESULT: ${JSON.stringify(userInfo)}`);
       await new Promise((res) => setTimeout(res, 1000));
     }
   }
+  await sendToNameBot(`
+DATA: ${content}
+RESULT: ${JSON.stringify({ name: null, gender: null })}`);
 
   return { name: null, gender: null };
 };
