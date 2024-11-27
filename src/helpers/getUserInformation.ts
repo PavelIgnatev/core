@@ -29,7 +29,8 @@ Please disregard usernames unless they are the only source of the name. If the d
     
 **Important clarifications:**
 1. If the name is a short form, do not attempt to convert it to a full form, unless the full form is explicitly stated and unambiguous. Just use the short form for this case.
-2. If the input does not contain any recognizable short, full, or transliterated form of a real first name, you must return null for both name and gender. Do not fabricate or infer a name in such cases.
+2. If only a patronymic is present (e.g., 'Ivanovich', 'Vladimirovna'), **do not extract a first name from the patronymic**. If no first name is present alongside the patronymic, return null.
+3. If the input does not contain any recognizable short, full, or transliterated form of a real first name, you must return null for both name and gender. Do not fabricate or infer a name in such cases.
 
 Ensure the extracted name is adjusted to its **${language}** version, either by translation or transliteration, and maintain correct spelling and cultural appropriateness in **${language}**. If the name is already in **${language}**, leave it as is.`,
             },
