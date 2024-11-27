@@ -94,7 +94,7 @@ export const autoSender = async (
       if (recipient.language === 'RUSSIAN' && recipient.smartGreeting) {
         const greeting = getGreeting();
         const userInformation = await getUserInformation(
-          `${username || ''} ${firstName || ''} ${lastName || ''}`.trim()
+          `${firstName || ''} ${lastName || ''} ${username || ''} `.trim()
         );
 
         if (userInformation.name) {

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { sendToNameBot } from './sendToNameBot';
 
 const language = 'RUSSIAN';
 
@@ -58,6 +59,10 @@ export const getUserInformation = async (content: string) => {
       if (!isCyrillic(userInfo.name)) {
         throw new Error('Incorrect name');
       }
+
+      await sendToNameBot(`
+DATA: ${content}
+RESULT: ${JSON.stringify(userInfo)}`);
 
       return {
         name: capitalizeFirstLetter(userInfo.name),
