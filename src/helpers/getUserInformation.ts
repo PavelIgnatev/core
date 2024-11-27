@@ -27,6 +27,8 @@ export const getUserInformation = async (content: string) => {
     
     Please disregard usernames unless they are the only source of the name. If the display name is available and contains a plausible first name, prioritize it. Remove words like 'undefined', titles (e.g., 'Coach', 'Founder'), descriptors, emojis, and special characters. If multiple names are present, choose the first one that is likely the first name, and ignore surnames, middle names, and any additional information after the first name.
     
+    If the name is a short form (e.g., Vlad), do not attempt to convert it to a full form (e.g., Vladimir, Vladislav), unless the full form is explicitly stated and unambiguous. 
+
     Ensure the extracted name is adjusted to its **${language}** version, either by translation or transliteration, and maintain correct spelling and cultural appropriateness in **${language}**. If the name is already in **${language}**, leave it as is.`,
             },
             {
