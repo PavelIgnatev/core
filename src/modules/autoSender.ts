@@ -12,6 +12,8 @@ import { sendMessage } from '../methods/messages/sendMessage';
 import { getRecipient } from '../methods/recipients/getRecipient';
 import { deleteMessages } from '../methods/messages/deleteHistory';
 import { getAccountById } from '../db/accounts';
+import { getUserInformation } from '../helpers/getUserInformation';
+import { getGreeting } from '../helpers/getGreetings';
 
 export const autoSender = async (
   client: any,
@@ -21,20 +23,20 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
-    return;
-  }
+  // if (currentUTCHours < 5 || currentUTCHours > 14) {
+  //   return;
+  // }
 
-  if (!accountId.includes('-prefix-')) {
-    const weekday = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(new Date());
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = new Intl.DateTimeFormat('en-GB', {
+  //     weekday: 'short',
+  //     timeZone: 'UTC',
+  //   }).format(new Date());
 
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
 
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
@@ -43,7 +45,7 @@ export const autoSender = async (
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime >= remainingTime || true) {
     const spamBlockDate = await checkSpamBlock(client, accountId);
     if (spamBlockDate) {
       return;
@@ -67,10 +69,14 @@ export const autoSender = async (
         support,
         contactRequirePremium,
         botBusiness,
+        firstName,
+        lastName,
+        username,
       } = recipientFull.users[0];
       if (self) {
         return;
       }
+
       if (deleted || bot || support || contactRequirePremium || botBusiness) {
         await updateFailedMessage(
           recipient.username,
@@ -81,7 +87,23 @@ export const autoSender = async (
       }
 
       await deleteMessages(client, id, accessHash);
-      const firstMessage = generateRandomString(recipient.firstMessagePrompt);
+
+      let firstMessage = generateRandomString(recipient.firstMessagePrompt);
+      //&& recipient.smartGreeting
+      //&& recipient.smartQuestion
+      if (recipient.language === 'RUSSIAN' && recipient.smartGreeting) {
+        const greeting = getGreeting();
+        const userInformation = await getUserInformation(
+          `${username || ''} ${firstName || ''} ${lastName || ''}`.trim()
+        );
+
+        if (userInformation.name) {
+          firstMessage = `${greeting}, ${userInformation.name}!`;
+        } else {
+          firstMessage = `${greeting}!`;
+        }
+      }
+
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       await new Promise((res) => setTimeout(res, 5000));
       const sentFirstMessage = await sendMessage(
