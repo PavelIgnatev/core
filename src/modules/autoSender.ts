@@ -1,5 +1,3 @@
-import BigInt from 'big-integer';
-
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
 import { updateFailedMessage } from '../db/groupIdUsers';

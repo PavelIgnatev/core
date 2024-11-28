@@ -32,7 +32,7 @@ export const getUserInformation = async (
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
-          temperature: 1,
+          temperature: 0.2,
           model: 'command-r-plus-08-2024',
           safety_mode: 'NONE',
           messages: [
