@@ -89,21 +89,21 @@ export const autoSender = async (
       let firstMessage = generateRandomString(recipient.firstMessagePrompt);
       //&& recipient.smartGreeting
       //&& recipient.smartQuestion
-      // if (recipient.language && recipient.smartGreeting) {
-      //   const greeting = getGreeting(recipient.language);
-      //   if (greeting) {
-      //     const userInformation = await getUserInformation(
-      //       `${firstName || ''} ${lastName || ''} ${username || ''}`,
-      //       recipient.language
-      //     );
+      if (recipient.language && recipient.smartGreeting) {
+        const greeting = getGreeting(recipient.language);
+        if (greeting) {
+          const userInformation = await getUserInformation(
+            `${firstName || ''} ${lastName || ''} ${username || ''}`,
+            recipient.language
+          );
 
-      //     if (userInformation.name) {
-      //       firstMessage = `${greeting}, ${userInformation.name}!`;
-      //     } else {
-      //       firstMessage = `${greeting}!`;
-      //     }
-      //   }
-      // }
+          if (userInformation.name) {
+            firstMessage = `${greeting}, ${userInformation.name}!`;
+          } else {
+            firstMessage = `${greeting}!`;
+          }
+        }
+      }
 
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
       await new Promise((res) => setTimeout(res, 5000));
