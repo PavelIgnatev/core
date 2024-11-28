@@ -92,16 +92,18 @@ export const autoSender = async (
       //&& recipient.smartGreeting
       //&& recipient.smartQuestion
       if (recipient.language && recipient.smartGreeting) {
-        const greeting = getGreeting();
-        const userInformation = await getUserInformation(
-          `${firstName || ''} ${lastName || ''} ${username || ''}`,
-          recipient.language
-        );
+        const greeting = getGreeting(recipient.language);
+        if (greeting) {
+          const userInformation = await getUserInformation(
+            `${firstName || ''} ${lastName || ''} ${username || ''}`,
+            recipient.language
+          );
 
-        if (userInformation.name) {
-          firstMessage = `${greeting}, ${userInformation.name}!`;
-        } else {
-          firstMessage = `${greeting}!`;
+          if (userInformation.name) {
+            firstMessage = `${greeting}, ${userInformation.name}!`;
+          } else {
+            firstMessage = `${greeting}!`;
+          }
         }
       }
 
