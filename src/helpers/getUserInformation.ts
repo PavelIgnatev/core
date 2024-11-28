@@ -33,7 +33,7 @@ export const getUserInformation = async (
         'http://91.198.220.234/chatv2',
         {
           temperature: 0.2,
-          model: 'command-r-plus-08-2024',
+          model: 'command-r-plus',
           safety_mode: 'NONE',
           messages: [
             {
