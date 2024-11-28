@@ -71,6 +71,10 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
       );
 
       const userInfo = JSON.parse(resultData?.message?.content?.[0]?.text);
+      if (!userInfo.name && !userInfo.gender) {
+        return { name: null, gender: null };
+      }
+
       if (!userInfo.name || !userInfo.gender) {
         throw new Error('Name or Gender not defined');
       }
