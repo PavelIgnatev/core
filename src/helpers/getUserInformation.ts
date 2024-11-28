@@ -22,6 +22,7 @@ export const getUserInformation = async (
   }
 
   const content = userContent
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
