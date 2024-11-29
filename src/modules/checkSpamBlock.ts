@@ -85,6 +85,7 @@ export const checkSpamBlock = async (client: any, account: Account) => {
   if (!tgSpamBlockDate) {
     const { latest, latest2 } = await getBlockedDialogues(accountId);
 
+    const isTRUE = latest[0]?.recipientId === latest2[0]?.recipientId;
     const mappedLatest = latest
       .map((l) => {
         const { messages, groupId, recipientId } = l;
@@ -146,7 +147,7 @@ ${history}`;
       })
       .join('\n');
 
-    await sendToSpamBot(`❗❗ NEW SPAMBLOCK ❗❗
+    await sendToSpamBot(`❗❗ NEW SPAMBLOCK (${isTRUE ? 'SAME' : 'NOT SAME'}) ❗❗
 -----------------
 ID: ${accountId}
 SPAMBLOCK DATE: ${untilDateMatch ? formatDateToUTC(nextSpamBlockDay) : 'INFINITY'}
@@ -157,7 +158,7 @@ ${mappedLatest2}
 ❗ ПОСЛЕДНИЕ 3 СПАМ-БЛОКИРОВКИ (по dateUpdated) ❗
 ${mappedLatest}`);
   }
-  
+
   await updateAccountById(accountId, {
     remainingTime: untilDateMatch ? nextSpamBlockDay : nextDay,
     spamBlockDate: untilDateMatch ? nextSpamBlockDay : 'INFINITY',
