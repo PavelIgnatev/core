@@ -302,7 +302,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
           'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
         );
       }
-      
+
       generations.push(message);
 
       console.log({
