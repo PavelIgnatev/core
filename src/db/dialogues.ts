@@ -139,41 +139,6 @@ export const getPingDialogues = async (accountId: string) => {
   return pingDialogs;
 };
 
-export const getDialogsAutomationCheck = async (accountId: string) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  const now = new Date();
-  const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
-  const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
-  const ninetySixHoursAgo = new Date(now.getTime() - 96 * 60 * 60 * 1000);
-
-  const automationDialogs = await dialoguesCollection
-    .find<Dialogue>({
-      accountId,
-      automaticCheckDate: null,
-      dateUpdated: {
-        $gte: fortyEightHoursAgo,
-        $lte: oneHourAgo,
-      },
-    })
-    .toArray();
-
-  const lastAutomationDialogs = await dialoguesCollection
-    .find<Dialogue>({
-      accountId,
-      lastAutomaticCheckDate: null,
-      automaticReason: null,
-      lastAutomaticReason: null,
-      automaticCheckDate: {
-        $gte: ninetySixHoursAgo,
-        $lte: fortyEightHoursAgo,
-      },
-    })
-    .toArray();
-
-  return [automationDialogs, lastAutomationDialogs];
-};
-
 export const getGlobalCheckDialogues = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -321,4 +286,72 @@ export const updateDateCheckedIds = async (
       },
     }
   );
+};
+export const getBlockedDialogues = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const latest = await dialoguesCollection
+    .find({
+      accountId,
+      automaticReason: 'automatic:blocked',
+    })
+    .sort({ dateUpdated: -1 })
+    .limit(3)
+    .toArray();
+
+  const latest2 = await dialoguesCollection
+    .aggregate([
+      {
+        $match: {
+          accountId,
+          automaticReason: 'automatic:blocked',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          messages: 1,
+          groupId: 1,
+          recipientId: 1,
+          automaticReason: 1,
+          dateUpdated: 1,
+        },
+      },
+      {
+        $unwind: '$messages',
+      },
+      {
+        $sort: {
+          'messages.date': -1,
+        },
+      },
+      {
+        $group: {
+          _id: '$_id',
+          messages: { $push: '$messages' },
+          recipientId: { $first: '$recipientId' },
+          groupId: { $first: '$groupId' },
+          automaticReason: { $first: '$automaticReason' },
+          dateUpdated: { $first: '$dateUpdated' },
+        },
+      },
+      {
+        $sort: {
+          'messages.0.date': -1,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          messages: 1,
+          groupId: 1,
+          recipientId: 1,
+          dateUpdated: 1,
+        },
+      },
+    ])
+    .limit(3)
+    .toArray();
+
+  return { latest, latest2 };
 };

@@ -253,13 +253,6 @@ RECIPIENT ID: ${userId}`);
             'automatic:data-not-actual',
             { read: true }
           );
-        } else if (isBlocked) {
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            'automatic:manual-blocked',
-            { read: true }
-          );
         } else if (
           (!dialogTG.status ||
             dialogTG.status instanceof GramJs.UserStatusEmpty) &&
@@ -271,40 +264,25 @@ RECIPIENT ID: ${userId}`);
             'automatic:blocked',
             { read: true }
           );
+        } else if (isBlocked) {
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:manual-blocked',
+            { read: true }
+          );
         } else {
-          const messages = await getMessages(client, dialogTG);
-
-          if (messages.length > 0) {
-            await sendToBot(`** ПЕРЕКИНУЛ В АРХИВ **
-ACCOUNT ID: ${accountId}
-ID: ${userId}`);
-            await editFolder(
-              client,
-              String(dialogTG.id),
-              String(dialogTG.accessHash),
-              1
-            );
-          } else {
-            await updateAutomaticDialogue(
-              accountId,
-              userId,
-              'automatic:messages-deleted',
-              { read: true }
-            );
-          }
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:messages-deleted',
+            { read: true }
+          );
         }
       } else {
         const { user, dialog } = users[userId];
 
-        if (isBlocked) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            'automatic:manual-blocked'
-          );
-        } else if (user.deleted) {
+        if (user.deleted) {
           await sleep10();
           await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
@@ -323,6 +301,14 @@ ID: ${userId}`);
             userId,
             'automatic:blocked',
             { read: true }
+          );
+        } else if (isBlocked) {
+          await sleep10();
+          await editFolder(client, String(user.id), String(user.accessHash), 0);
+          await updateAutomaticDialogue(
+            accountId,
+            userId,
+            'automatic:manual-blocked'
           );
         }
 

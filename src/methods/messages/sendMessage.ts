@@ -82,7 +82,7 @@ export const sendMessage = async (
 
     return sentMessage;
   } catch (e: any) {
-    if (e.message === 'PEER_FLOOD' && message.length > 15) {
+    if (e.message === 'PEER_FLOOD' && message.length > 30) {
       const fullAccount = await getAccountById(accountId);
       const dialog = await getDialogue(accountId, String(userId));
       const createdDateFormatted = dialog?.dateCreated

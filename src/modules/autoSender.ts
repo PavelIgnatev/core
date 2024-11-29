@@ -41,14 +41,14 @@ export const autoSender = async (
     throw new Error('Account not defined');
   }
 
+  const spamBlockDate = await checkSpamBlock(client, accountByID);
+  if (spamBlockDate) {
+    return;
+  }
+
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
-    const spamBlockDate = await checkSpamBlock(client, accountId);
-    if (spamBlockDate) {
-      return;
-    }
-
     const recipient = await getRecipient(accountId);
 
     try {

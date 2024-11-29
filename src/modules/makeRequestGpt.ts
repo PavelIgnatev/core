@@ -281,29 +281,12 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         part || '',
         'mainlink'
       );
-      generations.push(message);
 
       const pattern =
         /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
       const hasTextLink = message.match(pattern);
 
       message = isRemoveGreetings ? removeGreetings(message) : message;
-      console.log({
-        accountId,
-        message: `**REQUEST GPT MESSAGE**`,
-        varianMessage: message,
-      });
-      if (hasTextLink && disableLink) {
-        throw new Error(
-          'The reply should not contain any references at this stage'
-        );
-      }
-
-      if (hasConsecutiveQuestionSentences(message)) {
-        throw new Error(
-          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
-        );
-      }
 
       if (
         message.includes('[') ||
@@ -317,6 +300,26 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       ) {
         throw new Error(
           'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
+        );
+      }
+      
+      generations.push(message);
+
+      console.log({
+        accountId,
+        message: `**REQUEST GPT MESSAGE**`,
+        varianMessage: message,
+      });
+
+      if (hasTextLink && disableLink) {
+        throw new Error(
+          'The reply should not contain any references at this stage'
+        );
+      }
+
+      if (hasConsecutiveQuestionSentences(message)) {
+        throw new Error(
+          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
         );
       }
 
