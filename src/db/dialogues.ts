@@ -16,15 +16,12 @@ export const getDialogue = async (accountId: string, recipientId: string) => {
   return dialogue;
 };
 
-export const getDialogueByGidRid= async (
+export const getDialogueByGidRid = async (
   recipientId: string,
   groupId: string
 ) => {
   const dialoguesCollection = await getDialoguesCollection();
-  console.log({
-    recipientId,
-    groupId,
-  })
+
   const dialogue = await dialoguesCollection.findOne<Dialogue>({
     recipientId,
     groupId,
