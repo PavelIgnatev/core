@@ -19,7 +19,19 @@ export interface Account {
   messageCount?: number;
   aiContactCount?: number;
 
-  spamBlockDate?: Date;
+  spamBlockDate?: Date | 'INFINITY';
+  spamBlockInitDate?: Date;
+  spamBlockDays?: number;
+
+  historySpamBlocks?: Array<{
+    spamBlockDate: Date | 'INFINITY';
+    spamBlockDays: number;
+    historySpamBlocks?: Array<{
+      spamBlockDate: string | Date;
+      spamBlockDays: number;
+    }>;
+    spamBlockInitDate?: Date;
+  }>;
 
   banned?: boolean;
   setuped?: boolean;

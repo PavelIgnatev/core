@@ -12,30 +12,13 @@ import { deleteMessages } from '../methods/messages/deleteHistory';
 import { getAccountById } from '../db/accounts';
 import { getUserInformation } from '../helpers/getUserInformation';
 import { getGreeting } from '../helpers/getGreetings';
+import { getDialogueByGidRid } from '../db/dialogues';
 
 export const autoSender = async (
   client: any,
   accountId: string,
   tgAccountId: string
 ) => {
-  const currentTime = new Date();
-  const currentUTCHours = currentTime.getUTCHours();
-
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
-    return;
-  }
-
-  if (!accountId.includes('-prefix-')) {
-    const weekday = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(new Date());
-
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
-
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
     throw new Error('Account not defined');
@@ -46,6 +29,24 @@ export const autoSender = async (
     return;
   }
 
+  const currentTime = new Date();
+  const currentUTCHours = currentTime.getUTCHours();
+
+  if (currentUTCHours < 5 || currentUTCHours > 14) {
+    return;
+  }
+
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = new Intl.DateTimeFormat('en-GB', {
+  //     weekday: 'short',
+  //     timeZone: 'UTC',
+  //   }).format(new Date());
+
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
+
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
@@ -55,7 +56,7 @@ export const autoSender = async (
       const recipientFull = await resolveContact(
         client,
         recipient.username,
-        recipient.groupId
+        String(recipient.groupId)
       );
 
       const {
@@ -80,15 +81,14 @@ export const autoSender = async (
           recipient.username,
           String(recipient.groupId)
         );
-
         return;
       }
 
       await deleteMessages(client, id, accessHash);
 
       let firstMessage = generateRandomString(recipient.firstMessagePrompt);
-      //&& recipient.smartGreeting
-      //&& recipient.smartQuestion
+      const secondMessage = generateRandomString(recipient.secondMessagePrompt);
+
       if (recipient.language && recipient.smartGreeting) {
         const greeting = getGreeting(recipient.language);
         if (greeting) {
@@ -105,8 +105,19 @@ export const autoSender = async (
         }
       }
 
-      const secondMessage = generateRandomString(recipient.secondMessagePrompt);
-      await new Promise((res) => setTimeout(res, 5000));
+      await new Promise((res) => setTimeout(res, 60000));
+      const dialog = await getDialogueByGidRid(
+        String(id),
+        String(recipient.username)
+      );
+
+      if (dialog) {
+        await sendToBot(`** ПРЕДОТВРАЩЕНИЕ ПОВТОРНОЙ ОТПРАВКИ **
+RID: ${id}
+GID: ${recipient.groupId}`);
+        return;
+      }
+
       const sentFirstMessage = await sendMessage(
         client,
         id,

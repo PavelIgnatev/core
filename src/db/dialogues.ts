@@ -16,6 +16,23 @@ export const getDialogue = async (accountId: string, recipientId: string) => {
   return dialogue;
 };
 
+export const getDialogueByGidRid= async (
+  recipientId: string,
+  groupId: string
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+  console.log({
+    recipientId,
+    groupId,
+  })
+  const dialogue = await dialoguesCollection.findOne<Dialogue>({
+    recipientId,
+    groupId,
+  });
+
+  return dialogue;
+};
+
 export const getDialogsIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -287,71 +304,18 @@ export const updateDateCheckedIds = async (
     }
   );
 };
+
 export const getBlockedDialogues = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
-  const latest = await dialoguesCollection
+  const blockedDialogs = await dialoguesCollection
     .find({
       accountId,
       automaticReason: 'automatic:blocked',
     })
     .sort({ dateUpdated: -1 })
-    .limit(3)
+    .limit(5)
     .toArray();
 
-  const latest2 = await dialoguesCollection
-    .aggregate([
-      {
-        $match: {
-          accountId,
-          automaticReason: 'automatic:blocked',
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          messages: 1,
-          groupId: 1,
-          recipientId: 1,
-          automaticReason: 1,
-          dateUpdated: 1,
-        },
-      },
-      {
-        $unwind: '$messages',
-      },
-      {
-        $sort: {
-          'messages.date': -1,
-        },
-      },
-      {
-        $group: {
-          _id: '$_id',
-          messages: { $push: '$messages' },
-          recipientId: { $first: '$recipientId' },
-          groupId: { $first: '$groupId' },
-          automaticReason: { $first: '$automaticReason' },
-          dateUpdated: { $first: '$dateUpdated' },
-        },
-      },
-      {
-        $sort: {
-          'messages.0.date': -1,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          messages: 1,
-          groupId: 1,
-          recipientId: 1,
-          dateUpdated: 1,
-        },
-      },
-    ])
-    .limit(3)
-    .toArray();
-
-  return { latest, latest2 };
+  return blockedDialogs;
 };

@@ -19,7 +19,12 @@ function formatDateToUTC(date: Date) {
 }
 
 export const checkSpamBlock = async (client: any, account: Account) => {
-  const { accountId, spamBlockDate: tgSpamBlockDate } = account;
+  const {
+    accountId,
+    spamBlockDate: tgSpamBlockDate,
+    spamBlockInitDate,
+    historySpamBlocks = [],
+  } = account;
   const result = await resolveUsername(client, 'spambot');
 
   const { id: userId, accessHash, username } = result?.users?.[0] ?? {};
@@ -66,104 +71,91 @@ export const checkSpamBlock = async (client: any, account: Account) => {
   if (message.includes('no limits are currently applied')) {
     await updateAccountById(accountId, {
       spamBlockDate: null,
-      spamInitDate: null,
+      spamBlockInitDate: null,
+      spamBlockDays: null,
     });
     return false;
   }
 
   const untilDateMatch = message.match(/until\s(.*)\./);
-
   const spamBlockDate = untilDateMatch
-    ? untilDateMatch[1].replace('UTC', '')
+    ? untilDateMatch[1].replace('UTC', '').trim()
     : 'INFINITY';
-
   const nextSpamBlockDay = new Date(spamBlockDate + 'Z');
-  const currentDate = new Date();
-  const nextDay = new Date(currentDate);
-  nextDay.setDate(currentDate.getDate() + 1);
 
-  if (!tgSpamBlockDate) {
-    const { latest, latest2 } = await getBlockedDialogues(accountId);
-
-    const isTRUE = latest[0]?.recipientId === latest2[0]?.recipientId;
+  if (
+    !spamBlockInitDate ||
+    !tgSpamBlockDate ||
+    (tgSpamBlockDate === 'INFINITY' && spamBlockDate !== 'INFINITY') ||
+    (tgSpamBlockDate !== 'INFINITY' && spamBlockDate === 'INFINITY') ||
+    (tgSpamBlockDate !== 'INFINITY' &&
+      tgSpamBlockDate.getTime() !== nextSpamBlockDay.getTime())
+  ) {
+    const latest = await getBlockedDialogues(accountId);
     const mappedLatest = latest
-      .map((l) => {
-        const { messages, groupId, recipientId } = l;
+      .map((l, index) => {
+        const { messages, groupId, recipientId, dateAutomaticCheck } = l;
 
-        if (!messages || messages.length === 0) {
-          return '';
+        if (index === 0) {
+          const history = messages
+            .reverse()
+            .map((message: any) => {
+              if (String(message.fromId) === String(recipientId)) {
+                return null;
+              }
+
+              return `${formatDateToUTC(new Date(Number((message.date || 0) + '000')))}: ${message.text}`;
+            })
+            .filter(Boolean)
+            .join('\n');
+
+          return `-----------------
+{"groupId": "${groupId}", "recipientId": "${recipientId}"}
+DETECT BLOCKED DATE: ${formatDateToUTC(new Date(dateAutomaticCheck))}
+${history}`;
         }
 
-        const history = messages
-          .map((message: any) => {
-            if (String(message.fromId) === String(recipientId)) {
-              return null;
-            }
-            const messageDate = Number(message.date + '000');
-            if (isNaN(messageDate)) {
-              console.warn(`Invalid message date: ${message.date}`);
-              return '';
-            }
-
-            return `${formatDateToUTC(new Date(messageDate))}: ${message.text}`;
-          })
-          .filter(Boolean)
-          .join('\n');
-
-        return `-----------------
+        return messages && messages.length
+          ? `-----------------
 {"groupId": "${groupId}", "recipientId": "${recipientId}"}
-${history}`;
+DETECT BLOCKED DATE: ${formatDateToUTC(new Date(dateAutomaticCheck))}
+LAST MESSAGE DATE: ${formatDateToUTC(new Date(Number((messages[messages.length - 1]?.date || 0) + '000')))}`
+          : '';
       })
       .join('\n');
 
-    const mappedLatest2 = latest2
-      .map((l) => {
-        const { messages, groupId, recipientId } = l;
+    let spamBlockDays = 0;
+    if (spamBlockDate !== 'INFINITY') {
+      const timeDiff = nextSpamBlockDay.getTime() - new Date().getTime();
+      spamBlockDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    }
 
-        if (!messages || messages.length === 0) {
-          return '';
-        }
-
-        const history = messages
-          .map((message: any) => {
-            if (String(message.fromId) === String(recipientId)) {
-              return null;
-            }
-
-            const messageDate = Number(message.date + '000');
-            if (isNaN(messageDate)) {
-              console.warn(`Invalid message date: ${message.date}`);
-              return '';
-            }
-
-            return `${formatDateToUTC(new Date(messageDate))}: ${message.text}`;
-          })
-          .filter(Boolean)
-          .join('\n');
-
-        return `-----------------
-{"groupId": "${groupId}", "recipientId": "${recipientId}"}
-${history}`;
-      })
-      .join('\n');
-
-    await sendToSpamBot(`❗❗ NEW SPAMBLOCK (${isTRUE ? 'SAME' : 'NOT SAME'}) ❗❗
+    await sendToSpamBot(`❗ ${!spamBlockInitDate ? 'NEW' : 'UPDATE'} SPAMBLOCK ❗
 -----------------
 ID: ${accountId}
 SPAMBLOCK DATE: ${untilDateMatch ? formatDateToUTC(nextSpamBlockDay) : 'INFINITY'}
+SPAMBLOCK DAYS: ${spamBlockDays === 0 ? 'INFINITY' : `${spamBlockDays} day(s)`}
 -----------------
-❗ ПОСЛЕДНИЕ 3 СПАМ-БЛОКИРОВКИ (по date) ❗
-${mappedLatest2}
------------------
-❗ ПОСЛЕДНИЕ 3 СПАМ-БЛОКИРОВКИ (по dateUpdated) ❗
+❗ ПОСЛЕДНИЕ ${latest.length} БЛОКИРОВОК ❗
 ${mappedLatest}`);
-  }
 
-  await updateAccountById(accountId, {
-    remainingTime: untilDateMatch ? nextSpamBlockDay : nextDay,
-    spamBlockDate: untilDateMatch ? nextSpamBlockDay : 'INFINITY',
-    spamInitDate: new Date(),
-  });
+    const updateData: any = {
+      spamBlockDate: untilDateMatch ? nextSpamBlockDay : 'INFINITY',
+      spamBlockDays,
+    };
+    if (!spamBlockInitDate) {
+      updateData['spamBlockInitDate'] = new Date();
+    }
+    updateData['historySpamBlocks'] = [
+      ...(historySpamBlocks || []),
+      {
+        spamBlockDate: untilDateMatch ? nextSpamBlockDay : 'INFINITY',
+        spamBlockDays,
+      },
+    ];
+
+    await updateAccountById(accountId, updateData);
+  }
 
   return true;
 };

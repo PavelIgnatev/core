@@ -50,7 +50,13 @@ export const saveRecipient = async (
     recipientUsername: recUsername,
     recipientTitle: `${firstName} ${lastName}`.trim(),
     recipientBio: about || '',
-    recipientPhone: phone || recipientPhone || null,
+    recipientPhone:
+      (status === 'create' && recipientDb.username.includes('+')
+        ? recipientDb.username.replace('+', '')
+        : null) ||
+      phone ||
+      recipientPhone ||
+      null,
     messages,
     step: getCombinedMessages(messages).length,
     read: false,

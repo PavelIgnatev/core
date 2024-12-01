@@ -91,9 +91,13 @@ export const sendMessage = async (
       const updatedDateFormatted = dialog?.dateUpdated
         ? formatDateToUTC(dialog.dateUpdated)
         : 'N/A';
-      const spamBlockDateFormatted = fullAccount?.spamBlockDate
-        ? formatDateToUTC(fullAccount.spamBlockDate)
-        : 'N/A';
+      const spamBlockDateFormatted =
+        fullAccount?.spamBlockDate && fullAccount.spamBlockDate !== 'INFINITY'
+          ? formatDateToUTC(fullAccount.spamBlockDate)
+          : fullAccount?.spamBlockDate &&
+              fullAccount.spamBlockDate === 'INFINITY'
+            ? 'INFINITY'
+            : 'N/A';
 
       await sendToBot(
         `*** ${e.message} ***

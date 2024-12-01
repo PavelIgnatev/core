@@ -21,7 +21,7 @@ export const resolveContact = async (
     !recipientFull ||
     !(userByUsername?.users?.[0] instanceof GramJs.User)
   ) {
-    await updateFailedMessage(username, String(groupId));
+    await updateFailedMessage(username, groupId);
     throw new Error('USERNAME_INVALID');
   }
 
