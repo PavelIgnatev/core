@@ -96,7 +96,7 @@ const main = async (ID: string) => {
     for (let i = 0; i < 30; i++) {
       accountsInWork[ID] = i + 1;
 
-      if (Object.keys(accountsInWork).length < 10) {
+      if (i !== 0 && Object.keys(accountsInWork).length < 10) {
         await sendToBot(`ОСТАНОВИЛ ИТЕРАЦИЮ
 АККАУНТ БЫЛ НА: ${i}
 ACCOUNT ID: ${ID}`)
