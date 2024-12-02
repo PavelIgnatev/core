@@ -19,7 +19,6 @@ import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
-import { sendToFormBot } from './helpers/sendToFormBot';
 
 import './helpers/setConsole.log';
 
@@ -96,31 +95,8 @@ const main = async (ID: string) => {
     for (let i = 0; i < 30; i++) {
       accountsInWork[ID] = i + 1;
 
-      //
-
-      ///
-      ///
-
-      ///
-      ///
-      ///
-
-      //
-      //
-      ////
-      //
-      //
-      //
       // в метрики засунуть кто виновен в спамблоке какой групп айди
       // офать итерацию чтобы не заебывало и если осталось парочку акков то приостановка
-      //
-      //
-      if (i !== 0 && Object.keys(accountsInWork).length < 10) {
-        await sendToBot(`ОСТАНОВИЛ ИТЕРАЦИЮ
-АККАУНТ БЫЛ НА: ${i}
-ACCOUNT ID: ${ID}`);
-        break;
-      }
 
       let timer;
       const timeout = new Promise(
@@ -241,6 +217,7 @@ getAccounts().then(async (accounts) => {
     });
   }, 60000);
 
+  // уйти от promise all
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
     const minutes = Math.floor(time / 60);
