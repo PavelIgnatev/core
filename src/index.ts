@@ -218,6 +218,7 @@ getAccounts().then(async (accounts) => {
   }, 60000);
 
   // уйти от promise all
+  // пофиксить recipient get чтобы был рандом
   Promise.all(promises).then(async () => {
     const time = Math.round((performance.now() - startTime) / 1000);
     const minutes = Math.floor(time / 60);
