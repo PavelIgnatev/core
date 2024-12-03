@@ -24,6 +24,7 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
       body: JSON.stringify({
         chat_id: chatId,
         text: chunk,
+        disable_web_page_preview: true,
       }),
     });
   }
