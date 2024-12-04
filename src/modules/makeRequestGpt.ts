@@ -303,6 +303,19 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
+      if (containsIdeographicOrArabic(message)) {
+        throw new Error(
+          'The answer must not contain Arabic characters or any hieroglyphics'
+        );
+      }
+
+      const text = validateText(JSON.stringify(messages), message, language);
+      if (text) {
+        throw new Error(
+          `The word ${text} is not allowed in reply, its use is prohibited`
+        );
+      }
+
       generations.push(message);
 
       console.log({
@@ -327,12 +340,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         addSpaceAfterPunctuation(message)
       );
 
-      if (containsIdeographicOrArabic(varMessage)) {
-        throw new Error(
-          'The answer must not contain Arabic characters or any hieroglyphics'
-        );
-      }
-
       if (mandatoryQuestion && !varMessage.includes('?')) {
         throw new Error(
           'The question in the reply is mandatory. The question was not found. Add a question at the end of the line.'
@@ -355,13 +362,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
-      const text = validateText(JSON.stringify(messages), varMessage, language);
-      if (text) {
-        throw new Error(
-          `The word ${text} is not allowed in reply, its use is prohibited`
-        );
-      }
-
       return filterString(
         varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ''),
         'mainlink',
@@ -379,7 +379,8 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         error.message !==
           'The answer must not contain Arabic characters or any hieroglyphics' &&
         error.message !==
-          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
+          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"' &&
+        !error.message.includes('is not allowed in reply')
       ) {
         i += 1;
       }
