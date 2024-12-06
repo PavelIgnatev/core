@@ -136,7 +136,7 @@ ${flowHandling}`
 
 ${
   stage !== 1 && addedInformation
-    ? `## ASSISTANT_INFORMATION
+    ? `## ASSISTANT_ADDED_giINFORMATION
 ${addedInformation}`
     : ''
 }
