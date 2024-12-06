@@ -9,6 +9,7 @@ import { incrementCurrentCount } from '../db/groupId';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { sleep } from '../helpers/sleep';
 import { updateSendMessage } from '../db/groupIdUsers';
+import { sendToBot } from '../helpers/sendToBot';
 
 export const saveRecipient = async (
   accountId: string,
@@ -19,53 +20,55 @@ export const saveRecipient = async (
   addedData: Record<string, unknown> = {},
   accountByID: Account | null = null
 ) => {
-  const {
-    id: recipientId,
-    phone,
-    username,
-    firstName,
-    lastName = '',
-  } = recipient.users[0] as GramJs.User;
-  const {
-    fullUser: { about },
-  } = recipient;
-
-  const {
-    groupId,
-    recipientUsername,
-    username: varSecondUsername,
-    recipientPhone,
-  } = recipientDb;
-  const recUsername = (
-    username ||
-    recipientUsername ||
-    varSecondUsername ||
-    ''
-  ).toLowerCase();
-
-  const data = {
-    groupId,
-    accountId,
-    recipientId: String(recipientId),
-    recipientUsername: recUsername,
-    recipientTitle: `${firstName} ${lastName}`.trim(),
-    recipientBio: about || '',
-    recipientPhone:
-      (status === 'create' && recipientDb.username.includes('+')
-        ? recipientDb.username.replace('+', '')
-        : null) ||
-      phone ||
-      recipientPhone ||
-      null,
-    messages,
-    step: getCombinedMessages(messages).length,
-    read: false,
-    ...addedData,
-  } as Dialogue;
-
   let isSave = false;
   while (!isSave) {
     try {
+      const {
+        id: recipientId,
+        phone,
+        username,
+        firstName,
+        lastName = '',
+      } = recipient.users[0] as GramJs.User;
+      const {
+        fullUser: { about },
+      } = recipient;
+
+      const {
+        groupId,
+        recipientUsername,
+        username: varSecondUsername,
+        recipientPhone,
+      } = recipientDb;
+      const recUsername = (
+        username ||
+        recipientUsername ||
+        varSecondUsername ||
+        ''
+      ).toLowerCase();
+
+      const data = {
+        groupId,
+        accountId,
+        recipientId: String(recipientId),
+        recipientUsername: recUsername,
+        recipientTitle: `${firstName} ${lastName}`.trim(),
+        recipientBio: about || '',
+        aiName: recipientDb?.aiName || null,
+        aiGender: recipientDb?.aiGender || null,
+        recipientPhone:
+          (status === 'create' && recipientDb.username.includes('+')
+            ? recipientDb.username.replace('+', '')
+            : null) ||
+          phone ||
+          recipientPhone ||
+          null,
+        messages,
+        step: getCombinedMessages(messages).length,
+        read: false,
+        ...addedData,
+      } as Dialogue;
+
       await updateDialogue(data);
       console.log({
         accountId,
@@ -97,12 +100,15 @@ export const saveRecipient = async (
       }
       isSave = true;
     } catch (error: any) {
-      console.error({
-        accountId,
-        message: new Error(
-          `Error occurred while saving recipient: ${error.message}`
-        ),
-      });
+      await sendToBot(`** ERROR SAVE RECIPIENT**
+ERROR: ${error.messgae};
+accountId: ${accountId};
+recipient: ${recipient};
+recipientDb: ${recipientDb};
+messages: ${messages};
+status: ${status};
+addedData: ${addedData};
+accountByID: ${accountByID};`);
 
       await sleep(3000);
     }

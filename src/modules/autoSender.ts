@@ -86,22 +86,22 @@ export const autoSender = async (
 
       await deleteMessages(client, id, accessHash);
 
+      let user = null;
       let firstMessage = generateRandomString(recipient.firstMessagePrompt);
       const secondMessage = generateRandomString(recipient.secondMessagePrompt);
 
-      if (recipient.language && recipient.smartGreeting) {
-        const greeting = getGreeting(recipient.language);
-        if (greeting) {
-          const userInformation = await getUserInformation(
-            `${firstName || ''} ${lastName || ''} ${username || ''}`,
-            recipient.language
-          );
+      const greeting = getGreeting(recipient?.language || 'RUSSIAN');
+      if (greeting) {
+        const userInformation = await getUserInformation(
+          `${firstName || ''} ${lastName || ''} ${username || ''}`,
+          recipient.language
+        );
 
-          if (userInformation.name) {
-            firstMessage = `${greeting}, ${userInformation.name}!`;
-          } else {
-            firstMessage = `${greeting}!`;
-          }
+        if (userInformation.aiName) {
+          user = userInformation;
+          firstMessage = `${greeting}, ${userInformation.aiName}!`;
+        } else {
+          firstMessage = `${greeting}!`;
         }
       }
 
@@ -137,7 +137,7 @@ GID: ${recipient.groupId}`);
       await saveRecipient(
         accountId,
         recipientFull,
-        recipient,
+        { ...recipient, ...user },
         [
           {
             id: sentFirstMessage.id,

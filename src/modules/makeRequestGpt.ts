@@ -3,21 +3,16 @@ import emojiRegex from 'emoji-regex';
 
 import { sendToBot } from '../helpers/sendToBot';
 
-function hasConsecutiveQuestionSentences(text: string): boolean {
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  let previousWasQuestion = false;
-  for (const sentence of sentences) {
-    const trimmedSentence = sentence.trim();
-    if (trimmedSentence.endsWith('?')) {
-      if (previousWasQuestion) {
-        return true;
-      }
-      previousWasQuestion = true;
-    } else {
-      previousWasQuestion = false;
-    }
+function trimmer(str: string) {
+  if (
+    str.endsWith('.') ||
+    str.endsWith(',') ||
+    str.endsWith('!') ||
+    str.endsWith('?')
+  ) {
+    return str.slice(0, -1);
   }
-  return false;
+  return str;
 }
 
 function containsIdeographicOrArabic(str: string) {
@@ -40,11 +35,19 @@ const validateText = (
   const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
   const englishRegex = /^[a-z]+$/i;
 
-  const isProperNoun = (word: string) =>
-    word[0] === word[0].toUpperCase() &&
-    word.slice(1) === word.slice(1).toLowerCase();
+  const pattern =
+    /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+  const links = inputString.match(pattern);
+  if (links) {
+    for (const link of links) {
+      if (!companyDataLowerCase.includes(trimmer(link.trim().toLowerCase()))) {
+        return link.toLocaleLowerCase();
+      }
+    }
+  }
 
-  const cleanWord = (word: string) => word.trim();
+  const isProperNoun = (word: string) => word[0] === word[0].toUpperCase();
+  const cleanWord = (word: string) => trimmer(word.trim());
 
   for (let word of words) {
     word = cleanWord(word);
@@ -327,12 +330,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply should not contain any references at this stage'
-        );
-      }
-
-      if (hasConsecutiveQuestionSentences(message)) {
-        throw new Error(
-          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
         );
       }
 

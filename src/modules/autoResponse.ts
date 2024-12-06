@@ -10,6 +10,9 @@ import { sendMessage } from '../methods/messages/sendMessage';
 import { getFullUser } from '../methods/users/getFullUser';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
 
+const pattern =
+  /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+
 export const autoResponse = async (
   client: any,
   accountId: string,
@@ -30,6 +33,8 @@ export const autoResponse = async (
       firstName,
       lastName = '',
       stage,
+      aiName,
+      aiGender,
     } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
@@ -43,6 +48,7 @@ export const autoResponse = async (
 
     const userName = `${firstName} ${lastName}`
       .trim()
+      .replace(pattern, '')
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
 
     const recipientFull = await getFullUser(client, id, accessHash);
@@ -57,7 +63,6 @@ export const autoResponse = async (
       goal = '',
       part = '',
       addedQuestion = '',
-      secondAddedQuestion = '',
       language = 'RUSSIAN',
       flowHandling = '',
       messagesCount = 4,
@@ -66,38 +71,47 @@ export const autoResponse = async (
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
     const parted = stage === 2 && part ? part : '';
     const hasQuestion = stage === 1 && addedQuestion ? addedQuestion : '';
+    const {
+      fullUser: { about },
+    } = recipientFull;
 
     const replyMessage = await makeRequestGpt(
       accountId,
       [
         {
           role: 'system',
-          content: `You are "${meName}" (role: assistant, <ASSISTANT>, man, male), acting as "${aiRole}". Fully adopt this identity as a real person whose task is to deeply engage the interlocutor within the context of YOUR_COMPANY_DESCRIPTION. You have initiated the conversation with the user (role: user) with the intention of immersing them into the context of YOUR_COMPANY_DESCRIPTION. ${
-            stage >= 2 && goal
-              ? ` *As assistant <ASSISTANT> "${meName}" (role assistant, <ASSISTANT>, man, male), ${goal}*`
-              : ''
-          }
+          content: `## ROLE ASSISANT
+NAME: ${meName};
+GENDER: male;
+BIO: ${aiRole} (fully adopt this identity as a real person);
+CONTEXT: You have initiated the conversation with the role user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION. This is a cold contact: the user has not interacted with you or your company before and is not familiar with the context of your message. Your task is to offer various services and solutions on behalf of ASSISTANT_COMPANY_DESCRIPTION, trying to turn the user from disinterested to a customer ready for further communication. You  communicating with a potential client via Telegram messenger. It is important to note that you are the protagonist in this interaction and act as a facilitator shaping the response for the user. Your goal is to create a message that will interest the user and encourage them to continue communicating with you;
+${stage >= 2 && goal ? `GOAL: ${goal}` : ''};         
 
-## GUIDELINES FOR <ASSISTANT> RESPONSE${
+## ROLE USER
+FULL DETAILS: ${userName};${aiName ? `\nREAL NAME: ${aiName};` : ''}
+GENDER: ${aiGender || 'couldnt pinpoint'};${about ? `\nBIO: ${about}` : ''}
+CONTEXT: a real person whom you have never met before and who is not familiar with you, your company or its offerings. He or she received a message from you for the first time and has no prior knowledge of your business or products;
+
+## ASSISTANT GUIDELINES REPLY
+- Your response must **strictly** be approximately ${
+            messagesCount * 60
+          } characters in length, consisting of around ${
+            messagesCount * 10
+          } words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.${
             stage <= 2
               ? `\n- You should always start your reply with a brief response to the user's last post. The reply is mandatory and should be minimal, without building a reply around it.`
               : ''
           }${
             hasQuestion
               ? `\n- Smoothly weave the following question into the end of your response in a way that feels natural and relevant: “${generateRandomString(hasQuestion)}”. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**`
-              : stage <= 2
-                ? '\n- **BE SURE TO ASK A LEADING QUESTION TO INTEREST THE USER EVEN MORE**. Conclude your response with a simple, easy-to-answer question that naturally follows from the conversation and further engages the user. The question should be quick to respond to, possibly even rhetorical, and should not require the user to spend much time writing an answer. Ensure it is relevant and seamlessly integrated into your reply.'
+              : stage === 2
+                ? '\n- **Ensure that you ask a precise, targeted question to further engage the user**. Conclude your reply by inserting a relevant question at the end of the sentence that compels the user to provide additional details, thoughts, or preferences. The question must be straightforward to answer, but not overly simplistic, and should facilitate meaningful engagement. It must be seamlessly integrated into the sentence, directly relevant to the context, and encourage user participation without overwhelming or pressuring them.'
                 : ''
           }${
             parted
               ? `\n- Ensure the phrase "${part}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.`
               : ''
           }
-- Your response must **strictly** be approximately ${
-            messagesCount * 60
-          } characters in length, consisting of around ${
-            messagesCount * 10
-          } words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.
 - Response language: **${language}**.
 - Never apologize in your responses, under any circumstances. **don't apologize**
 - Do not use generic greetings like "Hello" or "Hi".
@@ -106,35 +120,30 @@ export const autoResponse = async (
 - Focus on providing value based on the company's offerings.
 - Avoid making assumptions about the user's profession or activities.
 
-## CONTEXT FOR <ASSISTANT>
-You "${meName}" (role: assistant, <ASSISTANT>, man, male) handle cold traffic, conducting unsolicited outreach to potential clients via Telegram messenger. Your interactions are cold, meaning you initiate contact with <USER> who have not previously interacted with you. It is important to note that neither you  (role: assistant, <ASSISTANT>, man, male) nor the interlocutor (role: user, <USER>) know each other and have not met in real life. The interlocutor (role: user, <USER>) doesn't know you (role: assistant, <ASSISTANT>, man, male) or the context of your message. You (role: assistant, <ASSISTANT>, man, male) offer various services and solutions, aiming to convert these cold leads into engaged clients. Never apologize in your responses, under any circumstances.
-
-Current date and time: ${getDateNow()}
-
 ${
   companyDescription
-    ? `## YOUR_COMPANY_DESCRIPTION
+    ? `## ASSISTANT_COMPANY_DESCRIPTION
 ${companyDescription}`
     : ''
 }
 
-## YOUR_COMMON_FLOW_HANDLING
 ${
-  stage <= 2
-    ? `**Where did you get the user's contact?**
-The users contact was found in one of the chat rooms, the exact details of which I don't recall`
+  flowHandling
+    ? `## ASSISTANT_COMMON_FLOW_HANDLING
+${flowHandling}`
     : ''
 }
-${flowHandling}
 
 ${
   stage !== 1 && addedInformation
-    ? `## ADDED_INFORMATION
+    ? `## ASSISTANT_INFORMATION
 ${addedInformation}`
     : ''
-}`,
+}
+
+Current date and time: ${getDateNow()}`,
         },
-      ...messages.map(
+        ...messages.map(
           (m: { id: number; text: string; fromId: string; date: number }) => ({
             role: m.fromId === String(id) ? 'user' : 'assistant',
             content: m.text,
@@ -209,7 +218,14 @@ ${replyMessage}`);
   }
 
   for (const dialog of pingDialogs) {
-    const { id, accessHash, messages, groupId: dialogGroupId } = dialog;
+    const {
+      id,
+      accessHash,
+      messages,
+      groupId: dialogGroupId,
+      aiName,
+      aiGender,
+    } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
     const recipientFull = await getFullUser(client, id, accessHash);
@@ -220,7 +236,6 @@ ${replyMessage}`);
     const {
       firstName = '',
       lastName = '',
-      username = '',
     } = recipientFull?.users?.[0] || {};
 
     const { language = 'RUSSIAN' } = groupId || { language: 'RUSSIAN' };
@@ -233,7 +248,9 @@ ${replyMessage}`);
       .slice(-15) as Array<{ role: 'USER' | 'CHATBOT'; message: string }>;
     const userName = `${firstName} ${lastName}`
       .trim()
+      .replace(pattern, '')
       .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
+
     const pingMessage = await makeRequestGpt(
       accountId,
       [
@@ -247,7 +264,8 @@ ${replyMessage}`);
 Maximum length of reminder message 100 characters
 
 ## USER DATA
-USER: ${userName}, ${username};
+FULL DETAILS: ${userName};${aiName ? `\nREAL NAME: ${aiName};` : ''}
+GENDER: ${aiGender || 'couldnt pinpoint'};
 Today's date is ${getDateNow()};
       
 ## DIALOG

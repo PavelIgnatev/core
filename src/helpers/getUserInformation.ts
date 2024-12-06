@@ -26,7 +26,7 @@ export const getUserInformation = async (
   language: string
 ) => {
   if (language !== 'RUSSIAN' && language !== 'ENGLISH') {
-    return { name: null, gender: null };
+    return { aiName: null, aiGender: null };
   }
 
   const content = userContent
@@ -82,7 +82,7 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
 
         const userInfo = JSON.parse(resultData?.message?.content?.[0]?.text);
         if (!userInfo.name && !userInfo.gender) {
-          return { name: null, gender: null };
+          return { aiName: null, aiGender: null };
         }
 
         if (!userInfo.name || !userInfo.gender) {
@@ -100,8 +100,8 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
 RESULT: ${JSON.stringify(userInfo)}`);
 
         return {
-          name: capitalizeFirstLetter(userInfo.name.toLowerCase()),
-          gender: userInfo.gender,
+          aiName: capitalizeFirstLetter(userInfo.name.toLowerCase()),
+          aiGender: userInfo.gender,
         };
       } catch (error) {
         await new Promise((res) => setTimeout(res, 1000));
@@ -111,7 +111,7 @@ RESULT: ${JSON.stringify(userInfo)}`);
     await sendToNameBot(`DATA: ${content} (limit times)
 RESULT: ${JSON.stringify({ name: null, gender: null })}`);
 
-    return { name: null, gender: null };
+    return { aiName: null, aiGender: null };
   };
 
   try {
@@ -120,6 +120,6 @@ RESULT: ${JSON.stringify({ name: null, gender: null })}`);
     await sendToNameBot(`DATA: ${content} (ERROR)
 RESULT: ${JSON.stringify({ name: null, gender: null })}`);
 
-    return { name: null, gender: null };
+    return { aiName: null, aiGender: null };
   }
 };
