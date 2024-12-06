@@ -136,7 +136,7 @@ ${flowHandling}`
 
 ${
   stage !== 1 && addedInformation
-    ? `## ASSISTANT_ADDED_giINFORMATION
+    ? `## ASSISTANT_ADDED_INFORMATION
 ${addedInformation}`
     : ''
 }
@@ -233,10 +233,7 @@ ${replyMessage}`);
       continue;
     }
 
-    const {
-      firstName = '',
-      lastName = '',
-    } = recipientFull?.users?.[0] || {};
+    const { firstName = '', lastName = '' } = recipientFull?.users?.[0] || {};
 
     const { language = 'RUSSIAN' } = groupId || { language: 'RUSSIAN' };
 
