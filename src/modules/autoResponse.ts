@@ -237,8 +237,6 @@ ${replyMessage}`);
       continue;
     }
 
-    const { firstName = '', lastName = '' } = recipientFull?.users?.[0] || {};
-
     const { language = 'RUSSIAN' } = groupId || { language: 'RUSSIAN' };
 
     const chatHistory = messages
@@ -247,10 +245,6 @@ ${replyMessage}`);
         message: m.text,
       }))
       .slice(-15) as Array<{ role: 'USER' | 'CHATBOT'; message: string }>;
-    const userName = `${firstName} ${lastName}`
-      .trim()
-      .replace(pattern, '')
-      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
 
     const pingMessage = await makeRequestGpt(
       accountId,
@@ -265,8 +259,7 @@ ${replyMessage}`);
 Maximum length of reminder message 100 characters
 
 ## USER DATA
-FULL DETAILS: ${userName};${aiName ? `\nREAL NAME: ${aiName};` : ''}
-GENDER: ${aiGender || 'couldnt pinpoint'};
+${aiName ? `\nNAME: ${aiName};\nGENDER: ${aiGender}` : ''}
 Today's date is ${getDateNow()};
       
 ## DIALOG
