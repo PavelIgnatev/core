@@ -15,6 +15,23 @@ function trimmer(str: string) {
   return str;
 }
 
+function hasConsecutiveQuestionSentences(text: string): boolean {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  let previousWasQuestion = false;
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
+    if (trimmedSentence.endsWith('?')) {
+      if (previousWasQuestion) {
+        return true;
+      }
+      previousWasQuestion = true;
+    } else {
+      previousWasQuestion = false;
+    }
+  }
+  return false;
+}
+
 function containsIdeographicOrArabic(str: string) {
   const ideographicAndArabicRegex =
     /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
@@ -330,6 +347,12 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply should not contain any references at this stage'
+        );
+      }
+
+      if (hasConsecutiveQuestionSentences(message)) {
+        throw new Error(
+          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
         );
       }
 
