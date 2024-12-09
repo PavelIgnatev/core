@@ -352,7 +352,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
 
       if (hasConsecutiveQuestionSentences(message)) {
         throw new Error(
-          'The answer should not contain 2 consecutive questions. Only 1 question is allowed.'
+          'An answer should contain no more than one question. The use of multiple or consecutive questions in a single answer is strictly prohibited.'
         );
       }
 
@@ -362,12 +362,14 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
 
       if (mandatoryQuestion && !varMessage.includes('?')) {
         throw new Error(
-          'The question in the reply is mandatory. The question was not found. Add a question at the end of the line.'
+          'The question in the reply is mandatory. Add a question at the end of the line.'
         );
       }
 
       if (mandatoryQuestion && varMessage.length < 200) {
-        throw new Error('Minimum reply length 200 characters');
+        throw new Error(
+          'Minimum reply length 200 characters. Make a reply of at least 3 sentences.'
+        );
       }
 
       if (minimalProposalLength > countSentences(varMessage)) {

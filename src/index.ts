@@ -95,9 +95,6 @@ const main = async (ID: string) => {
     for (let i = 0; i < 30; i++) {
       accountsInWork[ID] = i + 1;
 
-      // в метрики засунуть кто виновен в спамблоке какой групп айди
-      // офать итерацию чтобы не заебывало и если осталось парочку акков то приостановка
-
       let timer;
       const timeout = new Promise(
         (_, rej) =>

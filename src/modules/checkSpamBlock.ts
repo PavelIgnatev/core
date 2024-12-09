@@ -43,7 +43,8 @@ export const checkSpamBlock = async (client: any, account: Account) => {
     userId,
     accessHash,
     '/start',
-    accountId
+    accountId,
+    false
   );
 
   const { id: maxId } = sentMessage;

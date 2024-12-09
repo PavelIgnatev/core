@@ -32,24 +32,24 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
-    return;
-  }
+  // if (currentUTCHours < 5 || currentUTCHours > 14) {
+  //   return;
+  // }
 
-  if (!accountId.includes('-prefix-')) {
-    const weekday = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(new Date());
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = new Intl.DateTimeFormat('en-GB', {
+  //     weekday: 'short',
+  //     timeZone: 'UTC',
+  //   }).format(new Date());
 
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime >= remainingTime || true) {
     const recipient = await getRecipient(accountId);
 
     try {
@@ -108,7 +108,7 @@ export const autoSender = async (
       await new Promise((res) => setTimeout(res, 60000));
       const dialog = await getDialogueByGidRid(
         String(id),
-        String(recipient.username)
+        String(recipient.groupId)
       );
 
       if (dialog) {
@@ -123,14 +123,16 @@ GID: ${recipient.groupId}`);
         id,
         accessHash,
         firstMessage,
-        accountId
+        accountId,
+        false
       );
       const sentSecondMessage = await sendMessage(
         client,
         id,
         accessHash,
         secondMessage,
-        accountId
+        accountId,
+        false
       );
       await editFolder(client, String(id), String(accessHash), 1);
       await muteNotification(client, id, accessHash, 2147483647);

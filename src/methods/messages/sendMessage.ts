@@ -5,6 +5,7 @@ import { sendToBot } from '../../helpers/sendToBot';
 import { rmSpLc } from '../../helpers/removeSpacesAndLowerCase';
 import { getAccountById } from '../../db/accounts';
 import { getDialogue } from '../../db/dialogues';
+import { sleep } from '../../helpers/sleep';
 
 function formatDateToUTC(date: Date) {
   const utcDate = new Date(date);
@@ -39,10 +40,29 @@ export const sendMessage = async (
   userId: string,
   accessHash: string,
   message: string,
-  accountId: string
+  accountId: string,
+  withTyping: boolean
 ) => {
   let sentMessage = null;
   try {
+    if (withTyping) {
+      const iterations = Math.ceil(((message.length / 250) * 60 * 1000) / 5000);
+
+      for (let i = 0; i < iterations; i++) {
+        await client.invoke(
+          new GramJs.messages.SetTyping({
+            peer: new GramJs.InputPeerUser({
+              userId: BigInt(userId),
+              accessHash: BigInt(accessHash),
+            }),
+            action: new GramJs.SendMessageTypingAction(),
+          })
+        );
+
+        await sleep(5000);
+      }
+    }
+
     sentMessage = await client.invoke(
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(
@@ -116,12 +136,6 @@ UserId: ${userId}
 Message: ${message}`
       );
     }
-
-    console.error({
-      accountId,
-      message: new Error(`Send Message Error: ${e.message}`),
-      payload: { userId, message, sentMessage: Boolean(sentMessage) },
-    });
 
     throw new Error(e.message);
   }

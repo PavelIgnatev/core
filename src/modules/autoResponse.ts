@@ -39,13 +39,6 @@ export const autoResponse = async (
 
     const groupId = await getGroupId(dialogGroupId);
 
-    const chatHistory = messages
-      .map((m: { id: number; text: string; fromId: string; date: number }) => ({
-        role: m.fromId === String(id) ? 'USER' : 'CHATBOT',
-        message: m.text,
-      }))
-      .slice(-30);
-
     const userName = `${firstName} ${lastName}`
       .trim()
       .replace(pattern, '')
@@ -176,7 +169,8 @@ ${replyMessage}`);
         id,
         accessHash,
         replyMessage.replace(lastQuestion, ''),
-        accountId
+        accountId,
+        true
       );
 
       const sentQuestionMessage = await sendMessage(
@@ -184,7 +178,8 @@ ${replyMessage}`);
         id,
         accessHash,
         lastQuestion,
-        accountId
+        accountId,
+        false
       );
 
       messages.push({
@@ -205,7 +200,8 @@ ${replyMessage}`);
         id,
         accessHash,
         replyMessage,
-        accountId
+        accountId,
+        true
       );
 
       messages.push({
@@ -280,7 +276,8 @@ ${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join('\n')}`,
       id,
       accessHash,
       pingMessage,
-      accountId
+      accountId,
+      true
     );
 
     messages.push({
@@ -314,7 +311,8 @@ ${pingMessage}`);
         id,
         accessHash,
         managerMessage,
-        accountId
+        accountId,
+        true
       );
 
       messages.push({

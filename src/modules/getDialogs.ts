@@ -179,6 +179,16 @@ export const getDialogs = async (client: any, accountId: string) => {
         messages: dialogMessages,
       };
 
+      await client.invoke(
+        new GramJs.messages.ReadHistory({
+          peer: new GramJs.InputPeerUser({
+            userId: BigInt(user.id),
+            accessHash: BigInt(user.accessHash),
+          }),
+          maxId: 100000,
+        })
+      );
+
       if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
         manualDialogs.push(dialogData);
       } else if (dialogIds.includes(dialogId)) {

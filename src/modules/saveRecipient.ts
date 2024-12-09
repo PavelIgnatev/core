@@ -100,15 +100,15 @@ export const saveRecipient = async (
       }
       isSave = true;
     } catch (error: any) {
-      await sendToBot(`** ERROR SAVE RECIPIENT**
-ERROR: ${error.messgae};
+      await sendToBot(`** ERROR SAVE RECIPIENT **
+ERROR: ${error.message};
 accountId: ${accountId};
-recipient: ${recipient};
-recipientDb: ${recipientDb};
-messages: ${messages};
 status: ${status};
-addedData: ${addedData};
-accountByID: ${accountByID};`);
+recipient: ${JSON.stringify(recipient)};
+recipientDb: ${JSON.stringify(recipientDb)};
+messages: ${JSON.stringify(messages)};
+addedData: ${JSON.stringify(addedData)};
+accountByID: ${JSON.stringify(accountByID)};`);
 
       await sleep(3000);
     }
