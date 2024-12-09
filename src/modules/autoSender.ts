@@ -32,24 +32,24 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  // if (currentUTCHours < 5 || currentUTCHours > 14) {
-  //   return;
-  // }
+  if (currentUTCHours < 5 || currentUTCHours > 14) {
+    return;
+  }
 
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = new Intl.DateTimeFormat('en-GB', {
-  //     weekday: 'short',
-  //     timeZone: 'UTC',
-  //   }).format(new Date());
+  if (!accountId.includes('-prefix-')) {
+    const weekday = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(new Date());
 
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     return;
-  //   }
-  // }
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
+  }
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
-  if (currentTime >= remainingTime || true) {
+  if (currentTime >= remainingTime) {
     const recipient = await getRecipient(accountId);
 
     try {
