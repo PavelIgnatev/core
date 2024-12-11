@@ -1,4 +1,5 @@
-import { sendToBot } from '../../helpers/sendToBot';
+import axios from 'axios';
+
 import { sleep } from '../../helpers/sleep';
 
 const defaultFirstMessagePrompt = 'Здравствуйте!';
@@ -14,15 +15,10 @@ export const getRecipient = async (accountId: string) => {
         url.searchParams.append('prefix', accountId.split('-prefix-')[1]);
       }
 
-      const response = await fetch(url.toString());
-      const user = await response.json();
+      const { data: user } = await axios(url.toString());
 
-      if (!user?.groupId || !user?.username) {
-        await sendToBot(
-          `При генерации recipient произошла ошибка: ${JSON.stringify(user)}:${
-            user?.groupId
-          }:${user?.username}`
-        );
+      if (!user) {
+        throw new Error('USER_NOT_DEFINED');
       }
 
       if (!user.firstMessagePrompt) {
@@ -36,9 +32,9 @@ export const getRecipient = async (accountId: string) => {
     } catch (error: any) {
       console.error({
         accountId,
-        message: new Error(`Get recipient error: ${error.message}`),
+        message: new Error(`GET RECIPIENT ERROR: ${error.message}`),
       });
-      await sleep(3000);
+      await sleep(10000);
     }
   }
 };

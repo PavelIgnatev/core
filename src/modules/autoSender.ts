@@ -50,138 +50,139 @@ export const autoSender = async (
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
-    const recipient = await getRecipient(accountId);
+    while (true) {
+      const recipient = await getRecipient(accountId);
 
-    try {
-      const recipientFull = await resolveContact(
-        client,
-        recipient.username,
-        String(recipient.groupId)
-      );
-
-      const {
-        id,
-        accessHash,
-        self,
-        deleted,
-        bot,
-        support,
-        contactRequirePremium,
-        botBusiness,
-        firstName,
-        lastName,
-        username,
-      } = recipientFull.users[0];
-      if (self) {
-        return;
-      }
-
-      if (deleted || bot || support || contactRequirePremium || botBusiness) {
-        await updateFailedMessage(
+      try {
+        const recipientFull = await resolveContact(
+          client,
           recipient.username,
           String(recipient.groupId)
         );
-        return;
-      }
 
-      await deleteMessages(client, id, accessHash);
+        const {
+          id,
+          accessHash,
+          self,
+          deleted,
+          bot,
+          support,
+          contactRequirePremium,
+          botBusiness,
+          firstName,
+          lastName,
+          username,
+        } = recipientFull.users[0];
+        if (self) {
+          throw new Error('SELF_ERROR');
+        }
 
-      let user = null;
-      let firstMessage = generateRandomString(recipient.firstMessagePrompt);
-      const secondMessage = generateRandomString(recipient.secondMessagePrompt);
+        if (deleted || bot || support || contactRequirePremium || botBusiness) {
+          throw new Error('USER_SPECIAL_PARAMS');
+        }
 
-      const greeting = getGreeting(recipient?.language || 'RUSSIAN');
-      if (greeting) {
-        const userInformation = await getUserInformation(
-          `${firstName || ''} ${lastName || ''} ${username || ''}`,
-          recipient.language
+        await deleteMessages(client, id, accessHash);
+
+        let user = null;
+        let firstMessage = generateRandomString(recipient.firstMessagePrompt);
+        const secondMessage = generateRandomString(
+          recipient.secondMessagePrompt
         );
 
-        if (userInformation.aiName) {
-          user = userInformation;
-          firstMessage = `${greeting}, ${userInformation.aiName}!`;
-        } else {
-          firstMessage = `${greeting}!`;
+        const greeting = getGreeting(recipient?.language || 'RUSSIAN');
+        if (greeting) {
+          const userInformation = await getUserInformation(
+            `${firstName || ''} ${lastName || ''} ${username || ''}`,
+            recipient.language
+          );
+
+          if (userInformation.aiName) {
+            user = userInformation;
+            firstMessage = `${greeting}, ${userInformation.aiName}!`;
+          } else {
+            firstMessage = `${greeting}!`;
+          }
         }
-      }
 
-      await new Promise((res) => setTimeout(res, 60000));
-      const dialog = await getDialogueByGidRid(
-        String(id),
-        String(recipient.groupId)
-      );
+        const dialog = await getDialogueByGidRid(
+          String(id),
+          String(recipient.groupId)
+        );
 
-      if (dialog) {
-        await sendToBot(`** ПРЕДОТВРАЩЕНИЕ ПОВТОРНОЙ ОТПРАВКИ **
+        if (dialog) {
+          await sendToBot(`** ПРЕДОТВРАЩЕНИЕ ПОВТОРНОЙ ОТПРАВКИ **
 RID: ${id}
 GID: ${recipient.groupId}`);
-        return;
-      }
+          throw new Error('DIALOG_DUPLICATE');
+        }
 
-      const sentFirstMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        firstMessage,
-        accountId,
-        false
-      );
-      const sentSecondMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        secondMessage,
-        accountId,
-        false
-      );
-      await editFolder(client, String(id), String(accessHash), 1);
-      await muteNotification(client, id, accessHash, 2147483647);
-      await saveRecipient(
-        accountId,
-        recipientFull,
-        { ...recipient, ...user },
-        [
-          {
-            id: sentFirstMessage.id,
-            text: firstMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1000),
-          },
-          {
-            id: sentSecondMessage.id,
-            text: secondMessage,
-            fromId: String(tgAccountId),
-            date: Math.round(Date.now() / 1000),
-          },
-        ],
-        'create',
-        {},
-        accountByID
-      );
-    } catch (e: any) {
-      if (
-        ![
-          'PEER_FLOOD',
-          'PHONE_NOT_OCCUPIED',
-          'USERNAME_NOT_OCCUPIED',
-          'USERNAME_INVALID',
-          'MESSAGE_ERROR',
-        ].includes(e.message)
-      ) {
-        await sendToBot(`Username: ${recipient.username}; Error: ${e.message}`);
-      }
-
-      if (
-        !e.message.includes('PEER_FLOOD') &&
-        !e.message.includes('MESSAGE_ERROR')
-      ) {
-        await updateFailedMessage(
-          recipient.username,
-          String(recipient.groupId)
+        await new Promise((res) => setTimeout(res, 5000));
+        const sentFirstMessage = await sendMessage(
+          client,
+          id,
+          accessHash,
+          firstMessage,
+          accountId,
+          false
         );
-      }
+        const sentSecondMessage = await sendMessage(
+          client,
+          id,
+          accessHash,
+          secondMessage,
+          accountId,
+          false
+        );
+        await editFolder(client, String(id), String(accessHash), 1);
+        await muteNotification(client, id, accessHash, 2147483647);
+        await saveRecipient(
+          accountId,
+          recipientFull,
+          { ...recipient, ...user },
+          [
+            {
+              id: sentFirstMessage.id,
+              text: firstMessage,
+              fromId: String(tgAccountId),
+              date: Math.round(Date.now() / 1000),
+            },
+            {
+              id: sentSecondMessage.id,
+              text: secondMessage,
+              fromId: String(tgAccountId),
+              date: Math.round(Date.now() / 1000),
+            },
+          ],
+          'create',
+          {},
+          accountByID
+        );
+        break;
+      } catch (e: any) {
+        if (
+          [
+            'PHONE_NOT_OCCUPIED',
+            'USERNAME_NOT_OCCUPIED',
+            'USERNAME_INVALID',
+            'USER_SPECIAL_PARAMS',
+            'DIALOG_DUPLICATE',
+          ].includes(e.message)
+        ) {
+          await updateFailedMessage(
+            recipient.username,
+            String(recipient.groupId)
+          );
+          continue;
+        }
 
-      throw new Error('Global Error');
+        if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
+          await sendToBot(`** AUTO SENDER ERROR **
+USER DATA: ${recipient.username};
+ERROR: ${e.message}`);
+        }
+
+        throw new Error('Global Error');
+      }
     }
   }
 };

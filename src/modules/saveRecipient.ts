@@ -94,7 +94,6 @@ export const saveRecipient = async (
         }
 
         await updateSendMessage(recipientDb.username, String(groupId));
-
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
