@@ -81,6 +81,15 @@ export const autoSender = async (
           throw new Error('USER_SPECIAL_PARAMS');
         }
 
+        const dialog = await getDialogueByGidRid(
+          String(id),
+          String(recipient.groupId)
+        );
+
+        if (dialog) {
+          throw new Error('DIALOG_DUPLICATE');
+        }
+
         await deleteMessages(client, id, accessHash);
 
         let user = null;
@@ -102,18 +111,6 @@ export const autoSender = async (
           } else {
             firstMessage = `${greeting}!`;
           }
-        }
-
-        const dialog = await getDialogueByGidRid(
-          String(id),
-          String(recipient.groupId)
-        );
-
-        if (dialog) {
-          await sendToBot(`** ПРЕДОТВРАЩЕНИЕ ПОВТОРНОЙ ОТПРАВКИ **
-RID: ${id}
-GID: ${recipient.groupId}`);
-          throw new Error('DIALOG_DUPLICATE');
         }
 
         await new Promise((res) => setTimeout(res, 5000));
