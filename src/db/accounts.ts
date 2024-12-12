@@ -46,33 +46,3 @@ export const incrementMessageCount = async (accountId: string) => {
     }
   );
 };
-
-export const getTotalAccounts = async () => {
-  const accountCollection = await getAccountCollection();
-
-  const totalAccounts = await accountCollection.countDocuments();
-
-  return totalAccounts;
-};
-
-export const stopAccountsByPrefix = async (prefix: string) => {
-  const accountCollection = await getAccountCollection();
-
-  const accountIds = await accountCollection.distinct('accountId', {
-    banned: { $ne: true },
-    stopped: { $ne: true },
-  });
-
-  const filteredAccountIds = accountIds.filter((accountId: string) =>
-    accountId.includes(prefix)
-  );
-
-  if (filteredAccountIds.length > 0) {
-    await accountCollection.updateMany(
-      { accountId: { $in: filteredAccountIds } },
-      { $set: { stopped: true } }
-    );
-  }
-
-  return filteredAccountIds;
-};

@@ -57,6 +57,19 @@ export const getBlockedIds = async (accountId: string) => {
 
 export const getDialogs = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
+  // await dialoguesCollection.createIndex({
+  //   accountId: 1,
+  //   step: 1,
+  //   ping: 1,
+  //   groupId: 1,
+  //   recipientId: 1,
+  //   stopped: 1,
+  //   blocked: 1,
+  //   dateUpdated: 1,
+  //   dateCreated: 1,
+  //   managerMessage: 1,
+  //   automaticReason: 1,
+  // });
 
   const dialogues = await dialoguesCollection
     .find<{
@@ -84,20 +97,6 @@ export const getDialogs = async (accountId: string) => {
     .toArray();
 
   return dialogues;
-};
-
-export const getDialogueByMessageId = async (
-  accountId: string,
-  messageIds: number[]
-) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  const dialogue = await dialoguesCollection.findOne<Dialogue>({
-    accountId,
-    messages: { $elemMatch: { id: { $in: messageIds } } },
-  });
-
-  return dialogue;
 };
 
 export const getRecipientUsernameAndPhone = async (
@@ -147,26 +146,6 @@ export const getPingDialogues = async (accountId: string) => {
       blocked: { $ne: true },
       dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
       dateCreated: { $gte: oneWeekAgo },
-    })
-    .toArray();
-
-  return pingDialogs;
-};
-
-export const getGlobalCheckDialogues = async (accountId: string) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  const twentyFiveHoursAgo = new Date();
-  twentyFiveHoursAgo.setHours(twentyFiveHoursAgo.getHours() - 25);
-
-  const fortyEightHoursAgo = new Date();
-  fortyEightHoursAgo.setHours(fortyEightHoursAgo.getHours() - 48);
-
-  const pingDialogs = await dialoguesCollection
-    .find<Dialogue>({
-      accountId,
-      dateUpdated: { $gte: fortyEightHoursAgo, $lte: twentyFiveHoursAgo },
-      globalCheck: { $ne: true },
     })
     .toArray();
 
