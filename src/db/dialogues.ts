@@ -57,19 +57,6 @@ export const getBlockedIds = async (accountId: string) => {
 
 export const getDialogs = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
-  // await dialoguesCollection.createIndex({
-  //   accountId: 1,
-  //   step: 1,
-  //   ping: 1,
-  //   groupId: 1,
-  //   recipientId: 1,
-  //   stopped: 1,
-  //   blocked: 1,
-  //   dateUpdated: 1,
-  //   dateCreated: 1,
-  //   managerMessage: 1,
-  //   automaticReason: 1,
-  // });
 
   const dialogues = await dialoguesCollection
     .find<{
