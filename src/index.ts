@@ -90,9 +90,9 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 20);
+    const randomI = Math.floor(Math.random() * 40);
 
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 40; i++) {
       accountsInWork[ID] = i + 1;
 
       let timer;
