@@ -36,7 +36,7 @@ export const getUserInformation = async (
     .toLowerCase()
     .trim();
 
-  if (!content) {
+  if (content.length < 2) {
     return { aiName: null, aiGender: null };
   }
 
