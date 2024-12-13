@@ -33,6 +33,7 @@ export const getUserInformation = async (
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, ' ')
     .replace(/\s+/g, ' ')
+    .toLowerCase()
     .trim();
 
   const processRequest = async () => {
