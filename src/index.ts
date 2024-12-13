@@ -90,9 +90,9 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 26);
+    const randomI = Math.floor(Math.random() * 20);
 
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 20; i++) {
       accountsInWork[ID] = i + 1;
 
       let timer;
@@ -101,9 +101,9 @@ const main = async (ID: string) => {
           (timer = setTimeout(
             () =>
               rej(
-                new Error(`Iteration [${i + 1}] took longer than 30 minutes.`)
+                new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
               ),
-            1800000
+            900000
           ))
       );
 
