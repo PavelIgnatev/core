@@ -36,6 +36,10 @@ export const getUserInformation = async (
     .toLowerCase()
     .trim();
 
+  if (!content) {
+    return { aiName: null, aiGender: null };
+  }
+
   const processRequest = async () => {
     for (let i = 0; i < 5; i++) {
       try {
