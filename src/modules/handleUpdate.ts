@@ -1,6 +1,6 @@
 import GramJs from '../common/gramjs/tl/api';
 
-import { getDialogue } from '../db/dialogues';
+import { getDialogue, updateDialogue } from '../db/dialogues';
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -49,6 +49,22 @@ export const handleUpdate = async (
       const dialog = await getDialogue(accountId, String(userId));
       if (dialog && !dialog.reason && !dialog.automaticReason) {
         onNewMessage();
+      }
+    }
+  } else if (
+    update instanceof GramJs.UpdateReadHistoryOutbox ||
+    update instanceof GramJs.UpdateReadHistoryInbox
+  ) {
+    if (userId && update.maxId) {
+      const dialog = await getDialogue(accountId, String(userId));
+      const messages = dialog?.messages || [];
+
+      if (messages[messages.length - 1].id === update.maxId) {
+        await updateDialogue({
+          accountId,
+          recipientId: String(userId),
+          read: true,
+        } as any);
       }
     }
   }

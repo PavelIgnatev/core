@@ -49,7 +49,7 @@ export const autoSender = async (
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
-  if (currentTime >= remainingTime) {
+  if (currentTime >= remainingTime || true) {
     while (true) {
       const recipient = await getRecipient(accountId);
 
