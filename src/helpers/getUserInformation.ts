@@ -120,7 +120,7 @@ RESULT: ${JSON.stringify({ name: null, gender: null })}`);
   };
 
   try {
-    return await withTimeout(processRequest(), 180000);
+    return await withTimeout(processRequest(), 300000);
   } catch {
     await sendToNameBot(`DATA: ${content} (ERROR)
 RESULT: ${JSON.stringify({ name: null, gender: null })}`);
