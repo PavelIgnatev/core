@@ -20,7 +20,7 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
 
-import { peerFloods } from './helpers/global';
+import { iterationErrors, peerFloods, reconnectErrors } from './helpers/global';
 
 import './helpers/setConsole.log';
 
@@ -83,6 +83,7 @@ const main = async (ID: string) => {
           accountId: ID,
           message: 'Reconnect due to set offline',
         });
+        reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
 
         client?._sender?.reconnect();
       }
@@ -230,11 +231,15 @@ getAccounts().then(async (accounts) => {
     }
 
     console.log({
-      message: `💥 ITERATION DONE (${timeString}) 💥
-КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}`,
+      message: `💥 ITERATION DONE (${timeString}) 💥`,
       peerFloods,
+      reconnectErrors,
+      iterationErrors,
     });
-    await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
+    await sendToBot(`💥 ITERATION DONE (${timeString}) 💥
+КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}
+КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
+КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);
     await sleep(120000);
     process.exit(1);

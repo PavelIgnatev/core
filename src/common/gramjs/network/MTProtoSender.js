@@ -30,6 +30,7 @@ const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 const { sendToBot } = require('../../../helpers/sendToBot');
+const { iterationErrors } = require('../../../helpers/global');
 
 /**
  * MTProto Mobile Protocol sender
@@ -207,6 +208,9 @@ class MTProtoSender {
           accountId: this._accountId,
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
+        iterationErrors[this._accountId] =
+          (iterationErrors[this._accountId] || 0) + 1;
+
         // eslint-disable-next-line no-console
 
         await Helpers.sleep(1000);
