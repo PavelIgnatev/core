@@ -86,10 +86,6 @@ export const autoSender = async (
         );
 
         if (dialog) {
-          await sendToBot(`** DIALOG_DUPLICATE **
-USER: ${recipient.username}
-RID: ${id}
-GID: ${String(recipient.groupId)}`);
           throw new Error('DIALOG_DUPLICATE');
         }
 

@@ -1,9 +1,5 @@
-const { Mutex } = require('async-mutex');
-const fetch = require('node-fetch');
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
-
-const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
@@ -45,19 +41,6 @@ class PromisedWebSockets {
         this.resolveRead = resolve;
       });
     }
-
-    return toReturn;
-  }
-
-  async readAll() {
-    if (this.closed || !(await this.canRead)) {
-      throw closeError;
-    }
-    const toReturn = this.stream;
-    this.stream = Buffer.alloc(0);
-    this.canRead = new Promise((resolve) => {
-      this.resolveRead = resolve;
-    });
 
     return toReturn;
   }
@@ -141,15 +124,8 @@ class PromisedWebSockets {
 
   receive() {
     this.client.onmessage = async (message) => {
-      await mutex.runExclusive(async () => {
-        const data =
-          message.data instanceof ArrayBuffer
-            ? Buffer.from(message.data)
-            : Buffer.from(await new fetch.Response(message.data).arrayBuffer());
-
-        this.stream = Buffer.concat([this.stream, data]);
-        this.resolveRead(true);
-      });
+      this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
+      this.resolveRead(true);
     };
   }
 }
