@@ -6,6 +6,7 @@ import { rmSpLc } from '../../helpers/removeSpacesAndLowerCase';
 import { getAccountById } from '../../db/accounts';
 import { getDialogue } from '../../db/dialogues';
 import { sleep } from '../../helpers/sleep';
+import { peerFloods } from '../../helpers/global';
 
 function formatDateToUTC(date: Date) {
   const utcDate = new Date(date);
@@ -102,32 +103,36 @@ export const sendMessage = async (
 
     return sentMessage;
   } catch (e: any) {
-    if (e.message === 'PEER_FLOOD' && message.length > 30) {
-      const fullAccount = await getAccountById(accountId);
-      const dialog = await getDialogue(accountId, String(userId));
-      const createdDateFormatted = dialog?.dateCreated
-        ? formatDateToUTC(dialog.dateCreated)
-        : 'N/A';
-      const updatedDateFormatted = dialog?.dateUpdated
-        ? formatDateToUTC(dialog.dateUpdated)
-        : 'N/A';
-      const spamBlockDateFormatted =
-        fullAccount?.spamBlockDate && fullAccount.spamBlockDate !== 'INFINITY'
-          ? formatDateToUTC(fullAccount.spamBlockDate)
-          : fullAccount?.spamBlockDate &&
-              fullAccount.spamBlockDate === 'INFINITY'
-            ? 'INFINITY'
-            : 'N/A';
+    if (e.message === 'PEER_FLOOD') {
+      if (message.length > 30) {
+        const fullAccount = await getAccountById(accountId);
+        const dialog = await getDialogue(accountId, String(userId));
+        const createdDateFormatted = dialog?.dateCreated
+          ? formatDateToUTC(dialog.dateCreated)
+          : 'N/A';
+        const updatedDateFormatted = dialog?.dateUpdated
+          ? formatDateToUTC(dialog.dateUpdated)
+          : 'N/A';
+        const spamBlockDateFormatted =
+          fullAccount?.spamBlockDate && fullAccount.spamBlockDate !== 'INFINITY'
+            ? formatDateToUTC(fullAccount.spamBlockDate)
+            : fullAccount?.spamBlockDate &&
+                fullAccount.spamBlockDate === 'INFINITY'
+              ? 'INFINITY'
+              : 'N/A';
 
-      await sendToBot(
-        `*** ${e.message} ***
+        await sendToBot(
+          `*** ${e.message} ***
 QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
 MESSAGE: ${message}
 
 SPAMBLOCK DATE: ${spamBlockDateFormatted}
 DIALOG CREATED DATE: ${createdDateFormatted}
 DIALOG UPDATED DATE: ${updatedDateFormatted}`
-      );
+        );
+      } else {
+        peerFloods[accountId] = (peerFloods[accountId] || 0) + 1;
+      }
     } else {
       await sendToBot(
         `*** ${e.message} ***

@@ -20,6 +20,8 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
 
+import { peerFloods } from './helpers/global';
+
 import './helpers/setConsole.log';
 
 const exec = util.promisify(childExec);
@@ -227,7 +229,11 @@ getAccounts().then(async (accounts) => {
       timeString = `${seconds}s`;
     }
 
-    console.log({ message: `💥 ITERATION DONE (${timeString}) 💥` });
+    console.log({
+      message: `💥 ITERATION DONE (${timeString}) 💥
+КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}`,
+      peerFloods,
+    });
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥`);
     clearInterval(interval);
     await sleep(120000);
