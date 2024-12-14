@@ -214,6 +214,9 @@ getAccounts().then(async (accounts) => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
       accountsInWork,
+      peerFloods,
+      reconnectErrors,
+      iterationErrors,
     });
   }, 60000);
 
