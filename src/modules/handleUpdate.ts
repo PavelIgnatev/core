@@ -57,9 +57,17 @@ export const handleUpdate = async (
   ) {
     if (userId && update.maxId) {
       const dialog = await getDialogue(accountId, String(userId));
-      const messages = dialog?.messages || [];
 
-      if (messages[messages.length - 1].id === update.maxId) {
+      if (
+        !dialog ||
+        !dialog.messages ||
+        !Array.isArray(dialog.messages) ||
+        !dialog.messages.length
+      ) {
+        return;
+      }
+
+      if (dialog.messages[dialog.messages.length - 1].id === update.maxId) {
         await updateDialogue({
           accountId,
           recipientId: String(userId),
