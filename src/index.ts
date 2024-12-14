@@ -250,6 +250,7 @@ Error: ${err.message}`);
 process.on('unhandledRejection', async (reason, promise) => {
   await sendToBot(`**** UnhandledRejection ****
 Reason: ${reason}
-Promise: ${promise}`);
+Promise: ${JSON.stringify(promise)}`);
+  console.error({ message: `**** UnhandledRejection ****`, reason, promise });
   process.exit(1);
 });

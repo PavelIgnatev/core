@@ -39,7 +39,5 @@ export const sendToSpamBot = async (text: string) => {
         await sendToBotByChatIdText(chatId, text);
       })
     );
-  } catch (e) {
-    console.log(e);
-  }
+  } catch {}
 };
