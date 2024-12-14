@@ -104,7 +104,9 @@ export const sendMessage = async (
     return sentMessage;
   } catch (e: any) {
     if (e.message === 'PEER_FLOOD') {
-      if (message.length > 30) {
+      if (message.length <= 30) {
+        peerFloods[accountId] = (peerFloods[accountId] || 0) + 1;
+      } else {
         const fullAccount = await getAccountById(accountId);
         const dialog = await getDialogue(accountId, String(userId));
         const createdDateFormatted = dialog?.dateCreated
@@ -130,8 +132,6 @@ SPAMBLOCK DATE: ${spamBlockDateFormatted}
 DIALOG CREATED DATE: ${createdDateFormatted}
 DIALOG UPDATED DATE: ${updatedDateFormatted}`
         );
-      } else {
-        peerFloods[accountId] = (peerFloods[accountId] || 0) + 1;
       }
     } else {
       await sendToBot(
