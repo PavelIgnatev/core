@@ -244,6 +244,7 @@ getAccounts().then(async (accounts) => {
 process.on('uncaughtException', async (err) => {
   await sendToBot(`**** UncaughtException ****
 Error: ${err.message}`);
+  console.error({ message: `**** UncaughtException ****`, erorr: err });
   process.exit(1);
 });
 
