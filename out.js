@@ -52187,7 +52187,7 @@ var require_PromisedWebSockets = __commonJS({
     var { HttpsProxyAgent } = require_dist3();
     var { WebSocket } = require_ws();
     var closeError = new Error("WebSocket was closed");
-    var CONNECTION_TIMEOUT = 3e3;
+    var CONNECTION_TIMEOUT = 15e3;
     var MAX_TIMEOUT = 3e4;
     var PromisedWebSockets = class {
       constructor(disconnectedCallback) {
