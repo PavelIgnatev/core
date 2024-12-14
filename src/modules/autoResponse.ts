@@ -86,7 +86,9 @@ CONTEXT: You handle cold traffic, conducting unsolicited outreach to potential c
 
 ## ROLE <USER>
 FULL DETAILS: ${userName};${aiName ? `\nREAL NAME: ${aiName};` : ''}
-GENDER: ${aiGender || 'couldnt pinpoint'};${about ? `\nBIO: ${about}` : ''}
+GENDER: ${aiGender || 'couldnt pinpoint'};${
+            about ? `\nBIO: ${about.replace(pattern, '')}` : ''
+          }
 CONTEXT: A genuine individual who has never interacted with the assistant before and is unfamiliar with the assistant's role (role <ASSISTANT>). He or she is receiving a message from the role assistant for the first time and has no prior knowledge of your products.
 
 ## GUIDELINES FOR <ASSISTANT> RESPONSE
