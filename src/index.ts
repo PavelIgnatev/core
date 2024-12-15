@@ -20,7 +20,14 @@ import { autoSender } from './modules/autoSender';
 import { handleUpdate } from './modules/handleUpdate';
 import { automaticCheck } from './modules/automaticCheck';
 
-import { iterationErrors, peerFloods, reconnectErrors } from './helpers/global';
+import {
+  endSender,
+  errorSender,
+  iterationErrors,
+  peerFloods,
+  reconnectErrors,
+  startSender,
+} from './helpers/global';
 
 import './helpers/setConsole.log';
 
@@ -240,6 +247,9 @@ getAccounts().then(async (accounts) => {
       iterationErrors,
     });
     await sendToBot(`💥 ITERATION DONE (${timeString}) 💥
+ИНИЦИИРОВАНО ОТПРАВОК: ${Object.keys(startSender).length}
+ПОДТВЕРЖДЕНО ОТПРАВОК: ${Object.keys(endSender).length}
+КОЛИЧЕСТВО ОШИБОК: ${Object.keys(errorSender).length}
 КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}
 КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);

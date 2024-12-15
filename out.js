@@ -46394,17 +46394,23 @@ var require_updates = __commonJS({
 // src/helpers/global.ts
 var global_exports = {};
 __export(global_exports, {
+  endSender: () => endSender,
+  errorSender: () => errorSender,
   iterationErrors: () => iterationErrors,
   peerFloods: () => peerFloods,
-  reconnectErrors: () => reconnectErrors
+  reconnectErrors: () => reconnectErrors,
+  startSender: () => startSender
 });
-var peerFloods, reconnectErrors, iterationErrors;
+var reconnectErrors, iterationErrors, startSender, endSender, errorSender, peerFloods;
 var init_global = __esm({
   "src/helpers/global.ts"() {
     "use strict";
-    peerFloods = {};
     reconnectErrors = {};
     iterationErrors = {};
+    startSender = {};
+    endSender = {};
+    errorSender = {};
+    peerFloods = {};
   }
 });
 
@@ -80188,7 +80194,6 @@ var rmSpLc = (str) => {
 };
 
 // src/methods/messages/sendMessage.ts
-init_global();
 function formatDateToUTC(date) {
   const utcDate = new Date(date);
   return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(
@@ -80269,9 +80274,7 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     return sentMessage;
   } catch (e) {
     if (e.message === "PEER_FLOOD") {
-      if (message.length <= 30) {
-        peerFloods[accountId] = (peerFloods[accountId] || 0) + 1;
-      } else {
+      if (message.length > 30) {
         const fullAccount = await getAccountById(accountId);
         const dialog = await getDialogue(accountId, String(userId));
         const createdDateFormatted = (dialog == null ? void 0 : dialog.dateCreated) ? formatDateToUTC(dialog.dateCreated) : "N/A";
@@ -81014,6 +81017,7 @@ var getGreeting = (language) => {
 };
 
 // src/modules/autoSender.ts
+init_global();
 var autoSender = async (client, accountId, tgAccountId) => {
   const accountByID = await getAccountById(accountId);
   if (!accountByID) {
@@ -81039,6 +81043,7 @@ var autoSender = async (client, accountId, tgAccountId) => {
   }
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
   if (currentTime >= remainingTime) {
+    startSender[accountId] = 1;
     while (true) {
       const recipient = await getRecipient(accountId);
       try {
@@ -81132,8 +81137,10 @@ var autoSender = async (client, accountId, tgAccountId) => {
           {},
           accountByID
         );
+        endSender[accountId] = 1;
         break;
       } catch (e) {
+        errorSender[accountId] = 1;
         if ([
           "PHONE_NOT_OCCUPIED",
           "USERNAME_NOT_OCCUPIED",
@@ -81146,6 +81153,9 @@ var autoSender = async (client, accountId, tgAccountId) => {
             String(recipient.groupId)
           );
           continue;
+        }
+        if (e.message.includes("PEER_FLOOD")) {
+          peerFloods[accountId] = 1;
         }
         if (!["PEER_FLOOD", "MESSAGE_ERROR"].includes(e.message)) {
           await sendToBot(`** AUTO SENDER ERROR **
@@ -81675,6 +81685,9 @@ getAccounts().then(async (accounts) => {
       iterationErrors
     });
     await sendToBot(`\u{1F4A5} ITERATION DONE (${timeString}) \u{1F4A5}
+\u0418\u041D\u0418\u0426\u0418\u0418\u0420\u041E\u0412\u0410\u041D\u041E \u041E\u0422\u041F\u0420\u0410\u0412\u041E\u041A: ${Object.keys(startSender).length}
+\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E \u041E\u0422\u041F\u0420\u0410\u0412\u041E\u041A: ${Object.keys(endSender).length}
+\u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E \u041E\u0428\u0418\u0411\u041E\u041A: ${Object.keys(errorSender).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E PEER FLOOD: ${Object.keys(peerFloods).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);

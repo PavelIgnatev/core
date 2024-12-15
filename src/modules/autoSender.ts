@@ -13,6 +13,12 @@ import { getAccountById } from '../db/accounts';
 import { getUserInformation } from '../helpers/getUserInformation';
 import { getGreeting } from '../helpers/getGreetings';
 import { getDialogueByGidRid } from '../db/dialogues';
+import {
+  endSender,
+  startSender,
+  errorSender,
+  peerFloods,
+} from '../helpers/global';
 
 export const autoSender = async (
   client: any,
@@ -50,6 +56,7 @@ export const autoSender = async (
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
   if (currentTime >= remainingTime) {
+    startSender[accountId] = 1;
     while (true) {
       const recipient = await getRecipient(accountId);
 
@@ -153,8 +160,10 @@ export const autoSender = async (
           {},
           accountByID
         );
+        endSender[accountId] = 1;
         break;
       } catch (e: any) {
+        errorSender[accountId] = 1;
         if (
           [
             'PHONE_NOT_OCCUPIED',
@@ -169,6 +178,10 @@ export const autoSender = async (
             String(recipient.groupId)
           );
           continue;
+        }
+
+        if (e.message.includes('PEER_FLOOD')) {
+          peerFloods[accountId] = 1;
         }
 
         if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
