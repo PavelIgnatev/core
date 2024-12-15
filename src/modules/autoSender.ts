@@ -163,7 +163,6 @@ export const autoSender = async (
         endSender[accountId] = 1;
         break;
       } catch (e: any) {
-        errorSender[accountId] = 1;
         if (
           [
             'PHONE_NOT_OCCUPIED',
@@ -179,6 +178,7 @@ export const autoSender = async (
           );
           continue;
         }
+        errorSender[accountId] = 1;
 
         if (e.message.includes('PEER_FLOOD')) {
           peerFloods[accountId] = 1;
