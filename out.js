@@ -75954,7 +75954,8 @@ var getDialogs = async (accountId) => {
         blocked: 1,
         automaticReason: 1,
         read: 1,
-        reason: 1
+        reason: 1,
+        lastOnline: 1
       }
     }
   ).toArray();
@@ -76027,7 +76028,7 @@ var updateDialogue = async (dialogue) => {
     }
   );
 };
-var updateAutomaticDialogueWithoutReason = async (accountId, recipientId, additionalData) => {
+var updateSingleDialogue = async (accountId, recipientId, additionalData) => {
   const dialoguesCollection = await getDialoguesCollection();
   await dialoguesCollection.updateOne(
     {
@@ -81179,7 +81180,20 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
   if (!update) {
     return;
   }
-  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus") {
+  const userId = findValue(update, "userId");
+  if (userId && update instanceof import_api18.default.UpdateUserStatus) {
+    if (update.status instanceof import_api18.default.UserStatusOffline) {
+      await updateSingleDialogue(accountId, String(userId), {
+        lastOnline: update.status.wasOnline
+      });
+    }
+    if (update.status instanceof import_api18.default.UserStatusOnline) {
+      await updateSingleDialogue(accountId, String(userId), {
+        lastOnline: update.status.expires
+      });
+    }
+  }
+  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat")) {
     if (process.env.DEV !== "true") {
       return;
     }
@@ -81189,7 +81203,6 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
-  const userId = findValue(update, "userId");
   if (update instanceof import_api18.default.UpdateNewMessage || update instanceof import_api18.default.UpdateShortMessage) {
     if (userId) {
       const dialog = await getDialogue(accountId, String(userId));
@@ -81390,7 +81403,7 @@ OFFSET DATE: ${offsetDate}`);
           accountId,
           userId
         );
-        if (!missingDialog) {
+        if (!missingDialog || !missingDialog.recipientPhone || !missingDialog.recipientUsername) {
           await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 RECIPIENT ID: ${userId}`);
@@ -81453,9 +81466,19 @@ RECIPIENT ID: ${userId}`);
             userId,
             "automatic:manual-blocked"
           );
+        } else {
+          const dialogDB = dialogs.find(
+            (d) => String(d.recipientId) === String(userId)
+          );
+          const lastOnline = !user.status || user.status instanceof import_api19.default.UserStatusRecently || user.status instanceof import_api19.default.UserStatusEmpty || user.status instanceof import_api19.default.UserStatusLastMonth || user.status instanceof import_api19.default.UserStatusLastWeek ? null : user.status instanceof import_api19.default.UserStatusOffline ? user.status.wasOnline : user.status.expires;
+          if (lastOnline !== (dialogDB == null ? void 0 : dialogDB.lastOnline)) {
+            await updateSingleDialogue(accountId, userId, {
+              lastOnline
+            });
+          }
         }
         if (dialog && dialog instanceof import_api19.default.Dialog && (dialog.topMessage <= dialog.readOutboxMaxId || dialog.topMessage <= dialog.readInboxMaxId) && !readIds.includes(userId)) {
-          await updateAutomaticDialogueWithoutReason(accountId, userId, {
+          await updateSingleDialogue(accountId, userId, {
             read: true
           });
         }

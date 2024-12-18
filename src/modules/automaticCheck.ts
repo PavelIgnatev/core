@@ -8,7 +8,7 @@ import {
   getDialogs,
   getRecipientUsernameAndPhone,
   updateAutomaticDialogue,
-  updateAutomaticDialogueWithoutReason,
+  updateSingleDialogue,
   updateDateCheckedIds,
 } from '../db/dialogues';
 import { editFolder } from '../methods/folders/editFolder';
@@ -35,7 +35,6 @@ export const automaticCheck = async (
     let offsetDate = 0;
 
     const dialogs = await getDialogs(accountId);
-
     const dialogsWithoutReasonIds = dialogs
       .filter((d) => !d.automaticReason)
       .map((d) => d.recipientId);
@@ -162,7 +161,11 @@ OFFSET DATE: ${offsetDate}`);
           accountId,
           userId
         );
-        if (!missingDialog) {
+        if (
+          !missingDialog ||
+          !missingDialog.recipientPhone ||
+          !missingDialog.recipientUsername
+        ) {
           await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 RECIPIENT ID: ${userId}`);
@@ -234,6 +237,26 @@ RECIPIENT ID: ${userId}`);
             userId,
             'automatic:manual-blocked'
           );
+        } else {
+          const dialogDB = dialogs.find(
+            (d) => String(d.recipientId) === String(userId)
+          );
+          const lastOnline =
+            !user.status ||
+            user.status instanceof GramJs.UserStatusRecently ||
+            user.status instanceof GramJs.UserStatusEmpty ||
+            user.status instanceof GramJs.UserStatusLastMonth ||
+            user.status instanceof GramJs.UserStatusLastWeek
+              ? null
+              : user.status instanceof GramJs.UserStatusOffline
+                ? user.status.wasOnline
+                : user.status.expires;
+
+          if (lastOnline !== dialogDB?.lastOnline) {
+            await updateSingleDialogue(accountId, userId, {
+              lastOnline,
+            });
+          }
         }
 
         if (
@@ -243,7 +266,7 @@ RECIPIENT ID: ${userId}`);
             dialog.topMessage <= dialog.readInboxMaxId) &&
           !readIds.includes(userId)
         ) {
-          await updateAutomaticDialogueWithoutReason(accountId, userId, {
+          await updateSingleDialogue(accountId, userId, {
             read: true,
           });
         }

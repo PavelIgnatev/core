@@ -1,6 +1,10 @@
 import GramJs from '../common/gramjs/tl/api';
 
-import { getDialogue, updateDialogue } from '../db/dialogues';
+import {
+  getDialogue,
+  updateDialogue,
+  updateSingleDialogue,
+} from '../db/dialogues';
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -24,9 +28,26 @@ export const handleUpdate = async (
     return;
   }
 
+  const userId = findValue(update, 'userId');
+  if (userId && update instanceof GramJs.UpdateUserStatus) {
+    if (update.status instanceof GramJs.UserStatusOffline) {
+      await updateSingleDialogue(accountId, String(userId), {
+        lastOnline: update.status.wasOnline,
+      });
+    }
+    if (update.status instanceof GramJs.UserStatusOnline) {
+      await updateSingleDialogue(accountId, String(userId), {
+        lastOnline: update.status.expires,
+      });
+    }
+  }
+
   if (
     update.className === 'UpdateConnectionState' ||
-    update.className === 'UpdateUserStatus'
+    update.className === 'UpdateUserStatus' ||
+    update.className === 'UpdateUserTyping' ||
+    update.className.toLowerCase().includes('channel') ||
+    update.className.toLowerCase().includes('chat')
   ) {
     if (process.env.DEV !== 'true') {
       return;
@@ -38,8 +59,6 @@ export const handleUpdate = async (
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update)),
   });
-
-  const userId = findValue(update, 'userId');
 
   if (
     update instanceof GramJs.UpdateNewMessage ||

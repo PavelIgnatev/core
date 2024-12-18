@@ -66,6 +66,7 @@ export const getDialogs = async (accountId: string) => {
       blocked?: boolean;
       stopped?: boolean;
       read?: boolean;
+      lastOnline?: number | null;
     }>(
       {
         accountId,
@@ -78,6 +79,7 @@ export const getDialogs = async (accountId: string) => {
           automaticReason: 1,
           read: 1,
           reason: 1,
+          lastOnline: 1,
         },
       }
     )
@@ -177,7 +179,7 @@ export const updateDialogue = async (dialogue: Dialogue) => {
   );
 };
 
-export const updateAutomaticDialogueWithoutReason = async (
+export const updateSingleDialogue = async (
   accountId: string,
   recipientId: string,
   additionalData?: Record<string, unknown>
@@ -197,6 +199,7 @@ export const updateAutomaticDialogueWithoutReason = async (
     }
   );
 };
+
 export const updateAutomaticDialogue = async (
   accountId: string,
   recipientId: string,
