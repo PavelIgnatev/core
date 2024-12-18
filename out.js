@@ -81403,7 +81403,7 @@ OFFSET DATE: ${offsetDate}`);
           accountId,
           userId
         );
-        if (!missingDialog || !missingDialog.recipientPhone || !missingDialog.recipientUsername) {
+        if (!missingDialog || !missingDialog.recipientPhone && !missingDialog.recipientUsername) {
           await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 RECIPIENT ID: ${userId}`);

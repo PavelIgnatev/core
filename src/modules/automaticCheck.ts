@@ -163,8 +163,7 @@ OFFSET DATE: ${offsetDate}`);
         );
         if (
           !missingDialog ||
-          !missingDialog.recipientPhone ||
-          !missingDialog.recipientUsername
+          (!missingDialog.recipientPhone && !missingDialog.recipientUsername)
         ) {
           await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
 ACCOUNT ID: ${accountId}
