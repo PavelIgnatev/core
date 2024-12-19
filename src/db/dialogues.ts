@@ -182,7 +182,7 @@ export const updateDialogue = async (dialogue: Dialogue) => {
 export const updateSingleDialogue = async (
   accountId: string,
   recipientId: string,
-  additionalData?: Record<string, unknown>
+  data: Record<string, unknown>
 ) => {
   const dialoguesCollection = await getDialoguesCollection();
 
@@ -192,10 +192,7 @@ export const updateSingleDialogue = async (
       recipientId,
     },
     {
-      $set: {
-        ...additionalData,
-        dateUpdated: new Date(),
-      },
+      $set: data,
     }
   );
 };

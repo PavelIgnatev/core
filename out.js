@@ -76028,7 +76028,7 @@ var updateDialogue = async (dialogue) => {
     }
   );
 };
-var updateSingleDialogue = async (accountId, recipientId, additionalData) => {
+var updateSingleDialogue = async (accountId, recipientId, data) => {
   const dialoguesCollection = await getDialoguesCollection();
   await dialoguesCollection.updateOne(
     {
@@ -76036,10 +76036,7 @@ var updateSingleDialogue = async (accountId, recipientId, additionalData) => {
       recipientId
     },
     {
-      $set: {
-        ...additionalData,
-        dateUpdated: /* @__PURE__ */ new Date()
-      }
+      $set: data
     }
   );
 };
@@ -81489,7 +81486,8 @@ RECIPIENT ID: ${userId}`);
         }
         if (dialog && dialog instanceof import_api19.default.Dialog && (dialog.topMessage <= dialog.readOutboxMaxId || dialog.topMessage <= dialog.readInboxMaxId) && !readIds.includes(userId)) {
           await updateSingleDialogue(accountId, userId, {
-            read: true
+            read: true,
+            dateUpdated: /* @__PURE__ */ new Date()
           });
         }
       }

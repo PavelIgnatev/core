@@ -267,6 +267,7 @@ RECIPIENT ID: ${userId}`);
         ) {
           await updateSingleDialogue(accountId, userId, {
             read: true,
+            dateUpdated: new Date(),
           });
         }
       }
