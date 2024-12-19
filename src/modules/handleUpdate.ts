@@ -47,7 +47,8 @@ export const handleUpdate = async (
     update.className === 'UpdateUserStatus' ||
     update.className === 'UpdateUserTyping' ||
     update.className.toLowerCase().includes('channel') ||
-    update.className.toLowerCase().includes('chat')
+    update.className.toLowerCase().includes('chat') ||
+    update.className.toLowerCase().includes('group')
   ) {
     if (process.env.DEV !== 'true') {
       return;

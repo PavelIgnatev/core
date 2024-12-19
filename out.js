@@ -81193,7 +81193,7 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
       });
     }
   }
-  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat")) {
+  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat") || update.className.toLowerCase().includes("group")) {
     if (process.env.DEV !== "true") {
       return;
     }
@@ -81585,16 +81585,21 @@ var main = async (ID) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 20);
-    for (let i = 0; i < 20; i++) {
-      accountsInWork[ID] = i + 1;
+    const randomI = Math.floor(Math.random() * 25);
+    let i = -1;
+    while (true) {
+      i += 1;
+      accountsInWork[ID] = i;
+      if (Object.values(accountsInWork).every((n) => n >= 30)) {
+        break;
+      }
       let timer;
       const timeout = new Promise(
         (_, rej) => timer = setTimeout(
           () => rej(
             new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
           ),
-          9e5
+          100
         )
       );
       await Promise.race([
@@ -81611,7 +81616,7 @@ var main = async (ID) => {
         })(),
         timeout
       ]);
-      timer;
+      clearTimeout(timer);
     }
   } catch (e) {
     console.error({
@@ -81655,7 +81660,6 @@ var main = async (ID) => {
       );
     }
   }
-  await sleep2(9e4);
   delete accountsInWork[ID];
   if (setOnlineInterval) {
     clearInterval(setOnlineInterval);
@@ -81716,7 +81720,7 @@ getAccounts().then(async (accounts) => {
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);
-    await sleep2(12e4);
+    await sleep2(1e4);
     process.exit(1);
   });
 });

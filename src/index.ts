@@ -100,10 +100,16 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 20);
+    const randomI = Math.floor(Math.random() * 25);
 
-    for (let i = 0; i < 20; i++) {
-      accountsInWork[ID] = i + 1;
+    let i = -1;
+    while (true) {
+      i += 1;
+      accountsInWork[ID] = i;
+
+      if (Object.values(accountsInWork).every((n) => n >= 30)) {
+        break;
+      }
 
       let timer;
       const timeout = new Promise(
@@ -113,7 +119,7 @@ const main = async (ID: string) => {
               rej(
                 new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
               ),
-            900000
+            100
           ))
       );
 
@@ -133,7 +139,7 @@ const main = async (ID: string) => {
         timeout,
       ]);
 
-      timer;
+      clearTimeout(timer);
     }
   } catch (e: any) {
     console.error({
@@ -180,8 +186,6 @@ const main = async (ID: string) => {
       );
     }
   }
-
-  await sleep(90000);
 
   delete accountsInWork[ID];
 
@@ -254,7 +258,7 @@ getAccounts().then(async (accounts) => {
 КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);
-    await sleep(120000);
+    await sleep(10000);
     process.exit(1);
   });
 });
