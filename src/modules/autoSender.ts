@@ -1,6 +1,6 @@
 import { checkSpamBlock } from './checkSpamBlock';
 import { saveRecipient } from './saveRecipient';
-import { updateFailedMessage } from '../db/groupIdUsers';
+import { updateFailedMessage, updateSendMessage } from '../db/groupIdUsers';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { sendToBot } from '../helpers/sendToBot';
 import { muteNotification } from '../methods/account/muteNotification';
@@ -181,6 +181,13 @@ export const autoSender = async (
         errorSender[accountId] = 1;
 
         if (e.message.includes('PEER_FLOOD')) {
+          await updateSendMessage(
+            recipient.username,
+            String(recipient.groupId),
+            {
+              p: null,
+            }
+          );
           peerFloods[accountId] = 1;
         }
 
@@ -190,7 +197,7 @@ USER DATA: ${recipient.username};
 ERROR: ${e.message}`);
         }
 
-        throw new Error('Global Error');
+        return;
       }
     }
   }

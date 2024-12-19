@@ -17,13 +17,16 @@ export const updateFailedMessage = async (
   );
 };
 
-export const updateSendMessage = async (username: string, groupId: string) => {
+export const updateSendMessage = async (
+  username: string,
+  groupId: string,
+  data: Record<string, unknown>
+) => {
   const messagesCollection = await getGroupIdUsersCollection();
 
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { s: true, p: new Date() } },
+    { $set: data },
     { upsert: true }
   );
 };
-

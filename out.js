@@ -79962,11 +79962,11 @@ var updateFailedMessage = async (username, groupId) => {
     { upsert: true }
   );
 };
-var updateSendMessage = async (username, groupId) => {
+var updateSendMessage = async (username, groupId, data) => {
   const messagesCollection = await getGroupIdUsersCollection();
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { s: true, p: /* @__PURE__ */ new Date() } },
+    { $set: data },
     { upsert: true }
   );
 };
@@ -80031,7 +80031,10 @@ var saveRecipient = async (accountId, recipient, recipientDb, messages, status, 
             multiplier
           });
         }
-        await updateSendMessage(recipientDb.username, String(groupId));
+        await updateSendMessage(recipientDb.username, String(groupId), {
+          s: true,
+          p: /* @__PURE__ */ new Date()
+        });
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
@@ -81157,6 +81160,13 @@ var autoSender = async (client, accountId, tgAccountId) => {
         }
         errorSender[accountId] = 1;
         if (e.message.includes("PEER_FLOOD")) {
+          await updateSendMessage(
+            recipient.username,
+            String(recipient.groupId),
+            {
+              p: null
+            }
+          );
           peerFloods[accountId] = 1;
         }
         if (!["PEER_FLOOD", "MESSAGE_ERROR"].includes(e.message)) {
@@ -81164,7 +81174,7 @@ var autoSender = async (client, accountId, tgAccountId) => {
 USER DATA: ${recipient.username};
 ERROR: ${e.message}`);
         }
-        throw new Error("Global Error");
+        return;
       }
     }
   }
@@ -81516,15 +81526,6 @@ var logger = import_winston.default.createLogger({
     })
   ]
 });
-console.log = (...args) => {
-  logger.info(...args);
-};
-console.error = (...args) => {
-  logger.error(...args);
-};
-console.warn = (...args) => {
-  logger.warn(...args);
-};
 
 // src/index.ts
 var exec = import_util3.default.promisify(import_child_process.exec);
@@ -81585,7 +81586,7 @@ var main = async (ID) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 25);
+    const randomI = Math.floor(Math.random() * 30);
     let i = -1;
     while (true) {
       i += 1;
