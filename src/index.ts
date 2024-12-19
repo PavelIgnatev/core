@@ -111,16 +111,12 @@ const main = async (ID: string) => {
         break;
       }
 
-      let timer;
-      const timeout = new Promise(
-        (_, rej) =>
-          (timer = setTimeout(
-            () =>
-              rej(
-                new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
-              ),
-            900000
-          ))
+      const timeout = new Promise((_, rej) =>
+        setTimeout(
+          () =>
+            rej(new Error(`Iteration [${i + 1}] took longer than 15 minutes`)),
+          900000
+        )
       );
 
       await Promise.race([
@@ -138,8 +134,6 @@ const main = async (ID: string) => {
         })(),
         timeout,
       ]);
-
-      clearTimeout(timer);
     }
   } catch (e: any) {
     console.error({

@@ -81593,12 +81593,9 @@ var main = async (ID) => {
       if (Object.values(accountsInWork).every((n) => n >= 30)) {
         break;
       }
-      let timer;
       const timeout = new Promise(
-        (_, rej) => timer = setTimeout(
-          () => rej(
-            new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
-          ),
+        (_, rej) => setTimeout(
+          () => rej(new Error(`Iteration [${i + 1}] took longer than 15 minutes`)),
           9e5
         )
       );
@@ -81616,7 +81613,6 @@ var main = async (ID) => {
         })(),
         timeout
       ]);
-      clearTimeout(timer);
     }
   } catch (e) {
     console.error({
