@@ -81526,6 +81526,15 @@ var logger = import_winston.default.createLogger({
     })
   ]
 });
+console.log = (...args) => {
+  logger.info(...args);
+};
+console.error = (...args) => {
+  logger.error(...args);
+};
+console.warn = (...args) => {
+  logger.warn(...args);
+};
 
 // src/index.ts
 var exec = import_util3.default.promisify(import_child_process.exec);
