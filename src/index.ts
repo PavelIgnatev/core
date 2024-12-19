@@ -119,7 +119,7 @@ const main = async (ID: string) => {
               rej(
                 new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
               ),
-            100
+            900000
           ))
       );
 

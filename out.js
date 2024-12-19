@@ -81599,7 +81599,7 @@ var main = async (ID) => {
           () => rej(
             new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
           ),
-          100
+          9e5
         )
       );
       await Promise.race([
