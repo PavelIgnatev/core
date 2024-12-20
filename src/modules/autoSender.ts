@@ -194,11 +194,11 @@ export const autoSender = async (
           peerFloods[accountId] = 1;
         }
 
-        // if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
-        await sendToBot(`** AUTO SENDER ERROR **
+        if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
+          await sendToBot(`** AUTO SENDER ERROR **
 USER DATA: ${recipient.username};
 ERROR: ${e.message}`);
-        // }
+        }
 
         return;
       }
