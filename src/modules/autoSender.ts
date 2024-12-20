@@ -48,9 +48,10 @@ export const autoSender = async (
       timeZone: 'UTC',
     }).format(new Date());
 
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
+    //weekday === 'Sat' || weekday === 'Sun'
+    // if (weekday === 'Sat' || weekday === 'Sun') {
+    return;
+    // }
   }
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
