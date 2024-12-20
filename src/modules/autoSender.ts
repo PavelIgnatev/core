@@ -184,6 +184,7 @@ export const autoSender = async (
         errorSender[accountId] = 1;
 
         if (e.message.includes('PEER_FLOOD')) {
+          peerFloods[accountId] = 1;
           await updateSendMessage(
             recipient.username,
             String(recipient.groupId),
@@ -191,7 +192,6 @@ export const autoSender = async (
               p: null,
             }
           );
-          peerFloods[accountId] = 1;
         }
 
         if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
