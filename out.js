@@ -81172,9 +81172,11 @@ var autoSender = async (client, accountId, tgAccountId) => {
           );
           peerFloods[accountId] = 1;
         }
-        await sendToBot(`** AUTO SENDER ERROR **
+        if (!["PEER_FLOOD", "MESSAGE_ERROR"].includes(e.message)) {
+          await sendToBot(`** AUTO SENDER ERROR **
 USER DATA: ${recipient.username};
 ERROR: ${e.message}`);
+        }
         return;
       }
     }
