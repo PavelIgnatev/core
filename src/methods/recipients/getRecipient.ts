@@ -21,6 +21,10 @@ export const getRecipient = async (accountId: string) => {
         throw new Error('USER_NOT_DEFINED');
       }
 
+      if (user === 'GROUP_ID_NOT_DEFINED') {
+        return null;
+      }
+
       if (!user.firstMessagePrompt) {
         user.firstMessagePrompt = defaultFirstMessagePrompt;
       }

@@ -80833,6 +80833,9 @@ var getRecipient = async (accountId) => {
       if (!user) {
         throw new Error("USER_NOT_DEFINED");
       }
+      if (user === "GROUP_ID_NOT_DEFINED") {
+        return null;
+      }
       if (!user.firstMessagePrompt) {
         user.firstMessagePrompt = defaultFirstMessagePrompt;
       }
@@ -81039,13 +81042,18 @@ var autoSender = async (client, accountId, tgAccountId) => {
       weekday: "short",
       timeZone: "UTC"
     }).format(/* @__PURE__ */ new Date());
-    return;
+    if (weekday === "Sat" || weekday === "Sun") {
+      return;
+    }
   }
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
   if (currentTime >= remainingTime) {
     startSender[accountId] = 1;
     while (true) {
       const recipient = await getRecipient(accountId);
+      if (!recipient) {
+        return;
+      }
       try {
         const recipientFull = await resolveContact(
           client,

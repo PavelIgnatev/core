@@ -48,10 +48,9 @@ export const autoSender = async (
       timeZone: 'UTC',
     }).format(new Date());
 
-    //weekday === 'Sat' || weekday === 'Sun'
-    // if (weekday === 'Sat' || weekday === 'Sun') {
-    return;
-    // }
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
   }
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
@@ -60,6 +59,9 @@ export const autoSender = async (
     startSender[accountId] = 1;
     while (true) {
       const recipient = await getRecipient(accountId);
+      if (!recipient) {
+        return;
+      }
 
       try {
         const recipientFull = await resolveContact(
