@@ -80321,12 +80321,6 @@ var getFullUser = async (client, userId, accessHash) => {
   return userFull;
 };
 
-// src/helpers/extractLastQuestion.ts
-var extractLastQuestion = (str) => {
-  const matches = str.match(/[^.?!]*\?/g);
-  return matches ? matches[matches.length - 1].trim() : null;
-};
-
 // src/modules/autoResponse.ts
 var pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
 var autoResponse = async (client, accountId, tgAccountId, tgFirstName) => {
@@ -80433,7 +80427,7 @@ ID: ${accountId}
 GID: ${dialogGroupId}
 RID: ${id}
 ${replyMessage}`);
-    const lastQuestion = extractLastQuestion(replyMessage);
+    const lastQuestion = (void 0)(replyMessage);
     if (lastQuestion) {
       const sentReplyMessage = await sendMessage(
         client,
