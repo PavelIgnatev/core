@@ -67,7 +67,7 @@ export const getUserInformation = async (
     ''
   );
   if (contentRequets.length < 2) {
-    await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
+    await sendToNameBot(`DATA: ${userContent} (MINIMAL LENGTH ERROR)
 REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
@@ -106,7 +106,7 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
 
         const userInfo = resultData?.message?.content?.[0]?.text;
         if (userInfo === 'null') {
-          await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+          await sendToNameBot(`DATA: ${userContent} (${i + 1} TIMES)
 REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           return { aiName: null, aiGender: null };
@@ -130,7 +130,7 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           aiName: capitalizeFirstLetter(userInfo.toLowerCase()),
           aiGender: Female > Male ? 'female' : 'male',
         };
-        await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+        await sendToNameBot(`DATA: ${userContent} (${i + 1} TIMES)
 REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify(returnData)}`);
         return returnData;
@@ -139,7 +139,7 @@ RESULT: ${JSON.stringify(returnData)}`);
       }
     }
 
-    await sendToNameBot(`DATA: ${content} (ATTEMPT LIMIT)
+    await sendToNameBot(`DATA: ${userContent} (ATTEMPT LIMIT)
 REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
@@ -148,7 +148,7 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
   try {
     return await withTimeout(processRequest(), 300000);
   } catch {
-    await sendToNameBot(`DATA: ${content} (TIME LIMIT)
+    await sendToNameBot(`DATA: ${userContent} (TIME LIMIT)
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   }
