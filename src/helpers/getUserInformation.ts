@@ -54,7 +54,7 @@ export const getUserInformation = async (
       if (
         nameData?.gender &&
         (nameData.gender.Female || nameData.gender.Male) &&
-        Object.values(nameData.rank).filter((rank) => rank !== null).length > 5
+        Object.values(nameData.rank).filter((rank) => rank !== null).length > 3
       ) {
         contentMap.add(promise.name);
       }
@@ -64,6 +64,7 @@ export const getUserInformation = async (
   const contentRequets = [...contentMap].join(' ');
   if (contentRequets.length < 2) {
     await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   }
@@ -102,6 +103,7 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
         const userInfo = resultData?.message?.content?.[0]?.text;
         if (userInfo === 'null') {
           await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           return { aiName: null, aiGender: null };
         }
@@ -125,6 +127,7 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           aiGender: Female > Male ? 'female' : 'male',
         };
         await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify(returnData)}`);
         return returnData;
       } catch (error) {
@@ -133,6 +136,7 @@ RESULT: ${JSON.stringify(returnData)}`);
     }
 
     await sendToNameBot(`DATA: ${content} (ATTEMPT LIMIT)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   };

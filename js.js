@@ -43,11 +43,11 @@ const getUserInformation = async (userContent, language) => {
     const promises = await Promise.all(requests);
     for (const promise of promises) {
       const nameData = promise?.result?.first_name;
-
+      console.log(promise.name, nameData);
       if (
         nameData?.gender &&
         (nameData.gender.Female || nameData.gender.Male) &&
-        Object.values(nameData.rank).filter((rank) => rank !== null).length > 5
+        Object.values(nameData.rank).filter((rank) => rank !== null).length > 3
       ) {
         contentMap.add(promise.name);
       }
@@ -132,6 +132,8 @@ const getUserInformation = async (userContent, language) => {
 
 // Test array with 20 names
 const testNames = [
+  'азарий webex',
+  'савва makeloveskiy ps',
   'Alex',
   'Sasha',
   'Aleksey',

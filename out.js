@@ -80941,7 +80941,7 @@ var getUserInformation = async (userContent, language) => {
     const promises2 = await Promise.all(requests);
     for (const promise of promises2) {
       const nameData = (_a = promise == null ? void 0 : promise.result) == null ? void 0 : _a.first_name;
-      if ((nameData == null ? void 0 : nameData.gender) && (nameData.gender.Female || nameData.gender.Male) && Object.values(nameData.rank).filter((rank) => rank !== null).length > 5) {
+      if ((nameData == null ? void 0 : nameData.gender) && (nameData.gender.Female || nameData.gender.Male) && Object.values(nameData.rank).filter((rank) => rank !== null).length > 3) {
         contentMap.add(promise.name);
       }
     }
@@ -80950,6 +80950,7 @@ var getUserInformation = async (userContent, language) => {
   const contentRequets = [...contentMap].join(" ");
   if (contentRequets.length < 2) {
     await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   }
@@ -80987,6 +80988,7 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
         const userInfo = (_c = (_b = (_a2 = resultData == null ? void 0 : resultData.message) == null ? void 0 : _a2.content) == null ? void 0 : _b[0]) == null ? void 0 : _c.text;
         if (userInfo === "null") {
           await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           return { aiName: null, aiGender: null };
         }
@@ -81003,6 +81005,7 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           aiGender: Female > Male ? "female" : "male"
         };
         await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify(returnData)}`);
         return returnData;
       } catch (error) {
@@ -81010,6 +81013,7 @@ RESULT: ${JSON.stringify(returnData)}`);
       }
     }
     await sendToNameBot(`DATA: ${content} (ATTEMPT LIMIT)
+REQUEST: ${contentRequets}
 RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   };

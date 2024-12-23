@@ -13,3 +13,4 @@ dev/perf/screenshot*
 !.github/workflows/package-and-publish.yml
 .package-lock.json
 data.txt
+js.js
