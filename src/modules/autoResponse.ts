@@ -166,7 +166,7 @@ RID: ${id}
 ${replyMessage}`);
 
     const lastQuestion = extractLastQuestion(replyMessage);
-    if (lastQuestion) {
+    if (lastQuestion && replyMessage.replace(lastQuestion, '').length > 0) {
       const sentReplyMessage = await sendMessage(
         client,
         id,

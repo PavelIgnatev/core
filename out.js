@@ -79819,7 +79819,7 @@ ${errors3.map((error) => `- **${error}**`).join("\n")}`
       }
       let message = filterString(
         data.replace(/\n/g, "").replace(/\*/g, "").replace(/!/g, ".").replace((0, import_emoji_regex.default)(), "").replace("<ASSISTANT>:", "").replace("<ASSISTANT>", "").replaceAll(/[«»„“”‘’'"`『』「」]/g, "").trim(),
-        part || "",
+        (part || "").trim(),
         "mainlink"
       );
       const pattern2 = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
@@ -79883,7 +79883,7 @@ ${errors3.map((error) => `- **${error}**`).join("\n")}`
       return filterString(
         varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ""),
         "mainlink",
-        part || ""
+        (part || "").trim()
       );
     } catch (error) {
       await new Promise((res) => setTimeout(res, 2500));
@@ -79916,7 +79916,7 @@ ${errors3.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
     return filterString(
       generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ""),
       "mainlink",
-      part || ""
+      (part || "").trim()
     );
   }
   throw new Error("Stopped");
@@ -80449,7 +80449,7 @@ GID: ${dialogGroupId}
 RID: ${id}
 ${replyMessage}`);
     const lastQuestion = extractLastQuestion(replyMessage);
-    if (lastQuestion) {
+    if (lastQuestion && replyMessage.replace(lastQuestion, "").length > 0) {
       const sentReplyMessage = await sendMessage(
         client,
         id,
