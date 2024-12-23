@@ -111,7 +111,7 @@ export const autoSender = async (
         const greeting = getGreeting(recipient?.language || 'RUSSIAN');
         if (greeting) {
           const userInformation = await getUserInformation(
-            `${firstName || ''} ${lastName || ''} ${username || ''}`,
+            `${(firstName || '').toLowerCase()} ${(lastName || '').toLowerCase()} ${username || ''}`,
             recipient.language
           );
 

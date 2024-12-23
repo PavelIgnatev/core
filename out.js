@@ -81115,7 +81115,7 @@ var autoSender = async (client, accountId, tgAccountId) => {
         const greeting = getGreeting((recipient == null ? void 0 : recipient.language) || "RUSSIAN");
         if (greeting) {
           const userInformation = await getUserInformation(
-            `${firstName || ""} ${lastName || ""} ${username || ""}`,
+            `${(firstName || "").toLowerCase()} ${(lastName || "").toLowerCase()} ${username || ""}`,
             recipient.language
           );
           if (userInformation.aiName) {
