@@ -62,7 +62,7 @@ export const autoResponse = async (
     } = groupId || ({} as any);
     const meName =
       language === 'RUSSIAN' ? converterName(tgFirstName) : tgFirstName;
-    const parted = stage === 2 && part ? part : '';
+    const parted = stage === 2 && part ? part.trim() : '';
     const hasQuestion = stage === 1 && addedQuestion ? addedQuestion : '';
     const {
       fullUser: { about },
@@ -109,7 +109,7 @@ CONTEXT: A genuine individual who has never interacted with the assistant before
                 : ''
           }${
             parted
-              ? `\n- Ensure the phrase "${part}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.`
+              ? `\n- Ensure the phrase "${parted}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.`
               : ''
           }
 - Response language: **${language}**.

@@ -80379,7 +80379,7 @@ var autoResponse = async (client, accountId, tgAccountId, tgFirstName) => {
       messagesCount = 4
     } = groupId || {};
     const meName = language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
-    const parted = stage === 2 && part ? part : "";
+    const parted = stage === 2 && part ? part.trim() : "";
     const hasQuestion = stage === 1 && addedQuestion ? addedQuestion : "";
     const {
       fullUser: { about }
@@ -80408,7 +80408,7 @@ CONTEXT: A genuine individual who has never interacted with the assistant before
 - Your response must **strictly** be approximately ${messagesCount * 60} characters in length, consisting of around ${messagesCount * 10} words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.${stage <= 2 ? `
 - You should always start your reply with a brief response to the user's last post. The reply is mandatory and should be minimal, without building a reply around it.` : ""}${hasQuestion ? `
 - Smoothly weave the following question into the end of your response in a way that feels natural and relevant: \u201C${generateRandomString(hasQuestion)}\u201D. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**` : stage === 2 ? "\n- **BE SURE TO ASK A LEADING QUESTION TO INTEREST THE USER EVEN MORE**. Conclude your response with a simple, easy-to-answer question that naturally follows from the conversation and further engages the user. The question should be quick to respond to, possibly even rhetorical, and should not require the user to spend much time writing an answer. Ensure it is relevant and seamlessly integrated into your reply." : ""}${parted ? `
-- Ensure the phrase "${part}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.` : ""}
+- Ensure the phrase "${parted}" is **meaningfully integrated** into the response, not just randomly added. Adjust your reply so that it flows naturally with this phrase.` : ""}
 - Response language: **${language}**.
 - Never apologize in your responses, under any circumstances. **don't apologize**
 - Do not use generic greetings like "Hello" or "Hi".
