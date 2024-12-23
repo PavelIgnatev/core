@@ -58,6 +58,7 @@ const getUserInformation = async (userContent, language) => {
   if (contentRequets.length < 2) {
     return { aiName: null, aiGender: null };
   }
+  console.log(contentRequets);
 
   const processRequest = async () => {
     for (let i = 0; i < 5; i++) {
@@ -71,11 +72,17 @@ const getUserInformation = async (userContent, language) => {
             messages: [
               {
                 role: 'system',
-                content: `Your task is to accurately identify and extract the most probable real first name from the provided message and return it in its **${language}** version. The input may contain irrelevant elements such as usernames, nicknames, descriptors, or random words. 
+                content: `Your task is to accurately identify and extract the real first name from the provided message and adjust it to its **${language}** version. The message may contain various elements such as usernames, display names, nicknames, titles, descriptors, and irrelevant words. Your primary goal is to extract the most likely real first name of the person and provide it in its **${language}** form, ensuring proper communication.
 
-                Focus on recognizing real names, including their diminutive or shortened forms, common misspellings, or transliterations. If a clear match to a valid name exists, adjust it to its full and proper **${language}** form.
+                Please disregard usernames unless they are the only source of the name. If the display name is available and contains a plausible first name, prioritize it. Remove words like 'undefined', titles (e.g., 'Coach', 'Founder'), descriptors, emojis, and special characters. If multiple names are present, choose the first one that is likely the first name. Ignore additional information like surnames or middle names, as they are already removed automatically by the system.
                 
-                If no valid name can be identified with reasonable certainty, return "null". Do not include any additional information, explanations, or context in your response—return only the name as plain text or "null". Ensure strict compliance with these instructions.`,
+                **Important clarifications:**
+                1. If the name is a short form, do not attempt to convert it to a full form, even if the full form is commonly known. and "Alex" must remain "Alex"
+                2. If only a patronymic is present (e.g., 'Ivanovich', 'Vladimirovna'), **do not extract a first name from the patronymic**. If no first name is present alongside the patronymic, return "null."
+                3. If the input does not contain any recognizable short, full, or transliterated form of a real first name, you must return "null." Do not fabricate or infer a name in such cases.
+                
+                Ensure the extracted name is adjusted to its **${language}** version, either by translation or transliteration, and maintain correct spelling and cultural appropriateness in **${language}**. If the name is already in **${language}**, leave it as is. Return only the name as plain text or "null" if no valid name is found. Do not provide any explanations or additional information.
+                `,
               },
               {
                 role: 'user',
@@ -125,39 +132,29 @@ const getUserInformation = async (userContent, language) => {
 
 // Test array with 20 names
 const testNames = [
-  'саша',
-  'людмила',
-  'пузенко александр',
-  'Madina Malova Madina_Malova',
-  'Serhii Liulchenko Liulchenko',
-  'Барон  wokeupbackinparis',
-  'Irina Galushkina IrinaGalushkyna',
-  'Анна Царевская annettetsar',
-  'Дмитрий  Draid74',
-  'sergbrabus  spafish',
-  'Irina Akimova IrinAkimova',
-  'Dmitrii Ive Sergeev dmitrii_ive',
-  'Helga  nerodda',
-  'Валерий Чуриков ogromniy',
-  'Alexey Golovin Golovin_79',
-  'Антон Трифонов (ТАВ) StartWithTAB',
-  'Татьяна Тренина Trenina',
-  'insomni.arts  insomniart',
-  'Иван Сафронов delusiondsn',
-  'Liza  lizzvt',
-  'П А PawaAnt',
-  'Artem Venkov a_venkov',
-  'Oleg  onepieceofcapybara',
-  'D I ivanovdv',
-  'Алексей Машкевич amashkevich',
-  'Tanya Mitskevich Tmitskevich',
-  'Mistral  Cielo02',
-  'Evgeny Kartukha johny0908',
-  'Gromov | treasures  ValeriyGromov',
-  'AV  AndVerh',
-  'Maxim Bystrov racingmax',
-  'Дмитрий  DimGrid',
-  'Dmitriy Belyan Belyan18',
+  'Alex',
+  'Sasha',
+  'Aleksey',
+  'Lesha',
+  'Dima',
+  'Dimon',
+  'Nastya',
+  'Katya',
+  'Liza',
+  'Masha',
+  'Vanya',
+  'Vova',
+  'Sergey',
+  'Max',
+  'Danny',
+  'Julia',
+  'Greg',
+  'Andrew',
+  'Vicky',
+  'Kolya',
+  'Eliza',
+  'Sophie',
+  'Tanya',
 ];
 
 const language = 'RUSSIAN'; // or 'RUSSIAN'
