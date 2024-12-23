@@ -1,4 +1,4 @@
-const extractLastQuestion = (text: string) => {
+export const extractLastQuestion = (text: string) => {
   const urlRegex =
     /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
   const links: Array<{ key: string; url: string }> = [];
