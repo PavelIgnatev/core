@@ -81,6 +81,7 @@ export const autoSender = async (
           botBusiness,
           firstName,
           lastName,
+          username,
         } = recipientFull.users[0];
         if (self) {
           throw new Error('SELF_ERROR');
@@ -110,7 +111,7 @@ export const autoSender = async (
         const greeting = getGreeting(recipient?.language || 'RUSSIAN');
         if (greeting) {
           const userInformation = await getUserInformation(
-            `${firstName || ''} ${lastName || ''}`,
+            `${firstName || ''} ${lastName || ''} ${username || ''}`,
             recipient.language
           );
 

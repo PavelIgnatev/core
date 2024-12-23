@@ -1,36 +1,29 @@
-import axios from 'axios';
-import { sendToNameBot } from './sendToNameBot';
+const axios = require('axios');
 
-const isRussian = (str: string) => /^[А-Яа-яЁё]+$/.test(str);
-const isEnglish = (str: string) => /^[A-Za-z]+$/.test(str);
+const isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
+const isEnglish = (str) => /^[A-Za-z]+$/.test(str);
 
-const capitalizeFirstLetter = (string: string) => {
+const capitalizeFirstLetter = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 
-const withTimeout = (promise: Promise<any>, ms: number) => {
+const withTimeout = (promise, ms) => {
   const timeout = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('Timeout exceeded')), ms)
   );
   return Promise.race([promise, timeout]);
 };
 
-const makeRequest = async (word: string) => {
+const makeRequest = async (word) => {
   return await axios
     .get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`)
     .then((response) => response.data)
-    .catch(async (e: any) => {
-      await sendToNameBot(`** USER INFORMATION REQUEST ERROR **
-REQUEST: ${word}
-ERROR: ${e.message}`);
+    .catch(() => {
       return null;
     });
 };
 
-export const getUserInformation = async (
-  userContent: string,
-  language: string
-) => {
+const getUserInformation = async (userContent, language) => {
   if (language !== 'RUSSIAN' && language !== 'ENGLISH') {
     return { aiName: null, aiGender: null };
   }
@@ -63,8 +56,6 @@ export const getUserInformation = async (
 
   const contentRequets = [...contentMap].join(' ');
   if (contentRequets.length < 2) {
-    await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   }
 
@@ -96,8 +87,6 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
 
         const userInfo = resultData?.message?.content?.[0]?.text;
         if (userInfo === 'null') {
-          await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           return { aiName: null, aiGender: null };
         }
 
@@ -115,28 +104,69 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           throw new Error('Incorrect gender');
         }
 
-        const returnData = {
+        return {
           aiName: capitalizeFirstLetter(userInfo.toLowerCase()),
           aiGender: Female > Male ? 'female' : 'male',
         };
-        await sendToNameBot(`DATA: ${content} (${i + 1} TIMES)
-RESULT: ${JSON.stringify(returnData)}`);
-        return returnData;
       } catch (error) {
         await new Promise((res) => setTimeout(res, 1000));
       }
     }
 
-    await sendToNameBot(`DATA: ${content} (ATTEMPT LIMIT)
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   };
 
   try {
     return await withTimeout(processRequest(), 300000);
   } catch {
-    await sendToNameBot(`DATA: ${content} (TIME LIMIT)
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
     return { aiName: null, aiGender: null };
   }
 };
+
+// Test array with 20 names
+const testNames = [
+  'саша',
+  'людмила',
+  'пузенко александр',
+  'Madina Malova Madina_Malova',
+  'Serhii Liulchenko Liulchenko',
+  'Барон  wokeupbackinparis',
+  'Irina Galushkina IrinaGalushkyna',
+  'Анна Царевская annettetsar',
+  'Дмитрий  Draid74',
+  'sergbrabus  spafish',
+  'Irina Akimova IrinAkimova',
+  'Dmitrii Ive Sergeev dmitrii_ive',
+  'Helga  nerodda',
+  'Валерий Чуриков ogromniy',
+  'Alexey Golovin Golovin_79',
+  'Антон Трифонов (ТАВ) StartWithTAB',
+  'Татьяна Тренина Trenina',
+  'insomni.arts  insomniart',
+  'Иван Сафронов delusiondsn',
+  'Liza  lizzvt',
+  'П А PawaAnt',
+  'Artem Venkov a_venkov',
+  'Oleg  onepieceofcapybara',
+  'D I ivanovdv',
+  'Алексей Машкевич amashkevich',
+  'Tanya Mitskevich Tmitskevich',
+  'Mistral  Cielo02',
+  'Evgeny Kartukha johny0908',
+  'Gromov | treasures  ValeriyGromov',
+  'AV  AndVerh',
+  'Maxim Bystrov racingmax',
+  'Дмитрий  DimGrid',
+  'Dmitriy Belyan Belyan18',
+];
+
+const language = 'RUSSIAN'; // or 'RUSSIAN'
+
+const testNameParsing = async () => {
+  for (const name of testNames) {
+    const result = await getUserInformation(name, language);
+    console.log(`Input: ${name}, Result:`, result);
+  }
+};
+
+testNameParsing();
