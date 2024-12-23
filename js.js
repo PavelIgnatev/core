@@ -54,7 +54,10 @@ const getUserInformation = async (userContent, language) => {
     }
   } catch {}
 
-  const contentRequets = [...contentMap].join(' ');
+  const contentRequets = [...contentMap].reduce(
+    (a, b) => (a.length >= b.length ? a : b),
+    ''
+  );
   if (contentRequets.length < 2) {
     return { aiName: null, aiGender: null };
   }
@@ -132,7 +135,7 @@ const getUserInformation = async (userContent, language) => {
 
 // Test array with 20 names
 const testNames = [
-  'азарий webex',
+  'g ulia gulya',
   'савва makeloveskiy ps',
   'Alex',
   'Sasha',

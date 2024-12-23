@@ -61,7 +61,11 @@ export const getUserInformation = async (
     }
   } catch {}
 
-  const contentRequets = [...contentMap].join(' ');
+  const contentArray = [...contentMap] as Array<string>;
+  const contentRequets = contentArray.reduce(
+    (a, b) => (a.length >= b.length ? a : b),
+    ''
+  );
   if (contentRequets.length < 2) {
     await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
 REQUEST: ${contentRequets}

@@ -80947,7 +80947,11 @@ var getUserInformation = async (userContent, language) => {
     }
   } catch {
   }
-  const contentRequets = [...contentMap].join(" ");
+  const contentArray = [...contentMap];
+  const contentRequets = contentArray.reduce(
+    (a, b) => a.length >= b.length ? a : b,
+    ""
+  );
   if (contentRequets.length < 2) {
     await sendToNameBot(`DATA: ${content} (MINIMAL LENGTH ERROR)
 REQUEST: ${contentRequets}
