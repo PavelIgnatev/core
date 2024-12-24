@@ -76122,6 +76122,7 @@ var editFolder = async (client, userId, accessHash, folderId) => {
 };
 
 // src/modules/getDialogs.ts
+init_sendToBot();
 var getDialogs2 = async (client, accountId) => {
   var _a, _b;
   const clientDialogs = await client.invoke(
@@ -76178,12 +76179,9 @@ var getDialogs2 = async (client, accountId) => {
         })
       );
       if (!((_b = allHistory == null ? void 0 : allHistory.messages) == null ? void 0 : _b.length)) {
-        await editFolder(client, String(user.id), String(user.accessHash), 0);
-        await updateAutomaticDialogue(
-          accountId,
-          String(user.id),
-          "automatic:messages-length-not-defined"
-        );
+        await sendToBot(`** HISTORY LENGTH ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}`);
         continue;
       }
       if (blocked || reason || automaticReason) {

@@ -10,6 +10,7 @@ import {
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { editFolder } from '../methods/folders/editFolder';
+import { sendToBot } from '../helpers/sendToBot';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -94,12 +95,15 @@ export const getDialogs = async (client: any, accountId: string) => {
       );
 
       if (!allHistory?.messages?.length) {
-        await editFolder(client, String(user.id), String(user.accessHash), 0);
-        await updateAutomaticDialogue(
-          accountId,
-          String(user.id),
-          'automatic:messages-length-not-defined'
-        );
+        // await editFolder(client, String(user.id), String(user.accessHash), 0);
+        // await updateAutomaticDialogue(
+        //   accountId,
+        //   String(user.id),
+        //   'automatic:messages-length-not-defined'
+        // );
+        await sendToBot(`** HISTORY LENGTH ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}`);
         continue;
       }
 
