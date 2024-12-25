@@ -76265,13 +76265,13 @@ RID: ${String(user.id)}`);
         })
       );
       if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
-        manualDialogs.push(dialogData);
+        if (!account.spamBlockDate) {
+          manualDialogs.push(dialogData);
+        }
       } else if (dialogIds.includes(dialogId)) {
         dialogs.push(dialogData);
       } else {
-        if (!account.spamBlockDate) {
-          pingDialogs.push(dialogData);
-        }
+        pingDialogs.push(dialogData);
       }
     }
   }
