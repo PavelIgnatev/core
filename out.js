@@ -76135,6 +76135,10 @@ var getDialogs2 = async (client, accountId) => {
   if (!((_a = clientDialogs == null ? void 0 : clientDialogs.users) == null ? void 0 : _a.length)) {
     return [[], [], []];
   }
+  const account = await getAccountById(accountId);
+  if (!account) {
+    throw new Error("Account not defined");
+  }
   const pingDialogsDB = await getPingDialogues(accountId);
   const manualControlDialogsDB = await getManualControlDialogues(accountId);
   const clientMessagesIds = clientDialogs.messages.filter((m) => !m.out).map((m) => String(m.peerId.userId));
@@ -76265,7 +76269,9 @@ RID: ${String(user.id)}`);
       } else if (dialogIds.includes(dialogId)) {
         dialogs.push(dialogData);
       } else {
-        pingDialogs.push(dialogData);
+        if (!account.spamBlockDate) {
+          pingDialogs.push(dialogData);
+        }
       }
     }
   }

@@ -11,6 +11,7 @@ import {
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { editFolder } from '../methods/folders/editFolder';
 import { sendToBot } from '../helpers/sendToBot';
+import { getAccountById } from '../db/accounts';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -27,7 +28,10 @@ export const getDialogs = async (client: any, accountId: string) => {
   if (!clientDialogs?.users?.length) {
     return [[], [], []];
   }
-
+  const account = await getAccountById(accountId);
+  if (!account) {
+    throw new Error('Account not defined');
+  }
   const pingDialogsDB = await getPingDialogues(accountId);
   const manualControlDialogsDB = await getManualControlDialogues(accountId);
 
@@ -198,7 +202,9 @@ RID: ${String(user.id)}`);
       } else if (dialogIds.includes(dialogId)) {
         dialogs.push(dialogData);
       } else {
-        pingDialogs.push(dialogData);
+        if (!account.spamBlockDate) {
+          pingDialogs.push(dialogData);
+        }
       }
     }
   }
