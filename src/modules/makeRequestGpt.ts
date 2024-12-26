@@ -350,7 +350,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
-      if (hasConsecutiveQuestionSentences(message)) {
+      if (mandatoryQuestion && hasConsecutiveQuestionSentences(message)) {
         throw new Error(
           'An answer should contain no more than one question. The use of multiple or consecutive questions in a single answer is strictly prohibited.'
         );
