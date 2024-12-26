@@ -79822,7 +79822,7 @@ ${errors3.map((error) => `- **${error}**`).join("\n")}`
         throw new Error("Empty message");
       }
       let message = filterString(
-        data.replace(/\n/g, "").replace(/\*/g, "").replace(/!/g, ".").replace((0, import_emoji_regex.default)(), "").replace("<ASSISTANT>:", "").replace("<ASSISTANT>", "").replaceAll(/[«»„“”‘’'"`『』「」]/g, "").trim(),
+        data.replace(/\n/g, "").replace(/\*/g, "").replace(/!/g, ".").replace((0, import_emoji_regex.default)(), "").replace("<ASSISTANT>:", "").replace("<ASSISTANT>", "").replaceAll(/[«»„“”‘’'"`『』「」]/g, "").replace("\u0442.me", "t.me").replace("\u0442 .me", "t.me").replace("\u0442. me", "t.me").trim(),
         (part || "").trim(),
         "mainlink"
       );
