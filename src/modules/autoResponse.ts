@@ -30,20 +30,12 @@ export const autoResponse = async (
       accessHash,
       messages,
       groupId: dialogGroupId,
-      firstName,
-      lastName = '',
       stage,
       aiName,
       aiGender,
     } = dialog;
 
     const groupId = await getGroupId(dialogGroupId);
-
-    const userName = `${firstName} ${lastName}`
-      .trim()
-      .replace(pattern, '')
-      .replace(/[^a-zA-Zа-яА-Я0-9\s]/g, '');
-
     const recipientFull = await getFullUser(client, id, accessHash);
     if (!recipientFull) {
       continue;
