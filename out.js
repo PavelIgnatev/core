@@ -76155,6 +76155,10 @@ var getDialogs2 = async (client, accountId) => {
     ...manualControlDialogIds
   ]) {
     if (!dialogId || dialogId === "undefined") {
+      await sendToBot(`** DIALOGID NOT DEFINED **
+ID: ${accountId}
+RID: ${String(dialogId)}
+DIALOGID: ${dialogId}`);
       continue;
     }
     const user = clientDialogs.users.find(
@@ -80318,6 +80322,7 @@ Message: ${message}`
 // src/methods/users/getFullUser.ts
 var import_big_integer5 = __toESM(require_BigInteger());
 var import_api11 = __toESM(require_api());
+init_sendToBot();
 var getFullUser = async (client, userId, accessHash) => {
   if (!userId || !accessHash) {
     return null;
@@ -80330,6 +80335,11 @@ var getFullUser = async (client, userId, accessHash) => {
       })
     })
   );
+  if (!userFull) {
+    await sendToBot(`** USER FULL NOT DEFINED **
+ID: ${userId}
+RID: ${accessHash}`);
+  }
   return userFull;
 };
 

@@ -1,6 +1,7 @@
 import BigInt from 'big-integer';
 
 import GramJs from '../../common/gramjs/tl/api';
+import { sendToBot } from '../../helpers/sendToBot';
 
 export const getFullUser = async (
   client: any,
@@ -19,6 +20,12 @@ export const getFullUser = async (
       }),
     })
   );
+
+  if (!userFull) {
+    await sendToBot(`** USER FULL NOT DEFINED **
+ID: ${userId}
+RID: ${accessHash}`);
+  }
 
   return userFull;
 };

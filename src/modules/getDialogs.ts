@@ -59,6 +59,10 @@ export const getDialogs = async (client: any, accountId: string) => {
     ...manualControlDialogIds,
   ]) {
     if (!dialogId || dialogId === 'undefined') {
+      await sendToBot(`** DIALOGID NOT DEFINED **
+ID: ${accountId}
+RID: ${String(dialogId)}
+DIALOGID: ${dialogId}`);
       continue;
     }
 
