@@ -87,6 +87,13 @@ export const getDialogs = async (client: any, accountId: string) => {
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
+      if (blocked || reason || automaticReason) {
+        await sendToBot(`** BLOCKED|REASON|automaticReason ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}
+STATUS: ${blocked}:${reason}:${automaticReason}`);
+        continue;
+      }
 
       const allHistory = await client.invoke(
         new GramJs.messages.GetHistory({
@@ -97,27 +104,15 @@ export const getDialogs = async (client: any, accountId: string) => {
           limit: 30,
         })
       );
-
-      if (!allHistory?.messages?.length) {
-        // await editFolder(client, String(user.id), String(user.accessHash), 0);
-        // await updateAutomaticDialogue(
-        //   accountId,
-        //   String(user.id),
-        //   'automatic:messages-length-not-defined'
-        // );
-        await sendToBot(`** HISTORY LENGTH ERROR **
+      const dialogsMessages = (allHistory?.messages || [])
+        .filter((m: GramJs.Message) => m.className === 'Message')
+        .reverse();
+      if (!dialogsMessages.length) {
+        await sendToBot(`** MESSAGES LENGTH ERROR **
 ID: ${accountId}
 RID: ${String(user.id)}`);
         continue;
       }
-
-      if (blocked || reason || automaticReason) {
-        continue;
-      }
-
-      const dialogsMessages = (allHistory.messages || [])
-        .filter((m: GramJs.Message) => m.className === 'Message')
-        .reverse();
       for (const dialogMessage of dialogsMessages) {
         if (dialogMessages.find((m: any) => m.id === dialogMessage.id)) {
           continue;
@@ -193,7 +188,7 @@ RID: ${String(user.id)}`);
             userId: BigInt(user.id),
             accessHash: BigInt(user.accessHash),
           }),
-          maxId: 100000,
+          maxId: 1000000,
         })
       );
 
@@ -206,6 +201,17 @@ RID: ${String(user.id)}`);
       } else {
         pingDialogs.push(dialogData);
       }
+    } else {
+      await sendToBot(`** USER NOT DEFINED **
+ID: ${accountId}
+RID: ${String(dialogId)}
+USER: ${JSON.stringify(user || 'null')}
+DELETED: ${user?.deleted}
+BOT: ${user?.bot}
+SUPPORT: ${user?.support}
+SELF: ${user?.self}
+STATUS: ${JSON.stringify(user?.status || 'null')}
+EMPTY STATUS: ${user?.status instanceof GramJs.UserStatusEmpty}`);
     }
   }
 

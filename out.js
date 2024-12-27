@@ -76124,7 +76124,7 @@ var editFolder = async (client, userId, accessHash, folderId) => {
 // src/modules/getDialogs.ts
 init_sendToBot();
 var getDialogs2 = async (client, accountId) => {
-  var _a, _b;
+  var _a;
   const clientDialogs = await client.invoke(
     new import_api9.default.messages.GetDialogs({
       offsetPeer: new import_api9.default.InputPeerEmpty(),
@@ -76173,6 +76173,13 @@ var getDialogs2 = async (client, accountId) => {
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
+      if (blocked || reason || automaticReason) {
+        await sendToBot(`** BLOCKED|REASON|automaticReason ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}
+STATUS: ${blocked}:${reason}:${automaticReason}`);
+        continue;
+      }
       const allHistory = await client.invoke(
         new import_api9.default.messages.GetHistory({
           peer: new import_api9.default.InputPeerUser({
@@ -76182,16 +76189,13 @@ var getDialogs2 = async (client, accountId) => {
           limit: 30
         })
       );
-      if (!((_b = allHistory == null ? void 0 : allHistory.messages) == null ? void 0 : _b.length)) {
-        await sendToBot(`** HISTORY LENGTH ERROR **
+      const dialogsMessages = ((allHistory == null ? void 0 : allHistory.messages) || []).filter((m) => m.className === "Message").reverse();
+      if (!dialogsMessages.length) {
+        await sendToBot(`** MESSAGES LENGTH ERROR **
 ID: ${accountId}
 RID: ${String(user.id)}`);
         continue;
       }
-      if (blocked || reason || automaticReason) {
-        continue;
-      }
-      const dialogsMessages = (allHistory.messages || []).filter((m) => m.className === "Message").reverse();
       for (const dialogMessage of dialogsMessages) {
         if (dialogMessages.find((m) => m.id === dialogMessage.id)) {
           continue;
@@ -76261,7 +76265,7 @@ RID: ${String(user.id)}`);
             userId: (0, import_big_integer3.default)(user.id),
             accessHash: (0, import_big_integer3.default)(user.accessHash)
           }),
-          maxId: 1e5
+          maxId: 1e6
         })
       );
       if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
@@ -76273,6 +76277,17 @@ RID: ${String(user.id)}`);
       } else {
         pingDialogs.push(dialogData);
       }
+    } else {
+      await sendToBot(`** USER NOT DEFINED **
+ID: ${accountId}
+RID: ${String(dialogId)}
+USER: ${JSON.stringify(user || "null")}
+DELETED: ${user == null ? void 0 : user.deleted}
+BOT: ${user == null ? void 0 : user.bot}
+SUPPORT: ${user == null ? void 0 : user.support}
+SELF: ${user == null ? void 0 : user.self}
+STATUS: ${JSON.stringify((user == null ? void 0 : user.status) || "null")}
+EMPTY STATUS: ${(user == null ? void 0 : user.status) instanceof import_api9.default.UserStatusEmpty}`);
     }
   }
   return [dialogs, pingDialogs, manualDialogs];
