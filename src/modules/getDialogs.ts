@@ -205,18 +205,18 @@ RID: ${String(user.id)}`);
       } else {
         pingDialogs.push(dialogData);
       }
-    } else {
-      await sendToBot(`** USER NOT DEFINED **
-ID: ${accountId}
-RID: ${String(dialogId)}
-USER: ${JSON.stringify(user || 'null')}
-DELETED: ${user?.deleted}
-BOT: ${user?.bot}
-SUPPORT: ${user?.support}
-SELF: ${user?.self}
-STATUS: ${JSON.stringify(user?.status || 'null')}
-EMPTY STATUS: ${user?.status instanceof GramJs.UserStatusEmpty}`);
     }
+    //       await sendToBot(`** USER NOT DEFINED **
+    // ID: ${accountId}
+    // RID: ${String(dialogId)}
+    // USER: ${JSON.stringify(user || 'null')}
+    // DELETED: ${user?.deleted}
+    // BOT: ${user?.bot}
+    // SUPPORT: ${user?.support}
+    // SELF: ${user?.self}
+    // STATUS: ${JSON.stringify(user?.status || 'null')}
+    // EMPTY STATUS: ${user?.status instanceof GramJs.UserStatusEmpty}`);
+    //     }
   }
 
   return [dialogs, pingDialogs, manualDialogs];

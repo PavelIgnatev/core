@@ -76281,17 +76281,6 @@ RID: ${String(user.id)}`);
       } else {
         pingDialogs.push(dialogData);
       }
-    } else {
-      await sendToBot(`** USER NOT DEFINED **
-ID: ${accountId}
-RID: ${String(dialogId)}
-USER: ${JSON.stringify(user || "null")}
-DELETED: ${user == null ? void 0 : user.deleted}
-BOT: ${user == null ? void 0 : user.bot}
-SUPPORT: ${user == null ? void 0 : user.support}
-SELF: ${user == null ? void 0 : user.self}
-STATUS: ${JSON.stringify((user == null ? void 0 : user.status) || "null")}
-EMPTY STATUS: ${(user == null ? void 0 : user.status) instanceof import_api9.default.UserStatusEmpty}`);
     }
   }
   return [dialogs, pingDialogs, manualDialogs];
