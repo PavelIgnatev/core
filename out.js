@@ -76170,6 +76170,10 @@ var getDialogs2 = async (client, accountId) => {
         automaticReason = null
       } = dialogDb || {};
       if (!dialogDb || !groupId) {
+        await sendToBot(`** dialogDb|groupId ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}
+STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${automaticReason}`);
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
