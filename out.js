@@ -76122,7 +76122,6 @@ var editFolder = async (client, userId, accessHash, folderId) => {
 };
 
 // src/modules/getDialogs.ts
-init_sendToBot();
 var getDialogs2 = async (client, accountId) => {
   var _a;
   const clientDialogs = await client.invoke(
@@ -76155,10 +76154,6 @@ var getDialogs2 = async (client, accountId) => {
     ...manualControlDialogIds
   ]) {
     if (!dialogId || dialogId === "undefined") {
-      await sendToBot(`** DIALOGID NOT DEFINED **
-ID: ${accountId}
-RID: ${String(dialogId)}
-DIALOGID: ${dialogId}`);
       continue;
     }
     const user = clientDialogs.users.find(
@@ -76174,18 +76169,10 @@ DIALOGID: ${dialogId}`);
         automaticReason = null
       } = dialogDb || {};
       if (!dialogDb || !groupId) {
-        await sendToBot(`** dialogDb|groupId ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}
-STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}`);
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
       if (blocked || reason || automaticReason) {
-        await sendToBot(`** BLOCKED|REASON|automaticReason ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}
-STATUS: ${blocked}:${reason}:${automaticReason}`);
         continue;
       }
       const allHistory = await client.invoke(
@@ -76199,9 +76186,6 @@ STATUS: ${blocked}:${reason}:${automaticReason}`);
       );
       const dialogsMessages = ((allHistory == null ? void 0 : allHistory.messages) || []).filter((m) => m.className === "Message").reverse();
       if (!dialogsMessages.length) {
-        await sendToBot(`** MESSAGES LENGTH ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}`);
         continue;
       }
       for (const dialogMessage of dialogsMessages) {

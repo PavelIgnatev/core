@@ -10,7 +10,6 @@ import {
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { editFolder } from '../methods/folders/editFolder';
-import { sendToBot } from '../helpers/sendToBot';
 import { getAccountById } from '../db/accounts';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
@@ -59,10 +58,6 @@ export const getDialogs = async (client: any, accountId: string) => {
     ...manualControlDialogIds,
   ]) {
     if (!dialogId || dialogId === 'undefined') {
-      await sendToBot(`** DIALOGID NOT DEFINED **
-ID: ${accountId}
-RID: ${String(dialogId)}
-DIALOGID: ${dialogId}`);
       continue;
     }
 
@@ -88,18 +83,10 @@ DIALOGID: ${dialogId}`);
       } = dialogDb || {};
 
       if (!dialogDb || !groupId) {
-        await sendToBot(`** dialogDb|groupId ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}
-STATUS: ${JSON.stringify(dialogDb || 'null')}:${groupId}`);
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
       if (blocked || reason || automaticReason) {
-        await sendToBot(`** BLOCKED|REASON|automaticReason ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}
-STATUS: ${blocked}:${reason}:${automaticReason}`);
         continue;
       }
 
@@ -116,9 +103,6 @@ STATUS: ${blocked}:${reason}:${automaticReason}`);
         .filter((m: GramJs.Message) => m.className === 'Message')
         .reverse();
       if (!dialogsMessages.length) {
-        await sendToBot(`** MESSAGES LENGTH ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}`);
         continue;
       }
       for (const dialogMessage of dialogsMessages) {
@@ -210,17 +194,6 @@ RID: ${String(user.id)}`);
         pingDialogs.push(dialogData);
       }
     }
-    //       await sendToBot(`** USER NOT DEFINED **
-    // ID: ${accountId}
-    // RID: ${String(dialogId)}
-    // USER: ${JSON.stringify(user || 'null')}
-    // DELETED: ${user?.deleted}
-    // BOT: ${user?.bot}
-    // SUPPORT: ${user?.support}
-    // SELF: ${user?.self}
-    // STATUS: ${JSON.stringify(user?.status || 'null')}
-    // EMPTY STATUS: ${user?.status instanceof GramJs.UserStatusEmpty}`);
-    //     }
   }
 
   return [dialogs, pingDialogs, manualDialogs];
