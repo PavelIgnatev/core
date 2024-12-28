@@ -76168,11 +76168,8 @@ var getDialogs2 = async (client, accountId) => {
         reason = null,
         automaticReason = null
       } = dialogDb || {};
-      if (!dialogDb || !groupId) {
+      if (!dialogDb || !groupId || blocked || reason || automaticReason) {
         await editFolder(client, String(user.id), String(user.accessHash), 0);
-        continue;
-      }
-      if (blocked || reason || automaticReason) {
         continue;
       }
       const allHistory = await client.invoke(
