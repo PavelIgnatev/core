@@ -11,6 +11,7 @@ import {
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
 import { editFolder } from '../methods/folders/editFolder';
 import { getAccountById } from '../db/accounts';
+import { sendToBot } from '../helpers/sendToBot';
 
 type Message = GramJs.Message & { peerId: GramJs.PeerUser };
 type Dialog = GramJs.Dialog & { peer: GramJs.PeerUser };
@@ -83,6 +84,10 @@ export const getDialogs = async (client: any, accountId: string) => {
       } = dialogDb || {};
 
       if (!dialogDb || !groupId || blocked || reason || automaticReason) {
+        await sendToBot(`** GET DIALOGS ERROR **
+ID: ${accountId}
+RID: ${String(user.id)}
+STATUS: ${dialogDb}:${groupId}:${blocked}:${reason}:${automaticReason}`);
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
