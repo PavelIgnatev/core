@@ -76173,7 +76173,7 @@ var getDialogs2 = async (client, accountId) => {
         await sendToBot(`** GET DIALOGS ERROR **
 ID: ${accountId}
 RID: ${String(user.id)}
-STATUS: ${dialogDb}:${groupId}:${blocked}:${reason}:${automaticReason}`);
+STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${blocked}:${reason}:${automaticReason}`);
         await editFolder(client, String(user.id), String(user.accessHash), 0);
         continue;
       }
