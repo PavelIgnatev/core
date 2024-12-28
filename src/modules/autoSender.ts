@@ -42,16 +42,16 @@ export const autoSender = async (
     return;
   }
 
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = new Intl.DateTimeFormat('en-GB', {
-  //     weekday: 'short',
-  //     timeZone: 'UTC',
-  //   }).format(new Date());
+  if (!accountId.includes('-prefix-')) {
+    const weekday = new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      timeZone: 'UTC',
+    }).format(new Date());
 
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     return;
-  //   }
-  // }
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
+  }
 
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
 
