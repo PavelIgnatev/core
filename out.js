@@ -81070,6 +81070,7 @@ var autoSender = async (client, accountId, tgAccountId) => {
   if (spamBlockDate) {
     return;
   }
+  return;
   const currentTime = /* @__PURE__ */ new Date();
   const currentUTCHours = currentTime.getUTCHours();
   if (currentUTCHours < 5 || currentUTCHours > 14) {
