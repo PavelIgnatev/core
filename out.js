@@ -81080,9 +81080,7 @@ var autoSender = async (client, accountId, tgAccountId) => {
       weekday: "short",
       timeZone: "UTC"
     }).format(/* @__PURE__ */ new Date());
-    if (weekday === "Sat" || weekday === "Sun") {
-      return;
-    }
+    return;
   }
   const remainingTime = new Date(accountByID.remainingTime || currentTime);
   if (currentTime >= remainingTime) {
