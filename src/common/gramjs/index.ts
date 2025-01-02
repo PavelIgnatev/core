@@ -3,6 +3,7 @@ import CallbackSession from './sessions/CallbackSession';
 import TelegramClient from './client/TelegramClient';
 
 import { Account } from '../../@types/Account';
+import { sendToBot } from '../../helpers/sendToBot';
 
 export async function init(
   accountData: Account,
@@ -52,4 +53,19 @@ export async function init(
   );
 
   return client;
+}
+
+export async function invokeRequest<T extends GramJs.AnyRequest>(
+  client: TelegramClient,
+  request: T
+) {
+  try {
+    return await client.invoke(request);
+  } catch (err: any) {
+    await sendToBot(`💀 REQUEST ERROR 💀
+ID: ${client._accountId}
+REQUEST: ${JSON.stringify(request)}
+`);
+    return undefined;
+  }
 }

@@ -102,6 +102,11 @@ const main = async (ID: string) => {
     const tgAccountId = await usersMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 30);
 
+    console.log({
+      accountId: ID,
+      message: `SEND IN ${randomI} ITERATION`,
+    });
+
     let i = -1;
     while (true) {
       i += 1;
@@ -147,22 +152,22 @@ const main = async (ID: string) => {
       message: new Error(`Main error: ${e.message}`),
     });
 
-    if (e.message.includes('AUTH_KEY_DUPLICATED')) {
+    if (e.message.includes('GLOBAL_ERROR')) {
+      console.error({
+        accountId: ID,
+        message: new Error(e.message),
+      });
+    } else if (e.message.includes('STOPPED_ERROR')) {
+      await updateAccountById(ID, {
+        stopped: true,
+      });
+    } else if (e.message.includes('AUTH_KEY_DUPLICATED')) {
       await updateAccountById(ID, {
         banned: true,
         reason: 'AUTH_KEY_DUPLICATED',
       });
       await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
       await exec('pm2 kill');
-    } else if (e.message.includes('Global Error')) {
-      console.error({
-        accountId: ID,
-        message: new Error(`Stop Account: ${e.message}`),
-      });
-    } else if (e.message.includes('Stopped')) {
-      await updateAccountById(ID, {
-        stopped: true,
-      });
     } else if (
       [
         'USER_DEACTIVATED_BAN',
@@ -217,9 +222,10 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('447828819872-2026165-en'));
+  // });
+  //447828819872-2026165-en
 
   const interval = setInterval(() => {
     console.log({

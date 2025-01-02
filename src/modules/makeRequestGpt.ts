@@ -438,5 +438,5 @@ ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}`);
     );
   }
 
-  throw new Error('Stopped');
+  throw new Error('STOPPED_ERROR');
 }

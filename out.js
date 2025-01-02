@@ -103,8 +103,8 @@ var require_package = __commonJS({
 // node_modules/dotenv/lib/main.js
 var require_main = __commonJS({
   "node_modules/dotenv/lib/main.js"(exports2, module2) {
-    var fs2 = require("fs");
-    var path2 = require("path");
+    var fs = require("fs");
+    var path = require("path");
     var os = require("os");
     var crypto = require("crypto");
     var packageJson = require_package();
@@ -210,7 +210,7 @@ var require_main = __commonJS({
       if (options && options.path && options.path.length > 0) {
         if (Array.isArray(options.path)) {
           for (const filepath of options.path) {
-            if (fs2.existsSync(filepath)) {
+            if (fs.existsSync(filepath)) {
               possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
             }
           }
@@ -218,15 +218,15 @@ var require_main = __commonJS({
           possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
         }
       } else {
-        possibleVaultPath = path2.resolve(process.cwd(), ".env.vault");
+        possibleVaultPath = path.resolve(process.cwd(), ".env.vault");
       }
-      if (fs2.existsSync(possibleVaultPath)) {
+      if (fs.existsSync(possibleVaultPath)) {
         return possibleVaultPath;
       }
       return null;
     }
     function _resolveHome(envPath) {
-      return envPath[0] === "~" ? path2.join(os.homedir(), envPath.slice(1)) : envPath;
+      return envPath[0] === "~" ? path.join(os.homedir(), envPath.slice(1)) : envPath;
     }
     function _configVault(options) {
       _log("Loading env from encrypted .env.vault");
@@ -239,7 +239,7 @@ var require_main = __commonJS({
       return { parsed };
     }
     function configDotenv(options) {
-      const dotenvPath = path2.resolve(process.cwd(), ".env");
+      const dotenvPath = path.resolve(process.cwd(), ".env");
       let encoding = "utf8";
       const debug = Boolean(options && options.debug);
       if (options && options.encoding) {
@@ -262,13 +262,13 @@ var require_main = __commonJS({
       }
       let lastError;
       const parsedAll = {};
-      for (const path3 of optionPaths) {
+      for (const path2 of optionPaths) {
         try {
-          const parsed = DotenvModule.parse(fs2.readFileSync(path3, { encoding }));
+          const parsed = DotenvModule.parse(fs.readFileSync(path2, { encoding }));
           DotenvModule.populate(parsedAll, parsed, options);
         } catch (e) {
           if (debug) {
-            _debug(`Failed to load ${path3} ${e.message}`);
+            _debug(`Failed to load ${path2} ${e.message}`);
           }
           lastError = e;
         }
@@ -7938,17 +7938,17 @@ var require_bson = __commonJS({
       index = index + size;
       return index;
     }
-    function serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2) {
-      if (path2.has(value)) {
+    function serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path) {
+      if (path.has(value)) {
         throw new BSONError("Cannot convert circular structure to BSON");
       }
-      path2.add(value);
+      path.add(value);
       buffer2[index++] = Array.isArray(value) ? BSON_DATA_ARRAY : BSON_DATA_OBJECT;
       const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer2, key, index);
       index = index + numberOfWrittenBytes;
       buffer2[index++] = 0;
-      const endIndex = serializeInto(buffer2, value, checkKeys, index, depth + 1, serializeFunctions, ignoreUndefined, path2);
-      path2.delete(value);
+      const endIndex = serializeInto(buffer2, value, checkKeys, index, depth + 1, serializeFunctions, ignoreUndefined, path);
+      path.delete(value);
       return endIndex;
     }
     function serializeDecimal128(buffer2, key, value, index) {
@@ -8000,7 +8000,7 @@ var require_bson = __commonJS({
       buffer2[index++] = 0;
       return index;
     }
-    function serializeCode(buffer2, key, value, index, checkKeys = false, depth = 0, serializeFunctions = false, ignoreUndefined = true, path2) {
+    function serializeCode(buffer2, key, value, index, checkKeys = false, depth = 0, serializeFunctions = false, ignoreUndefined = true, path) {
       if (value.scope && typeof value.scope === "object") {
         buffer2[index++] = BSON_DATA_CODE_W_SCOPE;
         const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer2, key, index);
@@ -8013,7 +8013,7 @@ var require_bson = __commonJS({
         NumberUtils.setInt32LE(buffer2, index, codeSize);
         buffer2[index + 4 + codeSize - 1] = 0;
         index = index + codeSize + 4;
-        const endIndex = serializeInto(buffer2, value.scope, checkKeys, index, depth + 1, serializeFunctions, ignoreUndefined, path2);
+        const endIndex = serializeInto(buffer2, value.scope, checkKeys, index, depth + 1, serializeFunctions, ignoreUndefined, path);
         index = endIndex - 1;
         const totalSize = endIndex - startIndex;
         startIndex += NumberUtils.setInt32LE(buffer2, startIndex, totalSize);
@@ -8069,7 +8069,7 @@ var require_bson = __commonJS({
       buffer2[index++] = 0;
       return index;
     }
-    function serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path2) {
+    function serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path) {
       buffer2[index++] = BSON_DATA_OBJECT;
       const numberOfWrittenBytes = ByteUtils.encodeUTF8Into(buffer2, key, index);
       index = index + numberOfWrittenBytes;
@@ -8083,13 +8083,13 @@ var require_bson = __commonJS({
         output.$db = value.db;
       }
       output = Object.assign(output, value.fields);
-      const endIndex = serializeInto(buffer2, output, false, index, depth + 1, serializeFunctions, true, path2);
+      const endIndex = serializeInto(buffer2, output, false, index, depth + 1, serializeFunctions, true, path);
       const size = endIndex - startIndex;
       startIndex += NumberUtils.setInt32LE(buffer2, index, size);
       return endIndex;
     }
-    function serializeInto(buffer2, object, checkKeys, startingIndex, depth, serializeFunctions, ignoreUndefined, path2) {
-      if (path2 == null) {
+    function serializeInto(buffer2, object, checkKeys, startingIndex, depth, serializeFunctions, ignoreUndefined, path) {
+      if (path == null) {
         if (object == null) {
           buffer2[0] = 5;
           buffer2[1] = 0;
@@ -8108,9 +8108,9 @@ var require_bson = __commonJS({
         } else if (isDate2(object) || isRegExp2(object) || isUint8Array(object) || isAnyArrayBuffer(object)) {
           throw new BSONError(`date, regexp, typedarray, and arraybuffer cannot be BSON documents`);
         }
-        path2 = /* @__PURE__ */ new Set();
+        path = /* @__PURE__ */ new Set();
       }
-      path2.add(object);
+      path.add(object);
       let index = startingIndex + 4;
       if (Array.isArray(object)) {
         for (let i = 0; i < object.length; i++) {
@@ -8140,7 +8140,7 @@ var require_bson = __commonJS({
             } else if (value instanceof RegExp || isRegExp2(value)) {
               index = serializeRegExp(buffer2, key, value, index);
             } else {
-              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             }
           } else if (type === "object") {
             if (value[BSON_VERSION_SYMBOL] !== BSON_MAJOR_VERSION) {
@@ -8154,13 +8154,13 @@ var require_bson = __commonJS({
             } else if (value._bsontype === "Double") {
               index = serializeDouble(buffer2, key, value, index);
             } else if (value._bsontype === "Code") {
-              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             } else if (value._bsontype === "Binary") {
               index = serializeBinary(buffer2, key, value, index);
             } else if (value._bsontype === "BSONSymbol") {
               index = serializeSymbol(buffer2, key, value, index);
             } else if (value._bsontype === "DBRef") {
-              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path2);
+              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path);
             } else if (value._bsontype === "BSONRegExp") {
               index = serializeBSONRegExp(buffer2, key, value, index);
             } else if (value._bsontype === "Int32") {
@@ -8221,7 +8221,7 @@ var require_bson = __commonJS({
             } else if (value instanceof RegExp || isRegExp2(value)) {
               index = serializeRegExp(buffer2, key, value, index);
             } else {
-              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             }
           } else if (type === "object") {
             if (value[BSON_VERSION_SYMBOL] !== BSON_MAJOR_VERSION) {
@@ -8235,13 +8235,13 @@ var require_bson = __commonJS({
             } else if (value._bsontype === "Double") {
               index = serializeDouble(buffer2, key, value, index);
             } else if (value._bsontype === "Code") {
-              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             } else if (value._bsontype === "Binary") {
               index = serializeBinary(buffer2, key, value, index);
             } else if (value._bsontype === "BSONSymbol") {
               index = serializeSymbol(buffer2, key, value, index);
             } else if (value._bsontype === "DBRef") {
-              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path2);
+              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path);
             } else if (value._bsontype === "BSONRegExp") {
               index = serializeBSONRegExp(buffer2, key, value, index);
             } else if (value._bsontype === "Int32") {
@@ -8301,7 +8301,7 @@ var require_bson = __commonJS({
             } else if (value instanceof RegExp || isRegExp2(value)) {
               index = serializeRegExp(buffer2, key, value, index);
             } else {
-              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeObject(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             }
           } else if (type === "object") {
             if (value[BSON_VERSION_SYMBOL] !== BSON_MAJOR_VERSION) {
@@ -8315,13 +8315,13 @@ var require_bson = __commonJS({
             } else if (value._bsontype === "Double") {
               index = serializeDouble(buffer2, key, value, index);
             } else if (value._bsontype === "Code") {
-              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path2);
+              index = serializeCode(buffer2, key, value, index, checkKeys, depth, serializeFunctions, ignoreUndefined, path);
             } else if (value._bsontype === "Binary") {
               index = serializeBinary(buffer2, key, value, index);
             } else if (value._bsontype === "BSONSymbol") {
               index = serializeSymbol(buffer2, key, value, index);
             } else if (value._bsontype === "DBRef") {
-              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path2);
+              index = serializeDBRef(buffer2, key, value, index, depth, serializeFunctions, path);
             } else if (value._bsontype === "BSONRegExp") {
               index = serializeBSONRegExp(buffer2, key, value, index);
             } else if (value._bsontype === "Int32") {
@@ -8336,7 +8336,7 @@ var require_bson = __commonJS({
           }
         }
       }
-      path2.delete(object);
+      path.delete(object);
       buffer2[index++] = 0;
       const size = index - startingIndex;
       startingIndex += NumberUtils.setInt32LE(buffer2, startingIndex, size);
@@ -25704,14 +25704,14 @@ var require_url_state_machine = __commonJS({
       return url2.replace(/\u0009|\u000A|\u000D/ug, "");
     }
     function shortenPath(url2) {
-      const { path: path2 } = url2;
-      if (path2.length === 0) {
+      const { path } = url2;
+      if (path.length === 0) {
         return;
       }
-      if (url2.scheme === "file" && path2.length === 1 && isNormalizedWindowsDriveLetter(path2[0])) {
+      if (url2.scheme === "file" && path.length === 1 && isNormalizedWindowsDriveLetter(path[0])) {
         return;
       }
-      path2.pop();
+      path.pop();
     }
     function includesCredentials(url2) {
       return url2.username !== "" || url2.password !== "";
@@ -29436,7 +29436,7 @@ var require_state_machine = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.StateMachine = void 0;
-    var fs2 = require("fs/promises");
+    var fs = require("fs/promises");
     var net = require("net");
     var tls = require("tls");
     var bson_1 = require_bson2();
@@ -29707,11 +29707,11 @@ var require_state_machine = __commonJS({
        */
       async setTlsOptions(tlsOptions, options) {
         if (tlsOptions.tlsCertificateKeyFile) {
-          const cert = await fs2.readFile(tlsOptions.tlsCertificateKeyFile);
+          const cert = await fs.readFile(tlsOptions.tlsCertificateKeyFile);
           options.cert = options.key = cert;
         }
         if (tlsOptions.tlsCAFile) {
-          options.ca = await fs2.readFile(tlsOptions.tlsCAFile);
+          options.ca = await fs.readFile(tlsOptions.tlsCAFile);
         }
         if (tlsOptions.tlsCertificateKeyFilePassword) {
           options.passphrase = tlsOptions.tlsCertificateKeyFilePassword;
@@ -36497,7 +36497,7 @@ var require_token_machine_workflow = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.TokenMachineWorkflow = void 0;
-    var fs2 = require("fs");
+    var fs = require("fs");
     var error_1 = require_error();
     var machine_workflow_1 = require_machine_workflow();
     var TOKEN_MISSING_ERROR = "OIDC_TOKEN_FILE must be set in the environment.";
@@ -36516,7 +36516,7 @@ var require_token_machine_workflow = __commonJS({
         if (!tokenFile) {
           throw new error_1.MongoAWSError(TOKEN_MISSING_ERROR);
         }
-        const token = await fs2.promises.readFile(tokenFile, "utf8");
+        const token = await fs.promises.readFile(tokenFile, "utf8");
         return { access_token: token };
       }
     };
@@ -53075,69 +53075,6 @@ ERROR: ${e.message}`
   }
 });
 
-// node_modules/unique-names-generator/dist/index.js
-var require_dist4 = __commonJS({
-  "node_modules/unique-names-generator/dist/index.js"(exports2) {
-    var a = (a2) => {
-      a2 = 1831565813 + (a2 |= 0) | 0;
-      let e2 = Math.imul(a2 ^ a2 >>> 15, 1 | a2);
-      return e2 = e2 + Math.imul(e2 ^ e2 >>> 7, 61 | e2) ^ e2, ((e2 ^ e2 >>> 14) >>> 0) / 4294967296;
-    };
-    var e = class {
-      constructor(a2) {
-        this.dictionaries = void 0, this.length = void 0, this.separator = void 0, this.style = void 0, this.seed = void 0;
-        const { length: e2, separator: i2, dictionaries: n, style: l, seed: r } = a2;
-        this.dictionaries = n, this.separator = i2, this.length = e2, this.style = l, this.seed = r;
-      }
-      generate() {
-        if (!this.dictionaries)
-          throw new Error('Cannot find any dictionary. Please provide at least one, or leave the "dictionary" field empty in the config object');
-        if (this.length <= 0)
-          throw new Error("Invalid length provided");
-        if (this.length > this.dictionaries.length)
-          throw new Error(`The length cannot be bigger than the number of dictionaries.
-Length provided: ${this.length}. Number of dictionaries provided: ${this.dictionaries.length}`);
-        let e2 = this.seed;
-        return this.dictionaries.slice(0, this.length).reduce((i2, n) => {
-          let l;
-          e2 ? (l = ((e3) => {
-            if ("string" == typeof e3) {
-              const i3 = e3.split("").map((a2) => a2.charCodeAt(0)).reduce((a2, e4) => a2 + e4, 1), n2 = Math.floor(Number(i3));
-              return a(n2);
-            }
-            return a(e3);
-          })(e2), e2 = 4294967296 * l) : l = Math.random();
-          let r = n[Math.floor(l * n.length)] || "";
-          if ("lowerCase" === this.style)
-            r = r.toLowerCase();
-          else if ("capital" === this.style) {
-            const [a2, ...e3] = r.split("");
-            r = a2.toUpperCase() + e3.join("");
-          } else
-            "upperCase" === this.style && (r = r.toUpperCase());
-          return i2 ? `${i2}${this.separator}${r}` : `${r}`;
-        }, "");
-      }
-    };
-    var i = { separator: "_", dictionaries: [] };
-    exports2.NumberDictionary = class {
-      static generate(a2 = {}) {
-        let e2 = a2.min || 1, i2 = a2.max || 999;
-        if (a2.length) {
-          const n = Math.pow(10, a2.length);
-          return e2 = n / 10, i2 = n - 1, [`${Math.floor(Math.random() * (i2 - e2)) + e2}`];
-        }
-        return [`${Math.floor(Math.random() * (i2 - e2)) + e2}`];
-      }
-    }, exports2.adjectives = ["able", "above", "absent", "absolute", "abstract", "abundant", "academic", "acceptable", "accepted", "accessible", "accurate", "accused", "active", "actual", "acute", "added", "additional", "adequate", "adjacent", "administrative", "adorable", "advanced", "adverse", "advisory", "aesthetic", "afraid", "aggregate", "aggressive", "agreeable", "agreed", "agricultural", "alert", "alive", "alleged", "allied", "alone", "alright", "alternative", "amateur", "amazing", "ambitious", "amused", "ancient", "angry", "annoyed", "annual", "anonymous", "anxious", "appalling", "apparent", "applicable", "appropriate", "arbitrary", "architectural", "armed", "arrogant", "artificial", "artistic", "ashamed", "asleep", "assistant", "associated", "atomic", "attractive", "automatic", "autonomous", "available", "average", "awake", "aware", "awful", "awkward", "back", "bad", "balanced", "bare", "basic", "beautiful", "beneficial", "better", "bewildered", "big", "binding", "biological", "bitter", "bizarre", "blank", "blind", "blonde", "bloody", "blushing", "boiling", "bold", "bored", "boring", "bottom", "brainy", "brave", "breakable", "breezy", "brief", "bright", "brilliant", "broad", "broken", "bumpy", "burning", "busy", "calm", "capable", "capitalist", "careful", "casual", "causal", "cautious", "central", "certain", "changing", "characteristic", "charming", "cheap", "cheerful", "chemical", "chief", "chilly", "chosen", "christian", "chronic", "chubby", "circular", "civic", "civil", "civilian", "classic", "classical", "clean", "clear", "clever", "clinical", "close", "closed", "cloudy", "clumsy", "coastal", "cognitive", "coherent", "cold", "collective", "colonial", "colorful", "colossal", "coloured", "colourful", "combative", "combined", "comfortable", "coming", "commercial", "common", "communist", "compact", "comparable", "comparative", "compatible", "competent", "competitive", "complete", "complex", "complicated", "comprehensive", "compulsory", "conceptual", "concerned", "concrete", "condemned", "confident", "confidential", "confused", "conscious", "conservation", "conservative", "considerable", "consistent", "constant", "constitutional", "contemporary", "content", "continental", "continued", "continuing", "continuous", "controlled", "controversial", "convenient", "conventional", "convinced", "convincing", "cooing", "cool", "cooperative", "corporate", "correct", "corresponding", "costly", "courageous", "crazy", "creative", "creepy", "criminal", "critical", "crooked", "crowded", "crucial", "crude", "cruel", "cuddly", "cultural", "curious", "curly", "current", "curved", "cute", "daily", "damaged", "damp", "dangerous", "dark", "dead", "deaf", "deafening", "dear", "decent", "decisive", "deep", "defeated", "defensive", "defiant", "definite", "deliberate", "delicate", "delicious", "delighted", "delightful", "democratic", "dependent", "depressed", "desirable", "desperate", "detailed", "determined", "developed", "developing", "devoted", "different", "difficult", "digital", "diplomatic", "direct", "dirty", "disabled", "disappointed", "disastrous", "disciplinary", "disgusted", "distant", "distinct", "distinctive", "distinguished", "disturbed", "disturbing", "diverse", "divine", "dizzy", "domestic", "dominant", "double", "doubtful", "drab", "dramatic", "dreadful", "driving", "drunk", "dry", "dual", "due", "dull", "dusty", "dutch", "dying", "dynamic", "eager", "early", "eastern", "easy", "economic", "educational", "eerie", "effective", "efficient", "elaborate", "elated", "elderly", "eldest", "electoral", "electric", "electrical", "electronic", "elegant", "eligible", "embarrassed", "embarrassing", "emotional", "empirical", "empty", "enchanting", "encouraging", "endless", "energetic", "enormous", "enthusiastic", "entire", "entitled", "envious", "environmental", "equal", "equivalent", "essential", "established", "estimated", "ethical", "ethnic", "eventual", "everyday", "evident", "evil", "evolutionary", "exact", "excellent", "exceptional", "excess", "excessive", "excited", "exciting", "exclusive", "existing", "exotic", "expected", "expensive", "experienced", "experimental", "explicit", "extended", "extensive", "external", "extra", "extraordinary", "extreme", "exuberant", "faint", "fair", "faithful", "familiar", "famous", "fancy", "fantastic", "far", "fascinating", "fashionable", "fast", "fat", "fatal", "favourable", "favourite", "federal", "fellow", "female", "feminist", "few", "fierce", "filthy", "final", "financial", "fine", "firm", "fiscal", "fit", "fixed", "flaky", "flat", "flexible", "fluffy", "fluttering", "flying", "following", "fond", "foolish", "foreign", "formal", "formidable", "forthcoming", "fortunate", "forward", "fragile", "frail", "frantic", "free", "frequent", "fresh", "friendly", "frightened", "front", "frozen", "full", "fun", "functional", "fundamental", "funny", "furious", "future", "fuzzy", "gastric", "gay", "general", "generous", "genetic", "gentle", "genuine", "geographical", "giant", "gigantic", "given", "glad", "glamorous", "gleaming", "global", "glorious", "golden", "good", "gorgeous", "gothic", "governing", "graceful", "gradual", "grand", "grateful", "greasy", "great", "grieving", "grim", "gross", "grotesque", "growing", "grubby", "grumpy", "guilty", "handicapped", "handsome", "happy", "hard", "harsh", "head", "healthy", "heavy", "helpful", "helpless", "hidden", "high", "hilarious", "hissing", "historic", "historical", "hollow", "holy", "homeless", "homely", "hon", "honest", "horizontal", "horrible", "hostile", "hot", "huge", "human", "hungry", "hurt", "hushed", "husky", "icy", "ideal", "identical", "ideological", "ill", "illegal", "imaginative", "immediate", "immense", "imperial", "implicit", "important", "impossible", "impressed", "impressive", "improved", "inadequate", "inappropriate", "inc", "inclined", "increased", "increasing", "incredible", "independent", "indirect", "individual", "industrial", "inevitable", "influential", "informal", "inherent", "initial", "injured", "inland", "inner", "innocent", "innovative", "inquisitive", "instant", "institutional", "insufficient", "intact", "integral", "integrated", "intellectual", "intelligent", "intense", "intensive", "interested", "interesting", "interim", "interior", "intermediate", "internal", "international", "intimate", "invisible", "involved", "irrelevant", "isolated", "itchy", "jealous", "jittery", "joint", "jolly", "joyous", "judicial", "juicy", "junior", "just", "keen", "key", "kind", "known", "labour", "large", "late", "latin", "lazy", "leading", "left", "legal", "legislative", "legitimate", "lengthy", "lesser", "level", "lexical", "liable", "liberal", "light", "like", "likely", "limited", "linear", "linguistic", "liquid", "literary", "little", "live", "lively", "living", "local", "logical", "lonely", "long", "loose", "lost", "loud", "lovely", "low", "loyal", "ltd", "lucky", "mad", "magic", "magnetic", "magnificent", "main", "major", "male", "mammoth", "managerial", "managing", "manual", "many", "marginal", "marine", "marked", "married", "marvellous", "marxist", "mass", "massive", "mathematical", "mature", "maximum", "mean", "meaningful", "mechanical", "medical", "medieval", "melodic", "melted", "mental", "mere", "metropolitan", "mid", "middle", "mighty", "mild", "military", "miniature", "minimal", "minimum", "ministerial", "minor", "miserable", "misleading", "missing", "misty", "mixed", "moaning", "mobile", "moderate", "modern", "modest", "molecular", "monetary", "monthly", "moral", "motionless", "muddy", "multiple", "mushy", "musical", "mute", "mutual", "mysterious", "naked", "narrow", "nasty", "national", "native", "natural", "naughty", "naval", "near", "nearby", "neat", "necessary", "negative", "neighbouring", "nervous", "net", "neutral", "new", "nice", "noble", "noisy", "normal", "northern", "nosy", "notable", "novel", "nuclear", "numerous", "nursing", "nutritious", "nutty", "obedient", "objective", "obliged", "obnoxious", "obvious", "occasional", "occupational", "odd", "official", "ok", "okay", "old", "olympic", "only", "open", "operational", "opposite", "optimistic", "oral", "ordinary", "organic", "organisational", "original", "orthodox", "other", "outdoor", "outer", "outrageous", "outside", "outstanding", "overall", "overseas", "overwhelming", "painful", "pale", "panicky", "parallel", "parental", "parliamentary", "partial", "particular", "passing", "passive", "past", "patient", "payable", "peaceful", "peculiar", "perfect", "permanent", "persistent", "personal", "petite", "philosophical", "physical", "plain", "planned", "plastic", "pleasant", "pleased", "poised", "polite", "political", "poor", "popular", "positive", "possible", "potential", "powerful", "practical", "precious", "precise", "preferred", "pregnant", "preliminary", "premier", "prepared", "present", "presidential", "pretty", "previous", "prickly", "primary", "prime", "primitive", "principal", "printed", "prior", "private", "probable", "productive", "professional", "profitable", "profound", "progressive", "prominent", "promising", "proper", "proposed", "prospective", "protective", "protestant", "proud", "provincial", "psychiatric", "psychological", "public", "puny", "pure", "purring", "puzzled", "quaint", "qualified", "quarrelsome", "querulous", "quick", "quickest", "quiet", "quintessential", "quixotic", "racial", "radical", "rainy", "random", "rapid", "rare", "raspy", "rational", "ratty", "raw", "ready", "real", "realistic", "rear", "reasonable", "recent", "reduced", "redundant", "regional", "registered", "regular", "regulatory", "related", "relative", "relaxed", "relevant", "reliable", "relieved", "religious", "reluctant", "remaining", "remarkable", "remote", "renewed", "representative", "repulsive", "required", "resident", "residential", "resonant", "respectable", "respective", "responsible", "resulting", "retail", "retired", "revolutionary", "rich", "ridiculous", "right", "rigid", "ripe", "rising", "rival", "roasted", "robust", "rolling", "romantic", "rotten", "rough", "round", "royal", "rubber", "rude", "ruling", "running", "rural", "sacred", "sad", "safe", "salty", "satisfactory", "satisfied", "scared", "scary", "scattered", "scientific", "scornful", "scrawny", "screeching", "secondary", "secret", "secure", "select", "selected", "selective", "selfish", "semantic", "senior", "sensible", "sensitive", "separate", "serious", "severe", "sexual", "shaggy", "shaky", "shallow", "shared", "sharp", "sheer", "shiny", "shivering", "shocked", "short", "shrill", "shy", "sick", "significant", "silent", "silky", "silly", "similar", "simple", "single", "skilled", "skinny", "sleepy", "slight", "slim", "slimy", "slippery", "slow", "small", "smart", "smiling", "smoggy", "smooth", "social", "socialist", "soft", "solar", "sole", "solid", "sophisticated", "sore", "sorry", "sound", "sour", "southern", "soviet", "spare", "sparkling", "spatial", "special", "specific", "specified", "spectacular", "spicy", "spiritual", "splendid", "spontaneous", "sporting", "spotless", "spotty", "square", "squealing", "stable", "stale", "standard", "static", "statistical", "statutory", "steady", "steep", "sticky", "stiff", "still", "stingy", "stormy", "straight", "straightforward", "strange", "strategic", "strict", "striking", "striped", "strong", "structural", "stuck", "stupid", "subjective", "subsequent", "substantial", "subtle", "successful", "successive", "sudden", "sufficient", "suitable", "sunny", "super", "superb", "superior", "supporting", "supposed", "supreme", "sure", "surprised", "surprising", "surrounding", "surviving", "suspicious", "sweet", "swift", "symbolic", "sympathetic", "systematic", "tall", "tame", "tart", "tasteless", "tasty", "technical", "technological", "teenage", "temporary", "tender", "tense", "terrible", "territorial", "testy", "then", "theoretical", "thick", "thin", "thirsty", "thorough", "thoughtful", "thoughtless", "thundering", "tight", "tiny", "tired", "top", "tory", "total", "tough", "toxic", "traditional", "tragic", "tremendous", "tricky", "tropical", "troubled", "typical", "ugliest", "ugly", "ultimate", "unable", "unacceptable", "unaware", "uncertain", "unchanged", "uncomfortable", "unconscious", "underground", "underlying", "unemployed", "uneven", "unexpected", "unfair", "unfortunate", "unhappy", "uniform", "uninterested", "unique", "united", "universal", "unknown", "unlikely", "unnecessary", "unpleasant", "unsightly", "unusual", "unwilling", "upper", "upset", "uptight", "urban", "urgent", "used", "useful", "useless", "usual", "vague", "valid", "valuable", "variable", "varied", "various", "varying", "vast", "verbal", "vertical", "very", "vicarious", "vicious", "victorious", "violent", "visible", "visiting", "visual", "vital", "vitreous", "vivacious", "vivid", "vocal", "vocational", "voiceless", "voluminous", "voluntary", "vulnerable", "wandering", "warm", "wasteful", "watery", "weak", "wealthy", "weary", "wee", "weekly", "weird", "welcome", "well", "western", "wet", "whispering", "whole", "wicked", "wide", "widespread", "wild", "wilful", "willing", "willowy", "wily", "wise", "wispy", "wittering", "witty", "wonderful", "wooden", "working", "worldwide", "worried", "worrying", "worthwhile", "worthy", "written", "wrong", "xenacious", "xenial", "xenogeneic", "xenophobic", "xeric", "xerothermic", "yabbering", "yammering", "yappiest", "yappy", "yawning", "yearling", "yearning", "yeasty", "yelling", "yelping", "yielding", "yodelling", "young", "youngest", "youthful", "ytterbic", "yucky", "yummy", "zany", "zealous", "zeroth", "zestful", "zesty", "zippy", "zonal", "zoophagous", "zygomorphic", "zygotic"], exports2.animals = ["aardvark", "aardwolf", "albatross", "alligator", "alpaca", "amphibian", "anaconda", "angelfish", "anglerfish", "ant", "anteater", "antelope", "antlion", "ape", "aphid", "armadillo", "asp", "baboon", "badger", "bandicoot", "barnacle", "barracuda", "basilisk", "bass", "bat", "bear", "beaver", "bedbug", "bee", "beetle", "bird", "bison", "blackbird", "boa", "boar", "bobcat", "bobolink", "bonobo", "booby", "bovid", "bug", "butterfly", "buzzard", "camel", "canid", "canidae", "capybara", "cardinal", "caribou", "carp", "cat", "caterpillar", "catfish", "catshark", "cattle", "centipede", "cephalopod", "chameleon", "cheetah", "chickadee", "chicken", "chimpanzee", "chinchilla", "chipmunk", "cicada", "clam", "clownfish", "cobra", "cockroach", "cod", "condor", "constrictor", "coral", "cougar", "cow", "coyote", "crab", "crane", "crawdad", "crayfish", "cricket", "crocodile", "crow", "cuckoo", "damselfly", "deer", "dingo", "dinosaur", "dog", "dolphin", "donkey", "dormouse", "dove", "dragon", "dragonfly", "duck", "eagle", "earthworm", "earwig", "echidna", "eel", "egret", "elephant", "elk", "emu", "ermine", "falcon", "felidae", "ferret", "finch", "firefly", "fish", "flamingo", "flea", "fly", "flyingfish", "fowl", "fox", "frog", "galliform", "gamefowl", "gayal", "gazelle", "gecko", "gerbil", "gibbon", "giraffe", "goat", "goldfish", "goose", "gopher", "gorilla", "grasshopper", "grouse", "guan", "guanaco", "guineafowl", "gull", "guppy", "haddock", "halibut", "hamster", "hare", "harrier", "hawk", "hedgehog", "heron", "herring", "hippopotamus", "hookworm", "hornet", "horse", "hoverfly", "hummingbird", "hyena", "iguana", "impala", "jackal", "jaguar", "jay", "jellyfish", "junglefowl", "kangaroo", "kingfisher", "kite", "kiwi", "koala", "koi", "krill", "ladybug", "lamprey", "landfowl", "lark", "leech", "lemming", "lemur", "leopard", "leopon", "limpet", "lion", "lizard", "llama", "lobster", "locust", "loon", "louse", "lungfish", "lynx", "macaw", "mackerel", "magpie", "mammal", "manatee", "mandrill", "marlin", "marmoset", "marmot", "marsupial", "marten", "mastodon", "meadowlark", "meerkat", "mink", "minnow", "mite", "mockingbird", "mole", "mollusk", "mongoose", "monkey", "moose", "mosquito", "moth", "mouse", "mule", "muskox", "narwhal", "newt", "nightingale", "ocelot", "octopus", "opossum", "orangutan", "orca", "ostrich", "otter", "owl", "ox", "panda", "panther", "parakeet", "parrot", "parrotfish", "partridge", "peacock", "peafowl", "pelican", "penguin", "perch", "pheasant", "pig", "pigeon", "pike", "pinniped", "piranha", "planarian", "platypus", "pony", "porcupine", "porpoise", "possum", "prawn", "primate", "ptarmigan", "puffin", "puma", "python", "quail", "quelea", "quokka", "rabbit", "raccoon", "rat", "rattlesnake", "raven", "reindeer", "reptile", "rhinoceros", "roadrunner", "rodent", "rook", "rooster", "roundworm", "sailfish", "salamander", "salmon", "sawfish", "scallop", "scorpion", "seahorse", "shark", "sheep", "shrew", "shrimp", "silkworm", "silverfish", "skink", "skunk", "sloth", "slug", "smelt", "snail", "snake", "snipe", "sole", "sparrow", "spider", "spoonbill", "squid", "squirrel", "starfish", "stingray", "stoat", "stork", "sturgeon", "swallow", "swan", "swift", "swordfish", "swordtail", "tahr", "takin", "tapir", "tarantula", "tarsier", "termite", "tern", "thrush", "tick", "tiger", "tiglon", "toad", "tortoise", "toucan", "trout", "tuna", "turkey", "turtle", "tyrannosaurus", "unicorn", "urial", "vicuna", "viper", "vole", "vulture", "wallaby", "walrus", "warbler", "wasp", "weasel", "whale", "whippet", "whitefish", "wildcat", "wildebeest", "wildfowl", "wolf", "wolverine", "wombat", "woodpecker", "worm", "wren", "xerinae", "yak", "zebra"], exports2.colors = ["amaranth", "amber", "amethyst", "apricot", "aqua", "aquamarine", "azure", "beige", "black", "blue", "blush", "bronze", "brown", "chocolate", "coffee", "copper", "coral", "crimson", "cyan", "emerald", "fuchsia", "gold", "gray", "green", "harlequin", "indigo", "ivory", "jade", "lavender", "lime", "magenta", "maroon", "moccasin", "olive", "orange", "peach", "pink", "plum", "purple", "red", "rose", "salmon", "sapphire", "scarlet", "silver", "tan", "teal", "tomato", "turquoise", "violet", "white", "yellow"], exports2.countries = ["Afghanistan", "\xC5land Islands", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua & Barbuda", "Argentina", "Armenia", "Aruba", "Ascension Island", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bosnia & Herzegovina", "Botswana", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Canary Islands", "Cape Verde", "Caribbean Netherlands", "Cayman Islands", "Central African Republic", "Ceuta & Melilla", "Chad", "Chile", "China", "Christmas Island", "Cocos Islands", "Colombia", "Comoros", "Congo", "Cook Islands", "Costa Rica", "C\xF4te d'Ivoire", "Croatia", "Cuba", "Cura\xE7ao", "Cyprus", "Czechia", "Denmark", "Diego Garcia", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Eurozone", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hong Kong SAR China", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macau SAR China", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territories", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn Islands", "Poland", "Portugal", "Puerto Rico", "Qatar", "R\xE9union", "Romania", "Russia", "Rwanda", "Samoa", "San Marino", "S\xE3o Tom\xE9 & Pr\xEDncipe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia & South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "St. Barth\xE9lemy", "St. Helena", "St. Kitts & Nevis", "St. Lucia", "St. Martin", "St. Pierre & Miquelon", "St. Vincent & Grenadines", "Sudan", "Suriname", "Svalbard & Jan Mayen", "Swaziland", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga", "Trinidad & Tobago", "Tristan da Cunha", "Tunisia", "Turkey", "Turkmenistan", "Turks & Caicos Islands", "Tuvalu", "U.S. Outlying Islands", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United Nations", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Wallis & Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe"], exports2.languages = ["Akan", "Amharic", "Arabic", "Assamese", "Awadhi", "Azerbaijani", "Balochi", "Belarusian", "Bengali", "Bhojpuri", "Burmese", "Cebuano", "Chewa", "Chhattisgarhi", "Chittagonian", "Czech", "Deccan", "Dhundhari", "Dutch", "English", "French", "Fula", "Gan", "German", "Greek", "Gujarati", "Hakka", "Haryanvi", "Hausa", "Hiligaynon", "Hindi", "Hmong", "Hungarian", "Igbo", "Ilocano", "Italian", "Japanese", "Javanese", "Jin", "Kannada", "Kazakh", "Khmer", "Kinyarwanda", "Kirundi", "Konkani", "Korean", "Kurdish", "Madurese", "Magahi", "Maithili", "Malagasy", "Malay", "Malayalam", "Mandarin", "Marathi", "Marwari", "Min", "Mossi", "Nepali", "Odia", "Oromo", "Pashto", "Persian", "Polish", "Portuguese", "Punjabi", "Quechua", "Romanian", "Russian", "Saraiki", "Shona", "Sindhi", "Sinhala", "Somali", "Spanish", "Sundanese", "Swedish", "Sylheti", "Tagalog", "Tamil", "Telugu", "Thai", "Turkish", "Turkmen", "Ukrainian", "Urdu", "Uyghur", "Uzbek", "Vietnamese", "Wu", "Xhosa", "Xiang", "Yoruba", "Yue", "Zhuang", "Zulu"], exports2.names = ["Aaren", "Aarika", "Abagael", "Abagail", "Abbe", "Abbey", "Abbi", "Abbie", "Abby", "Abbye", "Abigael", "Abigail", "Abigale", "Abra", "Ada", "Adah", "Adaline", "Adan", "Adara", "Adda", "Addi", "Addia", "Addie", "Addy", "Adel", "Adela", "Adelaida", "Adelaide", "Adele", "Adelheid", "Adelice", "Adelina", "Adelind", "Adeline", "Adella", "Adelle", "Adena", "Adey", "Adi", "Adiana", "Adina", "Adora", "Adore", "Adoree", "Adorne", "Adrea", "Adria", "Adriaens", "Adrian", "Adriana", "Adriane", "Adrianna", "Adrianne", "Adriena", "Adrienne", "Aeriel", "Aeriela", "Aeriell", "Afton", "Ag", "Agace", "Agata", "Agatha", "Agathe", "Aggi", "Aggie", "Aggy", "Agna", "Agnella", "Agnes", "Agnese", "Agnesse", "Agneta", "Agnola", "Agretha", "Aida", "Aidan", "Aigneis", "Aila", "Aile", "Ailee", "Aileen", "Ailene", "Ailey", "Aili", "Ailina", "Ailis", "Ailsun", "Ailyn", "Aime", "Aimee", "Aimil", "Aindrea", "Ainslee", "Ainsley", "Ainslie", "Ajay", "Alaine", "Alameda", "Alana", "Alanah", "Alane", "Alanna", "Alayne", "Alberta", "Albertina", "Albertine", "Albina", "Alecia", "Aleda", "Aleece", "Aleen", "Alejandra", "Alejandrina", "Alena", "Alene", "Alessandra", "Aleta", "Alethea", "Alex", "Alexa", "Alexandra", "Alexandrina", "Alexi", "Alexia", "Alexina", "Alexine", "Alexis", "Alfi", "Alfie", "Alfreda", "Alfy", "Ali", "Alia", "Alica", "Alice", "Alicea", "Alicia", "Alida", "Alidia", "Alie", "Alika", "Alikee", "Alina", "Aline", "Alis", "Alisa", "Alisha", "Alison", "Alissa", "Alisun", "Alix", "Aliza", "Alla", "Alleen", "Allegra", "Allene", "Alli", "Allianora", "Allie", "Allina", "Allis", "Allison", "Allissa", "Allix", "Allsun", "Allx", "Ally", "Allyce", "Allyn", "Allys", "Allyson", "Alma", "Almeda", "Almeria", "Almeta", "Almira", "Almire", "Aloise", "Aloisia", "Aloysia", "Alta", "Althea", "Alvera", "Alverta", "Alvina", "Alvinia", "Alvira", "Alyce", "Alyda", "Alys", "Alysa", "Alyse", "Alysia", "Alyson", "Alyss", "Alyssa", "Amabel", "Amabelle", "Amalea", "Amalee", "Amaleta", "Amalia", "Amalie", "Amalita", "Amalle", "Amanda", "Amandi", "Amandie", "Amandy", "Amara", "Amargo", "Amata", "Amber", "Amberly", "Ambur", "Ame", "Amelia", "Amelie", "Amelina", "Ameline", "Amelita", "Ami", "Amie", "Amii", "Amil", "Amitie", "Amity", "Ammamaria", "Amy", "Amye", "Ana", "Anabal", "Anabel", "Anabella", "Anabelle", "Analiese", "Analise", "Anallese", "Anallise", "Anastasia", "Anastasie", "Anastassia", "Anatola", "Andee", "Andeee", "Anderea", "Andi", "Andie", "Andra", "Andrea", "Andreana", "Andree", "Andrei", "Andria", "Andriana", "Andriette", "Andromache", "Andy", "Anestassia", "Anet", "Anett", "Anetta", "Anette", "Ange", "Angel", "Angela", "Angele", "Angelia", "Angelica", "Angelika", "Angelina", "Angeline", "Angelique", "Angelita", "Angelle", "Angie", "Angil", "Angy", "Ania", "Anica", "Anissa", "Anita", "Anitra", "Anjanette", "Anjela", "Ann", "Ann-marie", "Anna", "Anna-diana", "Anna-diane", "Anna-maria", "Annabal", "Annabel", "Annabela", "Annabell", "Annabella", "Annabelle", "Annadiana", "Annadiane", "Annalee", "Annaliese", "Annalise", "Annamaria", "Annamarie", "Anne", "Anne-corinne", "Anne-marie", "Annecorinne", "Anneliese", "Annelise", "Annemarie", "Annetta", "Annette", "Anni", "Annice", "Annie", "Annis", "Annissa", "Annmaria", "Annmarie", "Annnora", "Annora", "Anny", "Anselma", "Ansley", "Anstice", "Anthe", "Anthea", "Anthia", "Anthiathia", "Antoinette", "Antonella", "Antonetta", "Antonia", "Antonie", "Antonietta", "Antonina", "Anya", "Appolonia", "April", "Aprilette", "Ara", "Arabel", "Arabela", "Arabele", "Arabella", "Arabelle", "Arda", "Ardath", "Ardeen", "Ardelia", "Ardelis", "Ardella", "Ardelle", "Arden", "Ardene", "Ardenia", "Ardine", "Ardis", "Ardisj", "Ardith", "Ardra", "Ardyce", "Ardys", "Ardyth", "Aretha", "Ariadne", "Ariana", "Aridatha", "Ariel", "Ariela", "Ariella", "Arielle", "Arlana", "Arlee", "Arleen", "Arlen", "Arlena", "Arlene", "Arleta", "Arlette", "Arleyne", "Arlie", "Arliene", "Arlina", "Arlinda", "Arline", "Arluene", "Arly", "Arlyn", "Arlyne", "Aryn", "Ashely", "Ashia", "Ashien", "Ashil", "Ashla", "Ashlan", "Ashlee", "Ashleigh", "Ashlen", "Ashley", "Ashli", "Ashlie", "Ashly", "Asia", "Astra", "Astrid", "Astrix", "Atalanta", "Athena", "Athene", "Atlanta", "Atlante", "Auberta", "Aubine", "Aubree", "Aubrette", "Aubrey", "Aubrie", "Aubry", "Audi", "Audie", "Audra", "Audre", "Audrey", "Audrie", "Audry", "Audrye", "Audy", "Augusta", "Auguste", "Augustina", "Augustine", "Aundrea", "Aura", "Aurea", "Aurel", "Aurelea", "Aurelia", "Aurelie", "Auria", "Aurie", "Aurilia", "Aurlie", "Auroora", "Aurora", "Aurore", "Austin", "Austina", "Austine", "Ava", "Aveline", "Averil", "Averyl", "Avie", "Avis", "Aviva", "Avivah", "Avril", "Avrit", "Ayn", "Bab", "Babara", "Babb", "Babbette", "Babbie", "Babette", "Babita", "Babs", "Bambi", "Bambie", "Bamby", "Barb", "Barbabra", "Barbara", "Barbara-anne", "Barbaraanne", "Barbe", "Barbee", "Barbette", "Barbey", "Barbi", "Barbie", "Barbra", "Barby", "Bari", "Barrie", "Barry", "Basia", "Bathsheba", "Batsheva", "Bea", "Beatrice", "Beatrisa", "Beatrix", "Beatriz", "Bebe", "Becca", "Becka", "Becki", "Beckie", "Becky", "Bee", "Beilul", "Beitris", "Bekki", "Bel", "Belia", "Belicia", "Belinda", "Belita", "Bell", "Bella", "Bellanca", "Belle", "Bellina", "Belva", "Belvia", "Bendite", "Benedetta", "Benedicta", "Benedikta", "Benetta", "Benita", "Benni", "Bennie", "Benny", "Benoite", "Berenice", "Beret", "Berget", "Berna", "Bernadene", "Bernadette", "Bernadina", "Bernadine", "Bernardina", "Bernardine", "Bernelle", "Bernete", "Bernetta", "Bernette", "Berni", "Bernice", "Bernie", "Bernita", "Berny", "Berri", "Berrie", "Berry", "Bert", "Berta", "Berte", "Bertha", "Berthe", "Berti", "Bertie", "Bertina", "Bertine", "Berty", "Beryl", "Beryle", "Bess", "Bessie", "Bessy", "Beth", "Bethanne", "Bethany", "Bethena", "Bethina", "Betsey", "Betsy", "Betta", "Bette", "Bette-ann", "Betteann", "Betteanne", "Betti", "Bettina", "Bettine", "Betty", "Bettye", "Beulah", "Bev", "Beverie", "Beverlee", "Beverley", "Beverlie", "Beverly", "Bevvy", "Bianca", "Bianka", "Bibbie", "Bibby", "Bibbye", "Bibi", "Biddie", "Biddy", "Bidget", "Bili", "Bill", "Billi", "Billie", "Billy", "Billye", "Binni", "Binnie", "Binny", "Bird", "Birdie", "Birgit", "Birgitta", "Blair", "Blaire", "Blake", "Blakelee", "Blakeley", "Blanca", "Blanch", "Blancha", "Blanche", "Blinni", "Blinnie", "Blinny", "Bliss", "Blisse", "Blithe", "Blondell", "Blondelle", "Blondie", "Blondy", "Blythe", "Bobbe", "Bobbee", "Bobbette", "Bobbi", "Bobbie", "Bobby", "Bobbye", "Bobette", "Bobina", "Bobine", "Bobinette", "Bonita", "Bonnee", "Bonni", "Bonnibelle", "Bonnie", "Bonny", "Brana", "Brandais", "Brande", "Brandea", "Brandi", "Brandice", "Brandie", "Brandise", "Brandy", "Breanne", "Brear", "Bree", "Breena", "Bren", "Brena", "Brenda", "Brenn", "Brenna", "Brett", "Bria", "Briana", "Brianna", "Brianne", "Bride", "Bridget", "Bridgette", "Bridie", "Brier", "Brietta", "Brigid", "Brigida", "Brigit", "Brigitta", "Brigitte", "Brina", "Briney", "Brinn", "Brinna", "Briny", "Brit", "Brita", "Britney", "Britni", "Britt", "Britta", "Brittan", "Brittaney", "Brittani", "Brittany", "Britte", "Britteny", "Brittne", "Brittney", "Brittni", "Brook", "Brooke", "Brooks", "Brunhilda", "Brunhilde", "Bryana", "Bryn", "Bryna", "Brynn", "Brynna", "Brynne", "Buffy", "Bunni", "Bunnie", "Bunny", "Cacilia", "Cacilie", "Cahra", "Cairistiona", "Caitlin", "Caitrin", "Cal", "Calida", "Calla", "Calley", "Calli", "Callida", "Callie", "Cally", "Calypso", "Cam", "Camala", "Camel", "Camella", "Camellia", "Cami", "Camila", "Camile", "Camilla", "Camille", "Cammi", "Cammie", "Cammy", "Candace", "Candi", "Candice", "Candida", "Candide", "Candie", "Candis", "Candra", "Candy", "Caprice", "Cara", "Caralie", "Caren", "Carena", "Caresa", "Caressa", "Caresse", "Carey", "Cari", "Caria", "Carie", "Caril", "Carilyn", "Carin", "Carina", "Carine", "Cariotta", "Carissa", "Carita", "Caritta", "Carla", "Carlee", "Carleen", "Carlen", "Carlene", "Carley", "Carlie", "Carlin", "Carlina", "Carline", "Carlita", "Carlota", "Carlotta", "Carly", "Carlye", "Carlyn", "Carlynn", "Carlynne", "Carma", "Carmel", "Carmela", "Carmelia", "Carmelina", "Carmelita", "Carmella", "Carmelle", "Carmen", "Carmencita", "Carmina", "Carmine", "Carmita", "Carmon", "Caro", "Carol", "Carol-jean", "Carola", "Carolan", "Carolann", "Carole", "Carolee", "Carolin", "Carolina", "Caroline", "Caroljean", "Carolyn", "Carolyne", "Carolynn", "Caron", "Carree", "Carri", "Carrie", "Carrissa", "Carroll", "Carry", "Cary", "Caryl", "Caryn", "Casandra", "Casey", "Casi", "Casie", "Cass", "Cassandra", "Cassandre", "Cassandry", "Cassaundra", "Cassey", "Cassi", "Cassie", "Cassondra", "Cassy", "Catarina", "Cate", "Caterina", "Catha", "Catharina", "Catharine", "Cathe", "Cathee", "Catherin", "Catherina", "Catherine", "Cathi", "Cathie", "Cathleen", "Cathlene", "Cathrin", "Cathrine", "Cathryn", "Cathy", "Cathyleen", "Cati", "Catie", "Catina", "Catlaina", "Catlee", "Catlin", "Catrina", "Catriona", "Caty", "Caye", "Cayla", "Cecelia", "Cecil", "Cecile", "Ceciley", "Cecilia", "Cecilla", "Cecily", "Ceil", "Cele", "Celene", "Celesta", "Celeste", "Celestia", "Celestina", "Celestine", "Celestyn", "Celestyna", "Celia", "Celie", "Celina", "Celinda", "Celine", "Celinka", "Celisse", "Celka", "Celle", "Cesya", "Chad", "Chanda", "Chandal", "Chandra", "Channa", "Chantal", "Chantalle", "Charil", "Charin", "Charis", "Charissa", "Charisse", "Charita", "Charity", "Charla", "Charlean", "Charleen", "Charlena", "Charlene", "Charline", "Charlot", "Charlotta", "Charlotte", "Charmain", "Charmaine", "Charmane", "Charmian", "Charmine", "Charmion", "Charo", "Charyl", "Chastity", "Chelsae", "Chelsea", "Chelsey", "Chelsie", "Chelsy", "Cher", "Chere", "Cherey", "Cheri", "Cherianne", "Cherice", "Cherida", "Cherie", "Cherilyn", "Cherilynn", "Cherin", "Cherise", "Cherish", "Cherlyn", "Cherri", "Cherrita", "Cherry", "Chery", "Cherye", "Cheryl", "Cheslie", "Chiarra", "Chickie", "Chicky", "Chiquia", "Chiquita", "Chlo", "Chloe", "Chloette", "Chloris", "Chris", "Chrissie", "Chrissy", "Christa", "Christabel", "Christabella", "Christal", "Christalle", "Christan", "Christean", "Christel", "Christen", "Christi", "Christian", "Christiana", "Christiane", "Christie", "Christin", "Christina", "Christine", "Christy", "Christye", "Christyna", "Chrysa", "Chrysler", "Chrystal", "Chryste", "Chrystel", "Cicely", "Cicily", "Ciel", "Cilka", "Cinda", "Cindee", "Cindelyn", "Cinderella", "Cindi", "Cindie", "Cindra", "Cindy", "Cinnamon", "Cissiee", "Cissy", "Clair", "Claire", "Clara", "Clarabelle", "Clare", "Claresta", "Clareta", "Claretta", "Clarette", "Clarey", "Clari", "Claribel", "Clarice", "Clarie", "Clarinda", "Clarine", "Clarissa", "Clarisse", "Clarita", "Clary", "Claude", "Claudelle", "Claudetta", "Claudette", "Claudia", "Claudie", "Claudina", "Claudine", "Clea", "Clem", "Clemence", "Clementia", "Clementina", "Clementine", "Clemmie", "Clemmy", "Cleo", "Cleopatra", "Clerissa", "Clio", "Clo", "Cloe", "Cloris", "Clotilda", "Clovis", "Codee", "Codi", "Codie", "Cody", "Coleen", "Colene", "Coletta", "Colette", "Colleen", "Collen", "Collete", "Collette", "Collie", "Colline", "Colly", "Con", "Concettina", "Conchita", "Concordia", "Conni", "Connie", "Conny", "Consolata", "Constance", "Constancia", "Constancy", "Constanta", "Constantia", "Constantina", "Constantine", "Consuela", "Consuelo", "Cookie", "Cora", "Corabel", "Corabella", "Corabelle", "Coral", "Coralie", "Coraline", "Coralyn", "Cordelia", "Cordelie", "Cordey", "Cordi", "Cordie", "Cordula", "Cordy", "Coreen", "Corella", "Corenda", "Corene", "Coretta", "Corette", "Corey", "Cori", "Corie", "Corilla", "Corina", "Corine", "Corinna", "Corinne", "Coriss", "Corissa", "Corliss", "Corly", "Cornela", "Cornelia", "Cornelle", "Cornie", "Corny", "Correna", "Correy", "Corri", "Corrianne", "Corrie", "Corrina", "Corrine", "Corrinne", "Corry", "Cortney", "Cory", "Cosetta", "Cosette", "Costanza", "Courtenay", "Courtnay", "Courtney", "Crin", "Cris", "Crissie", "Crissy", "Crista", "Cristabel", "Cristal", "Cristen", "Cristi", "Cristie", "Cristin", "Cristina", "Cristine", "Cristionna", "Cristy", "Crysta", "Crystal", "Crystie", "Cthrine", "Cyb", "Cybil", "Cybill", "Cymbre", "Cynde", "Cyndi", "Cyndia", "Cyndie", "Cyndy", "Cynthea", "Cynthia", "Cynthie", "Cynthy", "Dacey", "Dacia", "Dacie", "Dacy", "Dael", "Daffi", "Daffie", "Daffy", "Dagmar", "Dahlia", "Daile", "Daisey", "Daisi", "Daisie", "Daisy", "Dale", "Dalenna", "Dalia", "Dalila", "Dallas", "Daloris", "Damara", "Damaris", "Damita", "Dana", "Danell", "Danella", "Danette", "Dani", "Dania", "Danica", "Danice", "Daniela", "Daniele", "Daniella", "Danielle", "Danika", "Danila", "Danit", "Danita", "Danna", "Danni", "Dannie", "Danny", "Dannye", "Danya", "Danyelle", "Danyette", "Daphene", "Daphna", "Daphne", "Dara", "Darb", "Darbie", "Darby", "Darcee", "Darcey", "Darci", "Darcie", "Darcy", "Darda", "Dareen", "Darell", "Darelle", "Dari", "Daria", "Darice", "Darla", "Darleen", "Darlene", "Darline", "Darlleen", "Daron", "Darrelle", "Darryl", "Darsey", "Darsie", "Darya", "Daryl", "Daryn", "Dasha", "Dasi", "Dasie", "Dasya", "Datha", "Daune", "Daveen", "Daveta", "Davida", "Davina", "Davine", "Davita", "Dawn", "Dawna", "Dayle", "Dayna", "Ddene", "De", "Deana", "Deane", "Deanna", "Deanne", "Deb", "Debbi", "Debbie", "Debby", "Debee", "Debera", "Debi", "Debor", "Debora", "Deborah", "Debra", "Dede", "Dedie", "Dedra", "Dee", "Deeann", "Deeanne", "Deedee", "Deena", "Deerdre", "Deeyn", "Dehlia", "Deidre", "Deina", "Deirdre", "Del", "Dela", "Delcina", "Delcine", "Delia", "Delila", "Delilah", "Delinda", "Dell", "Della", "Delly", "Delora", "Delores", "Deloria", "Deloris", "Delphine", "Delphinia", "Demeter", "Demetra", "Demetria", "Demetris", "Dena", "Deni", "Denice", "Denise", "Denna", "Denni", "Dennie", "Denny", "Deny", "Denys", "Denyse", "Deonne", "Desdemona", "Desirae", "Desiree", "Desiri", "Deva", "Devan", "Devi", "Devin", "Devina", "Devinne", "Devon", "Devondra", "Devonna", "Devonne", "Devora", "Di", "Diahann", "Dian", "Diana", "Diandra", "Diane", "Diane-marie", "Dianemarie", "Diann", "Dianna", "Dianne", "Diannne", "Didi", "Dido", "Diena", "Dierdre", "Dina", "Dinah", "Dinnie", "Dinny", "Dion", "Dione", "Dionis", "Dionne", "Dita", "Dix", "Dixie", "Dniren", "Dode", "Dodi", "Dodie", "Dody", "Doe", "Doll", "Dolley", "Dolli", "Dollie", "Dolly", "Dolores", "Dolorita", "Doloritas", "Domeniga", "Dominga", "Domini", "Dominica", "Dominique", "Dona", "Donella", "Donelle", "Donetta", "Donia", "Donica", "Donielle", "Donna", "Donnamarie", "Donni", "Donnie", "Donny", "Dora", "Doralia", "Doralin", "Doralyn", "Doralynn", "Doralynne", "Dore", "Doreen", "Dorelia", "Dorella", "Dorelle", "Dorena", "Dorene", "Doretta", "Dorette", "Dorey", "Dori", "Doria", "Dorian", "Dorice", "Dorie", "Dorine", "Doris", "Dorisa", "Dorise", "Dorita", "Doro", "Dorolice", "Dorolisa", "Dorotea", "Doroteya", "Dorothea", "Dorothee", "Dorothy", "Dorree", "Dorri", "Dorrie", "Dorris", "Dorry", "Dorthea", "Dorthy", "Dory", "Dosi", "Dot", "Doti", "Dotti", "Dottie", "Dotty", "Dre", "Dreddy", "Dredi", "Drona", "Dru", "Druci", "Drucie", "Drucill", "Drucy", "Drusi", "Drusie", "Drusilla", "Drusy", "Dulce", "Dulcea", "Dulci", "Dulcia", "Dulciana", "Dulcie", "Dulcine", "Dulcinea", "Dulcy", "Dulsea", "Dusty", "Dyan", "Dyana", "Dyane", "Dyann", "Dyanna", "Dyanne", "Dyna", "Dynah", "Eachelle", "Eada", "Eadie", "Eadith", "Ealasaid", "Eartha", "Easter", "Eba", "Ebba", "Ebonee", "Ebony", "Eda", "Eddi", "Eddie", "Eddy", "Ede", "Edee", "Edeline", "Eden", "Edi", "Edie", "Edin", "Edita", "Edith", "Editha", "Edithe", "Ediva", "Edna", "Edwina", "Edy", "Edyth", "Edythe", "Effie", "Eileen", "Eilis", "Eimile", "Eirena", "Ekaterina", "Elaina", "Elaine", "Elana", "Elane", "Elayne", "Elberta", "Elbertina", "Elbertine", "Eleanor", "Eleanora", "Eleanore", "Electra", "Eleen", "Elena", "Elene", "Eleni", "Elenore", "Eleonora", "Eleonore", "Elfie", "Elfreda", "Elfrida", "Elfrieda", "Elga", "Elianora", "Elianore", "Elicia", "Elie", "Elinor", "Elinore", "Elisa", "Elisabet", "Elisabeth", "Elisabetta", "Elise", "Elisha", "Elissa", "Elita", "Eliza", "Elizabet", "Elizabeth", "Elka", "Elke", "Ella", "Elladine", "Elle", "Ellen", "Ellene", "Ellette", "Elli", "Ellie", "Ellissa", "Elly", "Ellyn", "Ellynn", "Elmira", "Elna", "Elnora", "Elnore", "Eloisa", "Eloise", "Elonore", "Elora", "Elsa", "Elsbeth", "Else", "Elset", "Elsey", "Elsi", "Elsie", "Elsinore", "Elspeth", "Elsy", "Elva", "Elvera", "Elvina", "Elvira", "Elwira", "Elyn", "Elyse", "Elysee", "Elysha", "Elysia", "Elyssa", "Em", "Ema", "Emalee", "Emalia", "Emelda", "Emelia", "Emelina", "Emeline", "Emelita", "Emelyne", "Emera", "Emilee", "Emili", "Emilia", "Emilie", "Emiline", "Emily", "Emlyn", "Emlynn", "Emlynne", "Emma", "Emmalee", "Emmaline", "Emmalyn", "Emmalynn", "Emmalynne", "Emmeline", "Emmey", "Emmi", "Emmie", "Emmy", "Emmye", "Emogene", "Emyle", "Emylee", "Engracia", "Enid", "Enrica", "Enrichetta", "Enrika", "Enriqueta", "Eolanda", "Eolande", "Eran", "Erda", "Erena", "Erica", "Ericha", "Ericka", "Erika", "Erin", "Erina", "Erinn", "Erinna", "Erma", "Ermengarde", "Ermentrude", "Ermina", "Erminia", "Erminie", "Erna", "Ernaline", "Ernesta", "Ernestine", "Ertha", "Eryn", "Esma", "Esmaria", "Esme", "Esmeralda", "Essa", "Essie", "Essy", "Esta", "Estel", "Estele", "Estell", "Estella", "Estelle", "Ester", "Esther", "Estrella", "Estrellita", "Ethel", "Ethelda", "Ethelin", "Ethelind", "Etheline", "Ethelyn", "Ethyl", "Etta", "Etti", "Ettie", "Etty", "Eudora", "Eugenia", "Eugenie", "Eugine", "Eula", "Eulalie", "Eunice", "Euphemia", "Eustacia", "Eva", "Evaleen", "Evangelia", "Evangelin", "Evangelina", "Evangeline", "Evania", "Evanne", "Eve", "Eveleen", "Evelina", "Eveline", "Evelyn", "Evey", "Evie", "Evita", "Evonne", "Evvie", "Evvy", "Evy", "Eyde", "Eydie", "Ezmeralda", "Fae", "Faina", "Faith", "Fallon", "Fan", "Fanchette", "Fanchon", "Fancie", "Fancy", "Fanechka", "Fania", "Fanni", "Fannie", "Fanny", "Fanya", "Fara", "Farah", "Farand", "Farica", "Farra", "Farrah", "Farrand", "Faun", "Faunie", "Faustina", "Faustine", "Fawn", "Fawne", "Fawnia", "Fay", "Faydra", "Faye", "Fayette", "Fayina", "Fayre", "Fayth", "Faythe", "Federica", "Fedora", "Felecia", "Felicdad", "Felice", "Felicia", "Felicity", "Felicle", "Felipa", "Felisha", "Felita", "Feliza", "Fenelia", "Feodora", "Ferdinanda", "Ferdinande", "Fern", "Fernanda", "Fernande", "Fernandina", "Ferne", "Fey", "Fiann", "Fianna", "Fidela", "Fidelia", "Fidelity", "Fifi", "Fifine", "Filia", "Filide", "Filippa", "Fina", "Fiona", "Fionna", "Fionnula", "Fiorenze", "Fleur", "Fleurette", "Flo", "Flor", "Flora", "Florance", "Flore", "Florella", "Florence", "Florencia", "Florentia", "Florenza", "Florette", "Flori", "Floria", "Florida", "Florie", "Florina", "Florinda", "Floris", "Florri", "Florrie", "Florry", "Flory", "Flossi", "Flossie", "Flossy", "Flss", "Fran", "Francene", "Frances", "Francesca", "Francine", "Francisca", "Franciska", "Francoise", "Francyne", "Frank", "Frankie", "Franky", "Franni", "Frannie", "Franny", "Frayda", "Fred", "Freda", "Freddi", "Freddie", "Freddy", "Fredelia", "Frederica", "Fredericka", "Frederique", "Fredi", "Fredia", "Fredra", "Fredrika", "Freida", "Frieda", "Friederike", "Fulvia", "Gabbey", "Gabbi", "Gabbie", "Gabey", "Gabi", "Gabie", "Gabriel", "Gabriela", "Gabriell", "Gabriella", "Gabrielle", "Gabriellia", "Gabrila", "Gaby", "Gae", "Gael", "Gail", "Gale", "Galina", "Garland", "Garnet", "Garnette", "Gates", "Gavra", "Gavrielle", "Gay", "Gaye", "Gayel", "Gayla", "Gayle", "Gayleen", "Gaylene", "Gaynor", "Gelya", "Gena", "Gene", "Geneva", "Genevieve", "Genevra", "Genia", "Genna", "Genni", "Gennie", "Gennifer", "Genny", "Genovera", "Genvieve", "George", "Georgeanna", "Georgeanne", "Georgena", "Georgeta", "Georgetta", "Georgette", "Georgia", "Georgiana", "Georgianna", "Georgianne", "Georgie", "Georgina", "Georgine", "Geralda", "Geraldine", "Gerda", "Gerhardine", "Geri", "Gerianna", "Gerianne", "Gerladina", "Germain", "Germaine", "Germana", "Gerri", "Gerrie", "Gerrilee", "Gerry", "Gert", "Gerta", "Gerti", "Gertie", "Gertrud", "Gertruda", "Gertrude", "Gertrudis", "Gerty", "Giacinta", "Giana", "Gianina", "Gianna", "Gigi", "Gilberta", "Gilberte", "Gilbertina", "Gilbertine", "Gilda", "Gilemette", "Gill", "Gillan", "Gilli", "Gillian", "Gillie", "Gilligan", "Gilly", "Gina", "Ginelle", "Ginevra", "Ginger", "Ginni", "Ginnie", "Ginnifer", "Ginny", "Giorgia", "Giovanna", "Gipsy", "Giralda", "Gisela", "Gisele", "Gisella", "Giselle", "Giuditta", "Giulia", "Giulietta", "Giustina", "Gizela", "Glad", "Gladi", "Gladys", "Gleda", "Glen", "Glenda", "Glenine", "Glenn", "Glenna", "Glennie", "Glennis", "Glori", "Gloria", "Gloriana", "Gloriane", "Glory", "Glyn", "Glynda", "Glynis", "Glynnis", "Gnni", "Godiva", "Golda", "Goldarina", "Goldi", "Goldia", "Goldie", "Goldina", "Goldy", "Grace", "Gracia", "Gracie", "Grata", "Gratia", "Gratiana", "Gray", "Grayce", "Grazia", "Greer", "Greta", "Gretal", "Gretchen", "Grete", "Gretel", "Grethel", "Gretna", "Gretta", "Grier", "Griselda", "Grissel", "Guendolen", "Guenevere", "Guenna", "Guglielma", "Gui", "Guillema", "Guillemette", "Guinevere", "Guinna", "Gunilla", "Gus", "Gusella", "Gussi", "Gussie", "Gussy", "Gusta", "Gusti", "Gustie", "Gusty", "Gwen", "Gwendolen", "Gwendolin", "Gwendolyn", "Gweneth", "Gwenette", "Gwenneth", "Gwenni", "Gwennie", "Gwenny", "Gwenora", "Gwenore", "Gwyn", "Gwyneth", "Gwynne", "Gypsy", "Hadria", "Hailee", "Haily", "Haleigh", "Halette", "Haley", "Hali", "Halie", "Halimeda", "Halley", "Halli", "Hallie", "Hally", "Hana", "Hanna", "Hannah", "Hanni", "Hannie", "Hannis", "Hanny", "Happy", "Harlene", "Harley", "Harli", "Harlie", "Harmonia", "Harmonie", "Harmony", "Harri", "Harrie", "Harriet", "Harriett", "Harrietta", "Harriette", "Harriot", "Harriott", "Hatti", "Hattie", "Hatty", "Hayley", "Hazel", "Heath", "Heather", "Heda", "Hedda", "Heddi", "Heddie", "Hedi", "Hedvig", "Hedvige", "Hedwig", "Hedwiga", "Hedy", "Heida", "Heidi", "Heidie", "Helaina", "Helaine", "Helen", "Helen-elizabeth", "Helena", "Helene", "Helenka", "Helga", "Helge", "Helli", "Heloise", "Helsa", "Helyn", "Hendrika", "Henka", "Henrie", "Henrieta", "Henrietta", "Henriette", "Henryetta", "Hephzibah", "Hermia", "Hermina", "Hermine", "Herminia", "Hermione", "Herta", "Hertha", "Hester", "Hesther", "Hestia", "Hetti", "Hettie", "Hetty", "Hilary", "Hilda", "Hildagard", "Hildagarde", "Hilde", "Hildegaard", "Hildegarde", "Hildy", "Hillary", "Hilliary", "Hinda", "Holli", "Hollie", "Holly", "Holly-anne", "Hollyanne", "Honey", "Honor", "Honoria", "Hope", "Horatia", "Hortense", "Hortensia", "Hulda", "Hyacinth", "Hyacintha", "Hyacinthe", "Hyacinthia", "Hyacinthie", "Hynda", "Ianthe", "Ibbie", "Ibby", "Ida", "Idalia", "Idalina", "Idaline", "Idell", "Idelle", "Idette", "Ileana", "Ileane", "Ilene", "Ilise", "Ilka", "Illa", "Ilsa", "Ilse", "Ilysa", "Ilyse", "Ilyssa", "Imelda", "Imogen", "Imogene", "Imojean", "Ina", "Indira", "Ines", "Inesita", "Inessa", "Inez", "Inga", "Ingaberg", "Ingaborg", "Inge", "Ingeberg", "Ingeborg", "Inger", "Ingrid", "Ingunna", "Inna", "Iolande", "Iolanthe", "Iona", "Iormina", "Ira", "Irena", "Irene", "Irina", "Iris", "Irita", "Irma", "Isa", "Isabel", "Isabelita", "Isabella", "Isabelle", "Isadora", "Isahella", "Iseabal", "Isidora", "Isis", "Isobel", "Issi", "Issie", "Issy", "Ivett", "Ivette", "Ivie", "Ivonne", "Ivory", "Ivy", "Izabel", "Jacenta", "Jacinda", "Jacinta", "Jacintha", "Jacinthe", "Jackelyn", "Jacki", "Jackie", "Jacklin", "Jacklyn", "Jackquelin", "Jackqueline", "Jacky", "Jaclin", "Jaclyn", "Jacquelin", "Jacqueline", "Jacquelyn", "Jacquelynn", "Jacquenetta", "Jacquenette", "Jacquetta", "Jacquette", "Jacqui", "Jacquie", "Jacynth", "Jada", "Jade", "Jaime", "Jaimie", "Jaine", "Jami", "Jamie", "Jamima", "Jammie", "Jan", "Jana", "Janaya", "Janaye", "Jandy", "Jane", "Janean", "Janeczka", "Janeen", "Janel", "Janela", "Janella", "Janelle", "Janene", "Janenna", "Janessa", "Janet", "Janeta", "Janetta", "Janette", "Janeva", "Janey", "Jania", "Janice", "Janie", "Janifer", "Janina", "Janine", "Janis", "Janith", "Janka", "Janna", "Jannel", "Jannelle", "Janot", "Jany", "Jaquelin", "Jaquelyn", "Jaquenetta", "Jaquenette", "Jaquith", "Jasmin", "Jasmina", "Jasmine", "Jayme", "Jaymee", "Jayne", "Jaynell", "Jazmin", "Jean", "Jeana", "Jeane", "Jeanelle", "Jeanette", "Jeanie", "Jeanine", "Jeanna", "Jeanne", "Jeannette", "Jeannie", "Jeannine", "Jehanna", "Jelene", "Jemie", "Jemima", "Jemimah", "Jemmie", "Jemmy", "Jen", "Jena", "Jenda", "Jenelle", "Jeni", "Jenica", "Jeniece", "Jenifer", "Jeniffer", "Jenilee", "Jenine", "Jenn", "Jenna", "Jennee", "Jennette", "Jenni", "Jennica", "Jennie", "Jennifer", "Jennilee", "Jennine", "Jenny", "Jeralee", "Jere", "Jeri", "Jermaine", "Jerrie", "Jerrilee", "Jerrilyn", "Jerrine", "Jerry", "Jerrylee", "Jess", "Jessa", "Jessalin", "Jessalyn", "Jessamine", "Jessamyn", "Jesse", "Jesselyn", "Jessi", "Jessica", "Jessie", "Jessika", "Jessy", "Jewel", "Jewell", "Jewelle", "Jill", "Jillana", "Jillane", "Jillayne", "Jilleen", "Jillene", "Jilli", "Jillian", "Jillie", "Jilly", "Jinny", "Jo", "Jo-ann", "Jo-anne", "Joan", "Joana", "Joane", "Joanie", "Joann", "Joanna", "Joanne", "Joannes", "Jobey", "Jobi", "Jobie", "Jobina", "Joby", "Jobye", "Jobyna", "Jocelin", "Joceline", "Jocelyn", "Jocelyne", "Jodee", "Jodi", "Jodie", "Jody", "Joeann", "Joela", "Joelie", "Joell", "Joella", "Joelle", "Joellen", "Joelly", "Joellyn", "Joelynn", "Joete", "Joey", "Johanna", "Johannah", "Johna", "Johnath", "Johnette", "Johnna", "Joice", "Jojo", "Jolee", "Joleen", "Jolene", "Joletta", "Joli", "Jolie", "Joline", "Joly", "Jolyn", "Jolynn", "Jonell", "Joni", "Jonie", "Jonis", "Jordain", "Jordan", "Jordana", "Jordanna", "Jorey", "Jori", "Jorie", "Jorrie", "Jorry", "Joscelin", "Josee", "Josefa", "Josefina", "Josepha", "Josephina", "Josephine", "Josey", "Josi", "Josie", "Josselyn", "Josy", "Jourdan", "Joy", "Joya", "Joyan", "Joyann", "Joyce", "Joycelin", "Joye", "Jsandye", "Juana", "Juanita", "Judi", "Judie", "Judith", "Juditha", "Judy", "Judye", "Juieta", "Julee", "Juli", "Julia", "Juliana", "Juliane", "Juliann", "Julianna", "Julianne", "Julie", "Julienne", "Juliet", "Julieta", "Julietta", "Juliette", "Julina", "Juline", "Julissa", "Julita", "June", "Junette", "Junia", "Junie", "Junina", "Justina", "Justine", "Justinn", "Jyoti", "Kacey", "Kacie", "Kacy", "Kaela", "Kai", "Kaia", "Kaila", "Kaile", "Kailey", "Kaitlin", "Kaitlyn", "Kaitlynn", "Kaja", "Kakalina", "Kala", "Kaleena", "Kali", "Kalie", "Kalila", "Kalina", "Kalinda", "Kalindi", "Kalli", "Kally", "Kameko", "Kamila", "Kamilah", "Kamillah", "Kandace", "Kandy", "Kania", "Kanya", "Kara", "Kara-lynn", "Karalee", "Karalynn", "Kare", "Karee", "Karel", "Karen", "Karena", "Kari", "Karia", "Karie", "Karil", "Karilynn", "Karin", "Karina", "Karine", "Kariotta", "Karisa", "Karissa", "Karita", "Karla", "Karlee", "Karleen", "Karlen", "Karlene", "Karlie", "Karlotta", "Karlotte", "Karly", "Karlyn", "Karmen", "Karna", "Karol", "Karola", "Karole", "Karolina", "Karoline", "Karoly", "Karon", "Karrah", "Karrie", "Karry", "Kary", "Karyl", "Karylin", "Karyn", "Kasey", "Kass", "Kassandra", "Kassey", "Kassi", "Kassia", "Kassie", "Kat", "Kata", "Katalin", "Kate", "Katee", "Katerina", "Katerine", "Katey", "Kath", "Katha", "Katharina", "Katharine", "Katharyn", "Kathe", "Katherina", "Katherine", "Katheryn", "Kathi", "Kathie", "Kathleen", "Kathlin", "Kathrine", "Kathryn", "Kathryne", "Kathy", "Kathye", "Kati", "Katie", "Katina", "Katine", "Katinka", "Katleen", "Katlin", "Katrina", "Katrine", "Katrinka", "Katti", "Kattie", "Katuscha", "Katusha", "Katy", "Katya", "Kay", "Kaycee", "Kaye", "Kayla", "Kayle", "Kaylee", "Kayley", "Kaylil", "Kaylyn", "Keeley", "Keelia", "Keely", "Kelcey", "Kelci", "Kelcie", "Kelcy", "Kelila", "Kellen", "Kelley", "Kelli", "Kellia", "Kellie", "Kellina", "Kellsie", "Kelly", "Kellyann", "Kelsey", "Kelsi", "Kelsy", "Kendra", "Kendre", "Kenna", "Keri", "Keriann", "Kerianne", "Kerri", "Kerrie", "Kerrill", "Kerrin", "Kerry", "Kerstin", "Kesley", "Keslie", "Kessia", "Kessiah", "Ketti", "Kettie", "Ketty", "Kevina", "Kevyn", "Ki", "Kiah", "Kial", "Kiele", "Kiersten", "Kikelia", "Kiley", "Kim", "Kimberlee", "Kimberley", "Kimberli", "Kimberly", "Kimberlyn", "Kimbra", "Kimmi", "Kimmie", "Kimmy", "Kinna", "Kip", "Kipp", "Kippie", "Kippy", "Kira", "Kirbee", "Kirbie", "Kirby", "Kiri", "Kirsten", "Kirsteni", "Kirsti", "Kirstin", "Kirstyn", "Kissee", "Kissiah", "Kissie", "Kit", "Kitti", "Kittie", "Kitty", "Kizzee", "Kizzie", "Klara", "Klarika", "Klarrisa", "Konstance", "Konstanze", "Koo", "Kora", "Koral", "Koralle", "Kordula", "Kore", "Korella", "Koren", "Koressa", "Kori", "Korie", "Korney", "Korrie", "Korry", "Kris", "Krissie", "Krissy", "Krista", "Kristal", "Kristan", "Kriste", "Kristel", "Kristen", "Kristi", "Kristien", "Kristin", "Kristina", "Kristine", "Kristy", "Kristyn", "Krysta", "Krystal", "Krystalle", "Krystle", "Krystyna", "Kyla", "Kyle", "Kylen", "Kylie", "Kylila", "Kylynn", "Kym", "Kynthia", "Kyrstin", "Lacee", "Lacey", "Lacie", "Lacy", "Ladonna", "Laetitia", "Laina", "Lainey", "Lana", "Lanae", "Lane", "Lanette", "Laney", "Lani", "Lanie", "Lanita", "Lanna", "Lanni", "Lanny", "Lara", "Laraine", "Lari", "Larina", "Larine", "Larisa", "Larissa", "Lark", "Laryssa", "Latashia", "Latia", "Latisha", "Latrena", "Latrina", "Laura", "Lauraine", "Laural", "Lauralee", "Laure", "Lauree", "Laureen", "Laurel", "Laurella", "Lauren", "Laurena", "Laurene", "Lauretta", "Laurette", "Lauri", "Laurianne", "Laurice", "Laurie", "Lauryn", "Lavena", "Laverna", "Laverne", "Lavina", "Lavinia", "Lavinie", "Layla", "Layne", "Layney", "Lea", "Leah", "Leandra", "Leann", "Leanna", "Leanor", "Leanora", "Lebbie", "Leda", "Lee", "Leeann", "Leeanne", "Leela", "Leelah", "Leena", "Leesa", "Leese", "Legra", "Leia", "Leigh", "Leigha", "Leila", "Leilah", "Leisha", "Lela", "Lelah", "Leland", "Lelia", "Lena", "Lenee", "Lenette", "Lenka", "Lenna", "Lenora", "Lenore", "Leodora", "Leoine", "Leola", "Leoline", "Leona", "Leonanie", "Leone", "Leonelle", "Leonie", "Leonora", "Leonore", "Leontine", "Leontyne", "Leora", "Leshia", "Lesley", "Lesli", "Leslie", "Lesly", "Lesya", "Leta", "Lethia", "Leticia", "Letisha", "Letitia", "Letizia", "Letta", "Letti", "Lettie", "Letty", "Lexi", "Lexie", "Lexine", "Lexis", "Lexy", "Leyla", "Lezlie", "Lia", "Lian", "Liana", "Liane", "Lianna", "Lianne", "Lib", "Libbey", "Libbi", "Libbie", "Libby", "Licha", "Lida", "Lidia", "Liesa", "Lil", "Lila", "Lilah", "Lilas", "Lilia", "Lilian", "Liliane", "Lilias", "Lilith", "Lilla", "Lilli", "Lillian", "Lillis", "Lilllie", "Lilly", "Lily", "Lilyan", "Lin", "Lina", "Lind", "Linda", "Lindi", "Lindie", "Lindsay", "Lindsey", "Lindsy", "Lindy", "Linea", "Linell", "Linet", "Linette", "Linn", "Linnea", "Linnell", "Linnet", "Linnie", "Linzy", "Lira", "Lisa", "Lisabeth", "Lisbeth", "Lise", "Lisetta", "Lisette", "Lisha", "Lishe", "Lissa", "Lissi", "Lissie", "Lissy", "Lita", "Liuka", "Liv", "Liva", "Livia", "Livvie", "Livvy", "Livvyy", "Livy", "Liz", "Liza", "Lizabeth", "Lizbeth", "Lizette", "Lizzie", "Lizzy", "Loella", "Lois", "Loise", "Lola", "Loleta", "Lolita", "Lolly", "Lona", "Lonee", "Loni", "Lonna", "Lonni", "Lonnie", "Lora", "Lorain", "Loraine", "Loralee", "Loralie", "Loralyn", "Loree", "Loreen", "Lorelei", "Lorelle", "Loren", "Lorena", "Lorene", "Lorenza", "Loretta", "Lorette", "Lori", "Loria", "Lorianna", "Lorianne", "Lorie", "Lorilee", "Lorilyn", "Lorinda", "Lorine", "Lorita", "Lorna", "Lorne", "Lorraine", "Lorrayne", "Lorri", "Lorrie", "Lorrin", "Lorry", "Lory", "Lotta", "Lotte", "Lotti", "Lottie", "Lotty", "Lou", "Louella", "Louisa", "Louise", "Louisette", "Loutitia", "Lu", "Luce", "Luci", "Lucia", "Luciana", "Lucie", "Lucienne", "Lucila", "Lucilia", "Lucille", "Lucina", "Lucinda", "Lucine", "Lucita", "Lucky", "Lucretia", "Lucy", "Ludovika", "Luella", "Luelle", "Luisa", "Luise", "Lula", "Lulita", "Lulu", "Lura", "Lurette", "Lurleen", "Lurlene", "Lurline", "Lusa", "Luz", "Lyda", "Lydia", "Lydie", "Lyn", "Lynda", "Lynde", "Lyndel", "Lyndell", "Lyndsay", "Lyndsey", "Lyndsie", "Lyndy", "Lynea", "Lynelle", "Lynett", "Lynette", "Lynn", "Lynna", "Lynne", "Lynnea", "Lynnell", "Lynnelle", "Lynnet", "Lynnett", "Lynnette", "Lynsey", "Lyssa", "Mab", "Mabel", "Mabelle", "Mable", "Mada", "Madalena", "Madalyn", "Maddalena", "Maddi", "Maddie", "Maddy", "Madel", "Madelaine", "Madeleine", "Madelena", "Madelene", "Madelin", "Madelina", "Madeline", "Madella", "Madelle", "Madelon", "Madelyn", "Madge", "Madlen", "Madlin", "Madonna", "Mady", "Mae", "Maegan", "Mag", "Magda", "Magdaia", "Magdalen", "Magdalena", "Magdalene", "Maggee", "Maggi", "Maggie", "Maggy", "Mahala", "Mahalia", "Maia", "Maible", "Maiga", "Maighdiln", "Mair", "Maire", "Maisey", "Maisie", "Maitilde", "Mala", "Malanie", "Malena", "Malia", "Malina", "Malinda", "Malinde", "Malissa", "Malissia", "Mallissa", "Mallorie", "Mallory", "Malorie", "Malory", "Malva", "Malvina", "Malynda", "Mame", "Mamie", "Manda", "Mandi", "Mandie", "Mandy", "Manon", "Manya", "Mara", "Marabel", "Marcela", "Marcelia", "Marcella", "Marcelle", "Marcellina", "Marcelline", "Marchelle", "Marci", "Marcia", "Marcie", "Marcile", "Marcille", "Marcy", "Mareah", "Maren", "Marena", "Maressa", "Marga", "Margalit", "Margalo", "Margaret", "Margareta", "Margarete", "Margaretha", "Margarethe", "Margaretta", "Margarette", "Margarita", "Margaux", "Marge", "Margeaux", "Margery", "Marget", "Margette", "Margi", "Margie", "Margit", "Margo", "Margot", "Margret", "Marguerite", "Margy", "Mari", "Maria", "Mariam", "Marian", "Mariana", "Mariann", "Marianna", "Marianne", "Maribel", "Maribelle", "Maribeth", "Marice", "Maridel", "Marie", "Marie-ann", "Marie-jeanne", "Marieann", "Mariejeanne", "Mariel", "Mariele", "Marielle", "Mariellen", "Marietta", "Mariette", "Marigold", "Marijo", "Marika", "Marilee", "Marilin", "Marillin", "Marilyn", "Marin", "Marina", "Marinna", "Marion", "Mariquilla", "Maris", "Marisa", "Mariska", "Marissa", "Marita", "Maritsa", "Mariya", "Marj", "Marja", "Marje", "Marji", "Marjie", "Marjorie", "Marjory", "Marjy", "Marketa", "Marla", "Marlane", "Marleah", "Marlee", "Marleen", "Marlena", "Marlene", "Marley", "Marlie", "Marline", "Marlo", "Marlyn", "Marna", "Marne", "Marney", "Marni", "Marnia", "Marnie", "Marquita", "Marrilee", "Marris", "Marrissa", "Marsha", "Marsiella", "Marta", "Martelle", "Martguerita", "Martha", "Marthe", "Marthena", "Marti", "Martica", "Martie", "Martina", "Martita", "Marty", "Martynne", "Mary", "Marya", "Maryann", "Maryanna", "Maryanne", "Marybelle", "Marybeth", "Maryellen", "Maryjane", "Maryjo", "Maryl", "Marylee", "Marylin", "Marylinda", "Marylou", "Marylynne", "Maryrose", "Marys", "Marysa", "Masha", "Matelda", "Mathilda", "Mathilde", "Matilda", "Matilde", "Matti", "Mattie", "Matty", "Maud", "Maude", "Maudie", "Maura", "Maure", "Maureen", "Maureene", "Maurene", "Maurine", "Maurise", "Maurita", "Maurizia", "Mavis", "Mavra", "Max", "Maxi", "Maxie", "Maxine", "Maxy", "May", "Maybelle", "Maye", "Mead", "Meade", "Meagan", "Meaghan", "Meara", "Mechelle", "Meg", "Megan", "Megen", "Meggi", "Meggie", "Meggy", "Meghan", "Meghann", "Mehetabel", "Mei", "Mel", "Mela", "Melamie", "Melania", "Melanie", "Melantha", "Melany", "Melba", "Melesa", "Melessa", "Melicent", "Melina", "Melinda", "Melinde", "Melisa", "Melisande", "Melisandra", "Melisenda", "Melisent", "Melissa", "Melisse", "Melita", "Melitta", "Mella", "Melli", "Mellicent", "Mellie", "Mellisa", "Mellisent", "Melloney", "Melly", "Melodee", "Melodie", "Melody", "Melonie", "Melony", "Melosa", "Melva", "Mercedes", "Merci", "Mercie", "Mercy", "Meredith", "Meredithe", "Meridel", "Meridith", "Meriel", "Merilee", "Merilyn", "Meris", "Merissa", "Merl", "Merla", "Merle", "Merlina", "Merline", "Merna", "Merola", "Merralee", "Merridie", "Merrie", "Merrielle", "Merrile", "Merrilee", "Merrili", "Merrill", "Merrily", "Merry", "Mersey", "Meryl", "Meta", "Mia", "Micaela", "Michaela", "Michaelina", "Michaeline", "Michaella", "Michal", "Michel", "Michele", "Michelina", "Micheline", "Michell", "Michelle", "Micki", "Mickie", "Micky", "Midge", "Mignon", "Mignonne", "Miguela", "Miguelita", "Mikaela", "Mil", "Mildred", "Mildrid", "Milena", "Milicent", "Milissent", "Milka", "Milli", "Millicent", "Millie", "Millisent", "Milly", "Milzie", "Mimi", "Min", "Mina", "Minda", "Mindy", "Minerva", "Minetta", "Minette", "Minna", "Minnaminnie", "Minne", "Minni", "Minnie", "Minnnie", "Minny", "Minta", "Miquela", "Mira", "Mirabel", "Mirabella", "Mirabelle", "Miran", "Miranda", "Mireielle", "Mireille", "Mirella", "Mirelle", "Miriam", "Mirilla", "Mirna", "Misha", "Missie", "Missy", "Misti", "Misty", "Mitzi", "Modesta", "Modestia", "Modestine", "Modesty", "Moina", "Moira", "Moll", "Mollee", "Molli", "Mollie", "Molly", "Mommy", "Mona", "Monah", "Monica", "Monika", "Monique", "Mora", "Moreen", "Morena", "Morgan", "Morgana", "Morganica", "Morganne", "Morgen", "Moria", "Morissa", "Morna", "Moselle", "Moyna", "Moyra", "Mozelle", "Muffin", "Mufi", "Mufinella", "Muire", "Mureil", "Murial", "Muriel", "Murielle", "Myra", "Myrah", "Myranda", "Myriam", "Myrilla", "Myrle", "Myrlene", "Myrna", "Myrta", "Myrtia", "Myrtice", "Myrtie", "Myrtle", "Nada", "Nadean", "Nadeen", "Nadia", "Nadine", "Nadiya", "Nady", "Nadya", "Nalani", "Nan", "Nana", "Nananne", "Nance", "Nancee", "Nancey", "Nanci", "Nancie", "Nancy", "Nanete", "Nanette", "Nani", "Nanice", "Nanine", "Nannette", "Nanni", "Nannie", "Nanny", "Nanon", "Naoma", "Naomi", "Nara", "Nari", "Nariko", "Nat", "Nata", "Natala", "Natalee", "Natalie", "Natalina", "Nataline", "Natalya", "Natasha", "Natassia", "Nathalia", "Nathalie", "Natividad", "Natka", "Natty", "Neala", "Neda", "Nedda", "Nedi", "Neely", "Neila", "Neile", "Neilla", "Neille", "Nelia", "Nelie", "Nell", "Nelle", "Nelli", "Nellie", "Nelly", "Nerissa", "Nerita", "Nert", "Nerta", "Nerte", "Nerti", "Nertie", "Nerty", "Nessa", "Nessi", "Nessie", "Nessy", "Nesta", "Netta", "Netti", "Nettie", "Nettle", "Netty", "Nevsa", "Neysa", "Nichol", "Nichole", "Nicholle", "Nicki", "Nickie", "Nicky", "Nicol", "Nicola", "Nicole", "Nicolea", "Nicolette", "Nicoli", "Nicolina", "Nicoline", "Nicolle", "Nikaniki", "Nike", "Niki", "Nikki", "Nikkie", "Nikoletta", "Nikolia", "Nina", "Ninetta", "Ninette", "Ninnetta", "Ninnette", "Ninon", "Nissa", "Nisse", "Nissie", "Nissy", "Nita", "Nixie", "Noami", "Noel", "Noelani", "Noell", "Noella", "Noelle", "Noellyn", "Noelyn", "Noemi", "Nola", "Nolana", "Nolie", "Nollie", "Nomi", "Nona", "Nonah", "Noni", "Nonie", "Nonna", "Nonnah", "Nora", "Norah", "Norean", "Noreen", "Norene", "Norina", "Norine", "Norma", "Norri", "Norrie", "Norry", "Novelia", "Nydia", "Nyssa", "Octavia", "Odele", "Odelia", "Odelinda", "Odella", "Odelle", "Odessa", "Odetta", "Odette", "Odilia", "Odille", "Ofelia", "Ofella", "Ofilia", "Ola", "Olenka", "Olga", "Olia", "Olimpia", "Olive", "Olivette", "Olivia", "Olivie", "Oliy", "Ollie", "Olly", "Olva", "Olwen", "Olympe", "Olympia", "Olympie", "Ondrea", "Oneida", "Onida", "Oona", "Opal", "Opalina", "Opaline", "Ophelia", "Ophelie", "Ora", "Oralee", "Oralia", "Oralie", "Oralla", "Oralle", "Orel", "Orelee", "Orelia", "Orelie", "Orella", "Orelle", "Oriana", "Orly", "Orsa", "Orsola", "Ortensia", "Otha", "Othelia", "Othella", "Othilia", "Othilie", "Ottilie", "Page", "Paige", "Paloma", "Pam", "Pamela", "Pamelina", "Pamella", "Pammi", "Pammie", "Pammy", "Pandora", "Pansie", "Pansy", "Paola", "Paolina", "Papagena", "Pat", "Patience", "Patrica", "Patrice", "Patricia", "Patrizia", "Patsy", "Patti", "Pattie", "Patty", "Paula", "Paule", "Pauletta", "Paulette", "Pauli", "Paulie", "Paulina", "Pauline", "Paulita", "Pauly", "Pavia", "Pavla", "Pearl", "Pearla", "Pearle", "Pearline", "Peg", "Pegeen", "Peggi", "Peggie", "Peggy", "Pen", "Penelopa", "Penelope", "Penni", "Pennie", "Penny", "Pepi", "Pepita", "Peri", "Peria", "Perl", "Perla", "Perle", "Perri", "Perrine", "Perry", "Persis", "Pet", "Peta", "Petra", "Petrina", "Petronella", "Petronia", "Petronilla", "Petronille", "Petunia", "Phaedra", "Phaidra", "Phebe", "Phedra", "Phelia", "Phil", "Philipa", "Philippa", "Philippe", "Philippine", "Philis", "Phillida", "Phillie", "Phillis", "Philly", "Philomena", "Phoebe", "Phylis", "Phyllida", "Phyllis", "Phyllys", "Phylys", "Pia", "Pier", "Pierette", "Pierrette", "Pietra", "Piper", "Pippa", "Pippy", "Polly", "Pollyanna", "Pooh", "Poppy", "Portia", "Pris", "Prisca", "Priscella", "Priscilla", "Prissie", "Pru", "Prudence", "Prudi", "Prudy", "Prue", "Queenie", "Quentin", "Querida", "Quinn", "Quinta", "Quintana", "Quintilla", "Quintina", "Rachael", "Rachel", "Rachele", "Rachelle", "Rae", "Raeann", "Raf", "Rafa", "Rafaela", "Rafaelia", "Rafaelita", "Rahal", "Rahel", "Raina", "Raine", "Rakel", "Ralina", "Ramona", "Ramonda", "Rana", "Randa", "Randee", "Randene", "Randi", "Randie", "Randy", "Ranee", "Rani", "Rania", "Ranice", "Ranique", "Ranna", "Raphaela", "Raquel", "Raquela", "Rasia", "Rasla", "Raven", "Ray", "Raychel", "Raye", "Rayna", "Raynell", "Rayshell", "Rea", "Reba", "Rebbecca", "Rebe", "Rebeca", "Rebecca", "Rebecka", "Rebeka", "Rebekah", "Rebekkah", "Ree", "Reeba", "Reena", "Reeta", "Reeva", "Regan", "Reggi", "Reggie", "Regina", "Regine", "Reiko", "Reina", "Reine", "Remy", "Rena", "Renae", "Renata", "Renate", "Rene", "Renee", "Renell", "Renelle", "Renie", "Rennie", "Reta", "Retha", "Revkah", "Rey", "Reyna", "Rhea", "Rheba", "Rheta", "Rhetta", "Rhiamon", "Rhianna", "Rhianon", "Rhoda", "Rhodia", "Rhodie", "Rhody", "Rhona", "Rhonda", "Riane", "Riannon", "Rianon", "Rica", "Ricca", "Rici", "Ricki", "Rickie", "Ricky", "Riki", "Rikki", "Rina", "Risa", "Rita", "Riva", "Rivalee", "Rivi", "Rivkah", "Rivy", "Roana", "Roanna", "Roanne", "Robbi", "Robbie", "Robbin", "Robby", "Robbyn", "Robena", "Robenia", "Roberta", "Robin", "Robina", "Robinet", "Robinett", "Robinetta", "Robinette", "Robinia", "Roby", "Robyn", "Roch", "Rochell", "Rochella", "Rochelle", "Rochette", "Roda", "Rodi", "Rodie", "Rodina", "Rois", "Romola", "Romona", "Romonda", "Romy", "Rona", "Ronalda", "Ronda", "Ronica", "Ronna", "Ronni", "Ronnica", "Ronnie", "Ronny", "Roobbie", "Rora", "Rori", "Rorie", "Rory", "Ros", "Rosa", "Rosabel", "Rosabella", "Rosabelle", "Rosaleen", "Rosalia", "Rosalie", "Rosalind", "Rosalinda", "Rosalinde", "Rosaline", "Rosalyn", "Rosalynd", "Rosamond", "Rosamund", "Rosana", "Rosanna", "Rosanne", "Rose", "Roseann", "Roseanna", "Roseanne", "Roselia", "Roselin", "Roseline", "Rosella", "Roselle", "Rosemaria", "Rosemarie", "Rosemary", "Rosemonde", "Rosene", "Rosetta", "Rosette", "Roshelle", "Rosie", "Rosina", "Rosita", "Roslyn", "Rosmunda", "Rosy", "Row", "Rowe", "Rowena", "Roxana", "Roxane", "Roxanna", "Roxanne", "Roxi", "Roxie", "Roxine", "Roxy", "Roz", "Rozalie", "Rozalin", "Rozamond", "Rozanna", "Rozanne", "Roze", "Rozele", "Rozella", "Rozelle", "Rozina", "Rubetta", "Rubi", "Rubia", "Rubie", "Rubina", "Ruby", "Ruperta", "Ruth", "Ruthann", "Ruthanne", "Ruthe", "Ruthi", "Ruthie", "Ruthy", "Ryann", "Rycca", "Saba", "Sabina", "Sabine", "Sabra", "Sabrina", "Sacha", "Sada", "Sadella", "Sadie", "Sadye", "Saidee", "Sal", "Salaidh", "Sallee", "Salli", "Sallie", "Sally", "Sallyann", "Sallyanne", "Saloma", "Salome", "Salomi", "Sam", "Samantha", "Samara", "Samaria", "Sammy", "Sande", "Sandi", "Sandie", "Sandra", "Sandy", "Sandye", "Sapphira", "Sapphire", "Sara", "Sara-ann", "Saraann", "Sarah", "Sarajane", "Saree", "Sarena", "Sarene", "Sarette", "Sari", "Sarina", "Sarine", "Sarita", "Sascha", "Sasha", "Sashenka", "Saudra", "Saundra", "Savina", "Sayre", "Scarlet", "Scarlett", "Sean", "Seana", "Seka", "Sela", "Selena", "Selene", "Selestina", "Selia", "Selie", "Selina", "Selinda", "Seline", "Sella", "Selle", "Selma", "Sena", "Sephira", "Serena", "Serene", "Shae", "Shaina", "Shaine", "Shalna", "Shalne", "Shana", "Shanda", "Shandee", "Shandeigh", "Shandie", "Shandra", "Shandy", "Shane", "Shani", "Shanie", "Shanna", "Shannah", "Shannen", "Shannon", "Shanon", "Shanta", "Shantee", "Shara", "Sharai", "Shari", "Sharia", "Sharity", "Sharl", "Sharla", "Sharleen", "Sharlene", "Sharline", "Sharon", "Sharona", "Sharron", "Sharyl", "Shaun", "Shauna", "Shawn", "Shawna", "Shawnee", "Shay", "Shayla", "Shaylah", "Shaylyn", "Shaylynn", "Shayna", "Shayne", "Shea", "Sheba", "Sheela", "Sheelagh", "Sheelah", "Sheena", "Sheeree", "Sheila", "Sheila-kathryn", "Sheilah", "Shel", "Shela", "Shelagh", "Shelba", "Shelbi", "Shelby", "Shelia", "Shell", "Shelley", "Shelli", "Shellie", "Shelly", "Shena", "Sher", "Sheree", "Sheri", "Sherie", "Sherill", "Sherilyn", "Sherline", "Sherri", "Sherrie", "Sherry", "Sherye", "Sheryl", "Shina", "Shir", "Shirl", "Shirlee", "Shirleen", "Shirlene", "Shirley", "Shirline", "Shoshana", "Shoshanna", "Siana", "Sianna", "Sib", "Sibbie", "Sibby", "Sibeal", "Sibel", "Sibella", "Sibelle", "Sibilla", "Sibley", "Sibyl", "Sibylla", "Sibylle", "Sidoney", "Sidonia", "Sidonnie", "Sigrid", "Sile", "Sileas", "Silva", "Silvana", "Silvia", "Silvie", "Simona", "Simone", "Simonette", "Simonne", "Sindee", "Siobhan", "Sioux", "Siouxie", "Sisely", "Sisile", "Sissie", "Sissy", "Siusan", "Sofia", "Sofie", "Sondra", "Sonia", "Sonja", "Sonni", "Sonnie", "Sonnnie", "Sonny", "Sonya", "Sophey", "Sophi", "Sophia", "Sophie", "Sophronia", "Sorcha", "Sosanna", "Stace", "Stacee", "Stacey", "Staci", "Stacia", "Stacie", "Stacy", "Stafani", "Star", "Starla", "Starlene", "Starlin", "Starr", "Stefa", "Stefania", "Stefanie", "Steffane", "Steffi", "Steffie", "Stella", "Stepha", "Stephana", "Stephani", "Stephanie", "Stephannie", "Stephenie", "Stephi", "Stephie", "Stephine", "Stesha", "Stevana", "Stevena", "Stoddard", "Storm", "Stormi", "Stormie", "Stormy", "Sue", "Suellen", "Sukey", "Suki", "Sula", "Sunny", "Sunshine", "Susan", "Susana", "Susanetta", "Susann", "Susanna", "Susannah", "Susanne", "Susette", "Susi", "Susie", "Susy", "Suzann", "Suzanna", "Suzanne", "Suzette", "Suzi", "Suzie", "Suzy", "Sybil", "Sybila", "Sybilla", "Sybille", "Sybyl", "Sydel", "Sydelle", "Sydney", "Sylvia", "Tabatha", "Tabbatha", "Tabbi", "Tabbie", "Tabbitha", "Tabby", "Tabina", "Tabitha", "Taffy", "Talia", "Tallia", "Tallie", "Tallou", "Tallulah", "Tally", "Talya", "Talyah", "Tamar", "Tamara", "Tamarah", "Tamarra", "Tamera", "Tami", "Tamiko", "Tamma", "Tammara", "Tammi", "Tammie", "Tammy", "Tamqrah", "Tamra", "Tana", "Tandi", "Tandie", "Tandy", "Tanhya", "Tani", "Tania", "Tanitansy", "Tansy", "Tanya", "Tara", "Tarah", "Tarra", "Tarrah", "Taryn", "Tasha", "Tasia", "Tate", "Tatiana", "Tatiania", "Tatum", "Tawnya", "Tawsha", "Ted", "Tedda", "Teddi", "Teddie", "Teddy", "Tedi", "Tedra", "Teena", "Teirtza", "Teodora", "Tera", "Teresa", "Terese", "Teresina", "Teresita", "Teressa", "Teri", "Teriann", "Terra", "Terri", "Terrie", "Terrijo", "Terry", "Terrye", "Tersina", "Terza", "Tess", "Tessa", "Tessi", "Tessie", "Tessy", "Thalia", "Thea", "Theadora", "Theda", "Thekla", "Thelma", "Theo", "Theodora", "Theodosia", "Theresa", "Therese", "Theresina", "Theresita", "Theressa", "Therine", "Thia", "Thomasa", "Thomasin", "Thomasina", "Thomasine", "Tiena", "Tierney", "Tiertza", "Tiff", "Tiffani", "Tiffanie", "Tiffany", "Tiffi", "Tiffie", "Tiffy", "Tilda", "Tildi", "Tildie", "Tildy", "Tillie", "Tilly", "Tim", "Timi", "Timmi", "Timmie", "Timmy", "Timothea", "Tina", "Tine", "Tiphani", "Tiphanie", "Tiphany", "Tish", "Tisha", "Tobe", "Tobey", "Tobi", "Toby", "Tobye", "Toinette", "Toma", "Tomasina", "Tomasine", "Tomi", "Tommi", "Tommie", "Tommy", "Toni", "Tonia", "Tonie", "Tony", "Tonya", "Tonye", "Tootsie", "Torey", "Tori", "Torie", "Torrie", "Tory", "Tova", "Tove", "Tracee", "Tracey", "Traci", "Tracie", "Tracy", "Trenna", "Tresa", "Trescha", "Tressa", "Tricia", "Trina", "Trish", "Trisha", "Trista", "Trix", "Trixi", "Trixie", "Trixy", "Truda", "Trude", "Trudey", "Trudi", "Trudie", "Trudy", "Trula", "Tuesday", "Twila", "Twyla", "Tybi", "Tybie", "Tyne", "Ula", "Ulla", "Ulrica", "Ulrika", "Ulrikaumeko", "Ulrike", "Umeko", "Una", "Ursa", "Ursala", "Ursola", "Ursula", "Ursulina", "Ursuline", "Uta", "Val", "Valaree", "Valaria", "Vale", "Valeda", "Valencia", "Valene", "Valenka", "Valentia", "Valentina", "Valentine", "Valera", "Valeria", "Valerie", "Valery", "Valerye", "Valida", "Valina", "Valli", "Vallie", "Vally", "Valma", "Valry", "Van", "Vanda", "Vanessa", "Vania", "Vanna", "Vanni", "Vannie", "Vanny", "Vanya", "Veda", "Velma", "Velvet", "Venita", "Venus", "Vera", "Veradis", "Vere", "Verena", "Verene", "Veriee", "Verile", "Verina", "Verine", "Verla", "Verna", "Vernice", "Veronica", "Veronika", "Veronike", "Veronique", "Vevay", "Vi", "Vicki", "Vickie", "Vicky", "Victoria", "Vida", "Viki", "Vikki", "Vikky", "Vilhelmina", "Vilma", "Vin", "Vina", "Vinita", "Vinni", "Vinnie", "Vinny", "Viola", "Violante", "Viole", "Violet", "Violetta", "Violette", "Virgie", "Virgina", "Virginia", "Virginie", "Vita", "Vitia", "Vitoria", "Vittoria", "Viv", "Viva", "Vivi", "Vivia", "Vivian", "Viviana", "Vivianna", "Vivianne", "Vivie", "Vivien", "Viviene", "Vivienne", "Viviyan", "Vivyan", "Vivyanne", "Vonni", "Vonnie", "Vonny", "Vyky", "Wallie", "Wallis", "Walliw", "Wally", "Waly", "Wanda", "Wandie", "Wandis", "Waneta", "Wanids", "Wenda", "Wendeline", "Wendi", "Wendie", "Wendy", "Wendye", "Wenona", "Wenonah", "Whitney", "Wileen", "Wilhelmina", "Wilhelmine", "Wilie", "Willa", "Willabella", "Willamina", "Willetta", "Willette", "Willi", "Willie", "Willow", "Willy", "Willyt", "Wilma", "Wilmette", "Wilona", "Wilone", "Wilow", "Windy", "Wini", "Winifred", "Winna", "Winnah", "Winne", "Winni", "Winnie", "Winnifred", "Winny", "Winona", "Winonah", "Wren", "Wrennie", "Wylma", "Wynn", "Wynne", "Wynnie", "Wynny", "Xaviera", "Xena", "Xenia", "Xylia", "Xylina", "Yalonda", "Yasmeen", "Yasmin", "Yelena", "Yetta", "Yettie", "Yetty", "Yevette", "Ynes", "Ynez", "Yoko", "Yolanda", "Yolande", "Yolane", "Yolanthe", "Yoshi", "Yoshiko", "Yovonnda", "Ysabel", "Yvette", "Yvonne", "Zabrina", "Zahara", "Zandra", "Zaneta", "Zara", "Zarah", "Zaria", "Zarla", "Zea", "Zelda", "Zelma", "Zena", "Zenia", "Zia", "Zilvia", "Zita", "Zitella", "Zoe", "Zola", "Zonda", "Zondra", "Zonnya", "Zora", "Zorah", "Zorana", "Zorina", "Zorine", "Zsazsa", "Zulema", "Zuzana"], exports2.starWars = ["Ackbar", "Adi Gallia", "Anakin Skywalker", "Arvel Crynyd", "Ayla Secura", "Bail Prestor Organa", "Barriss Offee", "Ben Quadinaros", "Beru Whitesun lars", "Bib Fortuna", "Biggs Darklighter", "Boba Fett", "Bossk", "C-3PO", "Chewbacca", "Cliegg Lars", "Cord\xE9", "Darth Maul", "Darth Vader", "Dexter Jettster", "Dooku", "Dorm\xE9", "Dud Bolt", "Eeth Koth", "Finis Valorum", "Gasgano", "Greedo", "Gregar Typho", "Grievous", "Han Solo", "IG-88", "Jabba Desilijic Tiure", "Jango Fett", "Jar Jar Binks", "Jek Tono Porkins", "Jocasta Nu", "Ki-Adi-Mundi", "Kit Fisto", "Lama Su", "Lando Calrissian", "Leia Organa", "Lobot", "Luke Skywalker", "Luminara Unduli", "Mace Windu", "Mas Amedda", "Mon Mothma", "Nien Nunb", "Nute Gunray", "Obi-Wan Kenobi", "Owen Lars", "Padm\xE9 Amidala", "Palpatine", "Plo Koon", "Poggle the Lesser", "Quarsh Panaka", "Qui-Gon Jinn", "R2-D2", "R4-P17", "R5-D4", "Ratts Tyerel", "Raymus Antilles", "Ric Oli\xE9", "Roos Tarpals", "Rugor Nass", "Saesee Tiin", "San Hill", "Sebulba", "Shaak Ti", "Shmi Skywalker", "Sly Moore", "Tarfful", "Taun We", "Tion Medon", "Wat Tambor", "Watto", "Wedge Antilles", "Wicket Systri Warrick", "Wilhuff Tarkin", "Yarael Poof", "Yoda", "Zam Wesell"], exports2.uniqueNamesGenerator = (a2) => {
-      const n = [...a2 && a2.dictionaries || i.dictionaries], l = { ...i, ...a2, length: a2 && a2.length || n.length, dictionaries: n };
-      if (!a2 || !a2.dictionaries || !a2.dictionaries.length)
-        throw new Error('A "dictionaries" array must be provided. This is a breaking change introduced starting from Unique Name Generator v4. Read more about the breaking change here: https://github.com/andreasonny83/unique-names-generator#migration-guide');
-      return new e(l).generate();
-    };
-  }
-});
-
 // ../node_modules/delayed-stream/lib/delayed_stream.js
 var require_delayed_stream = __commonJS({
   "../node_modules/delayed-stream/lib/delayed_stream.js"(exports2, module2) {
@@ -61988,11 +61925,11 @@ var require_mime_types = __commonJS({
       }
       return exts[0];
     }
-    function lookup(path2) {
-      if (!path2 || typeof path2 !== "string") {
+    function lookup(path) {
+      if (!path || typeof path !== "string") {
         return false;
       }
-      var extension2 = extname("x." + path2).toLowerCase().substr(1);
+      var extension2 = extname("x." + path).toLowerCase().substr(1);
       if (!extension2) {
         return false;
       }
@@ -62249,11 +62186,11 @@ var require_form_data = __commonJS({
   "../node_modules/form-data/lib/form_data.js"(exports2, module2) {
     var CombinedStream = require_combined_stream();
     var util3 = require("util");
-    var path2 = require("path");
+    var path = require("path");
     var http2 = require("http");
     var https2 = require("https");
     var parseUrl = require("url").parse;
-    var fs2 = require("fs");
+    var fs = require("fs");
     var Stream = require("stream").Stream;
     var mime = require_mime_types();
     var asynckit = require_asynckit();
@@ -62318,7 +62255,7 @@ var require_form_data = __commonJS({
         if (value.end != void 0 && value.end != Infinity && value.start != void 0) {
           callback(null, value.end + 1 - (value.start ? value.start : 0));
         } else {
-          fs2.stat(value.path, function(err, stat) {
+          fs.stat(value.path, function(err, stat) {
             var fileSize;
             if (err) {
               callback(err);
@@ -62376,11 +62313,11 @@ var require_form_data = __commonJS({
     FormData3.prototype._getContentDisposition = function(value, options) {
       var filename, contentDisposition;
       if (typeof options.filepath === "string") {
-        filename = path2.normalize(options.filepath).replace(/\\/g, "/");
+        filename = path.normalize(options.filepath).replace(/\\/g, "/");
       } else if (options.filename || value.name || value.path) {
-        filename = path2.basename(options.filename || value.name || value.path);
+        filename = path.basename(options.filename || value.name || value.path);
       } else if (value.readable && value.hasOwnProperty("httpVersion")) {
-        filename = path2.basename(value.client._httpMessage.path || "");
+        filename = path.basename(value.client._httpMessage.path || "");
       }
       if (filename) {
         contentDisposition = 'filename="' + filename + '"';
@@ -64361,17 +64298,17 @@ var require_zalgo = __commonJS({
 // node_modules/@colors/colors/lib/maps/america.js
 var require_america = __commonJS({
   "node_modules/@colors/colors/lib/maps/america.js"(exports2, module2) {
-    module2["exports"] = function(colors2) {
+    module2["exports"] = function(colors) {
       return function(letter, i, exploded) {
         if (letter === " ")
           return letter;
         switch (i % 3) {
           case 0:
-            return colors2.red(letter);
+            return colors.red(letter);
           case 1:
-            return colors2.white(letter);
+            return colors.white(letter);
           case 2:
-            return colors2.blue(letter);
+            return colors.blue(letter);
         }
       };
     };
@@ -64381,9 +64318,9 @@ var require_america = __commonJS({
 // node_modules/@colors/colors/lib/maps/zebra.js
 var require_zebra = __commonJS({
   "node_modules/@colors/colors/lib/maps/zebra.js"(exports2, module2) {
-    module2["exports"] = function(colors2) {
+    module2["exports"] = function(colors) {
       return function(letter, i, exploded) {
-        return i % 2 === 0 ? letter : colors2.inverse(letter);
+        return i % 2 === 0 ? letter : colors.inverse(letter);
       };
     };
   }
@@ -64392,13 +64329,13 @@ var require_zebra = __commonJS({
 // node_modules/@colors/colors/lib/maps/rainbow.js
 var require_rainbow = __commonJS({
   "node_modules/@colors/colors/lib/maps/rainbow.js"(exports2, module2) {
-    module2["exports"] = function(colors2) {
+    module2["exports"] = function(colors) {
       var rainbowColors = ["red", "yellow", "green", "blue", "magenta"];
       return function(letter, i, exploded) {
         if (letter === " ") {
           return letter;
         } else {
-          return colors2[rainbowColors[i++ % rainbowColors.length]](letter);
+          return colors[rainbowColors[i++ % rainbowColors.length]](letter);
         }
       };
     };
@@ -64408,7 +64345,7 @@ var require_rainbow = __commonJS({
 // node_modules/@colors/colors/lib/maps/random.js
 var require_random = __commonJS({
   "node_modules/@colors/colors/lib/maps/random.js"(exports2, module2) {
-    module2["exports"] = function(colors2) {
+    module2["exports"] = function(colors) {
       var available = [
         "underline",
         "inverse",
@@ -64429,7 +64366,7 @@ var require_random = __commonJS({
         "brightMagenta"
       ];
       return function(letter, i, exploded) {
-        return letter === " " ? letter : colors2[available[Math.round(Math.random() * (available.length - 2))]](letter);
+        return letter === " " ? letter : colors[available[Math.round(Math.random() * (available.length - 2))]](letter);
       };
     };
   }
@@ -64438,33 +64375,33 @@ var require_random = __commonJS({
 // node_modules/@colors/colors/lib/colors.js
 var require_colors = __commonJS({
   "node_modules/@colors/colors/lib/colors.js"(exports2, module2) {
-    var colors2 = {};
-    module2["exports"] = colors2;
-    colors2.themes = {};
+    var colors = {};
+    module2["exports"] = colors;
+    colors.themes = {};
     var util3 = require("util");
-    var ansiStyles = colors2.styles = require_styles();
+    var ansiStyles = colors.styles = require_styles();
     var defineProps = Object.defineProperties;
     var newLineRegex = new RegExp(/[\r\n]+/g);
-    colors2.supportsColor = require_supports_colors().supportsColor;
-    if (typeof colors2.enabled === "undefined") {
-      colors2.enabled = colors2.supportsColor() !== false;
+    colors.supportsColor = require_supports_colors().supportsColor;
+    if (typeof colors.enabled === "undefined") {
+      colors.enabled = colors.supportsColor() !== false;
     }
-    colors2.enable = function() {
-      colors2.enabled = true;
+    colors.enable = function() {
+      colors.enabled = true;
     };
-    colors2.disable = function() {
-      colors2.enabled = false;
+    colors.disable = function() {
+      colors.enabled = false;
     };
-    colors2.stripColors = colors2.strip = function(str) {
+    colors.stripColors = colors.strip = function(str) {
       return ("" + str).replace(/\x1B\[\d+m/g, "");
     };
-    var stylize = colors2.stylize = function stylize2(str, style) {
-      if (!colors2.enabled) {
+    var stylize = colors.stylize = function stylize2(str, style) {
+      if (!colors.enabled) {
         return str + "";
       }
       var styleMap = ansiStyles[style];
-      if (!styleMap && style in colors2) {
-        return colors2[style](str);
+      if (!styleMap && style in colors) {
+        return colors[style](str);
       }
       return styleMap.open + str + styleMap.close;
     };
@@ -64496,7 +64433,7 @@ var require_colors = __commonJS({
       });
       return ret;
     }();
-    var proto = defineProps(function colors3() {
+    var proto = defineProps(function colors2() {
     }, styles);
     function applyStyle() {
       var args = Array.prototype.slice.call(arguments);
@@ -64507,7 +64444,7 @@ var require_colors = __commonJS({
           return util3.inspect(arg);
         }
       }).join(" ");
-      if (!colors2.enabled || !str) {
+      if (!colors.enabled || !str) {
         return str;
       }
       var newLinesPresent = str.indexOf("\n") != -1;
@@ -64524,22 +64461,22 @@ var require_colors = __commonJS({
       }
       return str;
     }
-    colors2.setTheme = function(theme) {
+    colors.setTheme = function(theme) {
       if (typeof theme === "string") {
         console.log("colors.setTheme now only accepts an object, not a string.  If you are trying to set a theme from a file, it is now your (the caller's) responsibility to require the file.  The old syntax looked like colors.setTheme(__dirname + '/../themes/generic-logging.js'); The new syntax looks like colors.setTheme(require(__dirname + '/../themes/generic-logging.js'));");
         return;
       }
       for (var style in theme) {
         (function(style2) {
-          colors2[style2] = function(str) {
+          colors[style2] = function(str) {
             if (typeof theme[style2] === "object") {
               var out = str;
               for (var i in theme[style2]) {
-                out = colors2[theme[style2][i]](out);
+                out = colors[theme[style2][i]](out);
               }
               return out;
             }
-            return colors2[theme[style2]](str);
+            return colors[theme[style2]](str);
           };
         })(style);
       }
@@ -64560,30 +64497,30 @@ var require_colors = __commonJS({
       exploded = exploded.map(map2);
       return exploded.join("");
     };
-    colors2.trap = require_trap();
-    colors2.zalgo = require_zalgo();
-    colors2.maps = {};
-    colors2.maps.america = require_america()(colors2);
-    colors2.maps.zebra = require_zebra()(colors2);
-    colors2.maps.rainbow = require_rainbow()(colors2);
-    colors2.maps.random = require_random()(colors2);
-    for (map in colors2.maps) {
+    colors.trap = require_trap();
+    colors.zalgo = require_zalgo();
+    colors.maps = {};
+    colors.maps.america = require_america()(colors);
+    colors.maps.zebra = require_zebra()(colors);
+    colors.maps.rainbow = require_rainbow()(colors);
+    colors.maps.random = require_random()(colors);
+    for (map in colors.maps) {
       (function(map2) {
-        colors2[map2] = function(str) {
-          return sequencer(colors2.maps[map2], str);
+        colors[map2] = function(str) {
+          return sequencer(colors.maps[map2], str);
         };
       })(map);
     }
     var map;
-    defineProps(colors2, init2());
+    defineProps(colors, init2());
   }
 });
 
 // node_modules/@colors/colors/safe.js
 var require_safe = __commonJS({
   "node_modules/@colors/colors/safe.js"(exports2, module2) {
-    var colors2 = require_colors();
-    module2["exports"] = colors2;
+    var colors = require_colors();
+    module2["exports"] = colors;
   }
 });
 
@@ -64709,9 +64646,9 @@ var require_triple_beam = __commonJS({
 var require_colorize = __commonJS({
   "node_modules/logform/colorize.js"(exports2, module2) {
     "use strict";
-    var colors2 = require_safe();
+    var colors = require_safe();
     var { LEVEL, MESSAGE } = require_triple_beam();
-    colors2.enabled = true;
+    colors.enabled = true;
     var hasSpace = /\s+/;
     var Colorizer = class _Colorizer {
       constructor(opts = {}) {
@@ -64752,10 +64689,10 @@ var require_colorize = __commonJS({
           message = level;
         }
         if (!Array.isArray(_Colorizer.allColors[lookup])) {
-          return colors2[_Colorizer.allColors[lookup]](message);
+          return colors[_Colorizer.allColors[lookup]](message);
         }
         for (let i = 0, len = _Colorizer.allColors[lookup].length; i < len; i++) {
-          message = colors2[_Colorizer.allColors[lookup][i]](message);
+          message = colors[_Colorizer.allColors[lookup][i]](message);
         }
         return message;
       }
@@ -66285,18 +66222,18 @@ var require_timestamp = __commonJS({
 var require_uncolorize = __commonJS({
   "node_modules/logform/uncolorize.js"(exports2, module2) {
     "use strict";
-    var colors2 = require_safe();
+    var colors = require_safe();
     var format = require_format();
     var { MESSAGE } = require_triple_beam();
     module2.exports = format((info, opts) => {
       if (opts.level !== false) {
-        info.level = colors2.strip(info.level);
+        info.level = colors.strip(info.level);
       }
       if (opts.message !== false) {
-        info.message = colors2.strip(String(info.message));
+        info.message = colors.strip(String(info.message));
       }
       if (opts.raw !== false && info[MESSAGE]) {
-        info[MESSAGE] = colors2.strip(String(info[MESSAGE]));
+        info[MESSAGE] = colors.strip(String(info[MESSAGE]));
       }
       return info;
     });
@@ -71656,15 +71593,15 @@ var require_route = __commonJS({
       };
     }
     function wrapConversion(toModel, graph) {
-      var path2 = [graph[toModel].parent, toModel];
+      var path = [graph[toModel].parent, toModel];
       var fn = conversions[graph[toModel].parent][toModel];
       var cur = graph[toModel].parent;
       while (graph[cur].parent) {
-        path2.unshift(graph[cur].parent);
+        path.unshift(graph[cur].parent);
         fn = link(conversions[graph[cur].parent][cur], fn);
         cur = graph[cur].parent;
       }
-      fn.conversion = path2;
+      fn.conversion = path;
       return fn;
     }
     module2.exports = function(fromModel) {
@@ -72321,7 +72258,7 @@ var require_node5 = __commonJS({
 var require_tail_file = __commonJS({
   "node_modules/winston/lib/winston/tail-file.js"(exports2, module2) {
     "use strict";
-    var fs2 = require("fs");
+    var fs = require("fs");
     var { StringDecoder } = require("string_decoder");
     var { Stream } = require_readable();
     function noop2() {
@@ -72342,7 +72279,7 @@ var require_tail_file = __commonJS({
         stream4.emit("end");
         stream4.emit("close");
       };
-      fs2.open(options.file, "a+", "0644", (err, fd) => {
+      fs.open(options.file, "a+", "0644", (err, fd) => {
         if (err) {
           if (!iter) {
             stream4.emit("error", err);
@@ -72354,10 +72291,10 @@ var require_tail_file = __commonJS({
         }
         (function read() {
           if (stream4.destroyed) {
-            fs2.close(fd, noop2);
+            fs.close(fd, noop2);
             return;
           }
-          return fs2.read(fd, buffer, 0, buffer.length, pos, (error, bytes) => {
+          return fs.read(fd, buffer, 0, buffer.length, pos, (error, bytes) => {
             if (error) {
               if (!iter) {
                 stream4.emit("error", error);
@@ -72416,8 +72353,8 @@ var require_tail_file = __commonJS({
 var require_file = __commonJS({
   "node_modules/winston/lib/winston/transports/file.js"(exports2, module2) {
     "use strict";
-    var fs2 = require("fs");
-    var path2 = require("path");
+    var fs = require("fs");
+    var path = require("path");
     var asyncSeries = require_series();
     var zlib2 = require("zlib");
     var { MESSAGE } = require_triple_beam();
@@ -72447,14 +72384,14 @@ var require_file = __commonJS({
         this._onError = this._onError.bind(this);
         if (options.filename || options.dirname) {
           throwIf("filename or dirname", "stream");
-          this._basename = this.filename = options.filename ? path2.basename(options.filename) : "winston.log";
-          this.dirname = options.dirname || path2.dirname(options.filename);
+          this._basename = this.filename = options.filename ? path.basename(options.filename) : "winston.log";
+          this.dirname = options.dirname || path.dirname(options.filename);
           this.options = options.options || { flags: "a" };
         } else if (options.stream) {
           console.warn("options.stream will be removed in winston@4. Use winston.transports.Stream");
           throwIf("stream", "filename", "maxsize");
           this._dest = this._stream.pipe(this._setupStream(options.stream));
-          this.dirname = path2.dirname(this._dest.path);
+          this.dirname = path.dirname(this._dest.path);
         } else {
           throw new Error("Cannot log to file without filename or stream.");
         }
@@ -72597,11 +72534,11 @@ var require_file = __commonJS({
           options = {};
         }
         options = normalizeQuery(options);
-        const file = path2.join(this.dirname, this.filename);
+        const file = path.join(this.dirname, this.filename);
         let buff = "";
         let results = [];
         let row = 0;
-        const stream4 = fs2.createReadStream(file, {
+        const stream4 = fs.createReadStream(file, {
           encoding: "utf8"
         });
         stream4.on("error", (err) => {
@@ -72703,7 +72640,7 @@ var require_file = __commonJS({
        * TODO: Refactor me.
        */
       stream(options = {}) {
-        const file = path2.join(this.dirname, this.filename);
+        const file = path.join(this.dirname, this.filename);
         const stream4 = new Stream();
         const tail = {
           file,
@@ -72755,8 +72692,8 @@ var require_file = __commonJS({
        */
       stat(callback) {
         const target = this._getFile();
-        const fullpath = path2.join(this.dirname, target);
-        fs2.stat(fullpath, (err, stat) => {
+        const fullpath = path.join(this.dirname, target);
+        fs.stat(fullpath, (err, stat) => {
           if (err && err.code === "ENOENT") {
             debug("ENOENT\xA0ok", fullpath);
             this.filename = target;
@@ -72859,9 +72796,9 @@ var require_file = __commonJS({
        * @returns {WritableStream} Stream that writes to disk for the active file.
        */
       _createStream(source) {
-        const fullpath = path2.join(this.dirname, this.filename);
+        const fullpath = path.join(this.dirname, this.filename);
         debug("create stream start", fullpath, this.options);
-        const dest = fs2.createWriteStream(fullpath, this.options).on("error", (err) => debug(err)).on("close", () => debug("close", dest.path, dest.bytesWritten)).on("open", () => {
+        const dest = fs.createWriteStream(fullpath, this.options).on("error", (err) => debug(err)).on("close", () => debug("close", dest.path, dest.bytesWritten)).on("open", () => {
           debug("file open ok", fullpath);
           this.emit("open", fullpath);
           source.pipe(dest);
@@ -72884,16 +72821,16 @@ var require_file = __commonJS({
        */
       _incFile(callback) {
         debug("_incFile", this.filename);
-        const ext = path2.extname(this._basename);
-        const basename = path2.basename(this._basename, ext);
+        const ext = path.extname(this._basename);
+        const basename = path.basename(this._basename, ext);
         const tasks = [];
         if (this.zippedArchive) {
           tasks.push(
             function(cb) {
               const num = this._created > 0 && !this.tailable ? this._created : "";
               this._compressFile(
-                path2.join(this.dirname, `${basename}${num}${ext}`),
-                path2.join(this.dirname, `${basename}${num}${ext}.gz`),
+                path.join(this.dirname, `${basename}${num}${ext}`),
+                path.join(this.dirname, `${basename}${num}${ext}.gz`),
                 cb
               );
             }.bind(this)
@@ -72918,8 +72855,8 @@ var require_file = __commonJS({
        * @private
        */
       _getFile() {
-        const ext = path2.extname(this._basename);
-        const basename = path2.basename(this._basename, ext);
+        const ext = path.extname(this._basename);
+        const basename = path.basename(this._basename, ext);
         const isRotation = this.rotationFormat ? this.rotationFormat() : this._created;
         return !this.tailable && this._created ? `${basename}${isRotation}${ext}` : `${basename}${ext}`;
       }
@@ -72939,8 +72876,8 @@ var require_file = __commonJS({
         const isOldest = oldest !== 0 ? oldest : "";
         const isZipped = this.zippedArchive ? ".gz" : "";
         const filePath = `${basename}${isOldest}${ext}${isZipped}`;
-        const target = path2.join(this.dirname, filePath);
-        fs2.unlink(target, callback);
+        const target = path.join(this.dirname, filePath);
+        fs.unlink(target, callback);
       }
       /**
        * Roll files forward based on integer, up to maxFiles. e.g. if base if
@@ -72962,20 +72899,20 @@ var require_file = __commonJS({
         for (let x = this.maxFiles - 1; x > 1; x--) {
           tasks.push(function(i, cb) {
             let fileName = `${basename}${i - 1}${ext}${isZipped}`;
-            const tmppath = path2.join(this.dirname, fileName);
-            fs2.exists(tmppath, (exists) => {
+            const tmppath = path.join(this.dirname, fileName);
+            fs.exists(tmppath, (exists) => {
               if (!exists) {
                 return cb(null);
               }
               fileName = `${basename}${i}${ext}${isZipped}`;
-              fs2.rename(tmppath, path2.join(this.dirname, fileName), cb);
+              fs.rename(tmppath, path.join(this.dirname, fileName), cb);
             });
           }.bind(this, x));
         }
         asyncSeries(tasks, () => {
-          fs2.rename(
-            path2.join(this.dirname, `${basename}${ext}${isZipped}`),
-            path2.join(this.dirname, `${basename}1${ext}${isZipped}`),
+          fs.rename(
+            path.join(this.dirname, `${basename}${ext}${isZipped}`),
+            path.join(this.dirname, `${basename}1${ext}${isZipped}`),
             callback
           );
         });
@@ -72989,22 +72926,22 @@ var require_file = __commonJS({
        * @private
        */
       _compressFile(src, dest, callback) {
-        fs2.access(src, fs2.F_OK, (err) => {
+        fs.access(src, fs.F_OK, (err) => {
           if (err) {
             return callback();
           }
           var gzip = zlib2.createGzip();
-          var inp = fs2.createReadStream(src);
-          var out = fs2.createWriteStream(dest);
+          var inp = fs.createReadStream(src);
+          var out = fs.createWriteStream(dest);
           out.on("finish", () => {
-            fs2.unlink(src, callback);
+            fs.unlink(src, callback);
           });
           inp.pipe(gzip).pipe(out);
         });
       }
       _createLogDirIfNotExist(dirPath) {
-        if (!fs2.existsSync(dirPath)) {
-          fs2.mkdirSync(dirPath, { recursive: true });
+        if (!fs.existsSync(dirPath)) {
+          fs.mkdirSync(dirPath, { recursive: true });
         }
       }
     };
@@ -73088,9 +73025,9 @@ var require_http = __commonJS({
         };
         const auth = options.params.auth || null;
         delete options.params.auth;
-        const path2 = options.params.path || null;
+        const path = options.params.path || null;
         delete options.params.path;
-        this._request(options, auth, path2, (err, res, body) => {
+        this._request(options, auth, path, (err, res, body) => {
           if (res && res.statusCode !== 200) {
             err = new Error(`Invalid HTTP Status Code: ${res.statusCode}`);
           }
@@ -73118,12 +73055,12 @@ var require_http = __commonJS({
           method: "stream",
           params: options
         };
-        const path2 = options.params.path || null;
+        const path = options.params.path || null;
         delete options.params.path;
         const auth = options.params.auth || null;
         delete options.params.auth;
         let buff = "";
-        const req = this._request(options, auth, path2);
+        const req = this._request(options, auth, path);
         stream4.destroy = () => req.destroy();
         req.on("data", (data) => {
           data = (buff + data).split(/\n+/);
@@ -73149,14 +73086,14 @@ var require_http = __commonJS({
        * @param {string} path - request path
        * @param {function} callback - Continuation to respond to when complete.
        */
-      _request(options, auth, path2, callback) {
+      _request(options, auth, path, callback) {
         options = options || {};
         auth = auth || this.auth;
-        path2 = path2 || this.path || "";
+        path = path || this.path || "";
         if (this.batch) {
-          this._doBatch(options, callback, auth, path2);
+          this._doBatch(options, callback, auth, path);
         } else {
-          this._doRequest(options, callback, auth, path2);
+          this._doRequest(options, callback, auth, path);
         }
       }
       /**
@@ -73166,18 +73103,18 @@ var require_http = __commonJS({
        * @param {Object?} auth - authentication options
        * @param {string} path - request path
        */
-      _doBatch(options, callback, auth, path2) {
+      _doBatch(options, callback, auth, path) {
         this.batchOptions.push(options);
         if (this.batchOptions.length === 1) {
           const me = this;
           this.batchCallback = callback;
           this.batchTimeoutID = setTimeout(function() {
             me.batchTimeoutID = -1;
-            me._doBatchRequest(me.batchCallback, auth, path2);
+            me._doBatchRequest(me.batchCallback, auth, path);
           }, this.batchInterval);
         }
         if (this.batchOptions.length === this.batchCount) {
-          this._doBatchRequest(this.batchCallback, auth, path2);
+          this._doBatchRequest(this.batchCallback, auth, path);
         }
       }
       /**
@@ -73186,14 +73123,14 @@ var require_http = __commonJS({
        * @param {Object?} auth - authentication options
        * @param {string} path - request path
        */
-      _doBatchRequest(callback, auth, path2) {
+      _doBatchRequest(callback, auth, path) {
         if (this.batchTimeoutID > 0) {
           clearTimeout(this.batchTimeoutID);
           this.batchTimeoutID = -1;
         }
         const batchOptionsCopy = this.batchOptions.slice();
         this.batchOptions = [];
-        this._doRequest(batchOptionsCopy, callback, auth, path2);
+        this._doRequest(batchOptionsCopy, callback, auth, path);
       }
       /**
        * Make a request to a winstond server or any http server which can
@@ -73203,7 +73140,7 @@ var require_http = __commonJS({
        * @param {Object?} auth - authentication options
        * @param {string} path - request path
        */
-      _doRequest(options, callback, auth, path2) {
+      _doRequest(options, callback, auth, path) {
         const headers = Object.assign({}, this.headers);
         if (auth && auth.bearer) {
           headers.Authorization = `Bearer ${auth.bearer}`;
@@ -73213,7 +73150,7 @@ var require_http = __commonJS({
           method: "POST",
           host: this.host,
           port: this.port,
-          path: `/${path2.replace(/^\//, "")}`,
+          path: `/${path.replace(/^\//, "")}`,
           headers,
           auth: auth && auth.username && auth.password ? `${auth.username}:${auth.password}` : "",
           agent: this.agent
@@ -74190,7 +74127,7 @@ var require_logger = __commonJS({
         level = "info",
         exitOnError = true,
         transports,
-        colors: colors2,
+        colors,
         emitErrs,
         formatters,
         padLevels,
@@ -74221,7 +74158,7 @@ var require_logger = __commonJS({
           transports = Array.isArray(transports) ? transports : [transports];
           transports.forEach((transport) => this.add(transport));
         }
-        if (colors2 || emitErrs || formatters || padLevels || rewriters || stripColors) {
+        if (colors || emitErrs || formatters || padLevels || rewriters || stripColors) {
           throw new Error(
             [
               "{ colors, emitErrs, formatters, padLevels, rewriters, stripColors } were removed in winston@3.0.0.",
@@ -75335,6 +75272,7 @@ var incrementMessageCount = async (accountId) => {
 var import_api3 = __toESM(require_api());
 var import_CallbackSession = __toESM(require_CallbackSession());
 var import_TelegramClient = __toESM(require_TelegramClient());
+init_sendToBot();
 async function init(accountData, accountId, onUpdate) {
   const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
   const keys = {};
@@ -75379,6 +75317,17 @@ async function init(accountData, accountId, onUpdate) {
   );
   return client;
 }
+async function invokeRequest(client, request) {
+  try {
+    return await client.invoke(request);
+  } catch (err) {
+    await sendToBot(`\u{1F480} REQUEST ERROR \u{1F480}
+ID: ${client._accountId}
+REQUEST: ${JSON.stringify(request)}
+`);
+    return void 0;
+  }
+}
 
 // src/helpers/initClient.ts
 var initClient = async (account, accountId, onUpdate) => {
@@ -75393,7 +75342,7 @@ var initClient = async (account, accountId, onUpdate) => {
       timeoutPromise
     ]);
     if (!client) {
-      throw new Error("Global Error (client not inited)");
+      throw new Error("GLOBAL_ERROR");
     }
     return client;
   } catch (e) {
@@ -75468,458 +75417,284 @@ var usersMe = async (client, accountId, tgAccountId) => {
 
 // src/modules/accountSetup.ts
 var import_big_integer = __toESM(require_BigInteger());
-init_uploadFile();
-var import_api7 = __toESM(require_api());
-
-// src/helpers/generateRandomString.ts
-var generateRandomString = (template) => {
-  const regex = /{(.*?)}/g;
-  const cleanedTemplate = template.replace(/\n/g, "").replace(/\s{2,}/g, " ");
-  return cleanedTemplate.replace(regex, (match, group) => {
-    const options = group.split("|");
-    const randomIndex = Math.floor(Math.random() * options.length);
-    return options[randomIndex];
-  }).trim();
-};
-
-// src/helpers/generateUser.ts
-var import_unique_names_generator = __toESM(require_dist4());
-var firstNames = [
-  "Anton",
-  "Artur",
-  "Boris",
-  "Vadim",
-  "Valeriy",
-  "Viktor",
-  "Vitaliy",
-  "Vladimir",
-  "Georgiy",
-  "Denis",
-  "Dmitriy",
-  "Egor",
-  "Ivan",
-  "Igor",
-  "Ilya",
-  "Kirill",
-  "Leonid",
-  "Maksim",
-  "Mikhail",
-  "Nikolai",
-  "Oleg",
-  "Pavel",
-  "Roman",
-  "Ruslan",
-  "Sergey",
-  "Stepan",
-  "Timofey",
-  "Fedor",
-  "Aleksey",
-  "Alexey",
-  "Andrew",
-  "Artem",
-  "Arthur",
-  "Victor",
-  "Vitaly",
-  "Gennady",
-  "Grigory",
-  "Dmitry",
-  "Matvey",
-  "Nikolay",
-  "Petr"
-];
-var lastNames = [
-  "Abramov",
-  "Agapov",
-  "Alekseev",
-  "Andreev",
-  "Anisimov",
-  "Antonov",
-  "Baranov",
-  "Belov",
-  "Bogdanov",
-  "Borisov",
-  "Bukin",
-  "Bulanov",
-  "Chernov",
-  "Chirkov",
-  "Chugunov",
-  "Demidov",
-  "Denisov",
-  "Dorofeev",
-  "Dubrovin",
-  "Efimov",
-  "Egorov",
-  "Ermakov",
-  "Erokhin",
-  "Eroshkin",
-  "Fedorov",
-  "Filatov",
-  "Frolov",
-  "Galitsyn",
-  "Gavrilov",
-  "Glazunov",
-  "Golubev",
-  "Gorbunov",
-  "Gorshkov",
-  "Grishin",
-  "Gromov",
-  "Ignatov",
-  "Ilin",
-  "Ivanov",
-  "Kalinin",
-  "Karpov",
-  "Kashirin",
-  "Kazmin",
-  "Khokhlov",
-  "Kiselev",
-  "Korneev",
-  "Korneyev",
-  "Korolev",
-  "Kostin",
-  "Kozlov",
-  "Kuzmin",
-  "Lapshin",
-  "Larionov",
-  "Lazarev",
-  "Lebedev",
-  "Lobanov",
-  "Loginov",
-  "Makarov",
-  "Maksimov",
-  "Malakhov",
-  "Malyutin",
-  "Markov",
-  "Martynov",
-  "Medvedev",
-  "Melnikov",
-  "Mironov",
-  "Mishin",
-  "Morozov",
-  "Mozharov",
-  "Naumov",
-  "Nechayev",
-  "Nesterov",
-  "Nikitin",
-  "Nikolaev",
-  "Novikov",
-  "Orlov",
-  "Osipov",
-  "Pakhomov",
-  "Panfilov",
-  "Pavlov",
-  "Petrov",
-  "Popov",
-  "Potapov",
-  "Puchkov",
-  "Romanov",
-  "Rostov",
-  "Rudakov",
-  "Rusanov",
-  "Samoylov",
-  "Savin",
-  "Semenov",
-  "Serov",
-  "Shevchuk",
-  "Shirokov",
-  "Shishkin",
-  "Shubin",
-  "Shumilov",
-  "Sidorov",
-  "Simonov",
-  "Sinitsyn",
-  "Smirnov",
-  "Sobolev",
-  "Sokolov",
-  "Soloviev",
-  "Sorokin",
-  "Stepanov",
-  "Suvorov",
-  "Sysoev",
-  "Tarasov",
-  "Terekhov",
-  "Timofeev",
-  "Tkachev",
-  "Tomilov",
-  "Trifonov",
-  "Trofimov",
-  "Tsyganov",
-  "Tikhonov",
-  "Ustinov",
-  "Vasilyev",
-  "Vikhrov",
-  "Vlasov",
-  "Volkov",
-  "Voronin",
-  "Zakharov",
-  "Zaitsev",
-  "Zaytsev",
-  "Zhdanov",
-  "Zhukov",
-  "Ziminov",
-  "Zubarev",
-  "Zubkov",
-  "Zyuzin",
-  "Zubanov"
-];
-var generateUser = () => {
-  const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-  const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-  const dictionaries = [[lastName], [...import_unique_names_generator.adjectives, ...import_unique_names_generator.colors]];
-  function randomSeparator() {
-    const separators = ["_"];
-    const index = Math.floor(Math.random() * separators.length);
-    return separators[index];
-  }
-  const dictionariesType = {
-    dictionaries: [...dictionaries],
-    length: 2,
-    separator: randomSeparator(),
-    style: "lowerCase"
-  };
-  const dictionariesTypeSecond = {
-    dictionaries: [
-      [`${lastName}${firstName}`],
-      Array.from(Array(100 + 1).keys()).slice(1).map(String)
-    ],
-    length: 2,
-    separator: randomSeparator(),
-    style: "lowerCase"
-  };
-  const randomUsername = (0, import_unique_names_generator.uniqueNamesGenerator)(dictionariesType);
-  const randomElseUsername = (0, import_unique_names_generator.uniqueNamesGenerator)(dictionariesTypeSecond);
-  return { firstName, lastName, username: randomUsername, randomElseUsername };
-};
-
-// src/helpers/getProfileFiles.ts
-var import_fs = __toESM(require("fs"));
-var import_path = __toESM(require("path"));
-
-// src/common/gramjs/CustomFile.ts
-var CustomFile = class {
-  /** The name of the file to be uploaded. This is what will be shown in telegram */
-  name;
-  /** The size of the file. this should be the exact size to not lose any information */
-  size;
-  /** The full path on the system to where the file is. this will be used to read the file from.<br/>
-   * Can be left empty to use a buffer instead
-   */
-  path;
-  /** in case of the no path a buffer can instead be passed instead to upload. */
-  buffer;
-  constructor(name, size, path2, buffer) {
-    this.name = name;
-    this.size = size;
-    this.path = path2;
-    this.buffer = buffer;
-  }
-};
-
-// src/helpers/getProfileFiles.ts
-var getProfileFiles = () => {
-  let files = [];
-  let folderName = "";
-  const getFilesFromFolder = () => {
-    const folders = import_fs.default.readdirSync(import_path.default.join(__dirname, "/src/common/images"));
-    const randomIndex = Math.floor(Math.random() * folders.length);
-    const randomFolder = folders[randomIndex];
-    folderName = import_path.default.basename(randomFolder);
-    files = import_fs.default.readdirSync(import_path.default.join(__dirname, `/src/common/images/${folderName}`)).filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
-  };
-  while (files.length < 3) {
-    getFilesFromFolder();
-  }
-  const customFiles = files.map((fileName) => {
-    return new CustomFile(
-      fileName,
-      import_fs.default.statSync(
-        import_path.default.join(__dirname, `/src/common/images/${folderName}/${fileName}`)
-      ).size,
-      import_path.default.join(__dirname, `/src/common/images/${folderName}/${fileName}`),
-      import_fs.default.readFileSync(
-        import_path.default.join(__dirname, `/src/common/images/${folderName}/${fileName}`)
-      )
-    );
-  });
-  return customFiles;
-};
-
-// src/methods/account/updateProfile.ts
 var import_api6 = __toESM(require_api());
-var updateProfile = (client, {
-  firstName,
-  lastName,
-  about
-}) => {
-  const newProfile = {
-    firstName: firstName || "",
-    lastName: lastName || "",
-    about: about || ""
-  };
-  return client.invoke(new import_api6.default.account.UpdateProfile(newProfile));
+init_sendToBot();
+var settings = {
+  muteUntil: 2147483647,
+  showPreviews: false,
+  silent: true
 };
-
-// src/modules/accountSetup.ts
-var emojis = [
-  "\u{1F30E}",
-  "\u{1F30D}",
-  "\u{1F30F}",
-  "\u{1FA90}",
-  "\u267B\uFE0F",
-  "\u{1F33F}",
-  "\u{1F9E9}",
-  "\u2618\uFE0F",
-  "\u{1F340}",
-  "\u{1F995}",
-  "\u{1F343}",
-  "\u{1F9F3}",
-  "\u{1F4BC}",
-  "\u{1F680}",
-  "\u{1F30A}",
-  "\u{1F4CC}",
-  "\u{1F3AF}",
-  "\u{1F44B}",
-  "\u{1F91D}",
-  "\u{1F468}\u200D\u{1F4BB}",
-  "\u{1F333}",
-  "\u{1F422}",
-  "\u{1F996}",
-  "\u{1F335}",
-  "\u{1F300}",
-  "\u26F0\uFE0F",
-  "\u{1F341}",
-  "\u{1F342}",
-  "\u{1F994}",
-  "\u{1F951}",
-  "\u{1F3C6}",
-  "\u{1F40C}",
-  "\u{1F9EC}",
-  "\u{1F40A}",
-  "\u{1F314}"
-];
+var defaultDialogFilter = {
+  contacts: void 0,
+  bots: void 0,
+  broadcasts: void 0,
+  emoticon: void 0,
+  excludeArchived: void 0,
+  excludeMuted: void 0,
+  excludeRead: void 0,
+  groups: void 0,
+  nonContacts: void 0,
+  includePeers: [],
+  excludePeers: [],
+  pinnedPeers: []
+};
 var accountSetup = async (client, accountId, setupped, firstName) => {
-  if (setupped) {
-    return firstName;
+  const contacts = await invokeRequest(
+    client,
+    new import_api6.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
+  );
+  if (!contacts || contacts instanceof import_api6.default.contacts.ContactsNotModified) {
+    await sendToBot(`** ACCOUNT SETUP: GET CONTACTS ERROR **
+ID: ${accountId}
+CONTACTS: ${Boolean(contacts)}
+NOT_MODIFIED: ${contacts instanceof import_api6.default.contacts.ContactsNotModified}`);
+    throw new Error("GLOBAL_ERROR");
   }
-  let user;
-  while (true) {
-    try {
-      const genUser = generateUser();
-      const {
-        firstName: genFirstName,
-        lastName,
-        username,
-        randomElseUsername: randomElseUsername2
-      } = genUser;
-      await client.invoke(
-        new import_api7.default.account.UpdateUsername({
-          username
-        })
-      );
-      await updateProfile(client, {
-        firstName: genFirstName,
-        lastName: `${lastName} ${emojis[Math.floor(Math.random() * emojis.length)]}`,
-        about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername2}`)
-      });
-      user = genUser;
-      break;
-    } catch (error) {
-      console.error({
-        accountId,
-        message: new Error(`Error when updating user data: ${error.message}`)
-      });
-      await sleep2(3e3);
+  const users = contacts.users.map(
+    (user) => new import_api6.default.InputPeerUser({
+      userId: (0, import_big_integer.default)(user.id),
+      accessHash: (0, import_big_integer.default)(user.accessHash)
+    })
+  );
+  if (users.length > 0) {
+    const isDC = await invokeRequest(
+      client,
+      new import_api6.default.contacts.DeleteContacts({ id: users })
+    );
+    if (!isDC) {
+      await sendToBot(`** ACCOUNT SETUP: DELETED CONTACTS ERROR **
+ID: ${accountId}
+USERS: ${JSON.stringify(contacts.users.map((user) => ({ id: user.id, accessHash: user.accessHash })))}`);
+      throw new Error("GLOBAL_ERROR");
     }
   }
-  const { photos: profilePhotos } = await client.invoke(
-    new import_api7.default.photos.GetUserPhotos({
-      userId: new import_api7.default.InputUserSelf(),
+  const isNC = await invokeRequest(
+    client,
+    new import_api6.default.account.UpdateNotifySettings({
+      peer: new import_api6.default.InputNotifyChats(),
+      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    })
+  );
+  const isNB = await invokeRequest(
+    client,
+    new import_api6.default.account.UpdateNotifySettings({
+      peer: new import_api6.default.InputNotifyBroadcasts(),
+      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    })
+  );
+  const isNU = await invokeRequest(
+    client,
+    new import_api6.default.account.UpdateNotifySettings({
+      peer: new import_api6.default.InputNotifyUsers(),
+      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    })
+  );
+  if (!isNC || !isNB || !isNU) {
+    await sendToBot(`** ACCOUNT SETUP: UPDATE NOTIFY SETTINGS ERROR **
+ID: ${accountId}
+CHATS: ${isNC}
+BROADCASTS: ${isNB}
+USERS: ${isNU}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const isSN = await invokeRequest(
+    client,
+    new import_api6.default.account.SetContactSignUpNotification({ silent: true })
+  );
+  if (!isSN) {
+    await sendToBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
+ID: ${accountId}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const isCS = await invokeRequest(
+    client,
+    new import_api6.default.account.SetContentSettings({
+      sensitiveEnabled: true
+    })
+  );
+  if (!isCS) {
+    await sendToBot(`** ACCOUNT SETUP: CONTENT SETTINGS ERROR **
+ID: ${accountId}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const dialogFilters = await invokeRequest(
+    client,
+    new import_api6.default.messages.GetDialogFilters()
+  );
+  if (!dialogFilters) {
+    await sendToBot(`** ACCOUNT SETUP: GET DIALOG FILTERS ERROR **
+ID: ${accountId}
+CONTACTS: ${Boolean(contacts)}
+NOT_MODIFIED: ${contacts instanceof import_api6.default.contacts.ContactsNotModified}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const filters = dialogFilters.filters.filter(
+    (filter2) => !(filter2 instanceof import_api6.default.DialogFilterDefault)
+  );
+  for (const filter2 of filters) {
+    if (filter2 instanceof import_api6.default.DialogFilterDefault) {
+      continue;
+    }
+    const isDeleted = await invokeRequest(
+      client,
+      new import_api6.default.messages.UpdateDialogFilter({
+        id: filter2.id,
+        filter: void 0
+      })
+    );
+    if (!isDeleted) {
+      await sendToBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
+ID: ${accountId}
+FID: ${filter2.id}`);
+      throw new Error("GLOBAL_ERROR");
+    }
+  }
+  const isC = await invokeRequest(
+    client,
+    new import_api6.default.messages.UpdateDialogFilter({
+      id: 2,
+      filter: new import_api6.default.DialogFilter({
+        ...defaultDialogFilter,
+        id: 2,
+        contacts: true,
+        title: "Main"
+      })
+    })
+  );
+  const isBO = await invokeRequest(
+    client,
+    new import_api6.default.messages.UpdateDialogFilter({
+      id: 3,
+      filter: new import_api6.default.DialogFilter({
+        ...defaultDialogFilter,
+        id: 3,
+        bots: true,
+        title: "Bots"
+      })
+    })
+  );
+  const isBR = await invokeRequest(
+    client,
+    new import_api6.default.messages.UpdateDialogFilter({
+      id: 4,
+      filter: new import_api6.default.DialogFilter({
+        ...defaultDialogFilter,
+        id: 4,
+        broadcasts: true,
+        title: "Channels"
+      })
+    })
+  );
+  const isG = await invokeRequest(
+    client,
+    new import_api6.default.messages.UpdateDialogFilter({
+      id: 5,
+      filter: new import_api6.default.DialogFilter({
+        ...defaultDialogFilter,
+        id: 5,
+        groups: true,
+        title: "Groups"
+      })
+    })
+  );
+  if (!isC || !isBO || !isBR || !isG) {
+    await sendToBot(`** ACCOUNT SETUP: CREATE DIALOG FILTER ERROR **
+ID: ${accountId}
+BOTS: ${isBO}
+GROUPS: ${isG}
+CONTACTS: ${isC}
+BROADCASTS: ${isBR}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const photos = await invokeRequest(
+    client,
+    new import_api6.default.photos.GetUserPhotos({
+      userId: new import_api6.default.InputUserSelf(),
       limit: 40,
       offset: 0,
       maxId: (0, import_big_integer.default)("0")
     })
   );
-  if (profilePhotos.length) {
-    await client.invoke(
-      new import_api7.default.photos.DeletePhotos({
-        id: profilePhotos.map(
-          (photo) => new import_api7.default.InputPhoto({
-            id: photo.id,
-            accessHash: photo.accessHash,
-            fileReference: Buffer.alloc(0)
-          })
-        )
-      })
-    );
+  if (!photos) {
+    await sendToBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
+ID: ${accountId}`);
+    throw new Error("GLOBAL_ERROR");
   }
-  const files = getProfileFiles();
-  for (const file of files) {
-    await client.invoke(
-      new import_api7.default.photos.UploadProfilePhoto({
-        file: await uploadFile(client, file)
-      })
-    );
+  const isPKA = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyAbout(),
+      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    })
+  );
+  const isPKS = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    })
+  );
+  const isPKPR = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    })
+  );
+  const isPKPH = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    })
+  );
+  const isPKPH2P2 = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyPhoneP2P(),
+      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    })
+  );
+  const isPKC = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    })
+  );
+  const isPKF = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyForwards(),
+      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    })
+  );
+  const isPKPHC = await invokeRequest(
+    client,
+    new import_api6.default.account.SetPrivacy({
+      key: new import_api6.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    })
+  );
+  if (!isPKA || !isPKS || !isPKPR || !isPKPH || !isPKPH2P2 || !isPKC || !isPKF || !isPKPHC) {
+    await sendToBot(`** ACCOUNT SETUP: SET PRIVACY ERROR **
+ID: ${accountId}
+ABOUT: ${isPKA}
+STATUS: ${isPKS}
+PROFILE_PHOTO: ${isPKPR}
+PHONE_NUMBER: ${isPKPH}
+PHONE_P2P: ${isPKPH2P2}
+CHAT_INVITE: ${isPKC}
+FORWARDS: ${isPKF}
+PHONE_CALL: ${isPKPHC}`);
+    throw new Error("GLOBAL_ERROR");
   }
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyAbout(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyForwards(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await client.invoke(
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  const { randomElseUsername, ...fullUser } = user;
-  await updateAccountById(accountId, {
-    ...fullUser,
-    setuped: true,
-    banned: false,
-    messageCount: 0
-  });
-  return user.firstName;
+  return firstName;
 };
 
 // src/modules/getDialogs.ts
 var import_big_integer3 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 
 // src/db/dialogues.ts
 var getDialoguesCollection = async () => {
@@ -76104,13 +75879,13 @@ var getCombinedMessages = (messages) => {
 
 // src/methods/folders/editFolder.ts
 var import_big_integer2 = __toESM(require_BigInteger());
-var import_api8 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 var editFolder = async (client, userId, accessHash, folderId) => {
   await client.invoke(
-    new import_api8.default.folders.EditPeerFolders({
+    new import_api7.default.folders.EditPeerFolders({
       folderPeers: [
-        new import_api8.default.InputFolderPeer({
-          peer: new import_api8.default.InputPeerUser({
+        new import_api7.default.InputFolderPeer({
+          peer: new import_api7.default.InputPeerUser({
             userId: (0, import_big_integer2.default)(userId),
             accessHash: (0, import_big_integer2.default)(accessHash)
           }),
@@ -76126,8 +75901,8 @@ init_sendToBot();
 var getDialogs2 = async (client, accountId) => {
   var _a;
   const clientDialogs = await client.invoke(
-    new import_api9.default.messages.GetDialogs({
-      offsetPeer: new import_api9.default.InputPeerEmpty(),
+    new import_api8.default.messages.GetDialogs({
+      offsetPeer: new import_api8.default.InputPeerEmpty(),
       folderId: 1,
       limit: 100
     })
@@ -76160,7 +75935,7 @@ var getDialogs2 = async (client, accountId) => {
     const user = clientDialogs.users.find(
       (u) => String(u.id) === dialogId
     );
-    if (user && !user.deleted && !user.bot && !user.support && !user.self && !(!user.status || user.status instanceof import_api9.default.UserStatusEmpty)) {
+    if (user && !user.deleted && !user.bot && !user.support && !user.self && !(!user.status || user.status instanceof import_api8.default.UserStatusEmpty)) {
       const dialogDb = await getDialogue(accountId, String(user.id));
       const {
         messages: dialogMessages = [],
@@ -76178,8 +75953,8 @@ STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${blocked}:${reason}:${
         continue;
       }
       const allHistory = await client.invoke(
-        new import_api9.default.messages.GetHistory({
-          peer: new import_api9.default.InputPeerUser({
+        new import_api8.default.messages.GetHistory({
+          peer: new import_api8.default.InputPeerUser({
             userId: (0, import_big_integer3.default)(user.id),
             accessHash: (0, import_big_integer3.default)(user.accessHash)
           }),
@@ -76210,7 +75985,7 @@ STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${blocked}:${reason}:${
           text = dialogMessage.message;
         } else if (voice || round) {
           await client.invoke(
-            new import_api9.default.messages.ReadMessageContents({
+            new import_api8.default.messages.ReadMessageContents({
               id: [dialogMessage.id]
             })
           );
@@ -76254,8 +76029,8 @@ STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${blocked}:${reason}:${
         messages: dialogMessages
       };
       await client.invoke(
-        new import_api9.default.messages.ReadHistory({
-          peer: new import_api9.default.InputPeerUser({
+        new import_api8.default.messages.ReadHistory({
+          peer: new import_api8.default.InputPeerUser({
             userId: (0, import_big_integer3.default)(user.id),
             accessHash: (0, import_big_integer3.default)(user.accessHash)
           }),
@@ -76754,10 +76529,10 @@ function isVisitable(thing) {
 function removeBrackets(key) {
   return utils_default.endsWith(key, "[]") ? key.slice(0, -2) : key;
 }
-function renderKey(path2, key, dots) {
-  if (!path2)
+function renderKey(path, key, dots) {
+  if (!path)
     return key;
-  return path2.concat(key).map(function each(token, i) {
+  return path.concat(key).map(function each(token, i) {
     token = removeBrackets(token);
     return !dots && i ? "[" + token + "]" : token;
   }).join(dots ? "." : "");
@@ -76803,9 +76578,9 @@ function toFormData(obj, formData, options) {
     }
     return value;
   }
-  function defaultVisitor(value, key, path2) {
+  function defaultVisitor(value, key, path) {
     let arr = value;
-    if (value && !path2 && typeof value === "object") {
+    if (value && !path && typeof value === "object") {
       if (utils_default.endsWith(key, "{}")) {
         key = metaTokens ? key : key.slice(0, -2);
         value = JSON.stringify(value);
@@ -76824,7 +76599,7 @@ function toFormData(obj, formData, options) {
     if (isVisitable(value)) {
       return true;
     }
-    formData.append(renderKey(path2, key, dots), convertValue(value));
+    formData.append(renderKey(path, key, dots), convertValue(value));
     return false;
   }
   const stack = [];
@@ -76833,11 +76608,11 @@ function toFormData(obj, formData, options) {
     convertValue,
     isVisitable
   });
-  function build(value, path2) {
+  function build(value, path) {
     if (utils_default.isUndefined(value))
       return;
     if (stack.indexOf(value) !== -1) {
-      throw Error("Circular reference detected in " + path2.join("."));
+      throw Error("Circular reference detected in " + path.join("."));
     }
     stack.push(value);
     utils_default.forEach(value, function each(el, key) {
@@ -76845,11 +76620,11 @@ function toFormData(obj, formData, options) {
         formData,
         el,
         utils_default.isString(key) ? key.trim() : key,
-        path2,
+        path,
         exposedHelpers
       );
       if (result === true) {
-        build(el, path2 ? path2.concat(key) : [key]);
+        build(el, path ? path.concat(key) : [key]);
       }
     });
     stack.pop();
@@ -77034,7 +76809,7 @@ var platform_default = {
 // ../node_modules/axios/lib/helpers/toURLEncodedForm.js
 function toURLEncodedForm(data, options) {
   return toFormData_default(data, new platform_default.classes.URLSearchParams(), Object.assign({
-    visitor: function(value, key, path2, helpers) {
+    visitor: function(value, key, path, helpers) {
       if (platform_default.isNode && utils_default.isBuffer(value)) {
         this.append(key, value.toString("base64"));
         return false;
@@ -77063,12 +76838,12 @@ function arrayToObject(arr) {
   return obj;
 }
 function formDataToJSON(formData) {
-  function buildPath(path2, value, target, index) {
-    let name = path2[index++];
+  function buildPath(path, value, target, index) {
+    let name = path[index++];
     if (name === "__proto__")
       return true;
     const isNumericKey = Number.isFinite(+name);
-    const isLast = index >= path2.length;
+    const isLast = index >= path.length;
     name = !name && utils_default.isArray(target) ? target.length : name;
     if (isLast) {
       if (utils_default.hasOwnProp(target, name)) {
@@ -77081,7 +76856,7 @@ function formDataToJSON(formData) {
     if (!target[name] || !utils_default.isObject(target[name])) {
       target[name] = [];
     }
-    const result = buildPath(path2, value, target[name], index);
+    const result = buildPath(path, value, target[name], index);
     if (result && utils_default.isArray(target[name])) {
       target[name] = arrayToObject(target[name]);
     }
@@ -78209,9 +77984,9 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
       auth = urlUsername + ":" + urlPassword;
     }
     auth && headers.delete("authorization");
-    let path2;
+    let path;
     try {
-      path2 = buildURL(
+      path = buildURL(
         parsed.pathname + parsed.search,
         config.params,
         config.paramsSerializer
@@ -78229,7 +78004,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
       false
     );
     const options = {
-      path: path2,
+      path,
       method,
       headers: headers.toJSON(),
       agents: { http: config.httpAgent, https: config.httpsAgent },
@@ -78493,10 +78268,10 @@ var isURLSameOrigin_default = platform_default.hasStandardBrowserEnv ? (
 var cookies_default = platform_default.hasStandardBrowserEnv ? (
   // Standard browser envs support document.cookie
   {
-    write(name, value, expires, path2, domain, secure) {
+    write(name, value, expires, path, domain, secure) {
       const cookie = [name + "=" + encodeURIComponent(value)];
       utils_default.isNumber(expires) && cookie.push("expires=" + new Date(expires).toGMTString());
-      utils_default.isString(path2) && cookie.push("path=" + path2);
+      utils_default.isString(path) && cookie.push("path=" + path);
       utils_default.isString(domain) && cookie.push("domain=" + domain);
       secure === true && cookie.push("secure");
       document.cookie = cookie.join("; ");
@@ -79921,7 +79696,7 @@ ${errors3.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
       (part || "").trim()
     );
   }
-  throw new Error("Stopped");
+  throw new Error("STOPPED_ERROR");
 }
 
 // src/db/groupId.ts
@@ -80130,6 +79905,17 @@ var converterName = (aiName) => {
   return russianNames[lowerCaseName] || aiName;
 };
 
+// src/helpers/generateRandomString.ts
+var generateRandomString = (template) => {
+  const regex = /{(.*?)}/g;
+  const cleanedTemplate = template.replace(/\n/g, "").replace(/\s{2,}/g, " ");
+  return cleanedTemplate.replace(regex, (match, group) => {
+    const options = group.split("|");
+    const randomIndex = Math.floor(Math.random() * options.length);
+    return options[randomIndex];
+  }).trim();
+};
+
 // src/helpers/getDateNow.ts
 var getDateNow = () => {
   const now = /* @__PURE__ */ new Date();
@@ -80188,7 +79974,7 @@ var sendToFormBot = async (text) => {
 
 // src/methods/messages/sendMessage.ts
 var import_big_integer4 = __toESM(require_BigInteger());
-var import_api10 = __toESM(require_api());
+var import_api9 = __toESM(require_api());
 init_sendToBot();
 
 // src/helpers/removeSpacesAndLowerCase.ts
@@ -80228,24 +80014,24 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
       const iterations = Math.ceil(message.length / 250 * 60 * 1e3 / 5e3);
       for (let i = 0; i < iterations; i++) {
         await client.invoke(
-          new import_api10.default.messages.SetTyping({
-            peer: new import_api10.default.InputPeerUser({
+          new import_api9.default.messages.SetTyping({
+            peer: new import_api9.default.InputPeerUser({
               userId: (0, import_big_integer4.default)(userId),
               accessHash: (0, import_big_integer4.default)(accessHash)
             }),
-            action: new import_api10.default.SendMessageTypingAction()
+            action: new import_api9.default.SendMessageTypingAction()
           })
         );
         await sleep2(5e3);
       }
     }
     sentMessage = await client.invoke(
-      new import_api10.default.messages.SendMessage({
+      new import_api9.default.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter2(reduceSpaces(message))
         ),
         clearDraft: true,
-        peer: new import_api10.default.InputPeerUser({
+        peer: new import_api9.default.InputPeerUser({
           userId: (0, import_big_integer4.default)(userId),
           accessHash: (0, import_big_integer4.default)(accessHash)
         }),
@@ -80265,8 +80051,8 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
         throw new Error("MESSAGE_ERROR");
       }
       await client.invoke(
-        new import_api10.default.messages.ReadHistory({
-          peer: new import_api10.default.InputPeerUser({
+        new import_api9.default.messages.ReadHistory({
+          peer: new import_api9.default.InputPeerUser({
             userId: (0, import_big_integer4.default)(userId),
             accessHash: (0, import_big_integer4.default)(accessHash)
           }),
@@ -80307,15 +80093,15 @@ Message: ${message}`
 
 // src/methods/users/getFullUser.ts
 var import_big_integer5 = __toESM(require_BigInteger());
-var import_api11 = __toESM(require_api());
+var import_api10 = __toESM(require_api());
 init_sendToBot();
 var getFullUser = async (client, userId, accessHash) => {
   if (!userId || !accessHash) {
     return null;
   }
   const userFull = await client.invoke(
-    new import_api11.default.users.GetFullUser({
-      id: new import_api11.default.InputPeerUser({
+    new import_api10.default.users.GetFullUser({
+      id: new import_api10.default.InputPeerUser({
         userId: (0, import_big_integer5.default)(userId),
         accessHash: (0, import_big_integer5.default)(accessHash)
       })
@@ -80642,10 +80428,10 @@ var sendToSpamBot = async (text) => {
 };
 
 // src/methods/contacts/resolveUsername.ts
-var import_api12 = __toESM(require_api());
+var import_api11 = __toESM(require_api());
 var resolveUsername = async (client, username) => {
   const userByUsername = await client.invoke(
-    new import_api12.default.contacts.ResolveUsername({
+    new import_api11.default.contacts.ResolveUsername({
       username
     })
   );
@@ -80654,11 +80440,11 @@ var resolveUsername = async (client, username) => {
 
 // src/methods/messages/getMessages.ts
 var import_big_integer6 = __toESM(require_BigInteger());
-var import_api13 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 var getMessages = async (client, userId, accessHash, minId) => {
   const allHistory = await client.invoke(
-    new import_api13.default.messages.GetHistory({
-      peer: new import_api13.default.InputPeerUser({
+    new import_api12.default.messages.GetHistory({
+      peer: new import_api12.default.InputPeerUser({
         userId: (0, import_big_integer6.default)(userId),
         accessHash: (0, import_big_integer6.default)(accessHash)
       }),
@@ -80795,27 +80581,27 @@ init_sendToBot();
 
 // src/methods/account/muteNotification.ts
 var import_big_integer7 = __toESM(require_BigInteger());
-var import_api14 = __toESM(require_api());
+var import_api13 = __toESM(require_api());
 var muteNotification = async (client, id, accessHash, muteUntil = 2147483647) => {
   const muteInvoke = await client.invoke(
-    new import_api14.default.account.UpdateNotifySettings({
-      peer: new import_api14.default.InputNotifyPeer({
-        peer: new import_api14.default.InputPeerUser({
+    new import_api13.default.account.UpdateNotifySettings({
+      peer: new import_api13.default.InputNotifyPeer({
+        peer: new import_api13.default.InputPeerUser({
           userId: (0, import_big_integer7.default)(id),
           accessHash: (0, import_big_integer7.default)(accessHash)
         })
       }),
-      settings: new import_api14.default.InputPeerNotifySettings({ muteUntil })
+      settings: new import_api13.default.InputPeerNotifySettings({ muteUntil })
     })
   );
   return muteInvoke;
 };
 
 // src/methods/contacts/resolvePhone.ts
-var import_api15 = __toESM(require_api());
+var import_api14 = __toESM(require_api());
 var resolvePhone = async (client, phone) => {
   const userByUsername = await client.invoke(
-    new import_api15.default.contacts.ResolvePhone({
+    new import_api14.default.contacts.ResolvePhone({
       phone
     })
   );
@@ -80823,14 +80609,14 @@ var resolvePhone = async (client, phone) => {
 };
 
 // src/methods/contacts/resolveContact.ts
-var import_api16 = __toESM(require_api());
+var import_api15 = __toESM(require_api());
 var resolveContact = async (client, username, groupId) => {
   var _a, _b;
   const resolveMethod = username.includes("+") ? resolvePhone : resolveUsername;
   const userByUsername = await resolveMethod(client, username);
   const { id: userId, accessHash } = ((_a = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _a[0]) ?? {};
   const recipientFull = await getFullUser(client, userId, accessHash);
-  if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api16.default.User)) {
+  if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api15.default.User)) {
     await updateFailedMessage(username, groupId);
     throw new Error("USERNAME_INVALID");
   }
@@ -80873,11 +80659,11 @@ var getRecipient = async (accountId) => {
 
 // src/methods/messages/deleteHistory.ts
 var import_big_integer8 = __toESM(require_BigInteger());
-var import_api17 = __toESM(require_api());
+var import_api16 = __toESM(require_api());
 var deleteMessages = async (client, userId, accessHash) => {
   await client.invoke(
-    new import_api17.default.messages.DeleteHistory({
-      peer: new import_api17.default.InputPeerUser({
+    new import_api16.default.messages.DeleteHistory({
+      peer: new import_api16.default.InputPeerUser({
         userId: (0, import_big_integer8.default)(userId),
         accessHash: (0, import_big_integer8.default)(accessHash)
       }),
@@ -81222,7 +81008,7 @@ ERROR: ${e.message}`);
 };
 
 // src/modules/handleUpdate.ts
-var import_api18 = __toESM(require_api());
+var import_api17 = __toESM(require_api());
 function findValue(obj, valueKey) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
   return obj[valueKey] || ((_a = obj.peer) == null ? void 0 : _a[valueKey]) || ((_b = obj.message) == null ? void 0 : _b[valueKey]) || ((_d = (_c = obj.message) == null ? void 0 : _c.fromId) == null ? void 0 : _d[valueKey]) || ((_f = (_e = obj.message) == null ? void 0 : _e.peer) == null ? void 0 : _f[valueKey]) || ((_h = (_g = obj.message) == null ? void 0 : _g.peerId) == null ? void 0 : _h[valueKey]);
@@ -81232,19 +81018,19 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     return;
   }
   const userId = findValue(update, "userId");
-  if (userId && update instanceof import_api18.default.UpdateUserStatus) {
-    if (update.status instanceof import_api18.default.UserStatusOffline) {
+  if (userId && update instanceof import_api17.default.UpdateUserStatus) {
+    if (update.status instanceof import_api17.default.UserStatusOffline) {
       await updateSingleDialogue(accountId, String(userId), {
         lastOnline: update.status.wasOnline
       });
     }
-    if (update.status instanceof import_api18.default.UserStatusOnline) {
+    if (update.status instanceof import_api17.default.UserStatusOnline) {
       await updateSingleDialogue(accountId, String(userId), {
         lastOnline: update.status.expires
       });
     }
   }
-  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat") || update.className.toLowerCase().includes("group")) {
+  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className === "UpdateConfig" || update.className === "UpdateUser" || update.className === "UpdatePrivacy" || update.className === "UpdateUserName" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat") || update.className.toLowerCase().includes("group")) {
     if (process.env.DEV !== "true") {
       return;
     }
@@ -81254,14 +81040,14 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
-  if (update instanceof import_api18.default.UpdateNewMessage || update instanceof import_api18.default.UpdateShortMessage) {
+  if (update instanceof import_api17.default.UpdateNewMessage || update instanceof import_api17.default.UpdateShortMessage) {
     if (userId) {
       const dialog = await getDialogue(accountId, String(userId));
       if (dialog && !dialog.reason && !dialog.automaticReason) {
         onNewMessage();
       }
     }
-  } else if (update instanceof import_api18.default.UpdateReadHistoryOutbox || update instanceof import_api18.default.UpdateReadHistoryInbox) {
+  } else if (update instanceof import_api17.default.UpdateReadHistoryOutbox || update instanceof import_api17.default.UpdateReadHistoryInbox) {
     if (userId && update.maxId) {
       const dialog = await getDialogue(accountId, String(userId));
       if (!dialog || !dialog.messages || !Array.isArray(dialog.messages) || !dialog.messages.length) {
@@ -81280,7 +81066,7 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
 
 // src/modules/automaticCheck.ts
 var import_big_integer9 = __toESM(require_BigInteger());
-var import_api19 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 init_sendToBot();
 
 // src/modules/getUserByDialogue.ts
@@ -81368,8 +81154,8 @@ var automaticCheck = async (client, accountId) => {
     const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
     while (true) {
       const dialogs2 = await client.invoke(
-        new import_api19.default.messages.GetDialogs({
-          offsetPeer: new import_api19.default.InputPeerEmpty(),
+        new import_api18.default.messages.GetDialogs({
+          offsetPeer: new import_api18.default.InputPeerEmpty(),
           folderId: 1,
           limit: 100,
           offsetDate
@@ -81380,13 +81166,13 @@ var automaticCheck = async (client, accountId) => {
       const clientDialogs = (dialogs2 == null ? void 0 : dialogs2.dialogs) || [];
       const clientChats = (dialogs2 == null ? void 0 : dialogs2.chats) || [];
       for (const chat of clientChats) {
-        if (chat instanceof import_api19.default.Channel && chat.username === "HiddenSender") {
+        if (chat instanceof import_api18.default.Channel && chat.username === "HiddenSender") {
           continue;
         }
         await sleep10();
         await client.invoke(
-          new import_api19.default.channels.LeaveChannel({
-            channel: new import_api19.default.InputPeerChannel({
+          new import_api18.default.channels.LeaveChannel({
+            channel: new import_api18.default.InputPeerChannel({
               channelId: (0, import_big_integer9.default)(chat.id),
               // @ts-ignore
               accessHash: (0, import_big_integer9.default)(chat.accessHash)
@@ -81395,17 +81181,17 @@ var automaticCheck = async (client, accountId) => {
         );
       }
       for (const user of clientUsers) {
-        if (!(user instanceof import_api19.default.User) || user.self || user.bot || user.support) {
+        if (!(user instanceof import_api18.default.User) || user.self || user.bot || user.support) {
           continue;
         }
         if (!dialogsWithoutReasonIds.includes(String(user.id)) && !dialogsWithReasonIds.includes(String(user.id))) {
           continue;
         }
         const dialog = clientDialogs.find(
-          (d) => d.peer instanceof import_api19.default.PeerUser && String(d.peer.userId) === String(user.id)
+          (d) => d.peer instanceof import_api18.default.PeerUser && String(d.peer.userId) === String(user.id)
         );
         const message = clientMessages.find(
-          (m) => m.peerId instanceof import_api19.default.PeerUser && String(m.peerId.userId) === String(user.id)
+          (m) => m.peerId instanceof import_api18.default.PeerUser && String(m.peerId.userId) === String(user.id)
         );
         if (!dialog || !message) {
           await sendToBot(`** DIALOG OR MESSAGE NOT DEFINED **
@@ -81419,7 +81205,7 @@ ID: ${String(user.id)}`);
         break;
       } else {
         const filtredUsers = clientUsers.filter(
-          (user) => String(user.id) !== "136817688" && (user instanceof import_api19.default.User ? !user.bot : true)
+          (user) => String(user.id) !== "136817688" && (user instanceof import_api18.default.User ? !user.bot : true)
         );
         const lastUser = filtredUsers[filtredUsers.length - 2];
         if (!lastUser) {
@@ -81435,7 +81221,7 @@ OFFSET DATE: ${offsetDate}`);
             return String((_a = message.peerId) == null ? void 0 : _a.userId) === String(lastUser.id);
           }
         );
-        if (!lastMessage || lastMessage instanceof import_api19.default.MessageEmpty) {
+        if (!lastMessage || lastMessage instanceof import_api18.default.MessageEmpty) {
           await sendToBot(`** LAST MESSAGE NOT INSTANCEOF MESSAGE **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
@@ -81468,7 +81254,7 @@ RECIPIENT ID: ${userId}`);
             "automatic:data-not-actual",
             { read: true }
           );
-        } else if ((!dialogTG.status || dialogTG.status instanceof import_api19.default.UserStatusEmpty) && !dialogTG.photo) {
+        } else if ((!dialogTG.status || dialogTG.status instanceof import_api18.default.UserStatusEmpty) && !dialogTG.photo) {
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -81500,7 +81286,7 @@ RECIPIENT ID: ${userId}`);
             userId,
             "automatic:account-deleted"
           );
-        } else if ((!user.status || user.status instanceof import_api19.default.UserStatusEmpty) && !user.photo) {
+        } else if ((!user.status || user.status instanceof import_api18.default.UserStatusEmpty) && !user.photo) {
           await sleep10();
           await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
@@ -81521,14 +81307,14 @@ RECIPIENT ID: ${userId}`);
           const dialogDB = dialogs.find(
             (d) => String(d.recipientId) === String(userId)
           );
-          const lastOnline = !user.status || user.status instanceof import_api19.default.UserStatusRecently || user.status instanceof import_api19.default.UserStatusEmpty || user.status instanceof import_api19.default.UserStatusLastMonth || user.status instanceof import_api19.default.UserStatusLastWeek ? null : user.status instanceof import_api19.default.UserStatusOffline ? user.status.wasOnline : user.status.expires;
+          const lastOnline = !user.status || user.status instanceof import_api18.default.UserStatusRecently || user.status instanceof import_api18.default.UserStatusEmpty || user.status instanceof import_api18.default.UserStatusLastMonth || user.status instanceof import_api18.default.UserStatusLastWeek ? null : user.status instanceof import_api18.default.UserStatusOffline ? user.status.wasOnline : user.status.expires;
           if (lastOnline !== (dialogDB == null ? void 0 : dialogDB.lastOnline)) {
             await updateSingleDialogue(accountId, userId, {
               lastOnline
             });
           }
         }
-        if (dialog && dialog instanceof import_api19.default.Dialog && (dialog.topMessage <= dialog.readOutboxMaxId || dialog.topMessage <= dialog.readInboxMaxId) && !readIds.includes(userId)) {
+        if (dialog && dialog instanceof import_api18.default.Dialog && (dialog.topMessage <= dialog.readOutboxMaxId || dialog.topMessage <= dialog.readInboxMaxId) && !readIds.includes(userId)) {
           await updateSingleDialogue(accountId, userId, {
             read: true,
             dateUpdated: /* @__PURE__ */ new Date()
@@ -81638,6 +81424,10 @@ var main = async (ID) => {
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const tgAccountId = await usersMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 30);
+    console.log({
+      accountId: ID,
+      message: `SEND IN ${randomI} ITERATION`
+    });
     let i = -1;
     while (true) {
       i += 1;
@@ -81675,22 +81465,22 @@ var main = async (ID) => {
       accountId: ID,
       message: new Error(`Main error: ${e.message}`)
     });
-    if (e.message.includes("AUTH_KEY_DUPLICATED")) {
+    if (e.message.includes("GLOBAL_ERROR")) {
+      console.error({
+        accountId: ID,
+        message: new Error(e.message)
+      });
+    } else if (e.message.includes("STOPPED_ERROR")) {
+      await updateAccountById(ID, {
+        stopped: true
+      });
+    } else if (e.message.includes("AUTH_KEY_DUPLICATED")) {
       await updateAccountById(ID, {
         banned: true,
         reason: "AUTH_KEY_DUPLICATED"
       });
       await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
       await exec("pm2 kill");
-    } else if (e.message.includes("Global Error")) {
-      console.error({
-        accountId: ID,
-        message: new Error(`Stop Account: ${e.message}`)
-      });
-    } else if (e.message.includes("Stopped")) {
-      await updateAccountById(ID, {
-        stopped: true
-      });
     } else if ([
       "USER_DEACTIVATED_BAN",
       "AUTH_KEY_UNREGISTERED",
@@ -81736,9 +81526,7 @@ var main = async (ID) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: "\u{1F4A5} ITERATION INIT \u{1F4A5}" });
   const startTime = performance.now();
-  accounts.forEach((accountId) => {
-    promises.push(main(accountId));
-  });
+  promises.push(main("447828819872-2026165-en"));
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,

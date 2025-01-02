@@ -46,6 +46,10 @@ export const handleUpdate = async (
     update.className === 'UpdateConnectionState' ||
     update.className === 'UpdateUserStatus' ||
     update.className === 'UpdateUserTyping' ||
+    update.className === 'UpdateConfig' ||
+    update.className === 'UpdateUser' ||
+    update.className === 'UpdatePrivacy' ||
+    update.className === 'UpdateUserName' ||
     update.className.toLowerCase().includes('channel') ||
     update.className.toLowerCase().includes('chat') ||
     update.className.toLowerCase().includes('group')

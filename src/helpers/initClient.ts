@@ -21,7 +21,7 @@ export const initClient = async (
     ]);
 
     if (!client) {
-      throw new Error('Global Error (client not inited)');
+      throw new Error('GLOBAL_ERROR');
     }
 
     return client as TelegramClient;
