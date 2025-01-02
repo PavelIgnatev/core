@@ -261,20 +261,7 @@ BROADCASTS: ${isBR}`);
     throw new Error('GLOBAL_ERROR');
   }
 
-  const photos = await invokeRequest(
-    client,
-    new GramJs.photos.GetUserPhotos({
-      userId: new GramJs.InputUserSelf(),
-      limit: 40,
-      offset: 0,
-      maxId: BigInt('0'),
-    })
-  );
-  if (!photos) {
-    await sendToBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
-ID: ${accountId}`);
-    throw new Error('GLOBAL_ERROR');
-  }
+
 
   const isPKA = await invokeRequest(
     client,
@@ -363,6 +350,20 @@ PHONE_CALL: ${isPKPHC}`);
     throw new Error('GLOBAL_ERROR');
   }
 
+//   const photos = await invokeRequest(
+//     client,
+//     new GramJs.photos.GetUserPhotos({
+//       userId: new GramJs.InputUserSelf(),
+//       limit: 40,
+//       offset: 0,
+//       maxId: BigInt('0'),
+//     })
+//   );
+//   if (!photos) {
+//     await sendToBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
+// ID: ${accountId}`);
+//     throw new Error('GLOBAL_ERROR');
+//   }
   //   const photoIds = [];
   //   for (const photo of photos.photos) {
   //     if (photo instanceof GramJs.PhotoEmpty) {

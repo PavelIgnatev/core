@@ -75603,20 +75603,6 @@ CONTACTS: ${isC}
 BROADCASTS: ${isBR}`);
     throw new Error("GLOBAL_ERROR");
   }
-  const photos = await invokeRequest(
-    client,
-    new import_api6.default.photos.GetUserPhotos({
-      userId: new import_api6.default.InputUserSelf(),
-      limit: 40,
-      offset: 0,
-      maxId: (0, import_big_integer.default)("0")
-    })
-  );
-  if (!photos) {
-    await sendToBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
-ID: ${accountId}`);
-    throw new Error("GLOBAL_ERROR");
-  }
   const isPKA = await invokeRequest(
     client,
     new import_api6.default.account.SetPrivacy({
