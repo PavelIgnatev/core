@@ -81426,7 +81426,7 @@ var main = async (ID) => {
     const randomI = Math.floor(Math.random() * 30);
     console.log({
       accountId: ID,
-      message: `SEND IN ${randomI} ITERATION`
+      message: `Random number: ${randomI}`
     });
     let i = -1;
     while (true) {

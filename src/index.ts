@@ -104,7 +104,7 @@ const main = async (ID: string) => {
 
     console.log({
       accountId: ID,
-      message: `SEND IN ${randomI} ITERATION`,
+      message: `Random number: ${randomI}`,
     });
 
     let i = -1;
