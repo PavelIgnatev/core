@@ -75438,8 +75438,8 @@ var defaultDialogFilter = {
   excludePeers: [],
   pinnedPeers: []
 };
-var accountSetup = async (client, accountId, setupped, firstName) => {
-  if (setupped) {
+var accountSetup = async (client, accountId, setuped, firstName) => {
+  if (setuped) {
     return firstName;
   }
   const contacts = await invokeRequest(
