@@ -81336,13 +81336,13 @@ var logger = import_winston.default.createLogger({
   ]
 });
 console.log = (...args) => {
-  logger.info(...args);
+  logger.info({ ...args, eventTime: (/* @__PURE__ */ new Date()).toISOString() });
 };
 console.error = (...args) => {
-  logger.error(...args);
+  logger.error({ ...args, eventTime: (/* @__PURE__ */ new Date()).toISOString() });
 };
 console.warn = (...args) => {
-  logger.warn(...args);
+  logger.warn({ ...args, eventTime: (/* @__PURE__ */ new Date()).toISOString() });
 };
 
 // src/index.ts
