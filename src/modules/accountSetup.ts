@@ -182,11 +182,7 @@ NOT_MODIFIED: ${contacts instanceof GramJs.contacts.ContactsNotModified}`);
     throw new Error('GLOBAL_ERROR');
   }
 
-  const filters = dialogFilters.filters.filter(
-    (filter) => !(filter instanceof GramJs.DialogFilterDefault)
-  );
-
-  for (const filter of filters) {
+  for (const filter of dialogFilters.filters) {
     if (filter instanceof GramJs.DialogFilterDefault) {
       continue;
     }

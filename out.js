@@ -75528,10 +75528,7 @@ CONTACTS: ${Boolean(contacts)}
 NOT_MODIFIED: ${contacts instanceof import_api6.default.contacts.ContactsNotModified}`);
     throw new Error("GLOBAL_ERROR");
   }
-  const filters = dialogFilters.filters.filter(
-    (filter2) => !(filter2 instanceof import_api6.default.DialogFilterDefault)
-  );
-  for (const filter2 of filters) {
+  for (const filter2 of dialogFilters.filters) {
     if (filter2 instanceof import_api6.default.DialogFilterDefault) {
       continue;
     }
