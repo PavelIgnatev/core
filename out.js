@@ -81526,7 +81526,9 @@ var main = async (ID) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: "\u{1F4A5} ITERATION INIT \u{1F4A5}" });
   const startTime = performance.now();
-  promises.push(main("447828819872-2026165-en"));
+  accounts.forEach((accountId) => {
+    promises.push(main(accountId));
+  });
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,

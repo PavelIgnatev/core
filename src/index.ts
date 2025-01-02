@@ -222,9 +222,9 @@ const main = async (ID: string) => {
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  // accounts.forEach((accountId: string) => {
-  promises.push(main('447828819872-2026165-en'));
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
   //447828819872-2026165-en
 
   const interval = setInterval(() => {
