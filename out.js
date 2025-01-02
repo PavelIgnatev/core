@@ -75439,6 +75439,9 @@ var defaultDialogFilter = {
   pinnedPeers: []
 };
 var accountSetup = async (client, accountId, setupped, firstName) => {
+  if (setupped) {
+    return firstName;
+  }
   const contacts = await invokeRequest(
     client,
     new import_api6.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
@@ -75503,17 +75506,6 @@ USERS: ${isNU}`);
   );
   if (!isSN) {
     await sendToBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
-ID: ${accountId}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  const isCS = await invokeRequest(
-    client,
-    new import_api6.default.account.SetContentSettings({
-      sensitiveEnabled: true
-    })
-  );
-  if (!isCS) {
-    await sendToBot(`** ACCOUNT SETUP: CONTENT SETTINGS ERROR **
 ID: ${accountId}`);
     throw new Error("GLOBAL_ERROR");
   }
@@ -75672,6 +75664,12 @@ FORWARDS: ${isPKF}
 PHONE_CALL: ${isPKPHC}`);
     throw new Error("GLOBAL_ERROR");
   }
+  await updateAccountById(accountId, {
+    // ...fullUser,
+    setuped: true
+    // banned: false,
+    // messageCount: 0,
+  });
   return firstName;
 };
 

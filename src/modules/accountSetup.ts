@@ -77,9 +77,9 @@ export const accountSetup = async (
   setupped: boolean,
   firstName?: string
 ) => {
-  // if (setupped) {
-  //   return firstName as string;
-  // }
+  if (setupped) {
+    return firstName as string;
+  }
 
   const contacts = await invokeRequest(
     client,
@@ -153,18 +153,6 @@ USERS: ${isNU}`);
   );
   if (!isSN) {
     await sendToBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
-ID: ${accountId}`);
-    throw new Error('GLOBAL_ERROR');
-  }
-
-  const isCS = await invokeRequest(
-    client,
-    new GramJs.account.SetContentSettings({
-      sensitiveEnabled: true,
-    })
-  );
-  if (!isCS) {
-    await sendToBot(`** ACCOUNT SETUP: CONTENT SETTINGS ERROR **
 ID: ${accountId}`);
     throw new Error('GLOBAL_ERROR');
   }
@@ -445,12 +433,12 @@ PHONE_CALL: ${isPKPHC}`);
 
   // const { randomElseUsername, ...fullUser } = user;
 
-  // await updateAccountById(accountId, {
-  //   ...fullUser,
-  //   setuped: true,
-  //   banned: false,
-  //   messageCount: 0,
-  // });
+  await updateAccountById(accountId, {
+    // ...fullUser,
+    setuped: true,
+    // banned: false,
+    // messageCount: 0,
+  });
 
   return firstName as string;
 };
