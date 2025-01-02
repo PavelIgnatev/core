@@ -21,13 +21,22 @@ const logger = winston.createLogger({
 });
 
 console.log = (...args) => {
-  logger.info({ ...args, eventTime: new Date().toISOString() });
+  // @ts-ignore
+  args['timestamp'] = new Date().toISOString();
+
+  logger.info(...args);
 };
 
 console.error = (...args) => {
-  logger.error({ ...args, eventTime: new Date().toISOString() });
+  // @ts-ignore
+  args['timestamp'] = new Date().toISOString();
+
+  logger.error(...args);
 };
 
 console.warn = (...args) => {
-  logger.warn({ ...args, eventTime: new Date().toISOString() });
+  // @ts-ignore
+  args['timestamp'] = new Date().toISOString();
+
+  logger.warn(...args);
 };
