@@ -2388,7 +2388,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/common/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer2(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -2396,14 +2396,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt = BigInt11(randBuffer.toString("hex"), 16);
+      let bigInt = BigInt10(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
-        bigInt = bigInt.subtract(BigInt11(2).pow(BigInt11(bytesNumber * 8)));
+        bigInt = bigInt.subtract(BigInt10(2).pow(BigInt10(bytesNumber * 8)));
       }
       return bigInt;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt11(big);
+      const bigNumber = BigInt10(big);
       const byteArray = [];
       for (let i = 0; i < number; i++) {
         byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
@@ -2411,17 +2411,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-      bigInt = BigInt11(bigInt);
+      bigInt = BigInt10(bigInt);
       const bitLength = bigInt.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt.lesser(BigInt11(0))) {
+      if (!signed && bigInt.lesser(BigInt10(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt.lesser(BigInt11(0))) {
+      if (bigInt.lesser(BigInt10(0))) {
         below = true;
         bigInt = bigInt.abs();
       }
@@ -2488,12 +2488,12 @@ var require_Helpers = __commonJS({
     }
     function modExp(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt11.one;
+      let result = BigInt10.one;
       let x = a;
-      while (b.greater(BigInt11.zero)) {
-        const leastSignificantBit = b.remainder(BigInt11(2));
-        b = b.divide(BigInt11(2));
-        if (leastSignificantBit.eq(BigInt11.one)) {
+      while (b.greater(BigInt10.zero)) {
+        const leastSignificantBit = b.remainder(BigInt10(2));
+        b = b.divide(BigInt10(2));
+        if (leastSignificantBit.eq(BigInt10.one)) {
           result = result.multiply(x);
           result = result.remainder(n);
         }
@@ -2505,7 +2505,7 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt(BigInt11(integer), byteLength, false, signed);
+      return readBufferFromBigInt(BigInt10(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
@@ -7286,9 +7286,9 @@ var require_bson = __commonJS({
       get _bsontype() {
         return "BSONRegExp";
       }
-      constructor(pattern2, options) {
+      constructor(pattern, options) {
         super();
-        this.pattern = pattern2;
+        this.pattern = pattern;
         this.options = alphabetize(options ?? "");
         if (this.pattern.indexOf("\0") !== -1) {
           throw new BSONError(`BSON Regex patterns cannot contain null bytes, found: ${JSON.stringify(this.pattern)}`);
@@ -7330,9 +7330,9 @@ var require_bson = __commonJS({
       inspect(depth, options, inspect) {
         const stylize = getStylizeFunction(options) ?? ((v) => v);
         inspect ?? (inspect = defaultInspect);
-        const pattern2 = stylize(inspect(this.pattern), "regexp");
+        const pattern = stylize(inspect(this.pattern), "regexp");
         const flags = stylize(inspect(this.options), "regexp");
-        return `new BSONRegExp(${pattern2}, ${flags})`;
+        return `new BSONRegExp(${pattern}, ${flags})`;
       }
     };
     var BSONSymbol = class _BSONSymbol extends BSONValue {
@@ -45727,7 +45727,7 @@ var require_IGE = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/common/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers = require_Helpers();
     var IGE = require_IGE();
@@ -45776,7 +45776,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt11(0);
+        this._lastMsgId = BigInt10(0);
         this.msgIds = [];
       }
       /**
@@ -46015,9 +46015,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt11(Math.floor(now)).shiftLeft(BigInt11(32)).or(BigInt11(nanoseconds).shiftLeft(BigInt11(2)));
+        let newMsgId = BigInt10(Math.floor(now)).shiftLeft(BigInt10(32)).or(BigInt10(nanoseconds).shiftLeft(BigInt10(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt11(4));
+          newMsgId = this._lastMsgId.add(BigInt10(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -46029,7 +46029,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt11(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt10(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -46040,10 +46040,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt11(32));
+        const correct = correctMsgId.shiftRight(BigInt10(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt11(0);
+          this._lastMsgId = BigInt10(0);
         }
         return this.timeOffset;
       }
@@ -52509,7 +52509,7 @@ var require_TCPFull = __commonJS({
 var require_TCPAbridged = __commonJS({
   "src/common/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var { readBufferFromBigInt } = require_Helpers();
     var { Connection, PacketCodec } = require_Connection();
     var AbridgedPacketCodec = class _AbridgedPacketCodec extends PacketCodec {
@@ -52529,7 +52529,7 @@ var require_TCPAbridged = __commonJS({
         } else {
           length = Buffer.concat([
             Buffer.from("7f", "hex"),
-            readBufferFromBigInt(BigInt11(length), 3)
+            readBufferFromBigInt(BigInt10(length), 3)
           ]);
         }
         return Buffer.concat([length, data]);
@@ -63821,15 +63821,6 @@ var require_follow_redirects = __commonJS({
     }
     module2.exports = wrap({ http: http2, https: https2 });
     module2.exports.wrap = wrap;
-  }
-});
-
-// node_modules/emoji-regex/index.js
-var require_emoji_regex = __commonJS({
-  "node_modules/emoji-regex/index.js"(exports2, module2) {
-    module2.exports = () => {
-      return /[#*0-9]\uFE0F?\u20E3|[\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26D3\uFE0F?(?:\u200D\uD83D\uDCA5)?|\u26F9(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF43\uDF45-\uDF4A\uDF4C-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDF44(?:\u200D\uD83D\uDFEB)?|\uDF4B(?:\u200D\uD83D\uDFE9)?|\uDFC3(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E\uDC70\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4\uDEB5](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC25\uDC27-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE41\uDE43\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED7\uDEDC-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC26(?:\u200D(?:\u2B1B|\uD83D\uDD25))?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE])))?))?|\uDC6F(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDD75(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?|\uDE42(?:\u200D[\u2194\u2195]\uFE0F?)?|\uDEB6(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF8](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE7C\uDE80-\uDE89\uDE8F-\uDEC2\uDEC6\uDECE-\uDEDC\uDEDF-\uDEE9]|\uDD3C(?:\u200D[\u2640\u2642]\uFE0F?|\uD83C[\uDFFB-\uDFFF])?|\uDDCE(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1|\uDDD1\u200D\uD83E\uDDD2(?:\u200D\uD83E\uDDD2)?|\uDDD2(?:\u200D\uD83E\uDDD2)?))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?)/g;
-    };
   }
 });
 
@@ -75323,9 +75314,10 @@ async function invokeRequest(client, request) {
   } catch (err) {
     await sendToBot(`\u{1F480} REQUEST ERROR \u{1F480}
 ID: ${client._accountId}
+ERROR: ${err.message}
 REQUEST: ${JSON.stringify(request)}
 `);
-    return void 0;
+    throw new Error("GLOBAL_ERROR");
   }
 }
 
@@ -75416,80 +75408,270 @@ var usersMe = async (client, accountId, tgAccountId) => {
 };
 
 // src/modules/accountSetup.ts
+var import_big_integer2 = __toESM(require_BigInteger());
+var import_api8 = __toESM(require_api());
+init_sendToBot();
+
+// src/helpers/buildInputPeer.ts
 var import_big_integer = __toESM(require_BigInteger());
 var import_api6 = __toESM(require_api());
-init_sendToBot();
+var getIdByPeer = (peer) => {
+  if (!peer) {
+    return "-1";
+  }
+  if (peer instanceof import_api6.default.PeerUser) {
+    return String(peer.userId);
+  } else if (peer instanceof import_api6.default.PeerChannel) {
+    return String(peer.channelId);
+  }
+  return String(peer.chatId);
+};
+function buildInputPeer(peer, chat, user) {
+  if (peer instanceof import_api6.default.PeerUser) {
+    if (!user || user instanceof import_api6.default.UserEmpty || !user.accessHash) {
+      return new import_api6.default.InputPeerUser({
+        userId: (0, import_big_integer.default)(getIdByPeer(peer)),
+        accessHash: (0, import_big_integer.default)(0)
+      });
+    }
+    return new import_api6.default.InputPeerUser({
+      userId: (0, import_big_integer.default)(getIdByPeer(peer)),
+      accessHash: (0, import_big_integer.default)(user.accessHash)
+    });
+  } else if (peer instanceof import_api6.default.PeerChannel) {
+    if (!chat || chat instanceof import_api6.default.ChatEmpty || chat instanceof import_api6.default.Chat || chat instanceof import_api6.default.ChatForbidden || !chat.accessHash) {
+      return new import_api6.default.InputPeerUser({
+        userId: (0, import_big_integer.default)(getIdByPeer(peer)),
+        accessHash: (0, import_big_integer.default)(0)
+      });
+    }
+    return new import_api6.default.InputPeerChannel({
+      channelId: (0, import_big_integer.default)(getIdByPeer(peer)),
+      accessHash: (0, import_big_integer.default)(chat.accessHash)
+    });
+  }
+  return new import_api6.default.InputPeerChat({
+    chatId: (0, import_big_integer.default)(getIdByPeer(peer))
+  });
+}
+
+// src/methods/messages/deleteHistoryByPeer.ts
+var import_api7 = __toESM(require_api());
+async function deleteHistoryByPeer(client, peer, shouldDeleteForAll) {
+  const result = await invokeRequest(
+    client,
+    new import_api7.default.messages.DeleteHistory({
+      peer,
+      ...shouldDeleteForAll && { revoke: true },
+      ...!shouldDeleteForAll && { just_clear: true }
+    })
+  );
+  if (!result) {
+    return;
+  }
+  if (result.offset) {
+    await deleteHistoryByPeer(client, peer, shouldDeleteForAll);
+    return;
+  }
+}
+
+// src/modules/accountSetup.ts
 var settings = {
   muteUntil: 2147483647,
   showPreviews: false,
   silent: true
 };
-var defaultDialogFilter = {
-  contacts: void 0,
-  bots: void 0,
-  broadcasts: void 0,
-  emoticon: void 0,
-  excludeArchived: void 0,
-  excludeMuted: void 0,
-  excludeRead: void 0,
-  groups: void 0,
-  nonContacts: void 0,
-  includePeers: [],
-  excludePeers: [],
-  pinnedPeers: []
+var getDialogsTG = async (client, accountId, folderId) => {
+  const dialogs = [];
+  let offsetDate = 0;
+  while (true) {
+    const d = await invokeRequest(
+      client,
+      new import_api8.default.messages.GetDialogs({
+        offsetPeer: new import_api8.default.InputPeerEmpty(),
+        folderId,
+        limit: 100,
+        offsetDate
+      })
+    );
+    if (d instanceof import_api8.default.messages.DialogsNotModified) {
+      return [];
+    }
+    for (const dialog of d.dialogs) {
+      if (!(dialog instanceof import_api8.default.Dialog) || dialogs.find(
+        ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
+      )) {
+        continue;
+      }
+      const id = getIdByPeer(dialog.peer);
+      const user = d.users.find((m) => String(m.id) === id);
+      const chat = d.chats.find((d2) => String(d2.id) === id);
+      const message = d.messages.find((m) => getIdByPeer(m.peerId) === id);
+      dialogs.push({ user, chat, dialog, message });
+    }
+    if (d.dialogs.length < 100) {
+      break;
+    } else {
+      const lastDialog = dialogs[dialogs.length - 1].dialog;
+      const lastMessage = d.messages.find(
+        (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
+      );
+      if (!lastMessage || lastMessage instanceof import_api8.default.MessageEmpty) {
+        await sendToBot(`** LAST MESSAGE NOT DEFINED **
+ACCOUNT ID: ${accountId}
+MESSAGE: ${JSON.stringify(lastMessage)}
+MESSAGE_EMPTY: ${lastMessage instanceof import_api8.default.MessageEmpty}
+OFFSET DATE: ${offsetDate}`);
+        return [];
+      }
+      offsetDate = lastMessage.date;
+    }
+  }
+  return dialogs;
 };
 var accountSetup = async (client, accountId, setuped, firstName) => {
   if (setuped) {
     return firstName;
   }
-  const contacts = await invokeRequest(
-    client,
-    new import_api6.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
-  );
-  if (!contacts || contacts instanceof import_api6.default.contacts.ContactsNotModified) {
-    await sendToBot(`** ACCOUNT SETUP: GET CONTACTS ERROR **
-ID: ${accountId}
-CONTACTS: ${Boolean(contacts)}
-NOT_MODIFIED: ${contacts instanceof import_api6.default.contacts.ContactsNotModified}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  const users = contacts.users.map(
-    (user) => new import_api6.default.InputPeerUser({
-      userId: (0, import_big_integer.default)(user.id),
-      accessHash: (0, import_big_integer.default)(user.accessHash)
-    })
-  );
-  if (users.length > 0) {
-    const isDC = await invokeRequest(
-      client,
-      new import_api6.default.contacts.DeleteContacts({ id: users })
+  const folderPeers = [];
+  const archiveDialogsTG = await getDialogsTG(client, accountId, 1);
+  for (const dialogTG of archiveDialogsTG) {
+    const { dialog, chat, user } = dialogTG;
+    const peer = buildInputPeer(dialog.peer, chat || null, user || null);
+    if (dialog.pinned) {
+      await invokeRequest(
+        client,
+        new import_api8.default.messages.ToggleDialogPin({
+          peer: new import_api8.default.InputDialogPeer({
+            peer
+          }),
+          pinned: void 0
+        })
+      );
+    }
+    folderPeers.push(
+      new import_api8.default.InputFolderPeer({
+        peer,
+        folderId: 0
+      })
     );
-    if (!isDC) {
-      await sendToBot(`** ACCOUNT SETUP: DELETED CONTACTS ERROR **
+  }
+  if (folderPeers.length) {
+    await client.invoke(
+      new import_api8.default.folders.EditPeerFolders({
+        folderPeers
+      })
+    );
+  }
+  const dialogsTG = await getDialogsTG(client, accountId, 0);
+  for (const dialogTG of dialogsTG) {
+    const { dialog, chat, user } = dialogTG;
+    const id = getIdByPeer(dialog.peer);
+    const peer = buildInputPeer(dialog.peer, chat || null, user || null);
+    if (id === "178220800") {
+      continue;
+    }
+    if (dialog.peer instanceof import_api8.default.PeerChannel) {
+      await invokeRequest(
+        client,
+        new import_api8.default.channels.LeaveChannel({
+          channel: peer
+        })
+      );
+    } else if (dialog.peer instanceof import_api8.default.PeerChat) {
+      if (chat && (chat instanceof import_api8.default.Chat || chat instanceof import_api8.default.ChatForbidden || chat instanceof import_api8.default.ChatEmpty)) {
+        await invokeRequest(
+          client,
+          new import_api8.default.messages.DeleteChatUser({
+            chatId: (0, import_big_integer2.default)(id),
+            userId: new import_api8.default.InputUserSelf()
+          })
+        );
+        await deleteHistoryByPeer(client, peer, false);
+      } else {
+        await invokeRequest(
+          client,
+          new import_api8.default.channels.LeaveChannel({
+            channel: peer
+          })
+        );
+      }
+    } else {
+      await deleteHistoryByPeer(client, peer, true);
+      if (user && user instanceof import_api8.default.User && user.bot) {
+        await invokeRequest(
+          client,
+          new import_api8.default.contacts.Block({
+            id: peer
+          })
+        );
+      }
+    }
+  }
+  const dialogFilters = await invokeRequest(
+    client,
+    new import_api8.default.messages.GetDialogFilters()
+  );
+  for (const filter2 of dialogFilters.filters) {
+    if (filter2 instanceof import_api8.default.DialogFilterDefault) {
+      continue;
+    }
+    const isDeleted = await invokeRequest(
+      client,
+      new import_api8.default.messages.UpdateDialogFilter({
+        id: filter2.id,
+        filter: void 0
+      })
+    );
+    if (!isDeleted) {
+      await sendToBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
 ID: ${accountId}
-USERS: ${JSON.stringify(contacts.users.map((user) => ({ id: user.id, accessHash: user.accessHash })))}`);
+FID: ${filter2.id}`);
       throw new Error("GLOBAL_ERROR");
     }
   }
+  const contacts = await invokeRequest(
+    client,
+    new import_api8.default.contacts.GetContacts({ hash: (0, import_big_integer2.default)("0") })
+  );
+  if (contacts instanceof import_api8.default.contacts.ContactsNotModified) {
+    await sendToBot(`** ACCOUNT SETUP: GET CONTACTS ERROR **
+ID: ${accountId}
+CONTACTS: ${Boolean(contacts)}
+NOT_MODIFIED: ${contacts instanceof import_api8.default.contacts.ContactsNotModified}`);
+    throw new Error("GLOBAL_ERROR");
+  }
+  const users = contacts.users.map(
+    (user) => new import_api8.default.InputPeerUser({
+      userId: (0, import_big_integer2.default)(user.id),
+      accessHash: (0, import_big_integer2.default)(user.accessHash)
+    })
+  );
+  if (users.length > 0) {
+    await invokeRequest(
+      client,
+      new import_api8.default.contacts.DeleteContacts({ id: users })
+    );
+  }
   const isNC = await invokeRequest(
     client,
-    new import_api6.default.account.UpdateNotifySettings({
-      peer: new import_api6.default.InputNotifyChats(),
-      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    new import_api8.default.account.UpdateNotifySettings({
+      peer: new import_api8.default.InputNotifyChats(),
+      settings: new import_api8.default.InputPeerNotifySettings(settings)
     })
   );
   const isNB = await invokeRequest(
     client,
-    new import_api6.default.account.UpdateNotifySettings({
-      peer: new import_api6.default.InputNotifyBroadcasts(),
-      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    new import_api8.default.account.UpdateNotifySettings({
+      peer: new import_api8.default.InputNotifyBroadcasts(),
+      settings: new import_api8.default.InputPeerNotifySettings(settings)
     })
   );
   const isNU = await invokeRequest(
     client,
-    new import_api6.default.account.UpdateNotifySettings({
-      peer: new import_api6.default.InputNotifyUsers(),
-      settings: new import_api6.default.InputPeerNotifySettings(settings)
+    new import_api8.default.account.UpdateNotifySettings({
+      peer: new import_api8.default.InputNotifyUsers(),
+      settings: new import_api8.default.InputPeerNotifySettings(settings)
     })
   );
   if (!isNC || !isNB || !isNU) {
@@ -75502,168 +75684,69 @@ USERS: ${isNU}`);
   }
   const isSN = await invokeRequest(
     client,
-    new import_api6.default.account.SetContactSignUpNotification({ silent: true })
+    new import_api8.default.account.SetContactSignUpNotification({ silent: true })
   );
   if (!isSN) {
     await sendToBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
 ID: ${accountId}`);
     throw new Error("GLOBAL_ERROR");
   }
-  const dialogFilters = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.messages.GetDialogFilters()
-  );
-  if (!dialogFilters) {
-    await sendToBot(`** ACCOUNT SETUP: GET DIALOG FILTERS ERROR **
-ID: ${accountId}
-CONTACTS: ${Boolean(contacts)}
-NOT_MODIFIED: ${contacts instanceof import_api6.default.contacts.ContactsNotModified}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  for (const filter2 of dialogFilters.filters) {
-    if (filter2 instanceof import_api6.default.DialogFilterDefault) {
-      continue;
-    }
-    const isDeleted = await invokeRequest(
-      client,
-      new import_api6.default.messages.UpdateDialogFilter({
-        id: filter2.id,
-        filter: void 0
-      })
-    );
-    if (!isDeleted) {
-      await sendToBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
-ID: ${accountId}
-FID: ${filter2.id}`);
-      throw new Error("GLOBAL_ERROR");
-    }
-  }
-  const isC = await invokeRequest(
-    client,
-    new import_api6.default.messages.UpdateDialogFilter({
-      id: 2,
-      filter: new import_api6.default.DialogFilter({
-        ...defaultDialogFilter,
-        id: 2,
-        contacts: true,
-        title: "Main"
-      })
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyAbout(),
+      rules: [new import_api8.default.InputPrivacyValueAllowAll()]
     })
   );
-  const isBO = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.messages.UpdateDialogFilter({
-      id: 3,
-      filter: new import_api6.default.DialogFilter({
-        ...defaultDialogFilter,
-        id: 3,
-        bots: true,
-        title: "Bots"
-      })
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api8.default.InputPrivacyValueAllowAll()]
     })
   );
-  const isBR = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.messages.UpdateDialogFilter({
-      id: 4,
-      filter: new import_api6.default.DialogFilter({
-        ...defaultDialogFilter,
-        id: 4,
-        broadcasts: true,
-        title: "Channels"
-      })
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api8.default.InputPrivacyValueAllowAll()]
     })
   );
-  const isG = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.messages.UpdateDialogFilter({
-      id: 5,
-      filter: new import_api6.default.DialogFilter({
-        ...defaultDialogFilter,
-        id: 5,
-        groups: true,
-        title: "Groups"
-      })
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api8.default.InputPrivacyValueDisallowAll()]
     })
   );
-  if (!isC || !isBO || !isBR || !isG) {
-    await sendToBot(`** ACCOUNT SETUP: CREATE DIALOG FILTER ERROR **
-ID: ${accountId}
-BOTS: ${isBO}
-GROUPS: ${isG}
-CONTACTS: ${isC}
-BROADCASTS: ${isBR}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  const isPKA = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyAbout(),
-      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyPhoneP2P(),
+      rules: [new import_api8.default.InputPrivacyValueDisallowAll()]
     })
   );
-  const isPKS = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api8.default.InputPrivacyValueDisallowAll()]
     })
   );
-  const isPKPR = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api6.default.InputPrivacyValueAllowAll()]
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyForwards(),
+      rules: [new import_api8.default.InputPrivacyValueDisallowAll()]
     })
   );
-  const isPKPH = await invokeRequest(
+  await invokeRequest(
     client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
+    new import_api8.default.account.SetPrivacy({
+      key: new import_api8.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api8.default.InputPrivacyValueDisallowAll()]
     })
   );
-  const isPKPH2P2 = await invokeRequest(
-    client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  const isPKC = await invokeRequest(
-    client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  const isPKF = await invokeRequest(
-    client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyForwards(),
-      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  const isPKPHC = await invokeRequest(
-    client,
-    new import_api6.default.account.SetPrivacy({
-      key: new import_api6.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api6.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  if (!isPKA || !isPKS || !isPKPR || !isPKPH || !isPKPH2P2 || !isPKC || !isPKF || !isPKPHC) {
-    await sendToBot(`** ACCOUNT SETUP: SET PRIVACY ERROR **
-ID: ${accountId}
-ABOUT: ${isPKA}
-STATUS: ${isPKS}
-PROFILE_PHOTO: ${isPKPR}
-PHONE_NUMBER: ${isPKPH}
-PHONE_P2P: ${isPKPH2P2}
-CHAT_INVITE: ${isPKC}
-FORWARDS: ${isPKF}
-PHONE_CALL: ${isPKPHC}`);
-    throw new Error("GLOBAL_ERROR");
-  }
   await updateAccountById(accountId, {
     // ...fullUser,
     setuped: true
@@ -75672,10 +75755,6 @@ PHONE_CALL: ${isPKPHC}`);
   });
   return firstName;
 };
-
-// src/modules/getDialogs.ts
-var import_big_integer3 = __toESM(require_BigInteger());
-var import_api8 = __toESM(require_api());
 
 // src/db/dialogues.ts
 var getDialoguesCollection = async () => {
@@ -75696,72 +75775,6 @@ var getDialogueByGidRid = async (recipientId, groupId) => {
     groupId
   });
   return dialogue;
-};
-var getDialogs = async (accountId) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const dialogues = await dialoguesCollection.find(
-    {
-      accountId
-    },
-    {
-      projection: {
-        _id: 0,
-        recipientId: 1,
-        blocked: 1,
-        automaticReason: 1,
-        read: 1,
-        reason: 1,
-        lastOnline: 1
-      }
-    }
-  ).toArray();
-  return dialogues;
-};
-var getRecipientUsernameAndPhone = async (accountId, recipientId) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const dialogues = await dialoguesCollection.findOne(
-    {
-      accountId,
-      recipientId
-    },
-    {
-      projection: {
-        _id: 0,
-        recipientUsername: 1,
-        recipientPhone: 1
-      }
-    }
-  );
-  return dialogues;
-};
-var getPingDialogues = async (accountId) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const twelveHoursAgo = /* @__PURE__ */ new Date();
-  twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
-  const hours24Ago = /* @__PURE__ */ new Date();
-  hours24Ago.setHours(hours24Ago.getHours() - 24);
-  const oneWeekAgo = /* @__PURE__ */ new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  const pingDialogs = await dialoguesCollection.find({
-    accountId,
-    step: 3,
-    ping: { $ne: true },
-    stopped: { $ne: true },
-    blocked: { $ne: true },
-    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
-    dateCreated: { $gte: oneWeekAgo }
-  }).toArray();
-  return pingDialogs;
-};
-var getManualControlDialogues = async (accountId) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  const dialogs = await dialoguesCollection.find({
-    accountId,
-    stopped: true,
-    blocked: { $ne: true },
-    managerMessage: { $ne: null }
-  }).toArray();
-  return dialogs;
 };
 var updateDialogue = async (dialogue) => {
   const dialoguesCollection = await getDialoguesCollection();
@@ -75796,40 +75809,6 @@ var updateSingleDialogue = async (accountId, recipientId, data) => {
     }
   );
 };
-var updateAutomaticDialogue = async (accountId, recipientId, automaticReason, additionalData) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  await dialoguesCollection.updateOne(
-    {
-      accountId,
-      recipientId
-    },
-    {
-      $set: {
-        blocked: true,
-        stopped: true,
-        viewed: false,
-        managerMessage: null,
-        automaticReason,
-        ...additionalData,
-        dateUpdated: /* @__PURE__ */ new Date()
-      }
-    }
-  );
-};
-var updateDateCheckedIds = async (accountId, ids) => {
-  const dialoguesCollection = await getDialoguesCollection();
-  await dialoguesCollection.updateMany(
-    {
-      accountId,
-      recipientId: { $in: ids }
-    },
-    {
-      $set: {
-        dateAutomaticCheck: /* @__PURE__ */ new Date()
-      }
-    }
-  );
-};
 var getBlockedDialogues = async (accountId) => {
   const dialoguesCollection = await getDialoguesCollection();
   const blockedDialogs = await dialoguesCollection.find({
@@ -75837,6 +75816,329 @@ var getBlockedDialogues = async (accountId) => {
     automaticReason: "automatic:blocked"
   }).sort({ dateUpdated: -1 }).limit(5).toArray();
   return blockedDialogs;
+};
+
+// src/helpers/sendToSpamBot.ts
+var sendToBotByChatIdText2 = async (chatId, text) => {
+  const token = "7309948288:AAG6ls9zydrUxg4d7ahPyyKerYsmnyr4oC0";
+  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
+    const chunks = [];
+    let currentIndex = 0;
+    while (currentIndex < text2.length) {
+      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
+      currentIndex += chunkSize;
+    }
+    return chunks;
+  };
+  const textChunks = splitTextIntoChunks(text);
+  for (const chunk of textChunks) {
+    await fetch(sendMessageUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: chunk,
+        disable_web_page_preview: true
+      })
+    });
+  }
+};
+var sendToSpamBot = async (text) => {
+  const chatIds = ["483779758", "324820826"];
+  try {
+    await Promise.all(
+      chatIds.map(async (chatId) => {
+        await sendToBotByChatIdText2(chatId, text);
+      })
+    );
+  } catch {
+  }
+};
+
+// src/methods/contacts/resolveUsername.ts
+var import_api9 = __toESM(require_api());
+var resolveUsername = async (client, username) => {
+  const userByUsername = await client.invoke(
+    new import_api9.default.contacts.ResolveUsername({
+      username
+    })
+  );
+  return userByUsername;
+};
+
+// src/methods/messages/getMessages.ts
+var import_big_integer3 = __toESM(require_BigInteger());
+var import_api10 = __toESM(require_api());
+var getMessages = async (client, userId, accessHash, minId) => {
+  const allHistory = await client.invoke(
+    new import_api10.default.messages.GetHistory({
+      peer: new import_api10.default.InputPeerUser({
+        userId: (0, import_big_integer3.default)(userId),
+        accessHash: (0, import_big_integer3.default)(accessHash)
+      }),
+      minId
+    })
+  );
+  return (allHistory.messages || []).filter(
+    (m) => m.className === "Message"
+  );
+};
+
+// src/methods/messages/sendMessage.ts
+var import_big_integer4 = __toESM(require_BigInteger());
+var import_api11 = __toESM(require_api());
+init_sendToBot();
+
+// src/helpers/removeSpacesAndLowerCase.ts
+var rmSpLc = (str) => {
+  return str.replace(/\s+/g, "").toLowerCase();
+};
+
+// src/methods/messages/sendMessage.ts
+function formatDateToUTC(date) {
+  const utcDate = new Date(date);
+  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    utcDate.getUTCDate()
+  ).padStart(
+    2,
+    "0"
+  )} ${String(utcDate.getUTCHours()).padStart(2, "0")}:${String(
+    utcDate.getUTCMinutes()
+  ).padStart(2, "0")}`;
+}
+function reduceSpaces(string) {
+  return string.replace(/\s+/g, " ").trim();
+}
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function removeNonAlphaPrefix(string) {
+  if (string === "/start") {
+    return string;
+  }
+  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+}
+var sendMessage = async (client, userId, accessHash, message, accountId, withTyping) => {
+  var _a;
+  let sentMessage = null;
+  try {
+    if (withTyping) {
+      const iterations = Math.ceil(message.length / 250 * 60 * 1e3 / 5e3);
+      for (let i = 0; i < iterations; i++) {
+        await client.invoke(
+          new import_api11.default.messages.SetTyping({
+            peer: new import_api11.default.InputPeerUser({
+              userId: (0, import_big_integer4.default)(userId),
+              accessHash: (0, import_big_integer4.default)(accessHash)
+            }),
+            action: new import_api11.default.SendMessageTypingAction()
+          })
+        );
+        await sleep2(5e3);
+      }
+    }
+    sentMessage = await client.invoke(
+      new import_api11.default.messages.SendMessage({
+        message: removeNonAlphaPrefix(
+          capitalizeFirstLetter(reduceSpaces(message))
+        ),
+        clearDraft: true,
+        peer: new import_api11.default.InputPeerUser({
+          userId: (0, import_big_integer4.default)(userId),
+          accessHash: (0, import_big_integer4.default)(accessHash)
+        }),
+        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+      })
+    );
+    if (sentMessage.updates) {
+      sentMessage = (_a = sentMessage.updates.find(
+        (update) => {
+          var _a2;
+          return rmSpLc(((_a2 = update == null ? void 0 : update.message) == null ? void 0 : _a2.message) || "") === rmSpLc(message);
+        }
+      )) == null ? void 0 : _a.message;
+    }
+    if (message !== "/start") {
+      if (!(sentMessage == null ? void 0 : sentMessage.id)) {
+        throw new Error("MESSAGE_ERROR");
+      }
+      await client.invoke(
+        new import_api11.default.messages.ReadHistory({
+          peer: new import_api11.default.InputPeerUser({
+            userId: (0, import_big_integer4.default)(userId),
+            accessHash: (0, import_big_integer4.default)(accessHash)
+          }),
+          maxId: sentMessage.id
+        })
+      );
+    }
+    return sentMessage;
+  } catch (e) {
+    if (e.message === "PEER_FLOOD") {
+      if (message.length > 30) {
+        const fullAccount = await getAccountById(accountId);
+        const dialog = await getDialogue(accountId, String(userId));
+        const createdDateFormatted = (dialog == null ? void 0 : dialog.dateCreated) ? formatDateToUTC(dialog.dateCreated) : "N/A";
+        const updatedDateFormatted = (dialog == null ? void 0 : dialog.dateUpdated) ? formatDateToUTC(dialog.dateUpdated) : "N/A";
+        const spamBlockDateFormatted = (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate !== "INFINITY" ? formatDateToUTC(fullAccount.spamBlockDate) : (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate === "INFINITY" ? "INFINITY" : "N/A";
+        await sendToBot(
+          `*** ${e.message} ***
+QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
+MESSAGE: ${message}
+
+SPAMBLOCK DATE: ${spamBlockDateFormatted}
+DIALOG CREATED DATE: ${createdDateFormatted}
+DIALOG UPDATED DATE: ${updatedDateFormatted}`
+        );
+      }
+    } else {
+      await sendToBot(
+        `*** ${e.message} ***
+AccountId: ${accountId}
+UserId: ${userId}
+Message: ${message}`
+      );
+    }
+    throw new Error(e.message);
+  }
+};
+
+// src/modules/checkSpamBlock.ts
+function formatDateToUTC2(date) {
+  const utcDate = new Date(date);
+  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(
+    utcDate.getUTCDate()
+  ).padStart(
+    2,
+    "0"
+  )} ${String(utcDate.getUTCHours()).padStart(2, "0")}:${String(
+    utcDate.getUTCMinutes()
+  ).padStart(2, "0")}`;
+}
+var checkSpamBlock = async (client, account) => {
+  var _a;
+  const {
+    accountId,
+    spamBlockDate: tgSpamBlockDate,
+    spamBlockInitDate,
+    historySpamBlocks = []
+  } = account;
+  const result = await resolveUsername(client, "spambot");
+  const { id: userId, accessHash, username } = ((_a = result == null ? void 0 : result.users) == null ? void 0 : _a[0]) ?? {};
+  if (!userId || !accessHash || username !== "SpamBot") {
+    console.error({
+      accountId,
+      message: new Error("Chat with SpamBot not defined")
+    });
+    return true;
+  }
+  const sentMessage = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    "/start",
+    accountId,
+    false
+  );
+  const { id: maxId } = sentMessage;
+  if (!maxId) {
+    console.error({
+      accountId,
+      message: new Error("MaxId from SpamBot not defined")
+    });
+    return true;
+  }
+  await new Promise((res) => setTimeout(res, 5e3));
+  const messages = await getMessages(client, userId, accessHash, maxId);
+  if (!(messages == null ? void 0 : messages[0])) {
+    console.error({
+      accountId,
+      message: new Error("Messages from SpamBot not defined")
+    });
+    return true;
+  }
+  const { message } = messages[0];
+  if (message.includes("no limits are currently applied")) {
+    await updateAccountById(accountId, {
+      spamBlockDate: null,
+      spamBlockInitDate: null,
+      spamBlockDays: null
+    });
+    return false;
+  }
+  const untilDateMatch = message.match(/until\s(.*)\./);
+  const spamBlockDate = untilDateMatch ? untilDateMatch[1].replace("UTC", "").trim() : "INFINITY";
+  const nextSpamBlockDay = /* @__PURE__ */ new Date(spamBlockDate + "Z");
+  if (!spamBlockInitDate || !tgSpamBlockDate || tgSpamBlockDate === "INFINITY" && spamBlockDate !== "INFINITY" || tgSpamBlockDate !== "INFINITY" && spamBlockDate === "INFINITY" || tgSpamBlockDate !== "INFINITY" && tgSpamBlockDate.getTime() !== nextSpamBlockDay.getTime()) {
+    const latest = await getBlockedDialogues(accountId);
+    const mappedLatest = latest.map((l, index) => {
+      var _a2;
+      const { messages: messages2, groupId, recipientId, dateAutomaticCheck } = l;
+      if (index === 0) {
+        const history = messages2.reverse().map((message2) => {
+          if (String(message2.fromId) === String(recipientId)) {
+            return null;
+          }
+          return `${formatDateToUTC2(new Date(Number((message2.date || 0) + "000")))}: ${message2.text}`;
+        }).filter(Boolean).join("\n");
+        return `-----------------
+{"groupId": "${groupId}", "recipientId": "${recipientId}"}
+DETECT BLOCKED DATE: ${formatDateToUTC2(new Date(dateAutomaticCheck))}
+${history}`;
+      }
+      return messages2 && messages2.length ? `-----------------
+{"groupId": "${groupId}", "recipientId": "${recipientId}"}
+DETECT BLOCKED DATE: ${formatDateToUTC2(new Date(dateAutomaticCheck))}
+LAST MESSAGE DATE: ${formatDateToUTC2(new Date(Number((((_a2 = messages2[messages2.length - 1]) == null ? void 0 : _a2.date) || 0) + "000")))}` : "";
+    }).join("\n");
+    let spamBlockDays = 0;
+    if (spamBlockDate !== "INFINITY") {
+      const timeDiff = nextSpamBlockDay.getTime() - (/* @__PURE__ */ new Date()).getTime();
+      spamBlockDays = Math.ceil(timeDiff / (1e3 * 3600 * 24));
+    }
+    await sendToSpamBot(`\u2757 ${!spamBlockInitDate ? "NEW" : "UPDATE"} SPAMBLOCK \u2757
+-----------------
+ID: ${accountId}
+SPAMBLOCK DATE: ${untilDateMatch ? formatDateToUTC2(nextSpamBlockDay) : "INFINITY"}
+SPAMBLOCK DAYS: ${spamBlockDays === 0 ? "INFINITY" : `${spamBlockDays} day(s)`}
+-----------------
+\u2757 \u041F\u041E\u0421\u041B\u0415\u0414\u041D\u0418\u0415 ${latest.length} \u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041E\u041A \u2757
+${mappedLatest}`);
+    const updateData = {
+      spamBlockDate: untilDateMatch ? nextSpamBlockDay : "INFINITY",
+      spamBlockDays
+    };
+    if (!spamBlockInitDate) {
+      updateData["spamBlockInitDate"] = /* @__PURE__ */ new Date();
+    }
+    updateData["historySpamBlocks"] = [
+      ...historySpamBlocks || [],
+      {
+        spamBlockDate: untilDateMatch ? nextSpamBlockDay : "INFINITY",
+        spamBlockDays
+      }
+    ];
+    await updateAccountById(accountId, updateData);
+  }
+  return true;
+};
+
+// src/db/groupId.ts
+var getGroupIdCollection = async () => {
+  return (await DB2()).collection("groupId");
+};
+var incrementCurrentCount = async (groupId) => {
+  const groupIdCollection = await getGroupIdCollection();
+  await groupIdCollection.updateOne(
+    { groupId },
+    {
+      $inc: { currentCount: 1 },
+      $set: { dateUpdated: /* @__PURE__ */ new Date() }
+    }
+  );
 };
 
 // src/helpers/getCombinedMessages.ts
@@ -75858,178 +76160,211 @@ var getCombinedMessages = (messages) => {
   return combinedMessages;
 };
 
+// src/db/groupIdUsers.ts
+var getGroupIdUsersCollection = async () => {
+  return (await DB2()).collection("groupIdUsers");
+};
+var updateFailedMessage = async (username, groupId) => {
+  const messagesCollection = await getGroupIdUsersCollection();
+  await messagesCollection.updateOne(
+    { g: groupId, u: username.toLowerCase() },
+    { $set: { f: true, p: /* @__PURE__ */ new Date() } },
+    { upsert: true }
+  );
+};
+var updateSendMessage = async (username, groupId, data) => {
+  const messagesCollection = await getGroupIdUsersCollection();
+  await messagesCollection.updateOne(
+    { g: groupId, u: username.toLowerCase() },
+    { $set: data },
+    { upsert: true }
+  );
+};
+
+// src/modules/saveRecipient.ts
+init_sendToBot();
+var saveRecipient = async (accountId, recipient, recipientDb, messages, status, addedData = {}, accountByID = null) => {
+  let isSave = false;
+  while (!isSave) {
+    try {
+      const {
+        id: recipientId,
+        phone,
+        username,
+        firstName,
+        lastName = ""
+      } = recipient.users[0];
+      const {
+        fullUser: { about }
+      } = recipient;
+      const {
+        groupId,
+        recipientUsername,
+        username: varSecondUsername,
+        recipientPhone
+      } = recipientDb;
+      const recUsername = (username || recipientUsername || varSecondUsername || "").toLowerCase();
+      const data = {
+        groupId,
+        accountId,
+        recipientId: String(recipientId),
+        recipientUsername: recUsername,
+        recipientTitle: `${firstName} ${lastName}`.trim(),
+        recipientBio: about || "",
+        aiName: (recipientDb == null ? void 0 : recipientDb.aiName) || null,
+        aiGender: (recipientDb == null ? void 0 : recipientDb.aiGender) || null,
+        recipientPhone: (status === "create" && recipientDb.username.includes("+") ? recipientDb.username.replace("+", "") : null) || phone || recipientPhone || null,
+        messages,
+        step: getCombinedMessages(messages).length,
+        read: false,
+        ...addedData
+      };
+      await updateDialogue(data);
+      console.log({
+        accountId,
+        message: `**SAVE RECIPIENT**`,
+        data
+      });
+      if (status === "create") {
+        const messageCount = (accountByID == null ? void 0 : accountByID.messageCount) || 0;
+        const multiplier = messageCount < 40 ? 1.5 : 1;
+        if (accountId.includes("-prefix-premium")) {
+          await updateAccountById(accountId, {
+            remainingTime: new Date((/* @__PURE__ */ new Date()).getTime() + 15e5),
+            multiplier: 1
+          });
+        } else {
+          await updateAccountById(accountId, {
+            remainingTime: new Date(
+              (/* @__PURE__ */ new Date()).getTime() + 72e5 * multiplier
+            ),
+            multiplier
+          });
+        }
+        await updateSendMessage(recipientDb.username, String(groupId), {
+          s: true,
+          p: /* @__PURE__ */ new Date()
+        });
+        await incrementMessageCount(accountId);
+        await incrementCurrentCount(String(groupId));
+      }
+      isSave = true;
+    } catch (error) {
+      await sendToBot(`** ERROR SAVE RECIPIENT **
+ERROR: ${error.message};
+accountId: ${accountId};
+status: ${status};
+recipient: ${JSON.stringify(recipient)};
+recipientDb: ${JSON.stringify(recipientDb)};
+messages: ${JSON.stringify(messages)};
+addedData: ${JSON.stringify(addedData)};
+accountByID: ${JSON.stringify(accountByID)};`);
+      await sleep2(3e3);
+    }
+  }
+};
+
+// src/helpers/generateRandomString.ts
+var generateRandomString = (template) => {
+  const regex = /{(.*?)}/g;
+  const cleanedTemplate = template.replace(/\n/g, "").replace(/\s{2,}/g, " ");
+  return cleanedTemplate.replace(regex, (match, group) => {
+    const options = group.split("|");
+    const randomIndex = Math.floor(Math.random() * options.length);
+    return options[randomIndex];
+  }).trim();
+};
+
+// src/modules/autoSender.ts
+init_sendToBot();
+
+// src/methods/account/muteNotification.ts
+var import_big_integer5 = __toESM(require_BigInteger());
+var import_api12 = __toESM(require_api());
+var muteNotification = async (client, id, accessHash, muteUntil = 2147483647) => {
+  const muteInvoke = await client.invoke(
+    new import_api12.default.account.UpdateNotifySettings({
+      peer: new import_api12.default.InputNotifyPeer({
+        peer: new import_api12.default.InputPeerUser({
+          userId: (0, import_big_integer5.default)(id),
+          accessHash: (0, import_big_integer5.default)(accessHash)
+        })
+      }),
+      settings: new import_api12.default.InputPeerNotifySettings({ muteUntil })
+    })
+  );
+  return muteInvoke;
+};
+
+// src/methods/contacts/resolvePhone.ts
+var import_api13 = __toESM(require_api());
+var resolvePhone = async (client, phone) => {
+  const userByUsername = await client.invoke(
+    new import_api13.default.contacts.ResolvePhone({
+      phone
+    })
+  );
+  return userByUsername;
+};
+
+// src/methods/contacts/resolveContact.ts
+var import_api15 = __toESM(require_api());
+
+// src/methods/users/getFullUser.ts
+var import_big_integer6 = __toESM(require_BigInteger());
+var import_api14 = __toESM(require_api());
+init_sendToBot();
+var getFullUser = async (client, userId, accessHash) => {
+  if (!userId || !accessHash) {
+    return null;
+  }
+  const userFull = await client.invoke(
+    new import_api14.default.users.GetFullUser({
+      id: new import_api14.default.InputPeerUser({
+        userId: (0, import_big_integer6.default)(userId),
+        accessHash: (0, import_big_integer6.default)(accessHash)
+      })
+    })
+  );
+  if (!userFull) {
+    await sendToBot(`** USER FULL NOT DEFINED **
+ID: ${userId}
+RID: ${accessHash}`);
+  }
+  return userFull;
+};
+
+// src/methods/contacts/resolveContact.ts
+var resolveContact = async (client, username, groupId) => {
+  var _a, _b;
+  const resolveMethod = username.includes("+") ? resolvePhone : resolveUsername;
+  const userByUsername = await resolveMethod(client, username);
+  const { id: userId, accessHash } = ((_a = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _a[0]) ?? {};
+  const recipientFull = await getFullUser(client, userId, accessHash);
+  if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api15.default.User)) {
+    await updateFailedMessage(username, groupId);
+    throw new Error("USERNAME_INVALID");
+  }
+  return recipientFull;
+};
+
 // src/methods/folders/editFolder.ts
-var import_big_integer2 = __toESM(require_BigInteger());
-var import_api7 = __toESM(require_api());
+var import_big_integer7 = __toESM(require_BigInteger());
+var import_api16 = __toESM(require_api());
 var editFolder = async (client, userId, accessHash, folderId) => {
   await client.invoke(
-    new import_api7.default.folders.EditPeerFolders({
+    new import_api16.default.folders.EditPeerFolders({
       folderPeers: [
-        new import_api7.default.InputFolderPeer({
-          peer: new import_api7.default.InputPeerUser({
-            userId: (0, import_big_integer2.default)(userId),
-            accessHash: (0, import_big_integer2.default)(accessHash)
+        new import_api16.default.InputFolderPeer({
+          peer: new import_api16.default.InputPeerUser({
+            userId: (0, import_big_integer7.default)(userId),
+            accessHash: (0, import_big_integer7.default)(accessHash)
           }),
           folderId
         })
       ]
     })
   );
-};
-
-// src/modules/getDialogs.ts
-init_sendToBot();
-var getDialogs2 = async (client, accountId) => {
-  var _a;
-  const clientDialogs = await client.invoke(
-    new import_api8.default.messages.GetDialogs({
-      offsetPeer: new import_api8.default.InputPeerEmpty(),
-      folderId: 1,
-      limit: 100
-    })
-  );
-  if (!((_a = clientDialogs == null ? void 0 : clientDialogs.users) == null ? void 0 : _a.length)) {
-    return [[], [], []];
-  }
-  const account = await getAccountById(accountId);
-  if (!account) {
-    throw new Error("Account not defined");
-  }
-  const pingDialogsDB = await getPingDialogues(accountId);
-  const manualControlDialogsDB = await getManualControlDialogues(accountId);
-  const clientMessagesIds = clientDialogs.messages.filter((m) => !m.out).map((m) => String(m.peerId.userId));
-  const clientDialogsIds = clientDialogs.dialogs.filter((d) => d.unreadCount !== 0).map((d) => String(d.peer.userId));
-  const dialogs = [];
-  const pingDialogs = [];
-  const manualDialogs = [];
-  const dialogIds = [.../* @__PURE__ */ new Set([...clientMessagesIds, ...clientDialogsIds])];
-  const pingDialogIds = pingDialogsDB.map((d) => String(d.recipientId)).filter((d) => !dialogIds.includes(d));
-  const manualControlDialogIds = manualControlDialogsDB.map((d) => String(d.recipientId)).filter((d) => !dialogIds.includes(d));
-  for (const dialogId of [
-    ...dialogIds,
-    ...pingDialogIds,
-    ...manualControlDialogIds
-  ]) {
-    if (!dialogId || dialogId === "undefined") {
-      continue;
-    }
-    const user = clientDialogs.users.find(
-      (u) => String(u.id) === dialogId
-    );
-    if (user && !user.deleted && !user.bot && !user.support && !user.self && !(!user.status || user.status instanceof import_api8.default.UserStatusEmpty)) {
-      const dialogDb = await getDialogue(accountId, String(user.id));
-      const {
-        messages: dialogMessages = [],
-        groupId,
-        blocked = false,
-        reason = null,
-        automaticReason = null
-      } = dialogDb || {};
-      if (!dialogDb || !groupId || blocked || reason || automaticReason) {
-        await sendToBot(`** GET DIALOGS ERROR **
-ID: ${accountId}
-RID: ${String(user.id)}
-STATUS: ${JSON.stringify(dialogDb || "null")}:${groupId}:${blocked}:${reason}:${automaticReason}`);
-        await editFolder(client, String(user.id), String(user.accessHash), 0);
-        continue;
-      }
-      const allHistory = await client.invoke(
-        new import_api8.default.messages.GetHistory({
-          peer: new import_api8.default.InputPeerUser({
-            userId: (0, import_big_integer3.default)(user.id),
-            accessHash: (0, import_big_integer3.default)(user.accessHash)
-          }),
-          limit: 30
-        })
-      );
-      const dialogsMessages = ((allHistory == null ? void 0 : allHistory.messages) || []).filter((m) => m.className === "Message").reverse();
-      if (!dialogsMessages.length) {
-        continue;
-      }
-      for (const dialogMessage of dialogsMessages) {
-        if (dialogMessages.find((m) => m.id === dialogMessage.id)) {
-          continue;
-        }
-        const {
-          photo = false,
-          voice = false,
-          round = false,
-          video = false,
-          document: document2 = false,
-          spoiler = false
-        } = (dialogMessage == null ? void 0 : dialogMessage.media) || {};
-        const fromId = dialogMessage == null ? void 0 : dialogMessage.fromId;
-        let text;
-        if (dialogMessage.fwdFrom) {
-          text = "[FORWARDED MESSAGE]";
-        } else if (dialogMessage.message) {
-          text = dialogMessage.message;
-        } else if (voice || round) {
-          await client.invoke(
-            new import_api8.default.messages.ReadMessageContents({
-              id: [dialogMessage.id]
-            })
-          );
-          text = "[VOICE MESSAGE]";
-        } else if (photo) {
-          text = "[PHOTO]";
-        } else if (video) {
-          text = "[VIDEO]";
-        } else if (document2) {
-          text = "[DOCUMENT]";
-        } else if (spoiler) {
-          text = "[SPOILER MESSAGE]";
-        } else {
-          text = "[UNKNOWN MESSAGE]";
-        }
-        dialogMessages.push({
-          id: dialogMessage.id,
-          text,
-          fromId: String((fromId == null ? void 0 : fromId.userId) || user.id),
-          date: dialogMessage.date
-        });
-      }
-      const combinedMessages = getCombinedMessages(dialogMessages);
-      const stage = combinedMessages.filter(
-        (m) => m.fromId === String(user.id)
-      ).length;
-      if (stage > 25) {
-        await editFolder(client, String(user.id), String(user.accessHash), 0);
-        await updateAutomaticDialogue(
-          accountId,
-          String(user.id),
-          "automatic:max-stage-25"
-        );
-        continue;
-      }
-      const dialogData = {
-        ...user,
-        ...dialogDb,
-        stage,
-        groupId,
-        messages: dialogMessages
-      };
-      await client.invoke(
-        new import_api8.default.messages.ReadHistory({
-          peer: new import_api8.default.InputPeerUser({
-            userId: (0, import_big_integer3.default)(user.id),
-            accessHash: (0, import_big_integer3.default)(user.accessHash)
-          }),
-          maxId: 1e6
-        })
-      );
-      if (dialogData.stopped || manualControlDialogIds.includes(dialogId)) {
-        if (!account.spamBlockDate) {
-          manualDialogs.push(dialogData);
-        }
-      } else if (dialogIds.includes(dialogId)) {
-        dialogs.push(dialogData);
-      } else {
-        pingDialogs.push(dialogData);
-      }
-    }
-  }
-  return [dialogs, pingDialogs, manualDialogs];
 };
 
 // ../node_modules/axios/lib/helpers/bind.js
@@ -79350,1260 +79685,6 @@ var {
   mergeConfig: mergeConfig2
 } = axios_default;
 
-// src/modules/makeRequestGpt.ts
-var import_emoji_regex = __toESM(require_emoji_regex());
-init_sendToBot();
-function trimmer(str) {
-  if (str.endsWith(".") || str.endsWith(",") || str.endsWith("!") || str.endsWith("?")) {
-    return str.slice(0, -1);
-  }
-  return str;
-}
-function hasConsecutiveQuestionSentences(text) {
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  let previousWasQuestion = false;
-  for (const sentence of sentences) {
-    const trimmedSentence = sentence.trim();
-    if (trimmedSentence.endsWith("?")) {
-      if (previousWasQuestion) {
-        return true;
-      }
-      previousWasQuestion = true;
-    } else {
-      previousWasQuestion = false;
-    }
-  }
-  return false;
-}
-function containsIdeographicOrArabic(str) {
-  const ideographicAndArabicRegex = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
-  return ideographicAndArabicRegex.test(str);
-}
-var validateText = (companyData, inputString, language) => {
-  if (language === "ANY") {
-    return false;
-  }
-  const companyDataLowerCase = companyData.toLowerCase();
-  const words = inputString.replace(/[.,!?;:'`"()@«»…—\-/]/g, " ").split(/\s+/);
-  const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
-  const englishRegex = /^[a-z]+$/i;
-  const pattern2 = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-  const links = inputString.match(pattern2);
-  if (links) {
-    for (const link of links) {
-      if (!companyDataLowerCase.includes(trimmer(link.trim().toLowerCase()))) {
-        return link.toLocaleLowerCase();
-      }
-    }
-  }
-  const isProperNoun = (word) => word[0] === word[0].toUpperCase();
-  const cleanWord = (word) => trimmer(word.trim());
-  for (let word of words) {
-    word = cleanWord(word);
-    if (word.length === 0)
-      continue;
-    if (word === "mainlink")
-      continue;
-    if (language === "RUSSIAN" || language === "UKRAINIAN") {
-      if (!russianUkrainianRegex.test(word) && !isProperNoun(word)) {
-        if (!companyDataLowerCase.includes(word.toLowerCase())) {
-          return word.toLowerCase();
-        }
-      }
-    } else if (language === "ENGLISH") {
-      if (!englishRegex.test(word) && !isProperNoun(word)) {
-        if (!companyDataLowerCase.includes(word.toLowerCase())) {
-          return word.toLowerCase();
-        }
-      }
-    } else {
-      return word.toLowerCase();
-    }
-  }
-  return false;
-};
-function filterString(str, part, replaceValue) {
-  if (!part) {
-    return str;
-  }
-  const escapedPart = part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return str.replace(new RegExp(escapedPart, "gi"), replaceValue);
-}
-function capitalizeFirstLetter(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-function addSpaceAfterPunctuation(str) {
-  const urlRegex = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\?\=\-\_\+\%\'\~\#]*)*/g;
-  let match;
-  let urls = [];
-  while ((match = urlRegex.exec(str)) !== null) {
-    urls.push({ start: match.index, end: match.index + match[0].length });
-  }
-  let result = "";
-  for (let i = 0; i < str.length; i++) {
-    const inUrl = urls.some((url2) => i >= url2.start && i < url2.end);
-    if (!inUrl && /[,.?!;:]/.test(str[i]) && i + 1 < str.length && /\S/.test(str[i + 1])) {
-      result += str[i] + " ";
-    } else {
-      result += str[i];
-    }
-  }
-  return result;
-}
-function countSentences(paragraph) {
-  const sentenceEnders = [".", "!", "?"];
-  let sentenceCount = 0;
-  for (let i = 0; i < paragraph.length; i++) {
-    if (sentenceEnders.includes(paragraph[i])) {
-      sentenceCount++;
-    }
-  }
-  return sentenceCount;
-}
-function removeGreetings(text) {
-  const greetings = [
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445 \u0432\u0430\u0441",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E, \u043A\u043E\u043B\u043B\u0435\u0433\u0438",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E, \u0434\u0440\u0443\u0437\u044C\u044F",
-    "\u0420\u0430\u0434 \u043F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C",
-    "\u0420\u0430\u0434 \u0432\u0441\u0435\u0445 \u0432\u0438\u0434\u0435\u0442\u044C",
-    "\u0420\u0430\u0434 \u0432\u0438\u0434\u0435\u0442\u044C \u0432\u0441\u0435\u0445",
-    "\u0420\u0430\u0434 \u0432\u0430\u0441 \u0432\u0438\u0434\u0435\u0442\u044C",
-    "\u0420\u0430\u0434 \u0432\u0438\u0434\u0435\u0442\u044C",
-    "\u0420\u0430\u0434\u0430 \u0432\u0438\u0434\u0435\u0442\u044C",
-    "\u041F\u0440\u0438\u0432\u0435\u0442-\u043F\u0440\u0438\u0432\u0435\u0442",
-    "\u0414\u043E\u0431\u0440\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u0441\u0443\u0442\u043E\u043A",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0441\u0443\u0442\u043E\u043A",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438",
-    "\u0414\u043E\u0431\u0440\u0435\u0439\u0448\u0435\u0433\u043E \u0434\u043D\u044F",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0438\u043A\u0438",
-    "\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E",
-    "\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440",
-    "\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0443\u0442\u0440\u0430",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0435\u0447\u0435\u0440\u0430",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0434\u043D\u044F",
-    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0443\u0442\u0440\u0435\u0447\u043A\u043E\u043C",
-    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0443\u0442\u0440\u043E\u043C",
-    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0434\u043D\u0435\u043C",
-    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0432\u0435\u0447\u0435\u0440\u043E\u043C",
-    "\u0414\u043E\u0431\u0440\u044B\u0439 \u043F\u043E\u043B\u0434\u0435\u043D\u044C",
-    "\u041F\u0440\u0438\u0432\u0435\u0442\u0438\u043A",
-    "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435",
-    "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439",
-    "\u041F\u0440\u0438\u0432\u0435\u0442",
-    "\u0425\u044D\u0439",
-    "\u0425\u0430\u0439",
-    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E"
-  ];
-  const followUpWords = [
-    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435 \u043A\u043E\u043B\u043B\u0435\u0433\u0438",
-    "\u0434\u043E\u0440\u043E\u0433\u0438\u0435 \u0434\u0440\u0443\u0437\u044C\u044F",
-    "\u0433\u043E\u0441\u043F\u043E\u0434\u0430 \u0438 \u0434\u0430\u043C\u044B",
-    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0442\u043D\u0435\u0440\u044B",
-    "\u043A\u043E\u043B\u043B\u0435\u0433\u0438 \u043C\u043E\u0438",
-    "\u0434\u0440\u0443\u0437\u044C\u044F \u043C\u043E\u0438",
-    "\u0432\u0441\u0435\u0445 \u0432\u0430\u0441",
-    "\u043C\u043E\u0438\u0445 \u043A\u043E\u043B\u043B\u0435\u0433",
-    "\u043D\u0430\u0448\u0438\u0445 \u0433\u043E\u0441\u0442\u0435\u0439",
-    "\u0434\u043E\u0440\u043E\u0433\u0438\u0435",
-    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435",
-    "\u0433\u043E\u0441\u043F\u043E\u0434\u0430",
-    "\u0442\u043E\u0432\u0430\u0440\u0438\u0449\u0438",
-    "\u043A\u043E\u043B\u043B\u0435\u0433\u0438",
-    "\u0434\u0440\u0443\u0437\u044C\u044F",
-    "\u0434\u0440\u0443\u0433",
-    "\u0442\u0435\u0431\u044F",
-    "\u0432\u0430\u0441",
-    "\u0432\u0430\u043C",
-    "\u0442\u0435\u0431\u0435",
-    "\u043D\u0430\u0448\u0438",
-    "\u0434\u043D\u044F",
-    "\u0432\u0435\u0447\u0435\u0440\u0430",
-    "\u0443\u0442\u0440\u0430",
-    "\u0432\u0440\u0435\u043C\u0435\u043D\u0438",
-    "\u0441\u0443\u0442\u043E\u043A",
-    "\u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u044E"
-  ];
-  greetings.forEach((greeting) => {
-    followUpWords.forEach((followUp) => {
-      const regex = new RegExp(`${greeting}\\s${followUp}[\\.,!]?`, "gi");
-      text = text.replace(regex, "");
-    });
-    const regexSingleGreeting = new RegExp(`${greeting}[\\.,!]?`, "gi");
-    text = text.replace(regexSingleGreeting, "");
-  });
-  return text.trim();
-}
-async function makeRequestGpt(accountId, messages, part, language, disableLink, mandatoryQuestion, minimalProposalLength, isRemoveGreetings, groupId) {
-  var _a, _b, _c;
-  const generations = [];
-  const errors3 = [];
-  console.log({
-    accountId,
-    message: `**MAKE REQUEST GPT**`,
-    messages
-  });
-  let i = 0;
-  while (i !== 5) {
-    try {
-      const fixedMessages = messages.map((message2) => {
-        if (message2.role !== "system" || errors3.length === 0)
-          return message2;
-        return {
-          ...message2,
-          content: `${message2.content}
-## MANDATORY REQUIREMENTS FOR REPLY
-${errors3.map((error) => `- **${error}**`).join("\n")}`
-        };
-      });
-      const { data: resultData } = await axios_default.post(
-        "http://91.198.220.234/chatv2",
-        {
-          k: 30,
-          temperature: 1,
-          presence_penalty: 0.8,
-          p: 0.95,
-          model: "command-r-plus-08-2024",
-          messages: fixedMessages
-        }
-      );
-      const data = ((_c = (_b = (_a = resultData == null ? void 0 : resultData.message) == null ? void 0 : _a.content) == null ? void 0 : _b[0]) == null ? void 0 : _c.text) || "";
-      if (!data.trim()) {
-        throw new Error("Empty message");
-      }
-      let message = filterString(
-        data.replace(/\n/g, "").replace(/\*/g, "").replace(/!/g, ".").replace((0, import_emoji_regex.default)(), "").replace("<ASSISTANT>:", "").replace("<ASSISTANT>", "").replaceAll(/[«»„“”‘’'"`『』「」]/g, "").replace("\u0442.me", "t.me").replace("\u0442 .me", "t.me").replace("\u0442. me", "t.me").trim(),
-        (part || "").trim(),
-        "mainlink"
-      );
-      const pattern2 = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-      const hasTextLink = message.match(pattern2);
-      message = isRemoveGreetings ? removeGreetings(message) : message;
-      if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("section") || message.includes("sign")) {
-        throw new Error(
-          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
-        );
-      }
-      if (containsIdeographicOrArabic(message)) {
-        throw new Error(
-          "The answer must not contain Arabic characters or any hieroglyphics"
-        );
-      }
-      const text = validateText(JSON.stringify(messages), message, language);
-      if (text) {
-        throw new Error(
-          `The word ${text} is not allowed in reply, its use is prohibited`
-        );
-      }
-      generations.push(message);
-      console.log({
-        accountId,
-        message: `**REQUEST GPT MESSAGE**`,
-        varianMessage: message
-      });
-      if (hasTextLink && disableLink) {
-        throw new Error(
-          "The reply should not contain any references at this stage"
-        );
-      }
-      if (mandatoryQuestion && hasConsecutiveQuestionSentences(message)) {
-        throw new Error(
-          "An answer should contain no more than one question. The use of multiple or consecutive questions in a single answer is strictly prohibited."
-        );
-      }
-      const varMessage = capitalizeFirstLetter(
-        addSpaceAfterPunctuation(message)
-      );
-      if (mandatoryQuestion && !varMessage.includes("?")) {
-        throw new Error(
-          "The question in the reply is mandatory. Add a question at the end of the line."
-        );
-      }
-      if (mandatoryQuestion && varMessage.length < 200) {
-        throw new Error(
-          "Minimum reply length 200 characters. Make a reply of at least 3 sentences."
-        );
-      }
-      if (minimalProposalLength > countSentences(varMessage)) {
-        throw new Error(
-          `The minimum number of sentences is ${minimalProposalLength}`
-        );
-      }
-      if (part && !varMessage.includes("mainlink")) {
-        throw new Error(
-          `The response does not contain the unique \u201C${part}\u201D part, even though it should contain`
-        );
-      }
-      return filterString(
-        varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ""),
-        "mainlink",
-        (part || "").trim()
-      );
-    } catch (error) {
-      await new Promise((res) => setTimeout(res, 2500));
-      console.error({
-        accountId,
-        message: new Error(`Request Gpt Error: ${error.message}`)
-      });
-      if (error.message !== "The answer must not contain Arabic characters or any hieroglyphics" && error.message !== 'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"' && !error.message.includes("is not allowed in reply")) {
-        i += 1;
-      }
-      errors3.push(error.message);
-    }
-  }
-  try {
-    await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
-GROUP ID: ${groupId}
-ACCOUNT ID: ${accountId}
-_____________
-GENERATIONS:
-${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
-ERRORS:
-${errors3.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
-  } catch (e) {
-    console.error({
-      accountId,
-      message: new Error(`GPT GENERATION ERROR: ${e.message}`)
-    });
-  }
-  if (generations[0]) {
-    return filterString(
-      generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ""),
-      "mainlink",
-      (part || "").trim()
-    );
-  }
-  throw new Error("STOPPED_ERROR");
-}
-
-// src/db/groupId.ts
-var getGroupIdCollection = async () => {
-  return (await DB2()).collection("groupId");
-};
-var getGroupId = async (groupId) => {
-  const groupIdCollection = await getGroupIdCollection();
-  const result = await groupIdCollection.findOne(
-    {
-      groupId: String(groupId)
-    },
-    { projection: { history: 0, dateUpdated: 0, _id: 0 } }
-  );
-  return result;
-};
-var incrementCurrentCount = async (groupId) => {
-  const groupIdCollection = await getGroupIdCollection();
-  await groupIdCollection.updateOne(
-    { groupId },
-    {
-      $inc: { currentCount: 1 },
-      $set: { dateUpdated: /* @__PURE__ */ new Date() }
-    }
-  );
-};
-
-// src/db/groupIdUsers.ts
-var getGroupIdUsersCollection = async () => {
-  return (await DB2()).collection("groupIdUsers");
-};
-var updateFailedMessage = async (username, groupId) => {
-  const messagesCollection = await getGroupIdUsersCollection();
-  await messagesCollection.updateOne(
-    { g: groupId, u: username.toLowerCase() },
-    { $set: { f: true, p: /* @__PURE__ */ new Date() } },
-    { upsert: true }
-  );
-};
-var updateSendMessage = async (username, groupId, data) => {
-  const messagesCollection = await getGroupIdUsersCollection();
-  await messagesCollection.updateOne(
-    { g: groupId, u: username.toLowerCase() },
-    { $set: data },
-    { upsert: true }
-  );
-};
-
-// src/modules/saveRecipient.ts
-init_sendToBot();
-var saveRecipient = async (accountId, recipient, recipientDb, messages, status, addedData = {}, accountByID = null) => {
-  let isSave = false;
-  while (!isSave) {
-    try {
-      const {
-        id: recipientId,
-        phone,
-        username,
-        firstName,
-        lastName = ""
-      } = recipient.users[0];
-      const {
-        fullUser: { about }
-      } = recipient;
-      const {
-        groupId,
-        recipientUsername,
-        username: varSecondUsername,
-        recipientPhone
-      } = recipientDb;
-      const recUsername = (username || recipientUsername || varSecondUsername || "").toLowerCase();
-      const data = {
-        groupId,
-        accountId,
-        recipientId: String(recipientId),
-        recipientUsername: recUsername,
-        recipientTitle: `${firstName} ${lastName}`.trim(),
-        recipientBio: about || "",
-        aiName: (recipientDb == null ? void 0 : recipientDb.aiName) || null,
-        aiGender: (recipientDb == null ? void 0 : recipientDb.aiGender) || null,
-        recipientPhone: (status === "create" && recipientDb.username.includes("+") ? recipientDb.username.replace("+", "") : null) || phone || recipientPhone || null,
-        messages,
-        step: getCombinedMessages(messages).length,
-        read: false,
-        ...addedData
-      };
-      await updateDialogue(data);
-      console.log({
-        accountId,
-        message: `**SAVE RECIPIENT**`,
-        data
-      });
-      if (status === "create") {
-        const messageCount = (accountByID == null ? void 0 : accountByID.messageCount) || 0;
-        const multiplier = messageCount < 40 ? 1.5 : 1;
-        if (accountId.includes("-prefix-premium")) {
-          await updateAccountById(accountId, {
-            remainingTime: new Date((/* @__PURE__ */ new Date()).getTime() + 15e5),
-            multiplier: 1
-          });
-        } else {
-          await updateAccountById(accountId, {
-            remainingTime: new Date(
-              (/* @__PURE__ */ new Date()).getTime() + 72e5 * multiplier
-            ),
-            multiplier
-          });
-        }
-        await updateSendMessage(recipientDb.username, String(groupId), {
-          s: true,
-          p: /* @__PURE__ */ new Date()
-        });
-        await incrementMessageCount(accountId);
-        await incrementCurrentCount(String(groupId));
-      }
-      isSave = true;
-    } catch (error) {
-      await sendToBot(`** ERROR SAVE RECIPIENT **
-ERROR: ${error.message};
-accountId: ${accountId};
-status: ${status};
-recipient: ${JSON.stringify(recipient)};
-recipientDb: ${JSON.stringify(recipientDb)};
-messages: ${JSON.stringify(messages)};
-addedData: ${JSON.stringify(addedData)};
-accountByID: ${JSON.stringify(accountByID)};`);
-      await sleep2(3e3);
-    }
-  }
-};
-
-// src/helpers/converterName.ts
-var russianNames = {
-  anatoliy: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
-  anton: "\u0410\u043D\u0442\u043E\u043D",
-  arkadiy: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
-  artur: "\u0410\u0440\u0442\u0443\u0440",
-  boris: "\u0411\u043E\u0440\u0438\u0441",
-  vadim: "\u0412\u0430\u0434\u0438\u043C",
-  valentin: "\u0412\u0430\u043B\u0435\u043D\u0442\u0438\u043D",
-  valeriy: "\u0412\u0430\u043B\u0435\u0440\u0438\u0439",
-  viktor: "\u0412\u0438\u043A\u0442\u043E\u0440",
-  vitaliy: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
-  vladimir: "\u0412\u043B\u0430\u0434\u0438\u043C\u0438\u0440",
-  vladislav: "\u0412\u043B\u0430\u0434\u0438\u0441\u043B\u0430\u0432",
-  gennadiy: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
-  georgiy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  denis: "\u0414\u0435\u043D\u0438\u0441",
-  dmitriy: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
-  egor: "\u0415\u0433\u043E\u0440",
-  ivan: "\u0418\u0432\u0430\u043D",
-  igor: "\u0418\u0433\u043E\u0440\u044C",
-  ilya: "\u0418\u043B\u044C\u044F",
-  kirill: "\u041A\u0438\u0440\u0438\u043B\u043B",
-  konstantin: "\u041A\u043E\u043D\u0441\u0442\u0430\u043D\u0442\u0438\u043D",
-  leonid: "\u041B\u0435\u043E\u043D\u0438\u0434",
-  maksim: "\u041C\u0430\u043A\u0441\u0438\u043C",
-  mikhail: "\u041C\u0438\u0445\u0430\u0438\u043B",
-  nikita: "\u041D\u0438\u043A\u0438\u0442\u0430",
-  nikolai: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
-  oleg: "\u041E\u043B\u0435\u0433",
-  pavel: "\u041F\u0430\u0432\u0435\u043B",
-  roman: "\u0420\u043E\u043C\u0430\u043D",
-  ruslan: "\u0420\u0443\u0441\u043B\u0430\u043D",
-  sergey: "\u0421\u0435\u0440\u0433\u0435\u0439",
-  stepan: "\u0421\u0442\u0435\u043F\u0430\u043D",
-  timofey: "\u0422\u0438\u043C\u043E\u0444\u0435\u0439",
-  fedor: "\u0424\u0435\u0434\u043E\u0440",
-  aleksandr: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
-  alexander: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
-  aleksey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
-  alexey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
-  alex: "\u0410\u043B\u0435\u043A\u0441",
-  anatoly: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
-  andrey: "\u0410\u043D\u0434\u0440\u0435\u0439",
-  andrew: "\u0410\u043D\u0434\u0440\u0435\u0439",
-  arkady: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
-  artem: "\u0410\u0440\u0442\u0435\u043C",
-  arthur: "\u0410\u0440\u0442\u0443\u0440",
-  valera: "\u0412\u0430\u043B\u0435\u0440\u0430",
-  vasily: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
-  vasiliy: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
-  victor: "\u0412\u0438\u043A\u0442\u043E\u0440",
-  vitaly: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
-  gennady: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
-  georgy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  george: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
-  gleb: "\u0413\u043B\u0435\u0431",
-  grigory: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
-  grigoriy: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
-  grisha: "\u0413\u0440\u0438\u0448\u0430",
-  daniil: "\u0414\u0430\u043D\u0438\u0438\u043B",
-  danila: "\u0414\u0430\u043D\u0438\u043B\u0430",
-  dmitry: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
-  dima: "\u0414\u0438\u043C\u0430",
-  zakhar: "\u0417\u0430\u0445\u0430\u0440",
-  matvey: "\u041C\u0430\u0442\u0432\u0435\u0439",
-  nikolay: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
-  petr: "\u041F\u0435\u0442\u0440",
-  stanislav: "\u0421\u0442\u0430\u043D\u0438\u0441\u043B\u0430\u0432",
-  timur: "\u0422\u0438\u043C\u0443\u0440",
-  yaroslav: "\u042F\u0440\u043E\u0441\u043B\u0430\u0432"
-};
-var converterName = (aiName) => {
-  const lowerCaseName = aiName.toLowerCase().replace(".", "").trim();
-  return russianNames[lowerCaseName] || aiName;
-};
-
-// src/helpers/generateRandomString.ts
-var generateRandomString = (template) => {
-  const regex = /{(.*?)}/g;
-  const cleanedTemplate = template.replace(/\n/g, "").replace(/\s{2,}/g, " ");
-  return cleanedTemplate.replace(regex, (match, group) => {
-    const options = group.split("|");
-    const randomIndex = Math.floor(Math.random() * options.length);
-    return options[randomIndex];
-  }).trim();
-};
-
-// src/helpers/getDateNow.ts
-var getDateNow = () => {
-  const now = /* @__PURE__ */ new Date();
-  return `${new Intl.DateTimeFormat("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  }).format(now)} ${now.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false
-  })}`;
-};
-
-// src/helpers/sendToFormBot.ts
-var sendToBotByChatIdText2 = async (chatId, text) => {
-  const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
-  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
-    const chunks = [];
-    let currentIndex = 0;
-    while (currentIndex < text2.length) {
-      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
-      currentIndex += chunkSize;
-    }
-    return chunks;
-  };
-  const textChunks = splitTextIntoChunks(text);
-  for (const chunk of textChunks) {
-    await fetch(sendMessageUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: chunk,
-        disable_web_page_preview: true
-      })
-    });
-  }
-};
-var sendToFormBot = async (text) => {
-  const chatIds = ["483779758", "324820826", "6957002018"];
-  try {
-    await Promise.all(
-      chatIds.map(async (chatId) => {
-        await sendToBotByChatIdText2(chatId, text);
-      })
-    );
-  } catch {
-  }
-};
-
-// src/methods/messages/sendMessage.ts
-var import_big_integer4 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
-init_sendToBot();
-
-// src/helpers/removeSpacesAndLowerCase.ts
-var rmSpLc = (str) => {
-  return str.replace(/\s+/g, "").toLowerCase();
-};
-
-// src/methods/messages/sendMessage.ts
-function formatDateToUTC(date) {
-  const utcDate = new Date(date);
-  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(
-    utcDate.getUTCDate()
-  ).padStart(
-    2,
-    "0"
-  )} ${String(utcDate.getUTCHours()).padStart(2, "0")}:${String(
-    utcDate.getUTCMinutes()
-  ).padStart(2, "0")}`;
-}
-function reduceSpaces(string) {
-  return string.replace(/\s+/g, " ").trim();
-}
-function capitalizeFirstLetter2(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-function removeNonAlphaPrefix(string) {
-  if (string === "/start") {
-    return string;
-  }
-  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-}
-var sendMessage = async (client, userId, accessHash, message, accountId, withTyping) => {
-  var _a;
-  let sentMessage = null;
-  try {
-    if (withTyping) {
-      const iterations = Math.ceil(message.length / 250 * 60 * 1e3 / 5e3);
-      for (let i = 0; i < iterations; i++) {
-        await client.invoke(
-          new import_api9.default.messages.SetTyping({
-            peer: new import_api9.default.InputPeerUser({
-              userId: (0, import_big_integer4.default)(userId),
-              accessHash: (0, import_big_integer4.default)(accessHash)
-            }),
-            action: new import_api9.default.SendMessageTypingAction()
-          })
-        );
-        await sleep2(5e3);
-      }
-    }
-    sentMessage = await client.invoke(
-      new import_api9.default.messages.SendMessage({
-        message: removeNonAlphaPrefix(
-          capitalizeFirstLetter2(reduceSpaces(message))
-        ),
-        clearDraft: true,
-        peer: new import_api9.default.InputPeerUser({
-          userId: (0, import_big_integer4.default)(userId),
-          accessHash: (0, import_big_integer4.default)(accessHash)
-        }),
-        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
-      })
-    );
-    if (sentMessage.updates) {
-      sentMessage = (_a = sentMessage.updates.find(
-        (update) => {
-          var _a2;
-          return rmSpLc(((_a2 = update == null ? void 0 : update.message) == null ? void 0 : _a2.message) || "") === rmSpLc(message);
-        }
-      )) == null ? void 0 : _a.message;
-    }
-    if (message !== "/start") {
-      if (!(sentMessage == null ? void 0 : sentMessage.id)) {
-        throw new Error("MESSAGE_ERROR");
-      }
-      await client.invoke(
-        new import_api9.default.messages.ReadHistory({
-          peer: new import_api9.default.InputPeerUser({
-            userId: (0, import_big_integer4.default)(userId),
-            accessHash: (0, import_big_integer4.default)(accessHash)
-          }),
-          maxId: sentMessage.id
-        })
-      );
-    }
-    return sentMessage;
-  } catch (e) {
-    if (e.message === "PEER_FLOOD") {
-      if (message.length > 30) {
-        const fullAccount = await getAccountById(accountId);
-        const dialog = await getDialogue(accountId, String(userId));
-        const createdDateFormatted = (dialog == null ? void 0 : dialog.dateCreated) ? formatDateToUTC(dialog.dateCreated) : "N/A";
-        const updatedDateFormatted = (dialog == null ? void 0 : dialog.dateUpdated) ? formatDateToUTC(dialog.dateUpdated) : "N/A";
-        const spamBlockDateFormatted = (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate !== "INFINITY" ? formatDateToUTC(fullAccount.spamBlockDate) : (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate === "INFINITY" ? "INFINITY" : "N/A";
-        await sendToBot(
-          `*** ${e.message} ***
-QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
-MESSAGE: ${message}
-
-SPAMBLOCK DATE: ${spamBlockDateFormatted}
-DIALOG CREATED DATE: ${createdDateFormatted}
-DIALOG UPDATED DATE: ${updatedDateFormatted}`
-        );
-      }
-    } else {
-      await sendToBot(
-        `*** ${e.message} ***
-AccountId: ${accountId}
-UserId: ${userId}
-Message: ${message}`
-      );
-    }
-    throw new Error(e.message);
-  }
-};
-
-// src/methods/users/getFullUser.ts
-var import_big_integer5 = __toESM(require_BigInteger());
-var import_api10 = __toESM(require_api());
-init_sendToBot();
-var getFullUser = async (client, userId, accessHash) => {
-  if (!userId || !accessHash) {
-    return null;
-  }
-  const userFull = await client.invoke(
-    new import_api10.default.users.GetFullUser({
-      id: new import_api10.default.InputPeerUser({
-        userId: (0, import_big_integer5.default)(userId),
-        accessHash: (0, import_big_integer5.default)(accessHash)
-      })
-    })
-  );
-  if (!userFull) {
-    await sendToBot(`** USER FULL NOT DEFINED **
-ID: ${userId}
-RID: ${accessHash}`);
-  }
-  return userFull;
-};
-
-// src/helpers/extractLastQuestion.ts
-var extractLastQuestion = (text) => {
-  const urlRegex = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-  const links = [];
-  let replacedStr = text;
-  let match;
-  while ((match = urlRegex.exec(text)) !== null) {
-    const key = `__LINK_${links.length}__`;
-    const fullLink = match[0].replace(/[?.!,]$/, "");
-    links.push({ key, url: fullLink });
-    replacedStr = replacedStr.replace(fullLink, key);
-  }
-  const matches = replacedStr.match(/[^.?!]*\?/g);
-  const lastQuestion = matches ? matches[matches.length - 1].trim() : null;
-  const restoredLastQuestion = lastQuestion ? lastQuestion.replace(/__LINK_\d+__/g, (key) => {
-    const link = links.find((item) => item.key === key);
-    return link ? link.url : key;
-  }) : null;
-  return restoredLastQuestion;
-};
-
-// src/modules/autoResponse.ts
-var pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-var autoResponse = async (client, accountId, tgAccountId, tgFirstName) => {
-  const [dialogs, pingDialogs, manualControlDialogs] = await getDialogs2(
-    client,
-    accountId
-  );
-  for (const dialog of dialogs) {
-    const {
-      id,
-      accessHash,
-      messages,
-      groupId: dialogGroupId,
-      stage,
-      aiName,
-      aiGender
-    } = dialog;
-    const groupId = await getGroupId(dialogGroupId);
-    const recipientFull = await getFullUser(client, id, accessHash);
-    if (!recipientFull) {
-      continue;
-    }
-    const {
-      aiRole = "",
-      companyDescription = "",
-      addedInformation = "",
-      goal = "",
-      part = "",
-      addedQuestion = "",
-      language = "RUSSIAN",
-      flowHandling = "",
-      messagesCount = 4
-    } = groupId || {};
-    const meName = language === "RUSSIAN" ? converterName(tgFirstName) : tgFirstName;
-    const parted = stage === 2 && part ? part.trim() : "";
-    const hasQuestion = stage === 1 && addedQuestion ? addedQuestion : "";
-    const {
-      fullUser: { about }
-    } = recipientFull;
-    const replyMessage = await makeRequestGpt(
-      accountId,
-      [
-        {
-          role: "system",
-          content: `You are "${meName}" (role assistant, role <ASSISTANT>, male gender), acting as role "${aiRole}". Your name: ${meName}. Your gender: male. Fully adopt this identity as a real person whose task is to deeply engage the user within the context of ASSISTANT_COMPANY_DESCRIPTION. You have initiated the conversation with the user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION.${stage >= 2 && goal ? `
-!IMPORTANT INSTRUCTION!: **${goal}**` : ""}${stage === 1 ? `
-You \u201C${meName}\u201D (role assistant, role <ASSISTANT>, male gender) have asked a question **${messages[1].content}** to initiate a (cold) dialog with a user, and regardless of the interlocutor's reaction to your question, you must give your clear and rigorous answer that will maximize the interlocutor's liking and encourage further communication` : ""}
-IMPORTANT CONTEXT: You work with cold traffic, conducting unsolicited communications to potential clients via Telegram messenger. Your interaction is \u201Ccold\u201D, meaning you initiate contact with a user who has not interacted with you before. Communication and possible communication with the user takes place via text messages only. It is important to note that neither you nor the user know each other or have met in real life. The user doesn't know you or the context of your message. You offer various services and solutions in an effort to convert these cold potential customers into interested ones. Never under any circumstances apologize in your reply;
-
-## INFORMATION ABOUT USER (is the interlocutor to whose messages you generate a reply)
-NAME: ${aiName || "unknown"};
-GENDER: ${aiGender || "unknown"};${about ? `
-BIO: ${about.replace(pattern, "")}` : ""}
-IMPORTANT CONTEXT: A genuine individual who has never interacted with the assistant before. He or she is receiving a message from the role assistant for the first time and has no prior knowledge of your products. The data is for contextual understanding only and does not imply personalized treatment. It is an important aspect of the assistant's context that should be considered when forming a reply.
-
-## STYLE GUIDE FOR ASSISTANT REPLY
-- Your reply must **strictly** be approximately ${messagesCount * 60} characters in length, consisting of around ${messagesCount * 10} words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.${stage <= 2 ? `
-- You should always begin your reply with a brief reply to the user's last message. The reply is mandatory and should be minimal but correct to the user's last message.` : ""}${hasQuestion ? `
-- Smoothly weave the following question into the end of your reply in a way that feels natural and relevant: \u201C${generateRandomString(hasQuestion)}\u201D. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**` : stage === 2 ? `
-- **Make sure to ask a leading question to further engage the user**. Conclude your answer with a simple, easy-to-answer question that flows naturally from the conversation and further engages the user. It should be a question along the lines of \u201Cwhat do you think?\u201D, \u201Ccan I tell you more?\u201D, \u201Cinteresting?\u201D or a question that can better qualify the user.` : ""}${parted ? `
-- Ensure the phrase "${parted}" is **meaningfully integrated** into the reply, not just randomly added. Adjust your reply so that it flows naturally with this phrase.` : ""}
-- Reply language: **${language}**.
-- Never apologize in your reply, under any circumstances. **don't apologize**
-- Do not use generic greetings like "Hello" or "Hi".
-- Never use the name of the interlocutor, any form of personal address, or title such as \u201Cclient,\u201D \u201Cinterlocutor,\u201D \u201Crespected,\u201D and so on
-- Use the company description to craft your reply, highlighting relevant points for the user.
-- Focus on providing value based on the company's offerings.
-- Avoid making assumptions about the user's profession or activities.
-
-
-${companyDescription ? `## ASSISTANT_COMPANY_DESCRIPTION
-${companyDescription}` : ""}
-
-${flowHandling ? `## ASSISTANT_COMMON_FLOW_HANDLING
-${flowHandling}` : ""}
-
-${stage !== 1 && addedInformation ? `## ASSISTANT_ADDED_INFORMATION
-${addedInformation}` : ""}
-
-Current date and time: ${getDateNow()}`
-        },
-        ...messages.map(
-          (m) => ({
-            role: m.fromId === String(id) ? "user" : "assistant",
-            content: m.text
-          })
-        )
-      ],
-      parted,
-      language,
-      stage === 1,
-      stage <= 2,
-      stage <= 2 ? 3 : 2,
-      true,
-      dialogGroupId
-    );
-    await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
-ID: ${accountId}
-GID: ${dialogGroupId}
-RID: ${id}
-${replyMessage}`);
-    const lastQuestion = extractLastQuestion(replyMessage);
-    if (lastQuestion && replyMessage.replace(lastQuestion, "").length > 0) {
-      const sentReplyMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        replyMessage.replace(lastQuestion, ""),
-        accountId,
-        true
-      );
-      const sentQuestionMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        lastQuestion,
-        accountId,
-        false
-      );
-      messages.push({
-        id: sentReplyMessage.id,
-        text: replyMessage.replace(lastQuestion, ""),
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-      messages.push({
-        id: sentQuestionMessage.id,
-        text: lastQuestion,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-    } else {
-      const sentReplyMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        replyMessage,
-        accountId,
-        true
-      );
-      messages.push({
-        id: sentReplyMessage.id,
-        text: replyMessage,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-    }
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
-      viewed: false
-    });
-  }
-  for (const dialog of pingDialogs) {
-    const {
-      id,
-      accessHash,
-      messages,
-      groupId: dialogGroupId,
-      aiName,
-      aiGender
-    } = dialog;
-    const groupId = await getGroupId(dialogGroupId);
-    const recipientFull = await getFullUser(client, id, accessHash);
-    if (!recipientFull) {
-      continue;
-    }
-    const { language = "RUSSIAN" } = groupId || { language: "RUSSIAN" };
-    const chatHistory = messages.map((m) => ({
-      role: m.fromId === String(id) ? "USER" : "CHATBOT",
-      message: m.text
-    })).slice(-15);
-    const pingMessage = await makeRequestGpt(
-      accountId,
-      [
-        {
-          role: "system",
-          content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`
-        },
-        {
-          role: "user",
-          content: `## STYLE GUIDE
-Maximum length of reminder message 100 characters
-
-## USER DATA
-${aiName ? `
-NAME: ${aiName};
-GENDER: ${aiGender}` : ""}
-Today's date is ${getDateNow()};
-      
-## DIALOG
-${chatHistory.map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`
-        }
-      ],
-      "",
-      "ANY",
-      false,
-      false,
-      1,
-      false,
-      dialogGroupId
-    );
-    const sentPingMessage = await sendMessage(
-      client,
-      id,
-      accessHash,
-      pingMessage,
-      accountId,
-      true
-    );
-    messages.push({
-      id: sentPingMessage.id,
-      text: pingMessage,
-      fromId: tgAccountId,
-      date: Math.round(Date.now() / 1e3)
-    });
-    await sendToFormBot(`**** PING MESSAGE (${language}) ****
-ID: ${accountId}
-GID: ${dialogGroupId}
-${pingMessage}`);
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
-      ping: true
-    });
-  }
-  for (const dialog of manualControlDialogs) {
-    const { id, accessHash, messages, managerMessage } = dialog;
-    const recipientFull = await getFullUser(client, id, accessHash);
-    if (!recipientFull) {
-      continue;
-    }
-    if (managerMessage) {
-      const sentManagerMessage = await sendMessage(
-        client,
-        id,
-        accessHash,
-        managerMessage,
-        accountId,
-        true
-      );
-      messages.push({
-        id: sentManagerMessage.id,
-        text: managerMessage,
-        fromId: tgAccountId,
-        date: Math.round(Date.now() / 1e3)
-      });
-    }
-    await saveRecipient(accountId, recipientFull, dialog, messages, "update", {
-      managerMessage: null,
-      viewed: false
-    });
-  }
-};
-
-// src/helpers/sendToSpamBot.ts
-var sendToBotByChatIdText3 = async (chatId, text) => {
-  const token = "7309948288:AAG6ls9zydrUxg4d7ahPyyKerYsmnyr4oC0";
-  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
-    const chunks = [];
-    let currentIndex = 0;
-    while (currentIndex < text2.length) {
-      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
-      currentIndex += chunkSize;
-    }
-    return chunks;
-  };
-  const textChunks = splitTextIntoChunks(text);
-  for (const chunk of textChunks) {
-    await fetch(sendMessageUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: chunk,
-        disable_web_page_preview: true
-      })
-    });
-  }
-};
-var sendToSpamBot = async (text) => {
-  const chatIds = ["483779758", "324820826"];
-  try {
-    await Promise.all(
-      chatIds.map(async (chatId) => {
-        await sendToBotByChatIdText3(chatId, text);
-      })
-    );
-  } catch {
-  }
-};
-
-// src/methods/contacts/resolveUsername.ts
-var import_api11 = __toESM(require_api());
-var resolveUsername = async (client, username) => {
-  const userByUsername = await client.invoke(
-    new import_api11.default.contacts.ResolveUsername({
-      username
-    })
-  );
-  return userByUsername;
-};
-
-// src/methods/messages/getMessages.ts
-var import_big_integer6 = __toESM(require_BigInteger());
-var import_api12 = __toESM(require_api());
-var getMessages = async (client, userId, accessHash, minId) => {
-  const allHistory = await client.invoke(
-    new import_api12.default.messages.GetHistory({
-      peer: new import_api12.default.InputPeerUser({
-        userId: (0, import_big_integer6.default)(userId),
-        accessHash: (0, import_big_integer6.default)(accessHash)
-      }),
-      minId
-    })
-  );
-  return (allHistory.messages || []).filter(
-    (m) => m.className === "Message"
-  );
-};
-
-// src/modules/checkSpamBlock.ts
-function formatDateToUTC2(date) {
-  const utcDate = new Date(date);
-  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(
-    utcDate.getUTCDate()
-  ).padStart(
-    2,
-    "0"
-  )} ${String(utcDate.getUTCHours()).padStart(2, "0")}:${String(
-    utcDate.getUTCMinutes()
-  ).padStart(2, "0")}`;
-}
-var checkSpamBlock = async (client, account) => {
-  var _a;
-  const {
-    accountId,
-    spamBlockDate: tgSpamBlockDate,
-    spamBlockInitDate,
-    historySpamBlocks = []
-  } = account;
-  const result = await resolveUsername(client, "spambot");
-  const { id: userId, accessHash, username } = ((_a = result == null ? void 0 : result.users) == null ? void 0 : _a[0]) ?? {};
-  if (!userId || !accessHash || username !== "SpamBot") {
-    console.error({
-      accountId,
-      message: new Error("Chat with SpamBot not defined")
-    });
-    return true;
-  }
-  const sentMessage = await sendMessage(
-    client,
-    userId,
-    accessHash,
-    "/start",
-    accountId,
-    false
-  );
-  const { id: maxId } = sentMessage;
-  if (!maxId) {
-    console.error({
-      accountId,
-      message: new Error("MaxId from SpamBot not defined")
-    });
-    return true;
-  }
-  await new Promise((res) => setTimeout(res, 5e3));
-  const messages = await getMessages(client, userId, accessHash, maxId);
-  if (!(messages == null ? void 0 : messages[0])) {
-    console.error({
-      accountId,
-      message: new Error("Messages from SpamBot not defined")
-    });
-    return true;
-  }
-  const { message } = messages[0];
-  if (message.includes("no limits are currently applied")) {
-    await updateAccountById(accountId, {
-      spamBlockDate: null,
-      spamBlockInitDate: null,
-      spamBlockDays: null
-    });
-    return false;
-  }
-  const untilDateMatch = message.match(/until\s(.*)\./);
-  const spamBlockDate = untilDateMatch ? untilDateMatch[1].replace("UTC", "").trim() : "INFINITY";
-  const nextSpamBlockDay = /* @__PURE__ */ new Date(spamBlockDate + "Z");
-  if (!spamBlockInitDate || !tgSpamBlockDate || tgSpamBlockDate === "INFINITY" && spamBlockDate !== "INFINITY" || tgSpamBlockDate !== "INFINITY" && spamBlockDate === "INFINITY" || tgSpamBlockDate !== "INFINITY" && tgSpamBlockDate.getTime() !== nextSpamBlockDay.getTime()) {
-    const latest = await getBlockedDialogues(accountId);
-    const mappedLatest = latest.map((l, index) => {
-      var _a2;
-      const { messages: messages2, groupId, recipientId, dateAutomaticCheck } = l;
-      if (index === 0) {
-        const history = messages2.reverse().map((message2) => {
-          if (String(message2.fromId) === String(recipientId)) {
-            return null;
-          }
-          return `${formatDateToUTC2(new Date(Number((message2.date || 0) + "000")))}: ${message2.text}`;
-        }).filter(Boolean).join("\n");
-        return `-----------------
-{"groupId": "${groupId}", "recipientId": "${recipientId}"}
-DETECT BLOCKED DATE: ${formatDateToUTC2(new Date(dateAutomaticCheck))}
-${history}`;
-      }
-      return messages2 && messages2.length ? `-----------------
-{"groupId": "${groupId}", "recipientId": "${recipientId}"}
-DETECT BLOCKED DATE: ${formatDateToUTC2(new Date(dateAutomaticCheck))}
-LAST MESSAGE DATE: ${formatDateToUTC2(new Date(Number((((_a2 = messages2[messages2.length - 1]) == null ? void 0 : _a2.date) || 0) + "000")))}` : "";
-    }).join("\n");
-    let spamBlockDays = 0;
-    if (spamBlockDate !== "INFINITY") {
-      const timeDiff = nextSpamBlockDay.getTime() - (/* @__PURE__ */ new Date()).getTime();
-      spamBlockDays = Math.ceil(timeDiff / (1e3 * 3600 * 24));
-    }
-    await sendToSpamBot(`\u2757 ${!spamBlockInitDate ? "NEW" : "UPDATE"} SPAMBLOCK \u2757
------------------
-ID: ${accountId}
-SPAMBLOCK DATE: ${untilDateMatch ? formatDateToUTC2(nextSpamBlockDay) : "INFINITY"}
-SPAMBLOCK DAYS: ${spamBlockDays === 0 ? "INFINITY" : `${spamBlockDays} day(s)`}
------------------
-\u2757 \u041F\u041E\u0421\u041B\u0415\u0414\u041D\u0418\u0415 ${latest.length} \u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041E\u041A \u2757
-${mappedLatest}`);
-    const updateData = {
-      spamBlockDate: untilDateMatch ? nextSpamBlockDay : "INFINITY",
-      spamBlockDays
-    };
-    if (!spamBlockInitDate) {
-      updateData["spamBlockInitDate"] = /* @__PURE__ */ new Date();
-    }
-    updateData["historySpamBlocks"] = [
-      ...historySpamBlocks || [],
-      {
-        spamBlockDate: untilDateMatch ? nextSpamBlockDay : "INFINITY",
-        spamBlockDays
-      }
-    ];
-    await updateAccountById(accountId, updateData);
-  }
-  return true;
-};
-
-// src/modules/autoSender.ts
-init_sendToBot();
-
-// src/methods/account/muteNotification.ts
-var import_big_integer7 = __toESM(require_BigInteger());
-var import_api13 = __toESM(require_api());
-var muteNotification = async (client, id, accessHash, muteUntil = 2147483647) => {
-  const muteInvoke = await client.invoke(
-    new import_api13.default.account.UpdateNotifySettings({
-      peer: new import_api13.default.InputNotifyPeer({
-        peer: new import_api13.default.InputPeerUser({
-          userId: (0, import_big_integer7.default)(id),
-          accessHash: (0, import_big_integer7.default)(accessHash)
-        })
-      }),
-      settings: new import_api13.default.InputPeerNotifySettings({ muteUntil })
-    })
-  );
-  return muteInvoke;
-};
-
-// src/methods/contacts/resolvePhone.ts
-var import_api14 = __toESM(require_api());
-var resolvePhone = async (client, phone) => {
-  const userByUsername = await client.invoke(
-    new import_api14.default.contacts.ResolvePhone({
-      phone
-    })
-  );
-  return userByUsername;
-};
-
-// src/methods/contacts/resolveContact.ts
-var import_api15 = __toESM(require_api());
-var resolveContact = async (client, username, groupId) => {
-  var _a, _b;
-  const resolveMethod = username.includes("+") ? resolvePhone : resolveUsername;
-  const userByUsername = await resolveMethod(client, username);
-  const { id: userId, accessHash } = ((_a = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _a[0]) ?? {};
-  const recipientFull = await getFullUser(client, userId, accessHash);
-  if (!userId || !accessHash || !recipientFull || !(((_b = userByUsername == null ? void 0 : userByUsername.users) == null ? void 0 : _b[0]) instanceof import_api15.default.User)) {
-    await updateFailedMessage(username, groupId);
-    throw new Error("USERNAME_INVALID");
-  }
-  return recipientFull;
-};
-
 // src/methods/recipients/getRecipient.ts
 var defaultFirstMessagePrompt = "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!";
 var defaultSecondMessagePrompt = "{\u042F |}{\u0437\u0430\u043C\u0435\u0442\u0438\u043B|\u0443\u0432\u0438\u0434\u0435\u043B|\u043E\u0431\u0440\u0430\u0442\u0438\u043B \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u0435|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u0438\u043C\u0430\u044E|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0438\u043B|\u0432\u0435\u0440\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u0437\u0430\u043F\u043E\u043C\u043D\u0438\u043B|\u043F\u043E\u0434\u043C\u0435\u0442\u0438\u043B}, {\u0447\u0442\u043E \u0432\u044B|\u0447\u0442\u043E \u0412\u044B|\u0432\u044B|\u0412\u044B} {\u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C|\u0432\u0435\u0434\u0435\u0442\u0435 \u0431\u0438\u0437\u043D\u0435\u0441|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E\u043C|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u0432\u0435\u0434\u0435\u043D\u0438\u0435\u043C \u0431\u0438\u0437\u043D\u0435\u0441\u0430|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043A\u043E\u043C\u043C\u0435\u0440\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C\u044E}{?|.|,} {\u044D\u0442\u043E \u0442\u0430\u043A|\u044F \u043F\u0440\u0430\u0432|\u043F\u0440\u0430\u0432 \u043B\u0438 \u044F|\u044D\u0442\u043E \u043F\u0440\u0430\u0432\u0434\u0430|\u0442\u0430\u043A \u043B\u0438 \u044D\u0442\u043E|\u044D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0442\u0430\u043A|\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u043B\u0438 \u0442\u0430\u043A|\u043D\u0435 \u043E\u0448\u0438\u0431\u0441\u044F|\u0432\u0435\u0440\u043D\u043E|\u044D\u0442\u043E \u0432\u0435\u0440\u043D\u043E}?";
@@ -80640,11 +79721,11 @@ var getRecipient = async (accountId) => {
 
 // src/methods/messages/deleteHistory.ts
 var import_big_integer8 = __toESM(require_BigInteger());
-var import_api16 = __toESM(require_api());
+var import_api17 = __toESM(require_api());
 var deleteMessages = async (client, userId, accessHash) => {
   await client.invoke(
-    new import_api16.default.messages.DeleteHistory({
-      peer: new import_api16.default.InputPeerUser({
+    new import_api17.default.messages.DeleteHistory({
+      peer: new import_api17.default.InputPeerUser({
         userId: (0, import_big_integer8.default)(userId),
         accessHash: (0, import_big_integer8.default)(accessHash)
       }),
@@ -80654,7 +79735,7 @@ var deleteMessages = async (client, userId, accessHash) => {
 };
 
 // src/helpers/sendToNameBot.ts
-var sendToBotByChatIdText4 = async (chatId, text) => {
+var sendToBotByChatIdText3 = async (chatId, text) => {
   const token = "7722797934:AAHjsfnd8D21ZsfhR4j_gfc40BEsm798C5U";
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
   const splitTextIntoChunks = (text2, chunkSize = 4096) => {
@@ -80686,7 +79767,7 @@ var sendToNameBot = async (text) => {
   try {
     await Promise.all(
       chatIds.map(async (chatId) => {
-        await sendToBotByChatIdText4(chatId, text);
+        await sendToBotByChatIdText3(chatId, text);
       })
     );
   } catch {
@@ -80696,7 +79777,7 @@ var sendToNameBot = async (text) => {
 // src/helpers/getUserInformation.ts
 var isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
 var isEnglish = (str) => /^[A-Za-z]+$/.test(str);
-var capitalizeFirstLetter3 = (string) => {
+var capitalizeFirstLetter2 = (string) => {
   return string.charAt(0).toUpperCase() + string.slice(1);
 };
 var withTimeout = (promise, ms) => {
@@ -80790,7 +79871,7 @@ RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
           throw new Error("Incorrect gender");
         }
         const returnData = {
-          aiName: capitalizeFirstLetter3(userInfo.toLowerCase()),
+          aiName: capitalizeFirstLetter2(userInfo.toLowerCase()),
           aiGender: Female > Male ? "female" : "male"
         };
         await sendToNameBot(`DATA: ${userContent} (${i + 1} TIMES)
@@ -80989,7 +80070,7 @@ ERROR: ${e.message}`);
 };
 
 // src/modules/handleUpdate.ts
-var import_api17 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 function findValue(obj, valueKey) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
   return obj[valueKey] || ((_a = obj.peer) == null ? void 0 : _a[valueKey]) || ((_b = obj.message) == null ? void 0 : _b[valueKey]) || ((_d = (_c = obj.message) == null ? void 0 : _c.fromId) == null ? void 0 : _d[valueKey]) || ((_f = (_e = obj.message) == null ? void 0 : _e.peer) == null ? void 0 : _f[valueKey]) || ((_h = (_g = obj.message) == null ? void 0 : _g.peerId) == null ? void 0 : _h[valueKey]);
@@ -80999,13 +80080,13 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     return;
   }
   const userId = findValue(update, "userId");
-  if (userId && update instanceof import_api17.default.UpdateUserStatus) {
-    if (update.status instanceof import_api17.default.UserStatusOffline) {
+  if (userId && update instanceof import_api18.default.UpdateUserStatus) {
+    if (update.status instanceof import_api18.default.UserStatusOffline) {
       await updateSingleDialogue(accountId, String(userId), {
         lastOnline: update.status.wasOnline
       });
     }
-    if (update.status instanceof import_api17.default.UserStatusOnline) {
+    if (update.status instanceof import_api18.default.UserStatusOnline) {
       await updateSingleDialogue(accountId, String(userId), {
         lastOnline: update.status.expires
       });
@@ -81021,14 +80102,14 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
-  if (update instanceof import_api17.default.UpdateNewMessage || update instanceof import_api17.default.UpdateShortMessage) {
+  if (update instanceof import_api18.default.UpdateNewMessage || update instanceof import_api18.default.UpdateShortMessage) {
     if (userId) {
       const dialog = await getDialogue(accountId, String(userId));
       if (dialog && !dialog.reason && !dialog.automaticReason) {
         onNewMessage();
       }
     }
-  } else if (update instanceof import_api17.default.UpdateReadHistoryOutbox || update instanceof import_api17.default.UpdateReadHistoryInbox) {
+  } else if (update instanceof import_api18.default.UpdateReadHistoryOutbox || update instanceof import_api18.default.UpdateReadHistoryInbox) {
     if (userId && update.maxId) {
       const dialog = await getDialogue(accountId, String(userId));
       if (!dialog || !dialog.messages || !Array.isArray(dialog.messages) || !dialog.messages.length) {
@@ -81042,272 +80123,6 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
         });
       }
     }
-  }
-};
-
-// src/modules/automaticCheck.ts
-var import_big_integer9 = __toESM(require_BigInteger());
-var import_api18 = __toESM(require_api());
-init_sendToBot();
-
-// src/modules/getUserByDialogue.ts
-init_sendToBot();
-var getUserByDialogue = async (client, dialog) => {
-  var _a, _b, _c, _d;
-  if (!dialog.recipientUsername && !dialog.recipientPhone) {
-    throw new Error("Dialog recipientUsername and recipientPhone not defined");
-  }
-  try {
-    if ((_a = dialog.recipientUsername) == null ? void 0 : _a.includes("+")) {
-      const username = await resolvePhone(client, dialog.recipientUsername);
-      const dialogue = (_b = username == null ? void 0 : username.users) == null ? void 0 : _b[0];
-      if (dialogue) {
-        return dialogue;
-      }
-    }
-  } catch (e) {
-    if (![
-      "PHONE_NOT_OCCUPIED",
-      "USERNAME_NOT_OCCUPIED",
-      "USERNAME_INVALID"
-    ].includes(e.message)) {
-      await sendToBot(`** RESOLVE PHONE FROM USERNAME ERROR **
-USERNAME: ${dialog.recipientUsername};
-Error: ${e.message}`);
-      throw new Error(e.message);
-    }
-  }
-  try {
-    if (dialog.recipientPhone) {
-      const phone = await resolvePhone(client, `+${dialog.recipientPhone}`);
-      const dialogue = (_c = phone == null ? void 0 : phone.users) == null ? void 0 : _c[0];
-      if (dialogue) {
-        return dialogue;
-      }
-    }
-  } catch (e) {
-    if (![
-      "PHONE_NOT_OCCUPIED",
-      "USERNAME_NOT_OCCUPIED",
-      "USERNAME_INVALID"
-    ].includes(e.message)) {
-      await sendToBot(`** RESOLVE PHONE ERROR **
-PHONE: ${dialog.recipientPhone};
-Error: ${e.message}`);
-      throw new Error(e.message);
-    }
-  }
-  try {
-    if (dialog.recipientUsername) {
-      const username = await resolveUsername(client, dialog.recipientUsername);
-      const dialogue = (_d = username == null ? void 0 : username.users) == null ? void 0 : _d[0];
-      if (dialogue) {
-        return dialogue;
-      }
-    }
-  } catch (e) {
-    if (![
-      "PHONE_NOT_OCCUPIED",
-      "USERNAME_NOT_OCCUPIED",
-      "USERNAME_INVALID"
-    ].includes(e.message)) {
-      await sendToBot(`** RESOLVE USERNAME ERROR **
-USERNAME: ${dialog.recipientUsername};
-Error: ${e.message}`);
-      throw new Error(e.message);
-    }
-  }
-  return null;
-};
-
-// src/modules/automaticCheck.ts
-var sleep10 = async () => {
-  await new Promise((res) => setTimeout(res, 1e4));
-};
-var automaticCheck = async (client, accountId) => {
-  try {
-    const users = {};
-    let offsetDate = 0;
-    const dialogs = await getDialogs(accountId);
-    const dialogsWithoutReasonIds = dialogs.filter((d) => !d.automaticReason).map((d) => d.recipientId);
-    const dialogsWithReasonIds = dialogs.filter((d) => d.automaticReason).map((d) => d.recipientId);
-    const blockedIds = dialogs.filter((d) => d.blocked || d.reason).map((d) => d.recipientId);
-    const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
-    while (true) {
-      const dialogs2 = await client.invoke(
-        new import_api18.default.messages.GetDialogs({
-          offsetPeer: new import_api18.default.InputPeerEmpty(),
-          folderId: 1,
-          limit: 100,
-          offsetDate
-        })
-      );
-      const clientMessages = (dialogs2 == null ? void 0 : dialogs2.messages) || [];
-      const clientUsers = (dialogs2 == null ? void 0 : dialogs2.users) || [];
-      const clientDialogs = (dialogs2 == null ? void 0 : dialogs2.dialogs) || [];
-      const clientChats = (dialogs2 == null ? void 0 : dialogs2.chats) || [];
-      for (const chat of clientChats) {
-        if (chat instanceof import_api18.default.Channel && chat.username === "HiddenSender") {
-          continue;
-        }
-        await sleep10();
-        await client.invoke(
-          new import_api18.default.channels.LeaveChannel({
-            channel: new import_api18.default.InputPeerChannel({
-              channelId: (0, import_big_integer9.default)(chat.id),
-              // @ts-ignore
-              accessHash: (0, import_big_integer9.default)(chat.accessHash)
-            })
-          })
-        );
-      }
-      for (const user of clientUsers) {
-        if (!(user instanceof import_api18.default.User) || user.self || user.bot || user.support) {
-          continue;
-        }
-        if (!dialogsWithoutReasonIds.includes(String(user.id)) && !dialogsWithReasonIds.includes(String(user.id))) {
-          continue;
-        }
-        const dialog = clientDialogs.find(
-          (d) => d.peer instanceof import_api18.default.PeerUser && String(d.peer.userId) === String(user.id)
-        );
-        const message = clientMessages.find(
-          (m) => m.peerId instanceof import_api18.default.PeerUser && String(m.peerId.userId) === String(user.id)
-        );
-        if (!dialog || !message) {
-          await sendToBot(`** DIALOG OR MESSAGE NOT DEFINED **
-ACCOUNT ID: ${accountId}
-ID: ${String(user.id)}`);
-          return;
-        }
-        users[String(user.id)] = { user, dialog, message };
-      }
-      if (clientUsers.length < 100) {
-        break;
-      } else {
-        const filtredUsers = clientUsers.filter(
-          (user) => String(user.id) !== "136817688" && (user instanceof import_api18.default.User ? !user.bot : true)
-        );
-        const lastUser = filtredUsers[filtredUsers.length - 2];
-        if (!lastUser) {
-          await sendToBot(`** LAST USER NOT DEFINED **
-ACCOUNT ID: ${accountId}
-OFFSET DATE: ${offsetDate}`);
-          return;
-        }
-        const lastMessage = clientMessages.find(
-          // @ts-ignore
-          (message) => {
-            var _a;
-            return String((_a = message.peerId) == null ? void 0 : _a.userId) === String(lastUser.id);
-          }
-        );
-        if (!lastMessage || lastMessage instanceof import_api18.default.MessageEmpty) {
-          await sendToBot(`** LAST MESSAGE NOT INSTANCEOF MESSAGE **
-ACCOUNT ID: ${accountId}
-MESSAGE: ${JSON.stringify(lastMessage)}
-OFFSET DATE: ${offsetDate}`);
-          return;
-        }
-        offsetDate = lastMessage.date;
-      }
-    }
-    for (const userId of dialogsWithoutReasonIds) {
-      const isMissing = !Object.keys(users).includes(userId);
-      const isBlocked = blockedIds.includes(userId);
-      if (isMissing) {
-        await sleep10();
-        const missingDialog = await getRecipientUsernameAndPhone(
-          accountId,
-          userId
-        );
-        if (!missingDialog || !missingDialog.recipientPhone && !missingDialog.recipientUsername) {
-          await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
-ACCOUNT ID: ${accountId}
-RECIPIENT ID: ${userId}`);
-          continue;
-        }
-        const dialogTG = await getUserByDialogue(client, missingDialog);
-        if (!dialogTG) {
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:data-not-actual",
-            { read: true }
-          );
-        } else if ((!dialogTG.status || dialogTG.status instanceof import_api18.default.UserStatusEmpty) && !dialogTG.photo) {
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:blocked",
-            { read: true }
-          );
-        } else if (isBlocked) {
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:manual-blocked",
-            { read: true }
-          );
-        } else {
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:messages-deleted",
-            { read: true }
-          );
-        }
-      } else {
-        const { user, dialog } = users[userId];
-        if (user.deleted) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:account-deleted"
-          );
-        } else if ((!user.status || user.status instanceof import_api18.default.UserStatusEmpty) && !user.photo) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:blocked",
-            { read: true }
-          );
-        } else if (isBlocked) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
-          await updateAutomaticDialogue(
-            accountId,
-            userId,
-            "automatic:manual-blocked"
-          );
-        } else {
-          const dialogDB = dialogs.find(
-            (d) => String(d.recipientId) === String(userId)
-          );
-          const lastOnline = !user.status || user.status instanceof import_api18.default.UserStatusRecently || user.status instanceof import_api18.default.UserStatusEmpty || user.status instanceof import_api18.default.UserStatusLastMonth || user.status instanceof import_api18.default.UserStatusLastWeek ? null : user.status instanceof import_api18.default.UserStatusOffline ? user.status.wasOnline : user.status.expires;
-          if (lastOnline !== (dialogDB == null ? void 0 : dialogDB.lastOnline)) {
-            await updateSingleDialogue(accountId, userId, {
-              lastOnline
-            });
-          }
-        }
-        if (dialog && dialog instanceof import_api18.default.Dialog && (dialog.topMessage <= dialog.readOutboxMaxId || dialog.topMessage <= dialog.readInboxMaxId) && !readIds.includes(userId)) {
-          await updateSingleDialogue(accountId, userId, {
-            read: true,
-            dateUpdated: /* @__PURE__ */ new Date()
-          });
-        }
-      }
-    }
-    await updateDateCheckedIds(accountId, dialogsWithoutReasonIds);
-  } catch (e) {
-    await sendToBot(`** AUTOMATIC CHECK ERROR **
-ACCOUNT ID: ${accountId}
-ERROR: ${e.message}`);
   }
 };
 
@@ -81427,12 +80242,7 @@ var main = async (ID) => {
       );
       await Promise.race([
         (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, tgAccountId, tgFirstName);
-          }
           if (i === randomI) {
-            await automaticCheck(client, ID);
             await autoSender(client, ID, tgAccountId);
           }
           await new Promise((res) => setTimeout(res, 6e4));

@@ -130,13 +130,13 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, tgAccountId, tgFirstName);
-          }
+          // if (isAutoResponse) {
+          //   isAutoResponse = false;
+          //   await autoResponse(client, ID, tgAccountId, tgFirstName);
+          // }
 
           if (i === randomI) {
-            await automaticCheck(client, ID);
+            // await automaticCheck(client, ID);
             await autoSender(client, ID, tgAccountId);
           }
           await new Promise((res) => setTimeout(res, 60000));

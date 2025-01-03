@@ -64,8 +64,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   } catch (err: any) {
     await sendToBot(`💀 REQUEST ERROR 💀
 ID: ${client._accountId}
+ERROR: ${err.message}
 REQUEST: ${JSON.stringify(request)}
 `);
-    return undefined;
+    throw new Error('GLOBAL_ERROR');
   }
 }

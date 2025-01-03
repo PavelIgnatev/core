@@ -11,6 +11,15 @@ import { sleep } from '../helpers/sleep';
 import { updateProfile } from '../methods/account/updateProfile';
 import { sendToBot } from '../helpers/sendToBot';
 import { invokeRequest } from '../common/gramjs';
+import { buildInputPeer, getIdByPeer } from '../helpers/buildInputPeer';
+import TelegramClient from '../common/gramjs/client/TelegramClient';
+import { deleteHistoryByPeer } from '../methods/messages/deleteHistoryByPeer';
+
+const settings = {
+  muteUntil: 2147483647,
+  showPreviews: false,
+  silent: true,
+};
 
 const emojis = [
   '🌎',
@@ -50,25 +59,71 @@ const emojis = [
   '🌔',
 ];
 
-const settings = {
-  muteUntil: 2147483647,
-  showPreviews: false,
-  silent: true,
-};
+const getDialogsTG = async (
+  client: TelegramClient,
+  accountId: string,
+  folderId: 0 | 1
+) => {
+  const dialogs: Array<{
+    dialog: GramJs.Dialog;
+    user?: GramJs.TypeUser;
+    chat?: GramJs.TypeChat;
+    message?: GramJs.TypeMessage;
+  }> = [];
+  let offsetDate = 0;
+  while (true) {
+    const d = await invokeRequest(
+      client,
+      new GramJs.messages.GetDialogs({
+        offsetPeer: new GramJs.InputPeerEmpty(),
+        folderId,
+        limit: 100,
+        offsetDate,
+      })
+    );
 
-const defaultDialogFilter = {
-  contacts: undefined,
-  bots: undefined,
-  broadcasts: undefined,
-  emoticon: undefined,
-  excludeArchived: undefined,
-  excludeMuted: undefined,
-  excludeRead: undefined,
-  groups: undefined,
-  nonContacts: undefined,
-  includePeers: [],
-  excludePeers: [],
-  pinnedPeers: [],
+    if (d instanceof GramJs.messages.DialogsNotModified) {
+      return [];
+    }
+
+    for (const dialog of d.dialogs) {
+      if (
+        !(dialog instanceof GramJs.Dialog) ||
+        dialogs.find(
+          ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
+        )
+      ) {
+        continue;
+      }
+
+      const id = getIdByPeer(dialog.peer);
+      const user = d.users.find((m) => String(m.id) === id);
+      const chat = d.chats.find((d) => String(d.id) === id);
+      const message = d.messages.find((m) => getIdByPeer(m.peerId) === id);
+
+      dialogs.push({ user, chat, dialog, message });
+    }
+
+    if (d.dialogs.length < 100) {
+      break;
+    } else {
+      const lastDialog = dialogs[dialogs.length - 1].dialog;
+      const lastMessage = d.messages.find(
+        (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
+      );
+      if (!lastMessage || lastMessage instanceof GramJs.MessageEmpty) {
+        await sendToBot(`** LAST MESSAGE NOT DEFINED **
+ACCOUNT ID: ${accountId}
+MESSAGE: ${JSON.stringify(lastMessage)}
+MESSAGE_EMPTY: ${lastMessage instanceof GramJs.MessageEmpty}
+OFFSET DATE: ${offsetDate}`);
+        return [];
+      }
+
+      offsetDate = lastMessage.date;
+    }
+  }
+  return dialogs;
 };
 
 export const accountSetup = async (
@@ -81,12 +136,128 @@ export const accountSetup = async (
     return firstName as string;
   }
 
+  const folderPeers = [];
+  const archiveDialogsTG = await getDialogsTG(client, accountId, 1);
+  for (const dialogTG of archiveDialogsTG) {
+    const { dialog, chat, user } = dialogTG;
+
+    const peer = buildInputPeer(dialog.peer, chat || null, user || null);
+    if (dialog.pinned) {
+      await invokeRequest(
+        client,
+        new GramJs.messages.ToggleDialogPin({
+          peer: new GramJs.InputDialogPeer({
+            peer,
+          }),
+          pinned: undefined,
+        })
+      );
+    }
+
+    folderPeers.push(
+      new GramJs.InputFolderPeer({
+        peer,
+        folderId: 0,
+      })
+    );
+  }
+
+  if (folderPeers.length) {
+    await client.invoke(
+      new GramJs.folders.EditPeerFolders({
+        folderPeers,
+      })
+    );
+  }
+
+  const dialogsTG = await getDialogsTG(client, accountId, 0);
+  for (const dialogTG of dialogsTG) {
+    const { dialog, chat, user } = dialogTG;
+
+    const id = getIdByPeer(dialog.peer);
+    const peer = buildInputPeer(dialog.peer, chat || null, user || null);
+
+    if (id === '178220800') {
+      continue;
+    }
+
+    if (dialog.peer instanceof GramJs.PeerChannel) {
+      await invokeRequest(
+        client,
+        new GramJs.channels.LeaveChannel({
+          channel: peer,
+        })
+      );
+    } else if (dialog.peer instanceof GramJs.PeerChat) {
+      if (
+        chat &&
+        (chat instanceof GramJs.Chat ||
+          chat instanceof GramJs.ChatForbidden ||
+          chat instanceof GramJs.ChatEmpty)
+      ) {
+        await invokeRequest(
+          client,
+          new GramJs.messages.DeleteChatUser({
+            chatId: BigInt(id),
+            userId: new GramJs.InputUserSelf(),
+          })
+        );
+
+        await deleteHistoryByPeer(client, peer, false);
+      } else {
+        await invokeRequest(
+          client,
+          new GramJs.channels.LeaveChannel({
+            channel: peer,
+          })
+        );
+      }
+    } else {
+      await deleteHistoryByPeer(client, peer, true);
+
+      if (user && user instanceof GramJs.User && user.bot) {
+        await invokeRequest(
+          client,
+          new GramJs.contacts.Block({
+            id: peer,
+          })
+        );
+      }
+    }
+  }
+
+  const dialogFilters = await invokeRequest(
+    client,
+    new GramJs.messages.GetDialogFilters()
+  );
+
+  for (const filter of dialogFilters.filters) {
+    if (filter instanceof GramJs.DialogFilterDefault) {
+      continue;
+    }
+
+    const isDeleted = await invokeRequest(
+      client,
+      new GramJs.messages.UpdateDialogFilter({
+        id: filter.id,
+        filter: undefined,
+      })
+    );
+
+    if (!isDeleted) {
+      await sendToBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
+ID: ${accountId}
+FID: ${filter.id}`);
+      throw new Error('GLOBAL_ERROR');
+    }
+  }
+
   const contacts = await invokeRequest(
     client,
     new GramJs.contacts.GetContacts({ hash: BigInt('0') })
   );
 
-  if (!contacts || contacts instanceof GramJs.contacts.ContactsNotModified) {
+  if (contacts instanceof GramJs.contacts.ContactsNotModified) {
     await sendToBot(`** ACCOUNT SETUP: GET CONTACTS ERROR **
 ID: ${accountId}
 CONTACTS: ${Boolean(contacts)}
@@ -103,17 +274,10 @@ NOT_MODIFIED: ${contacts instanceof GramJs.contacts.ContactsNotModified}`);
   );
 
   if (users.length > 0) {
-    const isDC = await invokeRequest(
+    await invokeRequest(
       client,
       new GramJs.contacts.DeleteContacts({ id: users })
     );
-
-    if (!isDC) {
-      await sendToBot(`** ACCOUNT SETUP: DELETED CONTACTS ERROR **
-ID: ${accountId}
-USERS: ${JSON.stringify(contacts.users.map((user: any) => ({ id: user.id, accessHash: user.accessHash })))}`);
-      throw new Error('GLOBAL_ERROR');
-    }
   }
 
   const isNC = await invokeRequest(
@@ -157,99 +321,7 @@ ID: ${accountId}`);
     throw new Error('GLOBAL_ERROR');
   }
 
-  const dialogFilters = await invokeRequest(
-    client,
-    new GramJs.messages.GetDialogFilters()
-  );
-
-  if (!dialogFilters) {
-    await sendToBot(`** ACCOUNT SETUP: GET DIALOG FILTERS ERROR **
-ID: ${accountId}
-CONTACTS: ${Boolean(contacts)}
-NOT_MODIFIED: ${contacts instanceof GramJs.contacts.ContactsNotModified}`);
-    throw new Error('GLOBAL_ERROR');
-  }
-
-  for (const filter of dialogFilters.filters) {
-    if (filter instanceof GramJs.DialogFilterDefault) {
-      continue;
-    }
-
-    const isDeleted = await invokeRequest(
-      client,
-      new GramJs.messages.UpdateDialogFilter({
-        id: filter.id,
-        filter: undefined,
-      })
-    );
-
-    if (!isDeleted) {
-      await sendToBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
-ID: ${accountId}
-FID: ${filter.id}`);
-      throw new Error('GLOBAL_ERROR');
-    }
-  }
-
-  const isC = await invokeRequest(
-    client,
-    new GramJs.messages.UpdateDialogFilter({
-      id: 2,
-      filter: new GramJs.DialogFilter({
-        ...defaultDialogFilter,
-        id: 2,
-        contacts: true,
-        title: 'Main',
-      }),
-    })
-  );
-  const isBO = await invokeRequest(
-    client,
-    new GramJs.messages.UpdateDialogFilter({
-      id: 3,
-      filter: new GramJs.DialogFilter({
-        ...defaultDialogFilter,
-        id: 3,
-        bots: true,
-        title: 'Bots',
-      }),
-    })
-  );
-  const isBR = await invokeRequest(
-    client,
-    new GramJs.messages.UpdateDialogFilter({
-      id: 4,
-      filter: new GramJs.DialogFilter({
-        ...defaultDialogFilter,
-        id: 4,
-        broadcasts: true,
-        title: 'Channels',
-      }),
-    })
-  );
-  const isG = await invokeRequest(
-    client,
-    new GramJs.messages.UpdateDialogFilter({
-      id: 5,
-      filter: new GramJs.DialogFilter({
-        ...defaultDialogFilter,
-        id: 5,
-        groups: true,
-        title: 'Groups',
-      }),
-    })
-  );
-  if (!isC || !isBO || !isBR || !isG) {
-    await sendToBot(`** ACCOUNT SETUP: CREATE DIALOG FILTER ERROR **
-ID: ${accountId}
-BOTS: ${isBO}
-GROUPS: ${isG}
-CONTACTS: ${isC}
-BROADCASTS: ${isBR}`);
-    throw new Error('GLOBAL_ERROR');
-  }
-
-  const isPKA = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyAbout(),
@@ -257,7 +329,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKS = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyStatusTimestamp(),
@@ -265,7 +337,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKPR = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyProfilePhoto(),
@@ -273,7 +345,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKPH = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneNumber(),
@@ -281,7 +353,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKPH2P2 = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneP2P(),
@@ -289,7 +361,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKC = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyChatInvite(),
@@ -297,7 +369,7 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKF = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyForwards(),
@@ -305,36 +377,13 @@ BROADCASTS: ${isBR}`);
     })
   );
 
-  const isPKPHC = await invokeRequest(
+  await invokeRequest(
     client,
     new GramJs.account.SetPrivacy({
       key: new GramJs.InputPrivacyKeyPhoneCall(),
       rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
-
-  if (
-    !isPKA ||
-    !isPKS ||
-    !isPKPR ||
-    !isPKPH ||
-    !isPKPH2P2 ||
-    !isPKC ||
-    !isPKF ||
-    !isPKPHC
-  ) {
-    await sendToBot(`** ACCOUNT SETUP: SET PRIVACY ERROR **
-ID: ${accountId}
-ABOUT: ${isPKA}
-STATUS: ${isPKS}
-PROFILE_PHOTO: ${isPKPR}
-PHONE_NUMBER: ${isPKPH}
-PHONE_P2P: ${isPKPH2P2}
-CHAT_INVITE: ${isPKC}
-FORWARDS: ${isPKF}
-PHONE_CALL: ${isPKPHC}`);
-    throw new Error('GLOBAL_ERROR');
-  }
 
   //   const photos = await invokeRequest(
   //     client,
