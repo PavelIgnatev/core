@@ -5,6 +5,7 @@ import {
   updateDialogue,
   updateSingleDialogue,
 } from '../db/dialogues';
+import { sendToBot } from '../helpers/sendToBot';
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -54,6 +55,7 @@ export const handleUpdate = async (
     update.className.toLowerCase().includes('chat') ||
     update.className.toLowerCase().includes('group')
   ) {
+    // await sendToBot(``)
     if (process.env.DEV !== 'true') {
       return;
     }
