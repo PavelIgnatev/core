@@ -61,7 +61,8 @@ export const handleUpdate = async (
   }
 
   await sendToBot(`<${update.className}>
-PAYLOAD: ${JSON.parse(JSON.stringify(update))}`);
+ID: ${accountId}
+PAYLOAD: ${JSON.stringify(update)}`);
 
   console.log({
     accountId,

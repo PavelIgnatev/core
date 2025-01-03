@@ -65062,7 +65062,8 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
     }
   }
   await sendToBot(`<${update.className}>
-PAYLOAD: ${JSON.parse(JSON.stringify(update))}`);
+ID: ${accountId}
+PAYLOAD: ${JSON.stringify(update)}`);
   console.log({
     accountId,
     message: `<${update.className}>`,
