@@ -138,6 +138,7 @@ export const accountSetup = async (
 
   const folderPeers = [];
   const archiveDialogsTG = await getDialogsTG(client, accountId, 1);
+
   for (const dialogTG of archiveDialogsTG) {
     const { dialog, chat, user } = dialogTG;
 
@@ -163,11 +164,14 @@ export const accountSetup = async (
   }
 
   if (folderPeers.length) {
-    await client.invoke(
-      new GramJs.folders.EditPeerFolders({
-        folderPeers,
-      })
-    );
+    for (let i = 0; i < folderPeers.length; i += 100) {
+      const chunk = folderPeers.slice(i, i + 100);
+      await client.invoke(
+        new GramJs.folders.EditPeerFolders({
+          folderPeers: chunk,
+        })
+      );
+    }
   }
 
   const dialogsTG = await getDialogsTG(client, accountId, 0);
