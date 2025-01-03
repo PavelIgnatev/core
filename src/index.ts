@@ -135,10 +135,10 @@ const main = async (ID: string) => {
           //   await autoResponse(client, ID, tgAccountId, tgFirstName);
           // }
 
-          if (i === randomI) {
-            // await automaticCheck(client, ID);
-            await autoSender(client, ID, tgAccountId);
-          }
+          // if (i === randomI) {
+          // await automaticCheck(client, ID);
+          // await autoSender(client, ID, tgAccountId);
+          // }
           await new Promise((res) => setTimeout(res, 60000));
         })(),
         timeout,

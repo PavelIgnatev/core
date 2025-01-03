@@ -44,22 +44,24 @@ export const handleUpdate = async (
   }
 
   if (
-    update.className === 'UpdateConnectionState' ||
-    update.className === 'UpdateUserStatus' ||
-    update.className === 'UpdateUserTyping' ||
-    update.className === 'UpdateConfig' ||
-    update.className === 'UpdateUser' ||
-    update.className === 'UpdatePrivacy' ||
-    update.className === 'UpdateUserName' ||
-    update.className.toLowerCase().includes('channel') ||
-    update.className.toLowerCase().includes('chat') ||
-    update.className.toLowerCase().includes('group')
+    update.className === 'UpdateConnectionState'
+    // update.className === 'UpdateUserStatus' ||
+    // update.className === 'UpdateUserTyping' ||
+    // update.className === 'UpdateConfig' ||
+    // update.className === 'UpdateUser' ||
+    // update.className === 'UpdatePrivacy' ||
+    // update.className === 'UpdateUserName' ||
+    // update.className.toLowerCase().includes('channel') ||
+    // update.className.toLowerCase().includes('chat') ||
+    // update.className.toLowerCase().includes('group')
   ) {
-    // await sendToBot(``)
     if (process.env.DEV !== 'true') {
       return;
     }
   }
+
+  await sendToBot(`<${update.className}>
+PAYLOAD: ${JSON.parse(JSON.stringify(update))}`);
 
   console.log({
     accountId,
