@@ -50,12 +50,12 @@ export const getClassifiedDialogs = async (
 
     const dialogDb = await getDialogue(accountId, String(user.id));
     if (!dialogDb || !dialogDb.groupId) {
-      await sendToMainBot(
-        `** CLASSIFIED DIALOG: DIALOG NOT FOUND **
-ACCOUNT_ID: ${accountId}
-ID: ${user.id}
-ACCESS_HASH: ${user.accessHash}`
-      );
+//       await sendToMainBot(
+//         `** CLASSIFIED DIALOG: DIALOG NOT FOUND **
+// ACCOUNT_ID: ${accountId}
+// ID: ${user.id}
+// ACCESS_HASH: ${user.accessHash}`
+//       );
       continue;
     }
 
