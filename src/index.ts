@@ -152,10 +152,6 @@ const main = async (ID: string) => {
     });
 
     if (e.message.includes('GLOBAL_ERROR')) {
-      console.error({
-        accountId: ID,
-        message: new Error(e.message),
-      });
     } else if (e.message.includes('STOPPED_ERROR')) {
       await updateAccountById(ID, {
         stopped: true,

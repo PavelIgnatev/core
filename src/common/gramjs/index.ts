@@ -69,11 +69,13 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   } catch (err: any) {
     if (shouldIgnoreErrors) return undefined;
 
-    await sendToMainBot(`💀 REQUEST ERROR 💀
+    if(err.message !== 'PEER_FLOOD'){
+      await sendToMainBot(`💀 REQUEST ERROR 💀
 ID: ${client._accountId}
 ERROR: ${err.message}
-REQUEST: ${JSON.stringify(request)}
-`);
-    throw new Error('GLOBAL_ERROR');
+REQUEST: ${JSON.stringify(request)}`);
+    }
+    
+    throw new Error(err.message);
   }
 }

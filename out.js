@@ -78996,12 +78996,13 @@ async function invokeRequest(client, request, params = {}) {
   } catch (err) {
     if (shouldIgnoreErrors)
       return void 0;
-    await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
+    if (err.message !== "PEER_FLOOD") {
+      await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
 ID: ${client._accountId}
 ERROR: ${err.message}
-REQUEST: ${JSON.stringify(request)}
-`);
-    throw new Error("GLOBAL_ERROR");
+REQUEST: ${JSON.stringify(request)}`);
+    }
+    throw new Error(err.message);
   }
 }
 var import_TelegramClient, import_CallbackSession, import_api2;
@@ -82337,10 +82338,6 @@ var main = async (ID) => {
       message: new Error(`MAIN_ERROR: ${e.message}`)
     });
     if (e.message.includes("GLOBAL_ERROR")) {
-      console.error({
-        accountId: ID,
-        message: new Error(e.message)
-      });
     } else if (e.message.includes("STOPPED_ERROR")) {
       await updateAccountById(ID, {
         stopped: true
