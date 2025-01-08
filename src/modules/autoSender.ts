@@ -1,40 +1,35 @@
-import { checkSpamBlock } from './checkSpamBlock';
-import { saveRecipient } from './saveRecipient';
-import { updateFailedMessage, updateSendMessage } from '../db/groupIdUsers';
-import { generateRandomString } from '../helpers/generateRandomString';
-import { sendToBot } from '../helpers/sendToBot';
-import { muteNotification } from '../methods/account/muteNotification';
-import { resolveContact } from '../methods/contacts/resolveContact';
-import { editFolder } from '../methods/folders/editFolder';
-import { sendMessage } from '../methods/messages/sendMessage';
-import { getRecipient } from '../methods/recipients/getRecipient';
-import { deleteMessages } from '../methods/messages/deleteHistory';
+import TelegramClient from '../common/gramjs/client/TelegramClient';
+import GramJs from '../common/gramjs/tl/api';
 import { getAccountById } from '../db/accounts';
-import { getUserInformation } from '../helpers/getUserInformation';
-import { getGreeting } from '../helpers/getGreetings';
 import { getDialogueByGidRid } from '../db/dialogues';
+import { updateFailedMessage, updateSendMessage } from '../db/groupIdUsers';
+import { getUserInformation } from '../helpers/getUserInformation';
 import {
   endSender,
-  startSender,
   errorSender,
+  getWeekday,
   peerFloods,
-} from '../helpers/global';
+  sleep,
+  startSender,
+} from '../helpers/helpers';
+import { sendToMainBot } from '../helpers/sendToMainBot';
+import { resolveContact } from '../methods/contacts/resolveContact';
+import { deleteHistory } from '../methods/messages/deleteHistory';
+import { sendMessage } from '../methods/messages/sendMessage';
+import { getRecipient } from '../methods/recipient/getRecipient';
+import { saveRecipient } from '../methods/recipient/saveRecipient';
+import { checkSpamBlock } from './checkSpamBlock';
 
 export const autoSender = async (
-  client: any,
+  client: TelegramClient,
   accountId: string,
-  tgAccountId: string
+  telegramId: string
 ) => {
-  const accountByID = await getAccountById(accountId);
-  if (!accountByID) {
-    throw new Error('Account not defined');
-  }
-
-  const spamBlockDate = await checkSpamBlock(client, accountByID);
+  const account = await getAccountById(accountId);
+  const spamBlockDate = await checkSpamBlock(client, account);
   if (spamBlockDate) {
     return;
   }
-  return;
 
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
@@ -44,20 +39,15 @@ export const autoSender = async (
   }
 
   if (!accountId.includes('-prefix-')) {
-    const weekday = new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(new Date());
-
-    // if (weekday === 'Sat' || weekday === 'Sun') {
-    return;
-    // }
+    const weekday = getWeekday();
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
   }
 
-  const remainingTime = new Date(accountByID.remainingTime || currentTime);
-
-  if (currentTime >= remainingTime) {
+  if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
+
     while (true) {
       const recipient = await getRecipient(accountId);
       if (!recipient) {
@@ -65,105 +55,106 @@ export const autoSender = async (
       }
 
       try {
-        const recipientFull = await resolveContact(
+        const { fullContact, contact } = await resolveContact(
           client,
-          recipient.username,
-          String(recipient.groupId)
+          recipient.username
         );
 
         const {
           id,
-          accessHash,
-          self,
-          deleted,
           bot,
+          self,
+          scam,
+          fake,
           support,
-          contactRequirePremium,
-          botBusiness,
-          firstName,
+          deleted,
           lastName,
           username,
-        } = recipientFull.users[0];
-        if (self) {
-          throw new Error('SELF_ERROR');
-        }
+          firstName,
+          accessHash,
+          restricted,
+          botBusiness,
+          contactRequirePremium,
+        } = contact;
 
-        if (deleted || bot || support || contactRequirePremium || botBusiness) {
+        if (
+          bot ||
+          self ||
+          scam ||
+          fake ||
+          support ||
+          deleted ||
+          restricted ||
+          botBusiness ||
+          contactRequirePremium
+        ) {
           throw new Error('USER_SPECIAL_PARAMS');
         }
 
-        const dialog = await getDialogueByGidRid(
-          String(id),
-          String(recipient.groupId)
-        );
-
+        const dialog = await getDialogueByGidRid(String(id), recipient.groupId);
         if (dialog) {
           throw new Error('DIALOG_DUPLICATE');
         }
 
-        await deleteMessages(client, id, accessHash);
-
-        let user = null;
-        let firstMessage = generateRandomString(recipient.firstMessagePrompt);
-        const secondMessage = generateRandomString(
-          recipient.secondMessagePrompt
+        await deleteHistory(
+          client,
+          new GramJs.InputPeerUser({
+            userId: id,
+            accessHash,
+          }),
+          true
         );
 
-        const greeting = getGreeting(recipient?.language || 'RUSSIAN');
-        if (greeting) {
-          const userInformation = await getUserInformation(
-            `${(firstName || '').toLowerCase()} ${(lastName || '').toLowerCase()} ${username || ''}`,
-            recipient.language
-          );
+        const { user, firstMessage, secondMessage } = await getUserInformation(
+          recipient.firstMessagePrompt,
+          recipient.secondMessagePrompt,
+          recipient.language || 'RUSSIAN',
+          firstName || '',
+          lastName || '',
+          username || ''
+        );
 
-          if (userInformation.aiName) {
-            user = userInformation;
-            firstMessage = `${greeting}, ${userInformation.aiName}!`;
-          } else {
-            firstMessage = `${greeting}!`;
-          }
-        }
-
-        await new Promise((res) => setTimeout(res, 5000));
+        await sleep(5000);
         const sentFirstMessage = await sendMessage(
           client,
-          id,
-          accessHash,
+          String(id),
+          String(accessHash),
           firstMessage,
           accountId,
           false
         );
         const sentSecondMessage = await sendMessage(
           client,
-          id,
-          accessHash,
+          String(id),
+          String(accessHash),
           secondMessage,
           accountId,
           false
         );
-        await editFolder(client, String(id), String(accessHash), 1);
-        await muteNotification(client, id, accessHash, 2147483647);
+
         await saveRecipient(
           accountId,
-          recipientFull,
-          { ...recipient, ...user },
+          String(id),
+          String(accessHash),
+          fullContact,
+          { ...recipient, ...(user || {}) },
           [
             {
               id: sentFirstMessage.id,
               text: firstMessage,
-              fromId: String(tgAccountId),
+              fromId: String(telegramId),
               date: Math.round(Date.now() / 1000),
             },
             {
               id: sentSecondMessage.id,
               text: secondMessage,
-              fromId: String(tgAccountId),
+              fromId: String(telegramId),
               date: Math.round(Date.now() / 1000),
             },
           ],
           'create',
           {},
-          accountByID
+          account
         );
         endSender[accountId] = 1;
         break;
@@ -177,28 +168,22 @@ export const autoSender = async (
             'DIALOG_DUPLICATE',
           ].includes(e.message)
         ) {
-          await updateFailedMessage(
-            recipient.username,
-            String(recipient.groupId)
-          );
+          await updateFailedMessage(recipient.username, recipient.groupId);
           continue;
         }
         errorSender[accountId] = 1;
 
         if (e.message.includes('PEER_FLOOD')) {
           peerFloods[accountId] = 1;
-          await updateSendMessage(
-            recipient.username,
-            String(recipient.groupId),
-            {
-              p: null,
-            }
-          );
+          await updateSendMessage(recipient.username, recipient.groupId, {
+            p: null,
+          });
         }
 
         if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
-          await sendToBot(`** AUTO SENDER ERROR **
-USER DATA: ${recipient.username};
+          await sendToMainBot(`** AUTO SENDER ERROR **
+USER_DATA: ${recipient.username}
+GROUP_ID: ${recipient.groupId}
 ERROR: ${e.message}`);
         }
 

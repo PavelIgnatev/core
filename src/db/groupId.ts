@@ -1,13 +1,14 @@
-import { DB2 } from './db';
+import { GroupId } from '../@types/GroupId';
+import { DB } from './db';
 
 const getGroupIdCollection = async () => {
-  return (await DB2()).collection('groupId');
+  return (await DB()).collection('groupId');
 };
 
 export const getGroupId = async (groupId: string) => {
   const groupIdCollection = await getGroupIdCollection();
 
-  const result = await groupIdCollection.findOne(
+  const result = await groupIdCollection.findOne<GroupId>(
     {
       groupId: String(groupId),
     },

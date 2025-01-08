@@ -1,19 +1,27 @@
-import BigInt from 'big-integer';
-
+import { invokeRequest } from '../../common/gramjs';
+import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
 
-export const deleteMessages = async (
-  client: any,
-  userId: string,
-  accessHash: string
-) => {
-  await client.invoke(
+export async function deleteHistory(
+  client: TelegramClient,
+  peer: GramJs.TypeInputPeer,
+  shouldDeleteForAll: boolean
+) {
+  const result = await invokeRequest(
+    client,
     new GramJs.messages.DeleteHistory({
-      peer: new GramJs.InputPeerUser({
-        userId: BigInt(userId),
-        accessHash: BigInt(accessHash),
-      }),
-      revoke: true,
+      peer: peer,
+      ...(shouldDeleteForAll && { revoke: true }),
+      ...(!shouldDeleteForAll && { just_clear: true }),
     })
   );
-};
+
+  if (!result) {
+    return;
+  }
+
+  if (result.offset) {
+    await deleteHistory(client, peer, shouldDeleteForAll);
+    return;
+  }
+}

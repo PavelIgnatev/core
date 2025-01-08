@@ -1,18 +1,16 @@
 import BigInt from 'big-integer';
 
+import { invokeRequest } from '../../common/gramjs';
+import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
-import { sendToBot } from '../../helpers/sendToBot';
 
 export const getFullUser = async (
-  client: any,
+  client: TelegramClient,
   userId: string,
   accessHash: string
 ) => {
-  if (!userId || !accessHash) {
-    return null;
-  }
-
-  const userFull = await client.invoke(
+  const fullUser = await invokeRequest(
+    client,
     new GramJs.users.GetFullUser({
       id: new GramJs.InputPeerUser({
         userId: BigInt(userId),
@@ -21,11 +19,5 @@ export const getFullUser = async (
     })
   );
 
-  if (!userFull) {
-    await sendToBot(`** USER FULL NOT DEFINED **
-ID: ${userId}
-RID: ${accessHash}`);
-  }
-
-  return userFull;
+  return fullUser;
 };

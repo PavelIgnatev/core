@@ -1,7 +1,9 @@
+import { invokeRequest } from '../../common/gramjs';
+import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
 
 export const updateProfile = (
-  client: any,
+  client: TelegramClient,
   {
     firstName,
     lastName,
@@ -18,5 +20,5 @@ export const updateProfile = (
     about: about || '',
   };
 
-  return client.invoke(new GramJs.account.UpdateProfile(newProfile));
+  return invokeRequest(client, new GramJs.account.UpdateProfile(newProfile));
 };

@@ -1,20 +1,20 @@
-import GramJs from '../common/gramjs/tl/api';
-
-import { Dialogue } from '../@types/Dialogue';
-import { Account } from '../@types/Account';
-
-import { incrementMessageCount, updateAccountById } from '../db/accounts';
-import { updateDialogue } from '../db/dialogues';
-import { incrementCurrentCount } from '../db/groupId';
-import { getCombinedMessages } from '../helpers/getCombinedMessages';
-import { sleep } from '../helpers/sleep';
-import { updateSendMessage } from '../db/groupIdUsers';
-import { sendToBot } from '../helpers/sendToBot';
+import { Account } from '../../@types/Account';
+import { Dialogue } from '../../@types/Dialogue';
+import GramJs from '../../common/gramjs/tl/api';
+import { incrementMessageCount, updateAccountById } from '../../db/accounts';
+import { updateDialogue } from '../../db/dialogues';
+import { incrementCurrentCount } from '../../db/groupId';
+import { updateSendMessage } from '../../db/groupIdUsers';
+import { getCombinedMessages } from '../../helpers/getCombinedMessages';
+import { sleep } from '../../helpers/helpers';
+import { sendToMainBot } from '../../helpers/sendToMainBot';
 
 export const saveRecipient = async (
   accountId: string,
+  recipientId: string,
+  recipientAccessHash: string,
   recipient: GramJs.users.UserFull,
-  recipientDb: Dialogue & { username: string },
+  recipientDb: Partial<Dialogue> & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: 'create' | 'update',
   addedData: Record<string, unknown> = {},
@@ -24,7 +24,6 @@ export const saveRecipient = async (
   while (!isSave) {
     try {
       const {
-        id: recipientId,
         phone,
         username,
         firstName,
@@ -50,14 +49,15 @@ export const saveRecipient = async (
       const data = {
         groupId,
         accountId,
-        recipientId: String(recipientId),
+        recipientId,
+        recipientAccessHash,
         recipientUsername: recUsername,
         recipientTitle: `${firstName} ${lastName}`.trim(),
         recipientBio: about || '',
         aiName: recipientDb?.aiName || null,
         aiGender: recipientDb?.aiGender || null,
         recipientPhone:
-          (status === 'create' && recipientDb.username.includes('+')
+          (status === 'create' && recipientDb?.username?.includes('+')
             ? recipientDb.username.replace('+', '')
             : null) ||
           phone ||
@@ -93,16 +93,25 @@ export const saveRecipient = async (
           });
         }
 
-        await updateSendMessage(recipientDb.username, String(groupId), {
-          s: true,
-          p: new Date(),
-        });
+        // TODO: remove this after testing
+        if (!recipientDb.username) {
+          await sendToMainBot(
+            `** SAVE RECIPIENT: NO USERNAME **
+ACCOUNT_ID: ${accountId}
+RECIPIENT_ID: ${recipientId}`
+          );
+        } else {
+          await updateSendMessage(recipientDb.username, String(groupId), {
+            s: true,
+            p: new Date(),
+          });
+        }
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
       isSave = true;
     } catch (error: any) {
-      await sendToBot(`** ERROR SAVE RECIPIENT **
+      await sendToMainBot(`** ERROR SAVE RECIPIENT **
 ERROR: ${error.message};
 accountId: ${accountId};
 status: ${status};

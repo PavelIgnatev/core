@@ -1,6 +1,6 @@
-type Message = { id: number; text: string; fromId: string; date: number };
-
-export const getCombinedMessages = (messages: Message[]) => {
+export const getCombinedMessages = (
+  messages: { id: number; text: string; fromId: string; date: number }[]
+) => {
   const combinedMessages = [];
   for (let i = 0; i < messages.length; i++) {
     const curr = { ...messages[i] };

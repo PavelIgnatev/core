@@ -5,11 +5,11 @@
  * @returns {Promise<{authKey: *, timeOffset: *}>}
  */
 // eslint-disable-next-line import/no-named-default
-import { default as Api } from '../tl/api';
+import { SERVER_KEYS } from '../crypto/RSA';
 import { SecurityError } from '../errors';
+import { default as Api } from '../tl/api';
 // eslint-disable-next-line import/no-named-default
 import type { default as MTProtoPlainSender } from './MTProtoPlainSender';
-import { SERVER_KEYS } from '../crypto/RSA';
 
 const bigInt = require('big-integer');
 const IGE = require('../crypto/IGE');

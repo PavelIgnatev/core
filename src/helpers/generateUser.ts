@@ -1,8 +1,8 @@
 import {
-  uniqueNamesGenerator,
-  Config,
-  colors,
   adjectives,
+  colors,
+  Config,
+  uniqueNamesGenerator,
 } from 'unique-names-generator';
 
 const firstNames = [

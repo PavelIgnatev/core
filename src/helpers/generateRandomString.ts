@@ -1,6 +1,5 @@
 export const generateRandomString = (template: string) => {
   const regex = /{(.*?)}/g;
-  // Удаляем переносы строк и заменяем множественные пробелы на один
   const cleanedTemplate = template.replace(/\n/g, '').replace(/\s{2,}/g, ' ');
 
   return cleanedTemplate

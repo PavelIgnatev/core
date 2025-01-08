@@ -1,188 +1,175 @@
-import BigInt from 'big-integer';
-
-import GramJs from '../common/gramjs/tl/api';
+import { Dialogue } from '../@types/Dialogue';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
-
-import { sendToBot } from '../helpers/sendToBot';
+import GramJs from '../common/gramjs/tl/api';
 import {
-  getDialogs,
-  getRecipientUsernameAndPhone,
+  getAccountDialogs,
   updateAutomaticDialogue,
-  updateSingleDialogue,
   updateDateCheckedIds,
+  updateSimpleDialogue,
 } from '../db/dialogues';
-import { editFolder } from '../methods/folders/editFolder';
-
-import { getUserByDialogue } from './getUserByDialogue';
-
-const sleep10 = async () => {
-  await new Promise((res) => setTimeout(res, 10000));
-};
+import { sendToMainBot } from '../helpers/sendToMainBot';
+import { leaveChannel } from '../methods/channels/leaveChannel';
+import { blockContact } from '../methods/contacts/blockContact';
+import { deleteContacts } from '../methods/contacts/deleteContacts';
+import { getContacts } from '../methods/contacts/getContacts';
+import { editFolders } from '../methods/folders/editFolders';
+import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
+import { deleteChatUser } from '../methods/messages/deleteChatUser';
+import { deleteHistory } from '../methods/messages/deleteHistory';
+import { deleteMessages } from '../methods/messages/deleteMessages';
+import { getHistory } from '../methods/messages/getHistory';
+import { togglePin } from '../methods/messages/togglePin';
+import { buildInputPeer } from '../methods/peer/buildInputPeer';
+import { getIdByPeer } from '../methods/peer/getIdByPeer';
+import { getDialogs } from '../methods/users/getDialogs';
+import { getFullUser } from '../methods/users/getFullUser';
 
 export const automaticCheck = async (
   client: TelegramClient,
   accountId: string
 ) => {
   try {
-    const users: Record<
-      string,
-      {
-        user: GramJs.User;
-        dialog?: GramJs.TypeDialog;
-        message?: GramJs.TypeMessage;
-      }
-    > = {};
-    let offsetDate = 0;
-
-    const dialogs = await getDialogs(accountId);
-    const dialogsWithoutReasonIds = dialogs
+    const accountDialogs = await getAccountDialogs(accountId);
+    const dialogsIds = accountDialogs.map((d) => d.recipientId);
+    const dialogsWithoutReasonIds = accountDialogs
       .filter((d) => !d.automaticReason)
       .map((d) => d.recipientId);
-    const dialogsWithReasonIds = dialogs
+    const dialogsWithReasonIds = accountDialogs
       .filter((d) => d.automaticReason)
       .map((d) => d.recipientId);
-    const blockedIds = dialogs
+    const blockedIds = accountDialogs
       .filter((d) => d.blocked || d.reason)
       .map((d) => d.recipientId);
-    const readIds = dialogs.filter((d) => d.read).map((d) => d.recipientId);
+    const readIds = accountDialogs
+      .filter((d) => d.read)
+      .map((d) => d.recipientId);
 
-    while (true) {
-      const dialogs = (await client.invoke(
-        new GramJs.messages.GetDialogs({
-          offsetPeer: new GramJs.InputPeerEmpty(),
-          folderId: 1,
-          limit: 100,
-          offsetDate,
+    await clearAllDrafts(client);
+
+    const folderPeers = [];
+    const archiveDialogs = await getDialogs(client, accountId, 1);
+    for (const archiveDialog of archiveDialogs) {
+      const { dialog } = archiveDialog;
+
+      const peer = buildInputPeer(archiveDialog);
+      if (dialog.pinned) {
+        await togglePin(
+          client,
+          new GramJs.InputDialogPeer({
+            peer,
+          }),
+          undefined
+        );
+      }
+
+      folderPeers.push(
+        new GramJs.InputFolderPeer({
+          peer,
+          folderId: 0,
         })
-      )) as GramJs.messages.Dialogs;
+      );
+    }
 
-      const clientMessages = dialogs?.messages || [];
-      const clientUsers = dialogs?.users || [];
-      const clientDialogs = dialogs?.dialogs || [];
-      const clientChats = dialogs?.chats || [];
+    if (folderPeers.length) {
+      for (let i = 0; i < folderPeers.length; i += 100) {
+        const chunk = folderPeers.slice(i, i + 100);
+        await editFolders(client, chunk);
+      }
+    }
 
-      for (const chat of clientChats) {
+    const dialogs = await getDialogs(client, accountId, 0);
+    for (const dialog of dialogs) {
+      const { type } = dialog;
+
+      const peer = buildInputPeer(dialog);
+      if (type === 'channel') {
+        await leaveChannel(client, peer);
+      } else if (type === 'chat') {
+        const { chat } = dialog;
+
         if (
-          chat instanceof GramJs.Channel &&
-          chat.username === 'HiddenSender'
+          chat instanceof GramJs.Chat ||
+          chat instanceof GramJs.ChatForbidden ||
+          chat instanceof GramJs.ChatEmpty
         ) {
-          continue;
+          await deleteChatUser(
+            client,
+            String(chat.id),
+            new GramJs.InputUserSelf()
+          );
+          await deleteHistory(client, peer, false);
+        } else {
+          await leaveChannel(client, peer);
         }
+      } else if (type === 'user') {
+        const { user } = dialog;
 
-        await sleep10();
-        await client.invoke(
-          new GramJs.channels.LeaveChannel({
-            channel: new GramJs.InputPeerChannel({
-              channelId: BigInt(chat.id),
-              // @ts-ignore
-              accessHash: BigInt(chat.accessHash),
-            }),
-          })
-        );
+        if (user instanceof GramJs.User && user.bot) {
+          await deleteHistory(client, peer, false);
+          await blockContact(client, peer);
+        } else if (!dialogsIds.includes(String(user.id))) {
+          await deleteHistory(client, peer, true);
+          await blockContact(client, peer);
+        }
+      }
+    }
+
+    const contacts = await getContacts(client);
+    if (contacts && contacts.users.length > 0) {
+      const users = [];
+      for (const user of contacts.users) {
+        if (user instanceof GramJs.User && user.accessHash) {
+          users.push(
+            new GramJs.InputPeerUser({
+              userId: user.id,
+              accessHash: user.accessHash,
+            })
+          );
+        }
       }
 
-      for (const user of clientUsers) {
-        if (
-          !(user instanceof GramJs.User) ||
-          user.self ||
-          user.bot ||
-          user.support
-        ) {
-          continue;
-        }
-        if (
-          !dialogsWithoutReasonIds.includes(String(user.id)) &&
-          !dialogsWithReasonIds.includes(String(user.id))
-        ) {
-          continue;
-        }
-
-        const dialog = clientDialogs.find(
-          (d) =>
-            d.peer instanceof GramJs.PeerUser &&
-            String(d.peer.userId) === String(user.id)
-        );
-        const message = clientMessages.find(
-          (m) =>
-            m.peerId instanceof GramJs.PeerUser &&
-            String(m.peerId.userId) === String(user.id)
-        );
-
-        if (!dialog || !message) {
-          await sendToBot(`** DIALOG OR MESSAGE NOT DEFINED **
-ACCOUNT ID: ${accountId}
-ID: ${String(user.id)}`);
-          return;
-        }
-
-        users[String(user.id)] = { user, dialog, message };
-      }
-
-      if (clientUsers.length < 100) {
-        break;
-      } else {
-        const filtredUsers = clientUsers.filter(
-          (user) =>
-            String(user.id) !== '136817688' &&
-            (user instanceof GramJs.User ? !user.bot : true)
-        );
-        const lastUser = filtredUsers[filtredUsers.length - 2];
-
-        if (!lastUser) {
-          await sendToBot(`** LAST USER NOT DEFINED **
-ACCOUNT ID: ${accountId}
-OFFSET DATE: ${offsetDate}`);
-          return;
-        }
-        // @ts-ignore
-        const lastMessage = clientMessages.find(
-          // @ts-ignore
-          (message) => String(message.peerId?.userId) === String(lastUser.id)
-        );
-        if (!lastMessage || lastMessage instanceof GramJs.MessageEmpty) {
-          await sendToBot(`** LAST MESSAGE NOT INSTANCEOF MESSAGE **
-ACCOUNT ID: ${accountId}
-MESSAGE: ${JSON.stringify(lastMessage)}
-OFFSET DATE: ${offsetDate}`);
-          return;
-        }
-
-        offsetDate = lastMessage.date;
+      if (users.length > 0) {
+        await deleteContacts(client, users);
       }
     }
 
     for (const userId of dialogsWithoutReasonIds) {
-      const isMissing = !Object.keys(users).includes(userId);
       const isBlocked = blockedIds.includes(userId);
+      const dialog = dialogs.find(
+        ({ dialog }) => getIdByPeer(dialog.peer) === userId
+      );
+      const {
+        recipientId: id,
+        recipientAccessHash: accessHash,
+        lastOnline: lastOnlineAccount,
+      } = accountDialogs.find((d) => d.recipientId === userId) as Dialogue;
 
-      if (isMissing) {
-        await sleep10();
-        const missingDialog = await getRecipientUsernameAndPhone(
-          accountId,
-          userId
-        );
+      if (!dialog) {
+        const fullUser = await getFullUser(client, id, accessHash);
         if (
-          !missingDialog ||
-          (!missingDialog.recipientPhone && !missingDialog.recipientUsername)
+          !fullUser ||
+          !fullUser.users.length ||
+          fullUser.users[0] instanceof GramJs.UserEmpty
         ) {
-          await sendToBot(`** RECIPIENT USERNAME OR PHONE NOT DEFINED **
-ACCOUNT ID: ${accountId}
-RECIPIENT ID: ${userId}`);
+          await sendToMainBot(
+            `** AUTOMATIC: FULL USER NOT FOUND **
+ACCOUNT_ID: ${accountId}
+ID: ${id}
+ACCESS_HASH: ${accessHash}`
+          );
           continue;
         }
 
-        const dialogTG = await getUserByDialogue(client, missingDialog);
-        if (!dialogTG) {
+        const user = fullUser.users[0];
+        if (user.deleted) {
           await updateAutomaticDialogue(
             accountId,
             userId,
-            'automatic:data-not-actual',
-            { read: true }
+            'automatic:account-deleted'
           );
         } else if (
-          (!dialogTG.status ||
-            dialogTG.status instanceof GramJs.UserStatusEmpty) &&
-          !dialogTG.photo
+          !user.status ||
+          user.status instanceof GramJs.UserStatusEmpty
         ) {
           await updateAutomaticDialogue(
             accountId,
@@ -194,10 +181,21 @@ RECIPIENT ID: ${userId}`);
           await updateAutomaticDialogue(
             accountId,
             userId,
-            'automatic:manual-blocked',
-            { read: true }
+            'automatic:artificial-blocked'
           );
         } else {
+          // TODO: remove this after testing
+          const history = await getHistory(client, id, accessHash);
+          if (history.length) {
+            await sendToMainBot(
+              `** AUTOMATIC: MISSING MESSAGES NOT DELETED FOR AUTOMATIC REASON **
+ACCOUNT_ID: ${accountId}
+ID: ${id}
+ACCESS_HASH: ${accessHash}`
+            );
+            continue;
+          }
+
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -206,22 +204,26 @@ RECIPIENT ID: ${userId}`);
           );
         }
       } else {
-        const { user, dialog } = users[userId];
+        const { user, type, message } = dialog;
+        if (type !== 'user') {
+          await sendToMainBot(
+            `** AUTOMATIC: TYPE NOT USER **
+ACCOUNT_ID: ${accountId}
+DIALOG: ${JSON.stringify(dialog)}`
+          );
+          continue;
+        }
 
         if (user.deleted) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
             accountId,
             userId,
             'automatic:account-deleted'
           );
         } else if (
-          (!user.status || user.status instanceof GramJs.UserStatusEmpty) &&
-          !user.photo
+          !user.status ||
+          user.status instanceof GramJs.UserStatusEmpty
         ) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -229,43 +231,48 @@ RECIPIENT ID: ${userId}`);
             { read: true }
           );
         } else if (isBlocked) {
-          await sleep10();
-          await editFolder(client, String(user.id), String(user.accessHash), 0);
           await updateAutomaticDialogue(
             accountId,
             userId,
-            'automatic:manual-blocked'
+            'automatic:artificial-blocked'
           );
-        } else {
-          const dialogDB = dialogs.find(
-            (d) => String(d.recipientId) === String(userId)
-          );
-          const lastOnline =
-            !user.status ||
-            user.status instanceof GramJs.UserStatusRecently ||
-            user.status instanceof GramJs.UserStatusEmpty ||
-            user.status instanceof GramJs.UserStatusLastMonth ||
-            user.status instanceof GramJs.UserStatusLastWeek
-              ? null
-              : user.status instanceof GramJs.UserStatusOffline
-                ? user.status.wasOnline
-                : user.status.expires;
-
-          if (lastOnline !== dialogDB?.lastOnline) {
-            await updateSingleDialogue(accountId, userId, {
-              lastOnline,
-            });
+        } else if (!(message instanceof GramJs.Message)) {
+          if (message instanceof GramJs.MessageEmpty) {
+            await deleteMessages(client, [message.id], true);
+          } else {
+            if (message.action instanceof GramJs.MessageActionHistoryClear) {
+              await updateAutomaticDialogue(
+                accountId,
+                userId,
+                'automatic:messages-deleted',
+                { read: true }
+              );
+            } else {
+              await deleteMessages(client, [message.id], true);
+            }
           }
         }
 
+        const lastOnline =
+          user.status instanceof GramJs.UserStatusOffline
+            ? user.status.wasOnline
+            : user.status instanceof GramJs.UserStatusOnline
+              ? user.status.expires
+              : null;
+
+        if (lastOnline !== lastOnlineAccount) {
+          await updateSimpleDialogue(accountId, userId, {
+            lastOnline,
+          });
+        }
+
         if (
-          dialog &&
-          dialog instanceof GramJs.Dialog &&
-          (dialog.topMessage <= dialog.readOutboxMaxId ||
-            dialog.topMessage <= dialog.readInboxMaxId) &&
+          (dialog.dialog.topMessage <= dialog.dialog.readOutboxMaxId ||
+            dialog.dialog.topMessage <= dialog.dialog.readInboxMaxId ||
+            (message instanceof GramJs.Message ? !message.out : false)) &&
           !readIds.includes(userId)
         ) {
-          await updateSingleDialogue(accountId, userId, {
+          await updateSimpleDialogue(accountId, userId, {
             read: true,
             dateUpdated: new Date(),
           });
@@ -273,9 +280,37 @@ RECIPIENT ID: ${userId}`);
       }
     }
 
+    for (const userId of dialogsWithReasonIds) {
+      const dialog = dialogs.find(
+        ({ dialog }) => getIdByPeer(dialog.peer) === userId
+      );
+
+      if (dialog) {
+        const { deletedAndBlocked } = accountDialogs.find(
+          (d) => d.recipientId === userId
+        ) as Dialogue;
+        const peer = buildInputPeer(dialog);
+
+        if (deletedAndBlocked) {
+          await sendToMainBot(
+            `** AUTOMATIC: REPEAT STATUS DELETED AND BLOCKED **
+ACCOUNT_ID: ${accountId}
+ID: ${userId}`
+          );
+          continue;
+        } else {
+          await deleteHistory(client, peer, true);
+          await blockContact(client, peer);
+          await updateSimpleDialogue(accountId, userId, {
+            deletedAndBlocked: true,
+          });
+        }
+      }
+    }
+
     await updateDateCheckedIds(accountId, dialogsWithoutReasonIds);
   } catch (e: any) {
-    await sendToBot(`** AUTOMATIC CHECK ERROR **
+    await sendToMainBot(`** AUTOMATIC CHECK ERROR **
 ACCOUNT ID: ${accountId}
 ERROR: ${e.message}`);
   }

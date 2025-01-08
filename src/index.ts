@@ -1,35 +1,33 @@
-import 'dotenv/config';
-import util from 'util';
-
 import { exec as childExec } from 'child_process';
 
-import TelegramClient from './common/gramjs/client/TelegramClient';
+import 'dotenv/config';
+import './helpers/setConsole.log';
+
+import util from 'util';
+
 import { clearAuthorizations } from './common/gramjs/client/auth';
-
+import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
-
-import { initClient } from './helpers/initClient';
-import { sendToBot } from './helpers/sendToBot';
-import { sleep } from './helpers/sleep';
-
-import { setOffline } from './methods/account/setOffline';
-import { usersMe } from './methods/users/usersMe';
-import { accountSetup } from './modules/accountSetup';
-import { autoResponse } from './modules/autoResponse';
-import { autoSender } from './modules/autoSender';
-import { handleUpdate } from './modules/handleUpdate';
-import { automaticCheck } from './modules/automaticCheck';
-
 import {
   endSender,
   errorSender,
+  getTimeString,
   iterationErrors,
   peerFloods,
   reconnectErrors,
+  sleep,
   startSender,
-} from './helpers/global';
-
-import './helpers/setConsole.log';
+} from './helpers/helpers';
+import { sendToMainBot } from './helpers/sendToMainBot';
+import { updateStatus } from './methods/account/updateStatus';
+import { handleUpdate } from './methods/update/handleUpdate';
+import { getFullUser } from './methods/users/getFullUser';
+import { getMe } from './methods/users/getMe';
+import { accountSetup } from './modules/accountSetup';
+import { automaticCheck } from './modules/automaticCheck';
+import { autoResponse } from './modules/autoResponse';
+import { autoSender } from './modules/autoSender';
+import { initClient } from './modules/initClient';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -48,9 +46,6 @@ const main = async (ID: string) => {
 
   try {
     const account = await getAccountById(ID);
-    if (!account) {
-      throw new Error('Account not defined');
-    }
 
     const {
       dcId,
@@ -62,18 +57,23 @@ const main = async (ID: string) => {
     } = account;
 
     if (![dcId, platform, userAgent].every(Boolean)) {
-      throw new Error('Insufficient number of parameters to start');
+      throw new Error('NOT_ENOUGH_PARAMS');
     }
 
     client = await initClient(account, ID, (update: any) =>
-      handleUpdate(client, ID, update, () => (isAutoResponse = true))
+      handleUpdate(ID, update, () => (isAutoResponse = true))
     );
+
+    if (!client) {
+      throw new Error('CLIENT_NOT_INITED');
+    }
 
     setOnlineInterval = setInterval(async () => {
       try {
         if (
-          !client?._sender._user_connected ||
-          client?._sender?.isReconnecting
+          !client?._sender ||
+          !client._sender._user_connected ||
+          client._sender.isReconnecting
         ) {
           return;
         }
@@ -84,22 +84,21 @@ const main = async (ID: string) => {
           }, 10000);
         });
 
-        await Promise.race([setOffline(client, false), timeoutPromise]);
+        await Promise.race([updateStatus(client, false), timeoutPromise]);
       } catch (error: any) {
         console.warn({
           accountId: ID,
-          message: 'Reconnect due to set offline',
+          message: 'RECONNECT_DUE_TO_SET_OFFLINE',
         });
         reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
-
         client?._sender?.reconnect();
       }
     }, 10000);
 
-    await new Promise((res) => setTimeout(res, 30000));
+    // await sleep(30000);
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
-    const tgAccountId = await usersMe(client, ID, tgId);
+    const meId = await getMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 30);
 
     console.log({
@@ -130,16 +129,16 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          // if (isAutoResponse) {
-          //   isAutoResponse = false;
-          //   await autoResponse(client, ID, tgAccountId, tgFirstName);
-          // }
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, ID, meId, tgFirstName);
+          }
 
-          // if (i === randomI) {
-          // await automaticCheck(client, ID);
-          // await autoSender(client, ID, tgAccountId);
-          // }
-          await new Promise((res) => setTimeout(res, 60000));
+          if (i === randomI) {
+            await automaticCheck(client, ID);
+            await autoSender(client, ID, meId);
+          }
+          await sleep(60000);
         })(),
         timeout,
       ]);
@@ -149,7 +148,7 @@ const main = async (ID: string) => {
   } catch (e: any) {
     console.error({
       accountId: ID,
-      message: new Error(`Main error: ${e.message}`),
+      message: new Error(`MAIN_ERROR: ${e.message}`),
     });
 
     if (e.message.includes('GLOBAL_ERROR')) {
@@ -166,7 +165,8 @@ const main = async (ID: string) => {
         banned: true,
         reason: 'AUTH_KEY_DUPLICATED',
       });
-      await sendToBot(`!!!AUTH_KEY_DUPLICATED!!! ID: ${ID}`);
+      await sendToMainBot(`** AUTH KEY DUPLICATED **
+ID: ${ID}`);
       await exec('pm2 kill');
     } else if (
       [
@@ -184,10 +184,16 @@ const main = async (ID: string) => {
         banned: true,
         reason: e.message,
       });
-      await sendToBot(`!!!БАН АККАУНТА!!! ID: ${ID}; Error: ${e.message}`);
+      await sendToMainBot(
+        `** BAN ACCOUNT **
+ID: ${ID};
+Error: ${e.message}`
+      );
     } else {
-      await sendToBot(
-        `!!!НЕИЗВЕСТНАЯ ОШИБКА!!! ID: ${ID}; Error: ${e.message}`
+      await sendToMainBot(
+        `** UNKNOWN_ERROR **
+ID: ${ID};
+Error: ${e.message}`
       );
     }
   }
@@ -202,29 +208,21 @@ const main = async (ID: string) => {
     await client.destroy();
   }
 
-  const time = Math.round((performance.now() - startTime) / 1000);
-  const minutes = Math.floor(time / 60);
-  const seconds = time % 60;
-
-  let timeString;
-  if (minutes > 0) {
-    timeString = `${minutes}m ${seconds}s`;
-  } else {
-    timeString = `${seconds}s`;
-  }
-
   console.log({
     accountId: ID,
-    message: `💥 EXIT FROM ${ID} (${timeString}) 💥`,
+    message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
   });
 };
 
 getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+
+  accounts
+    .filter((a) => a.includes('-prefix-aisender'))
+    .forEach((accountId: string) => {
+      promises.push(main(accountId));
+    });
   //447828819872-2026165-en
 
   const interval = setInterval(() => {
@@ -239,24 +237,13 @@ getAccounts().then(async (accounts) => {
 
   // уйти от promise all
   Promise.all(promises).then(async () => {
-    const time = Math.round((performance.now() - startTime) / 1000);
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-
-    let timeString;
-    if (minutes > 0) {
-      timeString = `${minutes}m ${seconds}s`;
-    } else {
-      timeString = `${seconds}s`;
-    }
-
     console.log({
-      message: `💥 ITERATION DONE (${timeString}) 💥`,
+      message: `💥 ITERATION DONE (${getTimeString(startTime)}) 💥`,
       peerFloods,
       reconnectErrors,
       iterationErrors,
     });
-    await sendToBot(`💥 ITERATION DONE (${timeString}) 💥
+    await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
 ИНИЦИИРОВАНО ОТПРАВОК: ${Object.keys(startSender).length}
 ПОДТВЕРЖДЕНО ОТПРАВОК: ${Object.keys(endSender).length}
 КОЛИЧЕСТВО ОШИБОК: ${Object.keys(errorSender).length}
@@ -270,16 +257,14 @@ getAccounts().then(async (accounts) => {
 });
 
 process.on('uncaughtException', async (err) => {
-  await sendToBot(`**** UncaughtException ****
+  await sendToMainBot(`**** UNCAUGHT_EXCEPTION ****
 Error: ${err.message}`);
-  console.error({ message: `**** UncaughtException ****`, erorr: err });
   process.exit(1);
 });
 
 process.on('unhandledRejection', async (reason, promise) => {
-  await sendToBot(`**** UnhandledRejection ****
+  await sendToMainBot(`**** UNHANDLED_REJECTION ****
 Reason: ${reason}
 Promise: ${JSON.stringify(promise)}`);
-  console.error({ message: `**** UnhandledRejection ****`, reason, promise });
   process.exit(1);
 });

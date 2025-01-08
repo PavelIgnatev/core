@@ -29,8 +29,7 @@ const { SecurityError } = require('../errors/Common');
 const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
-const { sendToBot } = require('../../../helpers/sendToBot');
-const { iterationErrors } = require('../../../helpers/global');
+const { iterationErrors } = require('../../../helpers/helpers');
 
 /**
  * MTProto Mobile Protocol sender

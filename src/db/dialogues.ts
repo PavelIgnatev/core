@@ -1,5 +1,5 @@
-import { DB } from './db';
 import { Dialogue } from '../@types/Dialogue';
+import { DB } from './db';
 
 const getDialoguesCollection = async () => {
   return (await DB()).collection('dialogues');
@@ -55,19 +55,11 @@ export const getBlockedIds = async (accountId: string) => {
   return ids;
 };
 
-export const getDialogs = async (accountId: string) => {
+export const getAccountDialogs = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
   const dialogues = await dialoguesCollection
-    .find<{
-      recipientId: string;
-      reason?: string;
-      automaticReason?: string;
-      blocked?: boolean;
-      stopped?: boolean;
-      read?: boolean;
-      lastOnline?: number | null;
-    }>(
+    .find<Dialogue>(
       {
         accountId,
       },
@@ -75,8 +67,10 @@ export const getDialogs = async (accountId: string) => {
         projection: {
           _id: 0,
           recipientId: 1,
+          recipientAccessHash: 1,
           blocked: 1,
           automaticReason: 1,
+          status: 1,
           read: 1,
           reason: 1,
           lastOnline: 1,
@@ -88,33 +82,7 @@ export const getDialogs = async (accountId: string) => {
   return dialogues;
 };
 
-export const getRecipientUsernameAndPhone = async (
-  accountId: string,
-  recipientId: string
-) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  const dialogues = await dialoguesCollection.findOne<{
-    recipientPhone?: string;
-    recipientUsername?: string;
-  }>(
-    {
-      accountId,
-      recipientId,
-    },
-    {
-      projection: {
-        _id: 0,
-        recipientUsername: 1,
-        recipientPhone: 1,
-      },
-    }
-  );
-
-  return dialogues;
-};
-
-export const getPingDialogues = async (accountId: string) => {
+export const getPingDialogsIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
   const twelveHoursAgo = new Date();
@@ -126,37 +94,36 @@ export const getPingDialogues = async (accountId: string) => {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
-  const pingDialogs = await dialoguesCollection
-    .find<Dialogue>({
-      accountId,
-      step: 3,
-      ping: { $ne: true },
-      stopped: { $ne: true },
-      blocked: { $ne: true },
-      dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
-      dateCreated: { $gte: oneWeekAgo },
-    })
-    .toArray();
+  const pingDialogsIds = await dialoguesCollection.distinct('recipientId', {
+    accountId,
+    step: 3,
+    ping: { $ne: true },
+    stopped: { $ne: true },
+    blocked: { $ne: true },
+    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
+    dateCreated: { $gte: oneWeekAgo },
+  });
 
-  return pingDialogs;
+  return pingDialogsIds;
 };
 
-export const getManualControlDialogues = async (accountId: string) => {
+export const getManualControlDialogsIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 
-  const dialogs = await dialoguesCollection
-    .find<Dialogue>({
+  const manualControlDialogsIds = await dialoguesCollection.distinct(
+    'recipientId',
+    {
       accountId,
       stopped: true,
       blocked: { $ne: true },
       managerMessage: { $ne: null },
-    })
-    .toArray();
+    }
+  );
 
-  return dialogs;
+  return manualControlDialogsIds;
 };
 
-export const updateDialogue = async (dialogue: Dialogue) => {
+export const updateDialogue = async (dialogue: Partial<Dialogue>) => {
   const dialoguesCollection = await getDialoguesCollection();
 
   await dialoguesCollection.updateOne(
@@ -179,7 +146,7 @@ export const updateDialogue = async (dialogue: Dialogue) => {
   );
 };
 
-export const updateSingleDialogue = async (
+export const updateSimpleDialogue = async (
   accountId: string,
   recipientId: string,
   data: Record<string, unknown>
@@ -266,19 +233,4 @@ export const updateDateCheckedIds = async (
       },
     }
   );
-};
-
-export const getBlockedDialogues = async (accountId: string) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  const blockedDialogs = await dialoguesCollection
-    .find({
-      accountId,
-      automaticReason: 'automatic:blocked',
-    })
-    .sort({ dateUpdated: -1 })
-    .limit(5)
-    .toArray();
-
-  return blockedDialogs;
 };

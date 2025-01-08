@@ -1,25 +1,23 @@
+import { invokeRequest } from '..';
 import Api from '../tl/api';
-import type TelegramClient from './TelegramClient';
+import TelegramClient from './TelegramClient';
 
 export async function clearAuthorizations(client: TelegramClient) {
-  const { authorizations } = await client.invoke(
+  const authorizations = await invokeRequest(
+    client,
     new Api.account.GetAuthorizations()
   );
 
-  for (const authorization of authorizations) {
+  for (const authorization of authorizations?.authorizations || []) {
     try {
       if (!authorization.current && authorization.deviceModel !== 'Desktop') {
-        await client.invoke(
+        await invokeRequest(
+          client,
           new Api.account.ResetAuthorization({
             hash: authorization.hash,
           })
         );
       }
-    } catch (error: any) {
-      console.error({
-        accountId: client._accountId,
-        message: new Error(`Reset Authorizations Error: ${error.message}`),
-      });
-    }
+    } catch {}
   }
 }

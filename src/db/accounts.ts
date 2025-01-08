@@ -1,5 +1,5 @@
-import { DB } from './db';
 import { Account } from '../@types/Account';
+import { DB } from './db';
 
 const getAccountCollection = async () => {
   return (await DB()).collection('accounts');
@@ -20,6 +20,10 @@ export const getAccountById = async (accountId: string) => {
   const accountCollection = await getAccountCollection();
 
   const account = await accountCollection.findOne<Account>({ accountId });
+
+  if (!account) {
+    throw new Error('ACCOUNT_NOT_DEFINED');
+  }
 
   return account;
 };

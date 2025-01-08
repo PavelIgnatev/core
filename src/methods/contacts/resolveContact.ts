@@ -1,29 +1,47 @@
-import { resolvePhone } from './resolvePhone';
-import { resolveUsername } from './resolveUsername';
+import { BigInteger } from 'big-integer';
+
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
-import { updateFailedMessage } from '../../db/groupIdUsers';
 import { getFullUser } from '../users/getFullUser';
+import { resolvePhone } from './resolvePhone';
+import { resolveUsername } from './resolveUsername';
 
 export const resolveContact = async (
   client: TelegramClient,
-  username: string,
-  groupId: string
+  contact: string
 ) => {
-  const resolveMethod = username.includes('+') ? resolvePhone : resolveUsername;
-  const userByUsername = await resolveMethod(client, username);
-  const { id: userId, accessHash } = userByUsername?.users?.[0] ?? {};
-  const recipientFull = await getFullUser(client, userId, accessHash);
+  const resolveMethod = contact.includes('+') ? resolvePhone : resolveUsername;
+  const resolvedContact = await resolveMethod(client, contact);
 
   if (
-    !userId ||
-    !accessHash ||
-    !recipientFull ||
-    !(userByUsername?.users?.[0] instanceof GramJs.User)
+    !resolvedContact ||
+    !resolvedContact.users.length ||
+    resolvedContact.users[0] instanceof GramJs.UserEmpty ||
+    !resolvedContact.users[0].accessHash
   ) {
-    await updateFailedMessage(username, groupId);
     throw new Error('USERNAME_INVALID');
   }
 
-  return recipientFull;
+  const { id: userId, accessHash } = resolvedContact.users[0];
+  const fullUser = await getFullUser(
+    client,
+    String(userId),
+    String(accessHash)
+  );
+
+  if (
+    !fullUser ||
+    !fullUser.users.length ||
+    fullUser.users[0] instanceof GramJs.UserEmpty ||
+    !fullUser.users[0].accessHash
+  ) {
+    throw new Error('USER_NOT_FOUND');
+  }
+
+  return {
+    fullContact: fullUser,
+    contact: fullUser.users[0] as GramJs.User & {
+      accessHash: BigInteger;
+    },
+  };
 };

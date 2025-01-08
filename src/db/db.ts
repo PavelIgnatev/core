@@ -1,9 +1,8 @@
-import { MongoClient, Db } from 'mongodb';
+import { Db, MongoClient } from 'mongodb';
 
-import { sendToBot } from '../helpers/sendToBot';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 
 let db: Db;
-let db2: Db;
 
 export const DB = async () => {
   while (!db) {
@@ -13,25 +12,9 @@ export const DB = async () => {
       db = connect.db('core');
       break;
     } catch {
-      await sendToBot('DB not inited. Dangerous mistake. Retry.');
+      await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
     }
   }
 
   return db;
-};
-
-
-export const DB2 = async () => {
-  while (!db2) {
-    try {
-      const client = new MongoClient(process.env.DATABASE_URI2 || '');
-      const connect = await client.connect();
-      db2 = connect.db('core');
-      break;
-    } catch {
-      await sendToBot('DB2 not inited. Dangerous mistake. Retry.');
-    }
-  }
-
-  return db2;
 };

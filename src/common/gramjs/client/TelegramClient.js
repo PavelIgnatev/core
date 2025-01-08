@@ -8,7 +8,7 @@ const { ConnectionTCPObfuscated, MTProtoSender } = require('../network');
 const { clearAuthorizations } = require('./auth');
 const { uploadFile } = require('./uploadFile');
 const RequestState = require('../network/RequestState');
-const { sendToBot } = require('../../../helpers/sendToBot');
+const { sendToMainBot } = require('../../../helpers/sendToMainBot');
 const Deferred = require('../Deferred').default;
 
 class TelegramClient {
@@ -189,15 +189,11 @@ class TelegramClient {
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
-          console.log({
-            accountId: this._accountId,
-            message: `Telegram is having internal issues ${e.constructor.name}`,
-          });
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
         ) {
-          await sendToBot(
+          await sendToMainBot(
             `** FLOOD WAIT ERROR **
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`

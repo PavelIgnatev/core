@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { sleep } from '../../helpers/sleep';
+import { sleep } from '../../helpers/helpers';
 
 const defaultFirstMessagePrompt = 'Здравствуйте!';
 const defaultSecondMessagePrompt =
@@ -17,12 +17,12 @@ export const getRecipient = async (accountId: string) => {
 
       const { data: user } = await axios(url.toString());
 
-      if (!user) {
-        throw new Error('USER_NOT_DEFINED');
-      }
-
       if (user === 'GROUP_ID_NOT_DEFINED') {
         return null;
+      }
+
+      if (!user || !user.username || !user.groupId) {
+        throw new Error('USER_NOT_DEFINED');
       }
 
       if (!user.firstMessagePrompt) {
@@ -32,7 +32,13 @@ export const getRecipient = async (accountId: string) => {
         user.secondMessagePrompt = defaultSecondMessagePrompt;
       }
 
-      return user;
+      return user as {
+        groupId: string;
+        username: string;
+        firstMessagePrompt: string;
+        secondMessagePrompt: string;
+        language?: string;
+      };
     } catch (error: any) {
       console.error({
         accountId,

@@ -2,6 +2,7 @@ export interface Dialogue {
   groupId: string;
   accountId: string;
   recipientId: string;
+  recipientAccessHash: string;
   recipientUsername: string;
   recipientTitle: string;
   recipientBio: string | null;
@@ -13,9 +14,17 @@ export interface Dialogue {
 
   reason?: string;
   automaticReason?: string;
+  managerMessage?: string;
+
+  read?: boolean;
 
   viewed?: boolean;
   blocked?: boolean;
+  stopped?: boolean;
+
+  deletedAndBlocked?: boolean;
+
+  lastOnline?: number | null;
 
   dateCreated?: Date;
   dateUpdated?: Date;

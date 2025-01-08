@@ -179,7 +179,7 @@ class MessagePacker {
           state.request.className || state.request.constructor.name
         } is too long ${state.data.length} and cannot be sent`,
       });
-  
+
       state.reject('Request Payload is too big');
       size = 0;
     }

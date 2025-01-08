@@ -1,7 +1,7 @@
-import { DB2 } from './db';
+import { DB } from './db';
 
 const getGroupIdUsersCollection = async () => {
-  return (await DB2()).collection('groupIdUsers');
+  return (await DB()).collection('groupIdUsers');
 };
 
 export const updateFailedMessage = async (

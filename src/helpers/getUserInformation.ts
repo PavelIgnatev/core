@@ -1,16 +1,13 @@
 import axios from 'axios';
-import { sendToNameBot } from './sendToNameBot';
+
+import { generateRandomString } from './generateRandomString';
+import { capitalizeFirstLetter, sleep } from './helpers';
 
 const isRussian = (str: string) => /^[А-Яа-яЁё]+$/.test(str);
-const isEnglish = (str: string) => /^[A-Za-z]+$/.test(str);
 
-const capitalizeFirstLetter = (string: string) => {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-};
-
-const withTimeout = (promise: Promise<any>, ms: number) => {
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Timeout exceeded')), ms)
+const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('TIMEOUT_EXCEEDED')), ms)
   );
   return Promise.race([promise, timeout]);
 };
@@ -19,20 +16,12 @@ const makeRequest = async (word: string) => {
   return await axios
     .get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`)
     .then((response) => response.data)
-    .catch(async (e: any) => {
-      await sendToNameBot(`** USER INFORMATION REQUEST ERROR **
-REQUEST: ${word}
-ERROR: ${e.message}`);
-      return null;
-    });
+    .catch(() => null);
 };
 
-export const getUserInformation = async (
-  userContent: string,
-  language: string
-) => {
-  if (language !== 'RUSSIAN' && language !== 'ENGLISH') {
-    return { aiName: null, aiGender: null };
+const getUser = async (userContent: string, language: string) => {
+  if (language !== 'RUSSIAN') {
+    return null;
   }
 
   const content = userContent
@@ -45,7 +34,7 @@ export const getUserInformation = async (
   const words = content.split(' ');
   const requests = words.map(makeRequest);
 
-  let contentMap = new Set();
+  let contentMap: Set<string> = new Set();
   try {
     const promises = await Promise.all(requests);
     for (const promise of promises) {
@@ -61,16 +50,12 @@ export const getUserInformation = async (
     }
   } catch {}
 
-  const contentArray = [...contentMap] as Array<string>;
-  const contentRequets = contentArray.reduce(
+  const contentRequets = [...contentMap].reduce(
     (a, b) => (a.length >= b.length ? a : b),
     ''
   );
   if (contentRequets.length < 2) {
-    await sendToNameBot(`DATA: ${userContent} (MINIMAL LENGTH ERROR)
-REQUEST: ${contentRequets}
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
-    return { aiName: null, aiGender: null };
+    return null;
   }
 
   const processRequest = async () => {
@@ -106,50 +91,65 @@ Ensure the extracted name is adjusted to its **${language}** version, either by 
 
         const userInfo = resultData?.message?.content?.[0]?.text;
         if (userInfo === 'null') {
-          await sendToNameBot(`DATA: ${userContent} (${i + 1} TIMES)
-REQUEST: ${contentRequets}
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}}`);
-          return { aiName: null, aiGender: null };
+          return null;
         }
 
-        if (
-          (language === 'RUSSIAN' && !isRussian(userInfo)) ||
-          (language === 'ENGLISH' && !isEnglish(userInfo))
-        ) {
-          throw new Error('Incorrect name');
+        if (language === 'RUSSIAN' && !isRussian(userInfo)) {
+          throw new Error('INCORRECT_NAME');
         }
 
         const data = await makeRequest(userInfo);
         const { Female = 0, Male = 0 } = data?.result?.first_name?.gender || {};
 
         if (!Female && !Male) {
-          throw new Error('Incorrect gender');
+          throw new Error('INCORRECT_GENDER');
         }
 
-        const returnData = {
+        return {
           aiName: capitalizeFirstLetter(userInfo.toLowerCase()),
           aiGender: Female > Male ? 'female' : 'male',
         };
-        await sendToNameBot(`DATA: ${userContent} (${i + 1} TIMES)
-REQUEST: ${contentRequets}
-RESULT: ${JSON.stringify(returnData)}`);
-        return returnData;
       } catch (error) {
-        await new Promise((res) => setTimeout(res, 1000));
+        await sleep(1000);
       }
     }
 
-    await sendToNameBot(`DATA: ${userContent} (ATTEMPT LIMIT)
-REQUEST: ${contentRequets}
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
-    return { aiName: null, aiGender: null };
+    return null;
   };
 
   try {
     return await withTimeout(processRequest(), 300000);
   } catch {
-    await sendToNameBot(`DATA: ${userContent} (TIME LIMIT)
-RESULT: ${JSON.stringify({ aiName: null, aiGender: null })}`);
-    return { aiName: null, aiGender: null };
+    return null;
   }
+};
+
+export const getUserInformation = async (
+  firstMessagePrompt: string,
+  secondMessagePrompt: string,
+  language: string,
+  firstName: string,
+  lastName: string,
+  username: string
+) => {
+  let user = null;
+  let firstMessage = generateRandomString(firstMessagePrompt);
+  const secondMessage = generateRandomString(secondMessagePrompt);
+
+  if (language === 'RUSSIAN') {
+    const fm = firstMessage.replace(/[^а-яА-ЯёЁ]+/g, '');
+    const userData = await getUser(
+      `${firstName.toLowerCase()} ${lastName.toLowerCase()} ${username}`,
+      language
+    );
+
+    if (userData?.aiName) {
+      user = userData;
+      firstMessage = `${fm}, ${userData.aiName}!`;
+    } else {
+      firstMessage = `${fm}!`;
+    }
+  }
+
+  return { user, firstMessage, secondMessage };
 };

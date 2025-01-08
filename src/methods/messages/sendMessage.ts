@@ -1,55 +1,81 @@
 import BigInt from 'big-integer';
 
+import { invokeRequest } from '../../common/gramjs';
+import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
-import { sendToBot } from '../../helpers/sendToBot';
-import { rmSpLc } from '../../helpers/removeSpacesAndLowerCase';
 import { getAccountById } from '../../db/accounts';
 import { getDialogue } from '../../db/dialogues';
-import { sleep } from '../../helpers/sleep';
+import {
+  capitalizeFirstLetter,
+  formatDateToUTC,
+  reduceSpaces,
+  removeNonAlphaPrefix,
+  sleep,
+} from '../../helpers/helpers';
+import { sendToMainBot } from '../../helpers/sendToMainBot';
 
-function formatDateToUTC(date: Date) {
-  const utcDate = new Date(date);
-  return `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, '0')}-${String(
-    utcDate.getUTCDate()
-  ).padStart(
-    2,
-    '0'
-  )} ${String(utcDate.getUTCHours()).padStart(2, '0')}:${String(
-    utcDate.getUTCMinutes()
-  ).padStart(2, '0')}`;
-}
+const logPeerFloodError = async (
+  message: string,
+  accountId: string,
+  userId: string
+) => {
+  const fullAccount = await getAccountById(accountId);
+  const dialog = await getDialogue(accountId, String(userId));
 
-function reduceSpaces(string: string) {
-  return string.replace(/\s+/g, ' ').trim();
-}
+  const createdDateFormatted = dialog?.dateCreated
+    ? formatDateToUTC(dialog.dateCreated)
+    : 'N/A';
+  const updatedDateFormatted = dialog?.dateUpdated
+    ? formatDateToUTC(dialog.dateUpdated)
+    : 'N/A';
+  const spamBlockDateFormatted =
+    fullAccount?.spamBlockDate && fullAccount.spamBlockDate !== 'INFINITY'
+      ? formatDateToUTC(fullAccount.spamBlockDate)
+      : fullAccount?.spamBlockDate === 'INFINITY'
+        ? 'INFINITY'
+        : 'N/A';
 
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+  await sendToMainBot(
+    `*** PEER_FLOOD ***
+QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
+MESSAGE: ${message}
 
-function removeNonAlphaPrefix(string: string) {
-  if (string === '/start') {
-    return string;
-  }
+SPAMBLOCK DATE: ${spamBlockDateFormatted}
+DIALOG CREATED DATE: ${createdDateFormatted}
+DIALOG UPDATED DATE: ${updatedDateFormatted}`
+  );
+};
 
-  return string.replace(/^[^a-zA-Zа-яА-Я]+/, '');
-}
+const logGeneralError = async (
+  error: Error,
+  accountId: string,
+  userId: string,
+  message: string
+) => {
+  await sendToMainBot(
+    `*** ${error.message} ***
+AccountId: ${accountId}
+UserId: ${userId}
+Message: ${message}`
+  );
+};
 
 export const sendMessage = async (
-  client: any,
+  client: TelegramClient,
   userId: string,
   accessHash: string,
   message: string,
   accountId: string,
   withTyping: boolean
 ) => {
-  let sentMessage = null;
+  let messageUpdate;
   try {
     if (withTyping) {
       const iterations = Math.ceil(((message.length / 250) * 60 * 1000) / 5000);
 
       for (let i = 0; i < iterations; i++) {
-        await client.invoke(
+        await invokeRequest(
+          client,
           new GramJs.messages.SetTyping({
             peer: new GramJs.InputPeerUser({
               userId: BigInt(userId),
@@ -63,7 +89,8 @@ export const sendMessage = async (
       }
     }
 
-    sentMessage = await client.invoke(
+    const update = await invokeRequest(
+      client,
       new GramJs.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))
@@ -77,68 +104,46 @@ export const sendMessage = async (
       })
     );
 
-    if (sentMessage.updates) {
-      sentMessage = sentMessage.updates.find(
-        (update: any) =>
-          rmSpLc(update?.message?.message || '') === rmSpLc(message)
-      )?.message;
+    if (!update) {
+      messageUpdate = null;
+    } else if (
+      update instanceof GramJs.UpdateShortSentMessage ||
+      update instanceof GramJs.UpdateMessageID
+    ) {
+      messageUpdate = update;
+    } else if ('updates' in update) {
+      messageUpdate = update.updates.find(
+        (u) => u instanceof GramJs.UpdateMessageID
+      );
+    }
+
+    if (!messageUpdate?.id) {
+      throw new Error('MESSAGE_NOT_SENT');
     }
 
     if (message !== '/start') {
-      if (!sentMessage?.id) {
-        throw new Error('MESSAGE_ERROR');
-      }
-
-      await client.invoke(
+      await invokeRequest(
+        client,
         new GramJs.messages.ReadHistory({
           peer: new GramJs.InputPeerUser({
             userId: BigInt(userId),
             accessHash: BigInt(accessHash),
           }),
-          maxId: sentMessage.id,
+          maxId: messageUpdate.id,
         })
       );
     }
 
-    return sentMessage;
-  } catch (e: any) {
-    if (e.message === 'PEER_FLOOD') {
+    return messageUpdate;
+  } catch (error: any) {
+    if (error.message === 'PEER_FLOOD') {
       if (message.length > 30) {
-        const fullAccount = await getAccountById(accountId);
-        const dialog = await getDialogue(accountId, String(userId));
-        const createdDateFormatted = dialog?.dateCreated
-          ? formatDateToUTC(dialog.dateCreated)
-          : 'N/A';
-        const updatedDateFormatted = dialog?.dateUpdated
-          ? formatDateToUTC(dialog.dateUpdated)
-          : 'N/A';
-        const spamBlockDateFormatted =
-          fullAccount?.spamBlockDate && fullAccount.spamBlockDate !== 'INFINITY'
-            ? formatDateToUTC(fullAccount.spamBlockDate)
-            : fullAccount?.spamBlockDate &&
-                fullAccount.spamBlockDate === 'INFINITY'
-              ? 'INFINITY'
-              : 'N/A';
-
-        await sendToBot(
-          `*** ${e.message} ***
-QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
-MESSAGE: ${message}
-
-SPAMBLOCK DATE: ${spamBlockDateFormatted}
-DIALOG CREATED DATE: ${createdDateFormatted}
-DIALOG UPDATED DATE: ${updatedDateFormatted}`
-        );
+        await logPeerFloodError(message, accountId, userId);
       }
     } else {
-      await sendToBot(
-        `*** ${e.message} ***
-AccountId: ${accountId}
-UserId: ${userId}
-Message: ${message}`
-      );
+      await logGeneralError(error, accountId, userId, message);
     }
 
-    throw new Error(e.message);
+    throw error;
   }
 };

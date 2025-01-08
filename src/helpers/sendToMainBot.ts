@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const sendToBotByChatIdText = async (chatId: string, text: string) => {
   const token = '6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
@@ -16,21 +18,15 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
   const textChunks = splitTextIntoChunks(text);
 
   for (const chunk of textChunks) {
-    await fetch(sendMessageUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: chunk,
-        disable_web_page_preview: true,
-      }),
+    await axios.post(sendMessageUrl, {
+      chat_id: chatId,
+      text: chunk,
+      disable_web_page_preview: true,
     });
   }
 };
 
-export const sendToBot = async (text: string) => {
+export const sendToMainBot = async (text: string) => {
   const chatIds = ['483779758', '324820826', '6957002018'];
 
   try {

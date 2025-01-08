@@ -1,9 +1,8 @@
-import GramJs from './tl/api';
-import CallbackSession from './sessions/CallbackSession';
-import TelegramClient from './client/TelegramClient';
-
 import { Account } from '../../@types/Account';
-import { sendToBot } from '../../helpers/sendToBot';
+import { sendToMainBot } from '../../helpers/sendToMainBot';
+import TelegramClient from './client/TelegramClient';
+import CallbackSession from './sessions/CallbackSession';
+import GramJs from './tl/api';
 
 export async function init(
   accountData: Account,
@@ -55,14 +54,22 @@ export async function init(
   return client;
 }
 
+type InvokeRequestParams = {
+  shouldIgnoreErrors?: boolean;
+};
+
 export async function invokeRequest<T extends GramJs.AnyRequest>(
   client: TelegramClient,
-  request: T
+  request: T,
+  params: InvokeRequestParams = {}
 ) {
+  const { shouldIgnoreErrors } = params;
   try {
     return await client.invoke(request);
   } catch (err: any) {
-    await sendToBot(`💀 REQUEST ERROR 💀
+    if (shouldIgnoreErrors) return undefined;
+
+    await sendToMainBot(`💀 REQUEST ERROR 💀
 ID: ${client._accountId}
 ERROR: ${err.message}
 REQUEST: ${JSON.stringify(request)}

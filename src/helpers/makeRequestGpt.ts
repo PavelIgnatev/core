@@ -1,7 +1,8 @@
 import axios from 'axios';
 import emojiRegex from 'emoji-regex';
 
-import { sendToBot } from '../helpers/sendToBot';
+import { sleep } from './helpers';
+import { sendToMainBot } from './sendToMainBot';
 
 function trimmer(str: string) {
   if (
@@ -393,7 +394,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         (part || '').trim()
       );
     } catch (error: any) {
-      await new Promise((res) => setTimeout(res, 2500));
+      await sleep(2500);
 
       console.error({
         accountId,
@@ -415,7 +416,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
   }
 
   try {
-    await sendToBot(`!!!GPT GENERATION ERROR (gpt)!!!
+    await sendToMainBot(`!!!GPT GENERATION ERROR (gpt)!!!
 GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
