@@ -81360,6 +81360,9 @@ var getClassifiedDialogs = async (client, accountId, meId) => {
       messages = [],
       automaticReason = null
     } = dialogDb;
+    if (blocked || reason || automaticReason) {
+      continue;
+    }
     if (recipientId !== String(user.id) || recipientAccessHash !== String(user.accessHash)) {
       await sendToMainBot(
         `** CLASSIFIED DIALOG: NOT SAME ERROR **
@@ -81370,9 +81373,6 @@ USER_ID: ${user.id}
 ACCESS_HASH: ${recipientAccessHash}
 USER_ACCESS_HASH: ${user.accessHash}`
       );
-      continue;
-    }
-    if (blocked || reason || automaticReason) {
       continue;
     }
     const history = await getHistory(client, recipientId, recipientAccessHash);

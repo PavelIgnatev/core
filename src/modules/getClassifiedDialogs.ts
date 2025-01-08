@@ -50,12 +50,12 @@ export const getClassifiedDialogs = async (
 
     const dialogDb = await getDialogue(accountId, String(user.id));
     if (!dialogDb || !dialogDb.groupId) {
-//       await sendToMainBot(
-//         `** CLASSIFIED DIALOG: DIALOG NOT FOUND **
-// ACCOUNT_ID: ${accountId}
-// ID: ${user.id}
-// ACCESS_HASH: ${user.accessHash}`
-//       );
+      //       await sendToMainBot(
+      //         `** CLASSIFIED DIALOG: DIALOG NOT FOUND **
+      // ACCOUNT_ID: ${accountId}
+      // ID: ${user.id}
+      // ACCESS_HASH: ${user.accessHash}`
+      //       );
       continue;
     }
 
@@ -68,6 +68,10 @@ export const getClassifiedDialogs = async (
       messages = [],
       automaticReason = null,
     } = dialogDb;
+
+    if (blocked || reason || automaticReason) {
+      continue;
+    }
 
     // TODO: remove this after testing
     if (
@@ -83,10 +87,6 @@ USER_ID: ${user.id}
 ACCESS_HASH: ${recipientAccessHash}
 USER_ACCESS_HASH: ${user.accessHash}`
       );
-      continue;
-    }
-
-    if (blocked || reason || automaticReason) {
       continue;
     }
 
