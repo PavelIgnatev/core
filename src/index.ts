@@ -95,7 +95,7 @@ const main = async (ID: string) => {
       }
     }, 10000);
 
-    // await sleep(30000);
+    await sleep(30000);
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
@@ -217,7 +217,7 @@ getAccounts().then(async (accounts) => {
   accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
-  //447828819872-2026165-en
+  // 447828819872-2026165-en
 
   const interval = setInterval(() => {
     console.log({

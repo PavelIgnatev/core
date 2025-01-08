@@ -82285,6 +82285,7 @@ var main = async (ID) => {
         (_a = client == null ? void 0 : client._sender) == null ? void 0 : _a.reconnect();
       }
     }, 1e4);
+    await sleep(3e4);
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, ID, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
