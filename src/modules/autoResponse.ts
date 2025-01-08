@@ -67,7 +67,8 @@ export const autoResponse = async (
     } = groupId;
     const language = gLanguage || 'RUSSIAN';
     const myName = language === 'RUSSIAN' ? converterName(meName) : meName;
-    const parted = step === 2 && part ? part.trim() : '';
+    const stage = Math.ceil(step / 2);
+    const parted = stage === 2 && part ? part.trim() : '';
 
     const replyMessage = await makeRequestGpt(
       accountId,
@@ -75,9 +76,9 @@ export const autoResponse = async (
         {
           role: 'system',
           content: `You are "${myName}" (role assistant, role <ASSISTANT>, male gender), acting as role "${aiRole}". Your name: ${myName}. Your gender: male. Fully adopt this identity as a real person whose task is to deeply engage the user within the context of ASSISTANT_COMPANY_DESCRIPTION. You have initiated the conversation with the user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION.${
-            step >= 2 && goal ? `\n!IMPORTANT INSTRUCTION!: **${goal}**` : ''
+            stage >= 2 && goal ? `\n!IMPORTANT INSTRUCTION!: **${goal}**` : ''
           }${
-            step === 1
+            stage === 1
               ? `\nYou “${myName}” (role assistant, role <ASSISTANT>, male gender) have asked a question **${messages[1].text}** to initiate a (cold) dialog with a user, and regardless of the interlocutor's reaction to your question, you must give your clear and rigorous answer that will maximize the interlocutor's liking and encourage further communication`
               : ''
           }
@@ -96,13 +97,13 @@ IMPORTANT CONTEXT: A genuine individual who has never interacted with the assist
           } characters in length, consisting of around ${
             messagesCount * 10
           } words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.${
-            step <= 2
+            stage <= 2
               ? `\n- You should always begin your reply with a brief reply to the user's last message. The reply is mandatory and should be minimal but correct to the user's last message.`
               : ''
           }${
-            step === 1 && addedQuestion
+            stage === 1 && addedQuestion
               ? `\n- Smoothly weave the following question into the end of your reply in a way that feels natural and relevant: “${generateRandomString(addedQuestion)}”. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**`
-              : step === 2
+              : stage === 2
                 ? `\n- **Make sure to ask a leading question to further engage the user**. Conclude your answer with a simple, easy-to-answer question that flows naturally from the conversation and further engages the user. It should be a question along the lines of “what do you think?”, “can I tell you more?”, “interesting?” or a question that can better qualify the user.`
                 : ''
           }${
@@ -134,7 +135,7 @@ ${flowHandling}`
 }
 
 ${
-  step !== 1 && addedInformation
+  stage !== 1 && addedInformation
     ? `## ASSISTANT_ADDED_INFORMATION
 ${addedInformation}`
     : ''
@@ -151,9 +152,9 @@ Current date and time: ${getDateNow()}`,
       ],
       parted,
       language,
-      step === 1,
-      step <= 2,
-      step <= 2 ? 3 : 2,
+      stage === 1,
+      stage <= 2,
+      stage <= 2 ? 3 : 2,
       true,
       dialogGroupId
     );
