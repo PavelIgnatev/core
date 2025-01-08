@@ -20,14 +20,14 @@ const logger = winston.createLogger({
   ],
 });
 
-// console.log = (...args) => {
-//   logger.info(...args);
-// };
+console.log = (...args) => {
+  logger.info(...args);
+};
 
-// console.error = (...args) => {
-//   logger.error(...args);
-// };
+console.error = (...args) => {
+  logger.error(...args);
+};
 
-// console.warn = (...args) => {
-//   logger.warn(...args);
-// };
+console.warn = (...args) => {
+  logger.warn(...args);
+};
