@@ -78996,10 +78996,12 @@ async function invokeRequest(client, request, params = {}) {
   } catch (err) {
     if (shouldIgnoreErrors)
       return void 0;
-    await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
+    if (err.message !== "PEER_FLOOD") {
+      await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
 ID: ${client._accountId}
 ERROR: ${err.message}
 REQUEST: ${JSON.stringify(request)}`);
+    }
     throw new Error(err.message);
   }
 }
@@ -82385,7 +82387,7 @@ Error: ${e.message}`
 getAccounts().then(async (accounts) => {
   console.log({ message: "\u{1F4A5} ITERATION INIT \u{1F4A5}" });
   const startTime = performance.now();
-  accounts.filter((a) => a.includes("-prefix-aisender")).forEach((accountId) => {
+  accounts.forEach((accountId) => {
     promises.push(main(accountId));
   });
   const interval = setInterval(() => {
