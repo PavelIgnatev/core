@@ -168,7 +168,7 @@ export const autoSender = async (
             'DIALOG_DUPLICATE',
           ].includes(e.message)
         ) {
-          await updateFailedMessage(recipient.username, recipient.groupId);
+          await updateFailedMessage(recipient.username, recipient.groupId, e.message);
           continue;
         }
         errorSender[accountId] = 1;

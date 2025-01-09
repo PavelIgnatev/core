@@ -6,13 +6,14 @@ const getGroupIdUsersCollection = async () => {
 
 export const updateFailedMessage = async (
   username: string,
-  groupId: string
+  groupId: string,
+  reason: string
 ) => {
   const messagesCollection = await getGroupIdUsersCollection();
 
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { f: true, p: new Date() } },
+    { $set: { f: true, p: new Date(), r: reason } },
     { upsert: true }
   );
 };
