@@ -165,7 +165,6 @@ export const autoSender = async (
             'USERNAME_NOT_OCCUPIED',
             'USER_NOT_FOUND',
             'CONTACT_NOT_RESOLVED',
-            'CONTACT_INVALID',
             'ACCESS_HASH_NOT_FOUND',
             'CONTACT_USER_EMPTY',
             'CONTACT_USERS_LENGTH',
