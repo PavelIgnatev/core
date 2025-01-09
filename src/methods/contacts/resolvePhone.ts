@@ -5,6 +5,18 @@ import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
 
 export const resolvePhone = async (client: TelegramClient, phone: string) => {
+  const userByPhone = await invokeRequest(
+    client,
+    new GramJs.contacts.ResolvePhone({
+      phone,
+    }),
+    { shouldIgnoreErrors: true }
+  );
+
+  if (userByPhone) {
+    return userByPhone;
+  }
+
   const result = await invokeRequest(
     client,
     new GramJs.contacts.ImportContacts({

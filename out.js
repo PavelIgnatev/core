@@ -81924,6 +81924,16 @@ var import_big_integer9 = __toESM(require_BigInteger());
 init_gramjs();
 var import_api29 = __toESM(require_api());
 var resolvePhone = async (client, phone) => {
+  const userByPhone = await invokeRequest(
+    client,
+    new import_api29.default.contacts.ResolvePhone({
+      phone
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  if (userByPhone) {
+    return userByPhone;
+  }
   const result = await invokeRequest(
     client,
     new import_api29.default.contacts.ImportContacts({
