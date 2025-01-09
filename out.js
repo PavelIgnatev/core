@@ -81814,7 +81814,7 @@ var getUser = async (userContent, language) => {
   }
   const content = userContent.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, " ").replace(/\s+/g, " ").toLowerCase().trim();
   const words = content.split(" ");
-  const requests = words.map(makeRequest);
+  const requests = words.map((w) => w.trim()).filter(Boolean).map(makeRequest);
   let contentMap = /* @__PURE__ */ new Set();
   try {
     const promises2 = await Promise.all(requests);

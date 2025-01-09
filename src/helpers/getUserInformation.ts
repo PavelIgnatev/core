@@ -39,7 +39,7 @@ const getUser = async (userContent: string, language: string) => {
     .trim();
 
   const words = content.split(' ');
-  const requests = words.map(makeRequest);
+  const requests = words.map(w => w.trim()).filter(Boolean).map(makeRequest);
 
   let contentMap: Set<string> = new Set();
   try {
