@@ -3,6 +3,7 @@ import axios from 'axios';
 import { generateRandomString } from './generateRandomString';
 import { capitalizeFirstLetter, sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
+import { sendToNameBot } from './sendToNameBot';
 
 const isRussian = (str: string) => /^[А-Яа-яЁё]+$/.test(str);
 
@@ -17,8 +18,10 @@ const makeRequest = async (word: string) => {
   return await axios
     .get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`)
     .then((response) => response.data)
-    .catch(async () => {
-      await sendToMainBot('** NAME SERVER NOT WORKING **');
+    .catch(async (error) => {
+      await sendToNameBot(`** NAME SERVER ERROR **
+WORD: ${word}
+ERROR: ${error.message}`);
       return null;
     });
 };

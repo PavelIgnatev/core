@@ -81750,7 +81750,48 @@ var import_api33 = __toESM(require_api());
 // src/helpers/getUserInformation.ts
 init_axios2();
 init_helpers();
-init_sendToMainBot();
+
+// src/helpers/sendToNameBot.ts
+var sendToBotByChatIdText3 = async (chatId, text) => {
+  const token = "7722797934:AAHjsfnd8D21ZsfhR4j_gfc40BEsm798C5U";
+  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
+    const chunks = [];
+    let currentIndex = 0;
+    while (currentIndex < text2.length) {
+      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
+      currentIndex += chunkSize;
+    }
+    return chunks;
+  };
+  const textChunks = splitTextIntoChunks(text);
+  for (const chunk of textChunks) {
+    await fetch(sendMessageUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: chunk,
+        disable_web_page_preview: true
+      })
+    });
+  }
+};
+var sendToNameBot = async (text) => {
+  const chatIds = ["483779758", "324820826"];
+  try {
+    await Promise.all(
+      chatIds.map(async (chatId) => {
+        await sendToBotByChatIdText3(chatId, text);
+      })
+    );
+  } catch {
+  }
+};
+
+// src/helpers/getUserInformation.ts
 var isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
 var withTimeout = (promise, ms) => {
   const timeout = new Promise(
@@ -81759,8 +81800,10 @@ var withTimeout = (promise, ms) => {
   return Promise.race([promise, timeout]);
 };
 var makeRequest = async (word) => {
-  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(async () => {
-    await sendToMainBot("** NAME SERVER NOT WORKING **");
+  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(async (error) => {
+    await sendToNameBot(`** NAME SERVER ERROR **
+WORD: ${word}
+ERROR: ${error.message}`);
     return null;
   });
 };
