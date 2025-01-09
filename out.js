@@ -81750,6 +81750,7 @@ var import_api33 = __toESM(require_api());
 // src/helpers/getUserInformation.ts
 init_axios2();
 init_helpers();
+init_sendToMainBot();
 var isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
 var withTimeout = (promise, ms) => {
   const timeout = new Promise(
@@ -81758,7 +81759,10 @@ var withTimeout = (promise, ms) => {
   return Promise.race([promise, timeout]);
 };
 var makeRequest = async (word) => {
-  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(() => null);
+  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(async () => {
+    await sendToMainBot("** NAME SERVER NOT WORKING **");
+    return null;
+  });
 };
 var getUser = async (userContent, language) => {
   var _a;
@@ -82055,7 +82059,9 @@ var autoSender = async (client, accountId, telegramId) => {
   }
   if (!accountId.includes("-prefix-")) {
     const weekday = getWeekday();
-    return;
+    if (weekday === "Sat" || weekday === "Sun") {
+      return;
+    }
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
