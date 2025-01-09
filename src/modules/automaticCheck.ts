@@ -175,7 +175,7 @@ ACCESS_HASH: ${accessHash}`
             accountId,
             userId,
             'automatic:blocked',
-            { read: true }
+            { read: true, withoutDialog: true }
           );
         } else if (isBlocked) {
           await updateAutomaticDialogue(
@@ -200,7 +200,7 @@ ACCESS_HASH: ${accessHash}`
             accountId,
             userId,
             'automatic:messages-deleted',
-            { read: true }
+            { read: true, withoutDialog: true }
           );
         }
       } else {
@@ -228,7 +228,7 @@ DIALOG: ${JSON.stringify(dialog)}`
             accountId,
             userId,
             'automatic:blocked',
-            { read: true }
+            { read: true, withoutDialog: false }
           );
         } else if (isBlocked) {
           await updateAutomaticDialogue(
@@ -245,7 +245,7 @@ DIALOG: ${JSON.stringify(dialog)}`
                 accountId,
                 userId,
                 'automatic:messages-deleted',
-                { read: true }
+                { read: true, withoutDialog: false }
               );
             } else {
               await deleteMessages(client, [message.id], true);
