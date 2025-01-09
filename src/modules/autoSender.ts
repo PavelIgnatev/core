@@ -40,9 +40,9 @@ export const autoSender = async (
 
   if (!accountId.includes('-prefix-')) {
     const weekday = getWeekday();
-    // if (weekday === 'Sat' || weekday === 'Sun') {
+    if (weekday === 'Sat' || weekday === 'Sun') {
       return;
-    // }
+    }
   }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
