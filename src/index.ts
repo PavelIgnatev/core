@@ -43,6 +43,7 @@ const main = async (ID: string) => {
   let isAutoResponse = true;
   let setOnlineInterval: any = null;
   let client: TelegramClient | null = null;
+  let errored = false;
 
   try {
     const account = await getAccountById(ID);
@@ -73,25 +74,30 @@ const main = async (ID: string) => {
         if (
           !client?._sender ||
           !client._sender._user_connected ||
-          client._sender.isReconnecting
+          client._sender.isReconnecting ||
+          errored
         ) {
           return;
         }
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            reject(new Error());
+            reject(new Error('RECONNECT'));
           }, 10000);
         });
 
         await Promise.race([updateStatus(client, false), timeoutPromise]);
       } catch (error: any) {
-        console.warn({
-          accountId: ID,
-          message: 'RECONNECT_DUE_TO_SET_OFFLINE',
-        });
-        reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
-        client?._sender?.reconnect();
+        if (error.message === 'RECONNECT') {
+          console.warn({
+            accountId: ID,
+            message: 'RECONNECT_DUE_TO_SET_OFFLINE',
+          });
+          reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
+          client?._sender?.reconnect();
+        } else {
+          errored = error.message;
+        }
       }
     }, 10000);
 
@@ -108,6 +114,10 @@ const main = async (ID: string) => {
 
     let i = -1;
     while (true) {
+      if (errored) {
+        throw new Error(errored);
+      }
+
       i += 1;
       accountsInWork[ID] = i;
 
@@ -214,9 +224,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('1723991714-7-september-9-sep'));
+  // });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {

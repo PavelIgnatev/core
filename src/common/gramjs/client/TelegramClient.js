@@ -1,11 +1,9 @@
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
-const Helpers = require('../Helpers');
 
 const { LAYER } = require('../tl/AllTLObjects');
 const { constructors, requests } = require('../tl');
 const { ConnectionTCPObfuscated, MTProtoSender } = require('../network');
-const { clearAuthorizations } = require('./auth');
 const { uploadFile } = require('./uploadFile');
 const RequestState = require('../network/RequestState');
 const { sendToMainBot } = require('../../../helpers/sendToMainBot');

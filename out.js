@@ -78248,11 +78248,9 @@ var require_TelegramClient = __commonJS({
     "use strict";
     var { sleep: sleep3 } = require_Helpers();
     var errors3 = require_errors5();
-    var Helpers = require_Helpers();
     var { LAYER } = require_AllTLObjects();
     var { constructors, requests } = require_tl();
     var { ConnectionTCPObfuscated, MTProtoSender } = require_network();
-    var { clearAuthorizations: clearAuthorizations2 } = (init_auth(), __toCommonJS(auth_exports));
     var { uploadFile: uploadFile2 } = (init_uploadFile(), __toCommonJS(uploadFile_exports));
     var RequestState = require_RequestState();
     var { sendToMainBot: sendToMainBot2 } = (init_sendToMainBot(), __toCommonJS(sendToMainBot_exports));
@@ -78944,111 +78942,6 @@ var require_CallbackSession = __commonJS({
   }
 });
 
-// src/common/gramjs/index.ts
-async function init(accountData, accountId, onUpdate) {
-  const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
-  const keys = {};
-  if (dc1)
-    keys["1"] = dc1;
-  if (dc2)
-    keys["2"] = dc2;
-  if (dc3)
-    keys["3"] = dc3;
-  if (dc4)
-    keys["4"] = dc4;
-  if (dc5)
-    keys["5"] = dc5;
-  const sessionData = {
-    mainDcId: Number(dcId),
-    keys,
-    hashes: {}
-  };
-  const session = new import_CallbackSession.default(sessionData, () => {
-  });
-  const client = new import_TelegramClient.default(session, 2496, {
-    deviceModel: userAgent,
-    systemVersion: platform,
-    accountId
-  });
-  if (!client) {
-    throw new Error("Client not inited");
-  }
-  await client.start();
-  client.addEventHandler(
-    (update) => {
-      if (!(update instanceof import_api2.default.UpdatesTooLong)) {
-        const updates = "updates" in update ? update.updates : [update];
-        updates.forEach(async (update2) => {
-          onUpdate(update2);
-        });
-      }
-    },
-    {
-      build: (update) => update
-    }
-  );
-  return client;
-}
-async function invokeRequest(client, request, params = {}) {
-  const { shouldIgnoreErrors } = params;
-  try {
-    return await client.invoke(request);
-  } catch (err) {
-    if (shouldIgnoreErrors)
-      return void 0;
-    if (err.message !== "PEER_FLOOD") {
-      await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
-ID: ${client._accountId}
-ERROR: ${err.message}
-REQUEST: ${JSON.stringify(request)}`);
-    }
-    throw new Error(err.message);
-  }
-}
-var import_TelegramClient, import_CallbackSession, import_api2;
-var init_gramjs = __esm({
-  "src/common/gramjs/index.ts"() {
-    "use strict";
-    init_sendToMainBot();
-    import_TelegramClient = __toESM(require_TelegramClient());
-    import_CallbackSession = __toESM(require_CallbackSession());
-    import_api2 = __toESM(require_api());
-  }
-});
-
-// src/common/gramjs/client/auth.ts
-var auth_exports = {};
-__export(auth_exports, {
-  clearAuthorizations: () => clearAuthorizations
-});
-async function clearAuthorizations(client) {
-  const authorizations = await invokeRequest(
-    client,
-    new import_api3.default.account.GetAuthorizations()
-  );
-  for (const authorization of (authorizations == null ? void 0 : authorizations.authorizations) || []) {
-    try {
-      if (!authorization.current && authorization.deviceModel !== "Desktop") {
-        await invokeRequest(
-          client,
-          new import_api3.default.account.ResetAuthorization({
-            hash: authorization.hash
-          })
-        );
-      }
-    } catch {
-    }
-  }
-}
-var import_api3;
-var init_auth = __esm({
-  "src/common/gramjs/client/auth.ts"() {
-    "use strict";
-    init_gramjs();
-    import_api3 = __toESM(require_api());
-  }
-});
-
 // node_modules/unique-names-generator/dist/index.js
 var require_dist4 = __commonJS({
   "node_modules/unique-names-generator/dist/index.js"(exports2) {
@@ -79156,19 +79049,97 @@ var logger = import_winston.default.createLogger({
     })
   ]
 });
-console.log = (...args) => {
-  logger.info(...args);
-};
-console.error = (...args) => {
-  logger.error(...args);
-};
-console.warn = (...args) => {
-  logger.warn(...args);
-};
 
 // src/index.ts
 var import_util3 = __toESM(require("util"));
-init_auth();
+
+// src/common/gramjs/index.ts
+init_sendToMainBot();
+var import_TelegramClient = __toESM(require_TelegramClient());
+var import_CallbackSession = __toESM(require_CallbackSession());
+var import_api2 = __toESM(require_api());
+async function init(accountData, accountId, onUpdate) {
+  const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
+  const keys = {};
+  if (dc1)
+    keys["1"] = dc1;
+  if (dc2)
+    keys["2"] = dc2;
+  if (dc3)
+    keys["3"] = dc3;
+  if (dc4)
+    keys["4"] = dc4;
+  if (dc5)
+    keys["5"] = dc5;
+  const sessionData = {
+    mainDcId: Number(dcId),
+    keys,
+    hashes: {}
+  };
+  const session = new import_CallbackSession.default(sessionData, () => {
+  });
+  const client = new import_TelegramClient.default(session, 2496, {
+    deviceModel: userAgent,
+    systemVersion: platform,
+    accountId
+  });
+  if (!client) {
+    throw new Error("Client not inited");
+  }
+  await client.start();
+  client.addEventHandler(
+    (update) => {
+      if (!(update instanceof import_api2.default.UpdatesTooLong)) {
+        const updates = "updates" in update ? update.updates : [update];
+        updates.forEach(async (update2) => {
+          onUpdate(update2);
+        });
+      }
+    },
+    {
+      build: (update) => update
+    }
+  );
+  return client;
+}
+async function invokeRequest(client, request, params = {}) {
+  const { shouldIgnoreErrors } = params;
+  try {
+    return await client.invoke(request);
+  } catch (err) {
+    if (shouldIgnoreErrors)
+      return void 0;
+    if (err.message !== "PEER_FLOOD") {
+      await sendToMainBot(`\u{1F480} REQUEST ERROR \u{1F480}
+ID: ${client._accountId}
+ERROR: ${err.message}
+REQUEST: ${JSON.stringify(request)}`);
+    }
+    throw new Error(err.message);
+  }
+}
+
+// src/common/gramjs/client/auth.ts
+var import_api3 = __toESM(require_api());
+async function clearAuthorizations(client) {
+  const authorizations = await invokeRequest(
+    client,
+    new import_api3.default.account.GetAuthorizations()
+  );
+  for (const authorization of (authorizations == null ? void 0 : authorizations.authorizations) || []) {
+    try {
+      if (!authorization.current && authorization.deviceModel !== "Desktop") {
+        await invokeRequest(
+          client,
+          new import_api3.default.account.ResetAuthorization({
+            hash: authorization.hash
+          })
+        );
+      }
+    } catch {
+    }
+  }
+}
 
 // src/db/db.ts
 var import_mongodb = __toESM(require_lib3());
@@ -79230,7 +79201,6 @@ init_helpers();
 init_sendToMainBot();
 
 // src/methods/account/updateStatus.ts
-init_gramjs();
 var import_api4 = __toESM(require_api());
 var updateStatus = async (client, offline) => {
   const result = await invokeRequest(
@@ -79444,7 +79414,6 @@ var handleUpdate = async (accountId, update, onNewMessage) => {
 };
 
 // src/methods/users/getMe.ts
-init_gramjs();
 var import_api6 = __toESM(require_api());
 var getMe = async (client, accountId, tgAccountId) => {
   if (!tgAccountId) {
@@ -79467,7 +79436,6 @@ var getMe = async (client, accountId, tgAccountId) => {
 
 // src/modules/accountSetup.ts
 var import_big_integer = __toESM(require_BigInteger());
-init_gramjs();
 init_uploadFile();
 var import_api8 = __toESM(require_api());
 
@@ -79748,7 +79716,6 @@ init_helpers();
 init_sendToMainBot();
 
 // src/methods/account/updateProfile.ts
-init_gramjs();
 var import_api7 = __toESM(require_api());
 var updateProfile = (client, {
   firstName,
@@ -80022,21 +79989,18 @@ var import_api24 = __toESM(require_api());
 init_sendToMainBot();
 
 // src/methods/channels/leaveChannel.ts
-init_gramjs();
 var import_api9 = __toESM(require_api());
 var leaveChannel = async (client, channel) => {
   await invokeRequest(client, new import_api9.default.channels.LeaveChannel({ channel }));
 };
 
 // src/methods/contacts/blockContact.ts
-init_gramjs();
 var import_api10 = __toESM(require_api());
 var blockContact = async (client, peer) => {
   await invokeRequest(client, new import_api10.default.contacts.Block({ id: peer }));
 };
 
 // src/methods/contacts/deleteContacts.ts
-init_gramjs();
 var import_api11 = __toESM(require_api());
 var deleteContacts = async (client, users) => {
   await invokeRequest(
@@ -80047,7 +80011,6 @@ var deleteContacts = async (client, users) => {
 
 // src/methods/contacts/getContacts.ts
 var import_big_integer2 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api12 = __toESM(require_api());
 var getContacts = async (client) => {
   const contacts = await invokeRequest(
@@ -80061,7 +80024,6 @@ var getContacts = async (client) => {
 };
 
 // src/methods/folders/editFolders.ts
-init_gramjs();
 var import_api13 = __toESM(require_api());
 var editFolders = async (client, folderPeers) => {
   await invokeRequest(
@@ -80071,7 +80033,6 @@ var editFolders = async (client, folderPeers) => {
 };
 
 // src/methods/messages/clearAllDrafts.ts
-init_gramjs();
 var import_api14 = __toESM(require_api());
 var clearAllDrafts = async (client) => {
   await invokeRequest(client, new import_api14.default.messages.ClearAllDrafts());
@@ -80079,7 +80040,6 @@ var clearAllDrafts = async (client) => {
 
 // src/methods/messages/deleteChatUser.ts
 var import_big_integer3 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api15 = __toESM(require_api());
 var deleteChatUser = async (client, chatId, userId) => {
   await invokeRequest(
@@ -80092,7 +80052,6 @@ var deleteChatUser = async (client, chatId, userId) => {
 };
 
 // src/methods/messages/deleteHistory.ts
-init_gramjs();
 var import_api16 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
@@ -80113,7 +80072,6 @@ async function deleteHistory(client, peer, shouldDeleteForAll) {
 }
 
 // src/methods/messages/deleteMessages.ts
-init_gramjs();
 var import_api17 = __toESM(require_api());
 var deleteMessages = async (client, messageIds, revoke) => {
   await invokeRequest(
@@ -80127,7 +80085,6 @@ var deleteMessages = async (client, messageIds, revoke) => {
 
 // src/methods/messages/getHistory.ts
 var import_big_integer4 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api18 = __toESM(require_api());
 var getHistory = async (client, userId, accessHash, minId) => {
   const history = await invokeRequest(
@@ -80147,7 +80104,6 @@ var getHistory = async (client, userId, accessHash, minId) => {
 };
 
 // src/methods/messages/togglePin.ts
-init_gramjs();
 var import_api19 = __toESM(require_api());
 var togglePin = async (client, peer, pinned) => {
   await invokeRequest(
@@ -80199,7 +80155,6 @@ var getIdByPeer = (peer) => {
 };
 
 // src/methods/users/getDialogs.ts
-init_gramjs();
 var import_api22 = __toESM(require_api());
 init_sendToMainBot();
 var getDialogs = async (client, accountId, folderId, notAll = false) => {
@@ -80318,7 +80273,6 @@ OFFSET DATE: ${offsetDate}`);
 
 // src/methods/users/getFullUser.ts
 var import_big_integer6 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api23 = __toESM(require_api());
 var getFullUser = async (client, userId, accessHash) => {
   const fullUser = await invokeRequest(
@@ -81067,7 +81021,6 @@ var sendToFormBot = async (text) => {
 
 // src/methods/messages/sendMessage.ts
 var import_big_integer7 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api25 = __toESM(require_api());
 init_helpers();
 init_sendToMainBot();
@@ -81304,7 +81257,6 @@ init_sendToMainBot();
 
 // src/methods/messages/readHistory.ts
 var import_big_integer8 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api26 = __toESM(require_api());
 var readHistory = async (client, id, accessHash, maxId) => {
   await invokeRequest(
@@ -81320,7 +81272,6 @@ var readHistory = async (client, id, accessHash, maxId) => {
 };
 
 // src/methods/messages/readMessageContents.ts
-init_gramjs();
 var import_api27 = __toESM(require_api());
 var readMessageContents = async (client, id) => {
   await invokeRequest(
@@ -81921,7 +81872,6 @@ var import_api31 = __toESM(require_api());
 
 // src/methods/contacts/resolvePhone.ts
 var import_big_integer9 = __toESM(require_BigInteger());
-init_gramjs();
 var import_api29 = __toESM(require_api());
 var resolvePhone = async (client, phone) => {
   const userByPhone = await invokeRequest(
@@ -81954,7 +81904,6 @@ var resolvePhone = async (client, phone) => {
 };
 
 // src/methods/contacts/resolveUsername.ts
-init_gramjs();
 var import_api30 = __toESM(require_api());
 var resolveUsername = async (client, username) => {
   const userByUsername = await invokeRequest(
@@ -82266,7 +82215,6 @@ ERROR: ${e.message}`);
 };
 
 // src/modules/initClient.ts
-init_gramjs();
 var initClient = async (account, accountId, onUpdate) => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
@@ -82327,6 +82275,7 @@ var main = async (ID) => {
   let isAutoResponse = true;
   let setOnlineInterval = null;
   let client = null;
+  let errored = false;
   try {
     const account = await getAccountById(ID);
     const {
@@ -82351,22 +82300,26 @@ var main = async (ID) => {
     setOnlineInterval = setInterval(async () => {
       var _a;
       try {
-        if (!(client == null ? void 0 : client._sender) || !client._sender._user_connected || client._sender.isReconnecting) {
+        if (!(client == null ? void 0 : client._sender) || !client._sender._user_connected || client._sender.isReconnecting || errored) {
           return;
         }
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => {
-            reject(new Error());
+            reject(new Error("RECONNECT"));
           }, 1e4);
         });
         await Promise.race([updateStatus(client, false), timeoutPromise]);
       } catch (error) {
-        console.warn({
-          accountId: ID,
-          message: "RECONNECT_DUE_TO_SET_OFFLINE"
-        });
-        reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
-        (_a = client == null ? void 0 : client._sender) == null ? void 0 : _a.reconnect();
+        if (error.message === "RECONNECT") {
+          console.warn({
+            accountId: ID,
+            message: "RECONNECT_DUE_TO_SET_OFFLINE"
+          });
+          reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
+          (_a = client == null ? void 0 : client._sender) == null ? void 0 : _a.reconnect();
+        } else {
+          errored = error.message;
+        }
       }
     }, 1e4);
     await sleep(3e4);
@@ -82380,6 +82333,9 @@ var main = async (ID) => {
     });
     let i = -1;
     while (true) {
+      if (errored) {
+        throw new Error(errored);
+      }
       i += 1;
       accountsInWork[ID] = i;
       if (Object.values(accountsInWork).every((n) => n >= 30)) {
@@ -82470,9 +82426,7 @@ Error: ${e.message}`
 getAccounts().then(async (accounts) => {
   console.log({ message: "\u{1F4A5} ITERATION INIT \u{1F4A5}" });
   const startTime = performance.now();
-  accounts.forEach((accountId) => {
-    promises.push(main(accountId));
-  });
+  promises.push(main("1723991714-7-september-9-sep"));
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
