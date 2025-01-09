@@ -82131,9 +82131,7 @@ var autoSender = async (client, accountId, telegramId) => {
   }
   if (!accountId.includes("-prefix-")) {
     const weekday = getWeekday();
-    if (weekday === "Sat" || weekday === "Sun") {
-      return;
-    }
+    return;
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
