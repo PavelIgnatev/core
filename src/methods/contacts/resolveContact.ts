@@ -13,13 +13,20 @@ export const resolveContact = async (
   const resolveMethod = contact.includes('+') ? resolvePhone : resolveUsername;
   const resolvedContact = await resolveMethod(client, contact);
 
-  if (
-    !resolvedContact ||
-    !resolvedContact.users.length ||
-    resolvedContact.users[0] instanceof GramJs.UserEmpty ||
-    !resolvedContact.users[0].accessHash
-  ) {
-    throw new Error('USERNAME_INVALID');
+  if (!resolvedContact) {
+    throw new Error('CONTACT_NOT_RESOLVED');
+  }
+
+  if (!resolvedContact.users.length) {
+    throw new Error('CONTACT_USERS_LENGTH');
+  }
+
+  if (resolvedContact.users[0] instanceof GramJs.UserEmpty) {
+    throw new Error('CONTACT_USER_EMPTY');
+  }
+
+  if (!resolvedContact.users[0].accessHash) {
+    throw new Error('ACCESS_HASH_NOT_FOUND');
   }
 
   const { id: userId, accessHash } = resolvedContact.users[0];

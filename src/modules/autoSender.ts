@@ -163,12 +163,21 @@ export const autoSender = async (
           [
             'PHONE_NOT_OCCUPIED',
             'USERNAME_NOT_OCCUPIED',
-            'USERNAME_INVALID',
+            'USER_NOT_FOUND',
+            'CONTACT_NOT_RESOLVED',
+            'CONTACT_INVALID',
+            'ACCESS_HASH_NOT_FOUND',
+            'CONTACT_USER_EMPTY',
+            'CONTACT_USERS_LENGTH',
             'USER_SPECIAL_PARAMS',
             'DIALOG_DUPLICATE',
           ].includes(e.message)
         ) {
-          await updateFailedMessage(recipient.username, recipient.groupId, e.message);
+          await updateFailedMessage(
+            recipient.username,
+            recipient.groupId,
+            e.message
+          );
           continue;
         }
         errorSender[accountId] = 1;

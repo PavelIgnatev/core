@@ -81951,8 +81951,17 @@ var resolveUsername = async (client, username) => {
 var resolveContact = async (client, contact) => {
   const resolveMethod = contact.includes("+") ? resolvePhone : resolveUsername;
   const resolvedContact = await resolveMethod(client, contact);
-  if (!resolvedContact || !resolvedContact.users.length || resolvedContact.users[0] instanceof import_api31.default.UserEmpty || !resolvedContact.users[0].accessHash) {
-    throw new Error("USERNAME_INVALID");
+  if (!resolvedContact) {
+    throw new Error("CONTACT_NOT_RESOLVED");
+  }
+  if (!resolvedContact.users.length) {
+    throw new Error("CONTACT_USERS_LENGTH");
+  }
+  if (resolvedContact.users[0] instanceof import_api31.default.UserEmpty) {
+    throw new Error("CONTACT_USER_EMPTY");
+  }
+  if (!resolvedContact.users[0].accessHash) {
+    throw new Error("ACCESS_HASH_NOT_FOUND");
   }
   const { id: userId, accessHash } = resolvedContact.users[0];
   const fullUser = await getFullUser(
@@ -82204,11 +82213,20 @@ var autoSender = async (client, accountId, telegramId) => {
         if ([
           "PHONE_NOT_OCCUPIED",
           "USERNAME_NOT_OCCUPIED",
-          "USERNAME_INVALID",
+          "USER_NOT_FOUND",
+          "CONTACT_NOT_RESOLVED",
+          "CONTACT_INVALID",
+          "ACCESS_HASH_NOT_FOUND",
+          "CONTACT_USER_EMPTY",
+          "CONTACT_USERS_LENGTH",
           "USER_SPECIAL_PARAMS",
           "DIALOG_DUPLICATE"
         ].includes(e.message)) {
-          await updateFailedMessage(recipient.username, recipient.groupId, e.message);
+          await updateFailedMessage(
+            recipient.username,
+            recipient.groupId,
+            e.message
+          );
           continue;
         }
         errorSender[accountId] = 1;
