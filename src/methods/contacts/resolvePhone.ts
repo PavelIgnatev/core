@@ -30,27 +30,5 @@ export const resolvePhone = async (client: TelegramClient, phone: string) => {
     return userByPhone;
   }
 
-  const result = await invokeRequest(
-    client,
-    new GramJs.contacts.ImportContacts({
-      contacts: [
-        new GramJs.InputPhoneContact({
-          clientId: BigInt(1),
-          phone,
-          firstName: phone,
-          lastName: '',
-        }),
-      ],
-    })
-  );
-
-  if (
-    result instanceof GramJs.contacts.ImportedContacts &&
-    result.users.length
-  ) {
-    await sendToMainBot(`ResolvePhone not detected, ImportContacts detected`);
-    return result;
-  }
-
   return null;
 };

@@ -65372,7 +65372,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/common/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer2(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -65380,14 +65380,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt = BigInt11(randBuffer.toString("hex"), 16);
+      let bigInt = BigInt10(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
-        bigInt = bigInt.subtract(BigInt11(2).pow(BigInt11(bytesNumber * 8)));
+        bigInt = bigInt.subtract(BigInt10(2).pow(BigInt10(bytesNumber * 8)));
       }
       return bigInt;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt11(big);
+      const bigNumber = BigInt10(big);
       const byteArray = [];
       for (let i = 0; i < number; i++) {
         byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
@@ -65395,17 +65395,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-      bigInt = BigInt11(bigInt);
+      bigInt = BigInt10(bigInt);
       const bitLength = bigInt.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt.lesser(BigInt11(0))) {
+      if (!signed && bigInt.lesser(BigInt10(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt.lesser(BigInt11(0))) {
+      if (bigInt.lesser(BigInt10(0))) {
         below = true;
         bigInt = bigInt.abs();
       }
@@ -65472,12 +65472,12 @@ var require_Helpers = __commonJS({
     }
     function modExp(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt11.one;
+      let result = BigInt10.one;
       let x = a;
-      while (b.greater(BigInt11.zero)) {
-        const leastSignificantBit = b.remainder(BigInt11(2));
-        b = b.divide(BigInt11(2));
-        if (leastSignificantBit.eq(BigInt11.one)) {
+      while (b.greater(BigInt10.zero)) {
+        const leastSignificantBit = b.remainder(BigInt10(2));
+        b = b.divide(BigInt10(2));
+        if (leastSignificantBit.eq(BigInt10.one)) {
           result = result.multiply(x);
           result = result.remainder(n);
         }
@@ -65489,7 +65489,7 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt(BigInt11(integer), byteLength, false, signed);
+      return readBufferFromBigInt(BigInt10(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
@@ -70905,7 +70905,7 @@ var require_BinaryReader = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/common/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers = require_Helpers();
     var IGE = require_IGE();
@@ -70954,7 +70954,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt11(0);
+        this._lastMsgId = BigInt10(0);
         this.msgIds = [];
       }
       /**
@@ -71193,9 +71193,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt11(Math.floor(now)).shiftLeft(BigInt11(32)).or(BigInt11(nanoseconds).shiftLeft(BigInt11(2)));
+        let newMsgId = BigInt10(Math.floor(now)).shiftLeft(BigInt10(32)).or(BigInt10(nanoseconds).shiftLeft(BigInt10(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt11(4));
+          newMsgId = this._lastMsgId.add(BigInt10(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -71207,7 +71207,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt11(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt10(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -71218,10 +71218,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt11(32));
+        const correct = correctMsgId.shiftRight(BigInt10(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt11(0);
+          this._lastMsgId = BigInt10(0);
         }
         return this.timeOffset;
       }
@@ -77730,7 +77730,7 @@ var require_TCPFull = __commonJS({
 var require_TCPAbridged = __commonJS({
   "src/common/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt11 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var { readBufferFromBigInt } = require_Helpers();
     var { Connection, PacketCodec } = require_Connection();
     var AbridgedPacketCodec = class _AbridgedPacketCodec extends PacketCodec {
@@ -77750,7 +77750,7 @@ var require_TCPAbridged = __commonJS({
         } else {
           length = Buffer.concat([
             Buffer.from("7f", "hex"),
-            readBufferFromBigInt(BigInt11(length), 3)
+            readBufferFromBigInt(BigInt10(length), 3)
           ]);
         }
         return Buffer.concat([length, data]);
@@ -81882,9 +81882,7 @@ init_sendToMainBot();
 var import_api31 = __toESM(require_api());
 
 // src/methods/contacts/resolvePhone.ts
-var import_big_integer9 = __toESM(require_BigInteger());
 var import_api29 = __toESM(require_api());
-init_sendToMainBot();
 var resolvePhone = async (client, phone) => {
   const stableResult = await invokeRequest(
     client,
@@ -81905,23 +81903,6 @@ var resolvePhone = async (client, phone) => {
   );
   if (userByPhone) {
     return userByPhone;
-  }
-  const result = await invokeRequest(
-    client,
-    new import_api29.default.contacts.ImportContacts({
-      contacts: [
-        new import_api29.default.InputPhoneContact({
-          clientId: (0, import_big_integer9.default)(1),
-          phone,
-          firstName: phone,
-          lastName: ""
-        })
-      ]
-    })
-  );
-  if (result instanceof import_api29.default.contacts.ImportedContacts && result.users.length) {
-    await sendToMainBot(`ResolvePhone not detected, ImportContacts detected`);
-    return result;
   }
   return null;
 };
