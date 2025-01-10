@@ -10,6 +10,7 @@ import {
   getWeekday,
   peerFloods,
   sleep,
+  stableResultError,
   startSender,
 } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
@@ -40,9 +41,9 @@ export const autoSender = async (
 
   if (!accountId.includes('-prefix-')) {
     const weekday = getWeekday();
-    // if (weekday === 'Sat' || weekday === 'Sun') {
+    if (weekday === 'Sat' || weekday === 'Sun') {
       return;
-    // }
+    }
   }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
@@ -159,6 +160,20 @@ export const autoSender = async (
         endSender[accountId] = 1;
         break;
       } catch (e: any) {
+        if (e.message === 'STABLE_RESULT_NOT_FOUND') {
+          await updateSendMessage(recipient.username, recipient.groupId, {
+            p: null,
+          });
+
+          if (stableResultError[accountId] > 1) {
+            return;
+          }
+
+          stableResultError[accountId] =
+            (stableResultError[accountId] || 0) + 1;
+          continue;
+        }
+
         if (
           [
             'PHONE_NOT_OCCUPIED',

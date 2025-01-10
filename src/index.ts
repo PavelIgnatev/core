@@ -16,6 +16,7 @@ import {
   peerFloods,
   reconnectErrors,
   sleep,
+  stableResultError,
   startSender,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
@@ -246,12 +247,14 @@ getAccounts().then(async (accounts) => {
       peerFloods,
       reconnectErrors,
       iterationErrors,
+      stableResultError,
     });
     await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
 ИНИЦИИРОВАНО ОТПРАВОК: ${Object.keys(startSender).length}
 ПОДТВЕРЖДЕНО ОТПРАВОК: ${Object.keys(endSender).length}
 КОЛИЧЕСТВО ОШИБОК: ${Object.keys(errorSender).length}
 КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}
+КОЛИЧЕСТВО STABLE RESULT ERRORS: ${Object.keys(stableResultError).length}
 КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);

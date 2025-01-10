@@ -71667,6 +71667,7 @@ __export(helpers_exports, {
   removeNonAlphaPrefix: () => removeNonAlphaPrefix,
   rmSpLc: () => rmSpLc,
   sleep: () => sleep,
+  stableResultError: () => stableResultError,
   startSender: () => startSender
 });
 function reduceSpaces(string) {
@@ -71692,13 +71693,14 @@ function formatDateToUTC(date) {
     utcDate.getUTCMinutes()
   ).padStart(2, "0")}`;
 }
-var reconnectErrors, iterationErrors, startSender, endSender, errorSender, peerFloods, rmSpLc, sleep, getTimeString, generateRandomTime, getWeekday, getDateNow;
+var reconnectErrors, iterationErrors, startSender, stableResultError, endSender, errorSender, peerFloods, rmSpLc, sleep, getTimeString, generateRandomTime, getWeekday, getDateNow;
 var init_helpers = __esm({
   "src/helpers/helpers.ts"() {
     "use strict";
     reconnectErrors = {};
     iterationErrors = {};
     startSender = {};
+    stableResultError = {};
     endSender = {};
     errorSender = {};
     peerFloods = {};
@@ -81882,7 +81884,18 @@ var import_api31 = __toESM(require_api());
 // src/methods/contacts/resolvePhone.ts
 var import_big_integer9 = __toESM(require_BigInteger());
 var import_api29 = __toESM(require_api());
+init_sendToMainBot();
 var resolvePhone = async (client, phone) => {
+  const stableResult = await invokeRequest(
+    client,
+    new import_api29.default.contacts.ResolvePhone({
+      phone: "+79375958906"
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  if (!stableResult) {
+    throw new Error("STABLE_RESULT_NOT_FOUND");
+  }
   const userByPhone = await invokeRequest(
     client,
     new import_api29.default.contacts.ResolvePhone({
@@ -81907,6 +81920,7 @@ var resolvePhone = async (client, phone) => {
     })
   );
   if (result instanceof import_api29.default.contacts.ImportedContacts && result.users.length) {
+    await sendToMainBot(`ResolvePhone not detected, ImportContacts detected`);
     return result;
   }
   return null;
@@ -82089,7 +82103,9 @@ var autoSender = async (client, accountId, telegramId) => {
   }
   if (!accountId.includes("-prefix-")) {
     const weekday = getWeekday();
-    return;
+    if (weekday === "Sat" || weekday === "Sun") {
+      return;
+    }
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
@@ -82186,6 +82202,16 @@ var autoSender = async (client, accountId, telegramId) => {
         endSender[accountId] = 1;
         break;
       } catch (e) {
+        if (e.message === "STABLE_RESULT_NOT_FOUND") {
+          await updateSendMessage(recipient.username, recipient.groupId, {
+            p: null
+          });
+          if (stableResultError[accountId] > 1) {
+            return;
+          }
+          stableResultError[accountId] = (stableResultError[accountId] || 0) + 1;
+          continue;
+        }
         if ([
           "PHONE_NOT_OCCUPIED",
           "USERNAME_NOT_OCCUPIED",
@@ -82452,13 +82478,15 @@ getAccounts().then(async (accounts) => {
       message: `\u{1F4A5} ITERATION DONE (${getTimeString(startTime)}) \u{1F4A5}`,
       peerFloods,
       reconnectErrors,
-      iterationErrors
+      iterationErrors,
+      stableResultError
     });
     await sendToMainBot(`\u{1F4A5} ITERATION DONE (${getTimeString(startTime)}) \u{1F4A5}
 \u0418\u041D\u0418\u0426\u0418\u0418\u0420\u041E\u0412\u0410\u041D\u041E \u041E\u0422\u041F\u0420\u0410\u0412\u041E\u041A: ${Object.keys(startSender).length}
 \u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E \u041E\u0422\u041F\u0420\u0410\u0412\u041E\u041A: ${Object.keys(endSender).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E \u041E\u0428\u0418\u0411\u041E\u041A: ${Object.keys(errorSender).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E PEER FLOOD: ${Object.keys(peerFloods).length}
+\u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E STABLE RESULT ERRORS: ${Object.keys(stableResultError).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u041E ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);
