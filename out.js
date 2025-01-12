@@ -79996,7 +79996,7 @@ FILE_NAME: ${file.name}`);
 };
 
 // src/modules/automaticCheck.ts
-var import_api24 = __toESM(require_api());
+var import_api23 = __toESM(require_api());
 init_sendToMainBot();
 
 // src/methods/channels/leaveChannel.ts
@@ -80094,79 +80094,59 @@ var deleteMessages = async (client, messageIds, revoke) => {
   );
 };
 
-// src/methods/messages/getHistory.ts
-var import_big_integer4 = __toESM(require_BigInteger());
-var import_api18 = __toESM(require_api());
-var getHistory = async (client, userId, accessHash, minId) => {
-  const history = await invokeRequest(
-    client,
-    new import_api18.default.messages.GetHistory({
-      peer: new import_api18.default.InputPeerUser({
-        userId: (0, import_big_integer4.default)(userId),
-        accessHash: (0, import_big_integer4.default)(accessHash)
-      }),
-      minId
-    })
-  );
-  if (!history || history instanceof import_api18.default.messages.MessagesNotModified) {
-    return [];
-  }
-  return history.messages.filter((m) => m instanceof import_api18.default.Message);
-};
-
 // src/methods/messages/togglePin.ts
-var import_api19 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 var togglePin = async (client, peer, pinned) => {
   await invokeRequest(
     client,
-    new import_api19.default.messages.ToggleDialogPin({ peer, pinned })
+    new import_api18.default.messages.ToggleDialogPin({ peer, pinned })
   );
 };
 
 // src/methods/peer/buildInputPeer.ts
-var import_big_integer5 = __toESM(require_BigInteger());
-var import_api20 = __toESM(require_api());
+var import_big_integer4 = __toESM(require_BigInteger());
+var import_api19 = __toESM(require_api());
 function buildInputPeer(dialog) {
   const { type } = dialog;
   if (type === "user") {
     const { user } = dialog;
-    return new import_api20.default.InputPeerUser({
+    return new import_api19.default.InputPeerUser({
       userId: user.id,
-      accessHash: (0, import_big_integer5.default)(user.accessHash)
+      accessHash: (0, import_big_integer4.default)(user.accessHash)
     });
   } else if (type === "channel") {
     const { chat } = dialog;
-    if (chat instanceof import_api20.default.ChatEmpty || chat instanceof import_api20.default.Chat || chat instanceof import_api20.default.ChatForbidden) {
-      return new import_api20.default.InputPeerChat({
+    if (chat instanceof import_api19.default.ChatEmpty || chat instanceof import_api19.default.Chat || chat instanceof import_api19.default.ChatForbidden) {
+      return new import_api19.default.InputPeerChat({
         chatId: chat.id
       });
     }
-    return new import_api20.default.InputPeerChannel({
+    return new import_api19.default.InputPeerChannel({
       channelId: chat.id,
-      accessHash: (0, import_big_integer5.default)(chat.accessHash)
+      accessHash: (0, import_big_integer4.default)(chat.accessHash)
     });
   }
-  return new import_api20.default.InputPeerChat({
+  return new import_api19.default.InputPeerChat({
     chatId: dialog.chat.id
   });
 }
 
 // src/methods/peer/getIdByPeer.ts
-var import_api21 = __toESM(require_api());
+var import_api20 = __toESM(require_api());
 var getIdByPeer = (peer) => {
   if (!peer) {
     return "-1";
   }
-  if (peer instanceof import_api21.default.PeerUser) {
+  if (peer instanceof import_api20.default.PeerUser) {
     return String(peer.userId);
-  } else if (peer instanceof import_api21.default.PeerChannel) {
+  } else if (peer instanceof import_api20.default.PeerChannel) {
     return String(peer.channelId);
   }
   return String(peer.chatId);
 };
 
 // src/methods/users/getDialogs.ts
-var import_api22 = __toESM(require_api());
+var import_api21 = __toESM(require_api());
 init_sendToMainBot();
 var getDialogs = async (client, accountId, folderId, notAll = false) => {
   const dialogs = [];
@@ -80174,18 +80154,18 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
   while (true) {
     const d = await invokeRequest(
       client,
-      new import_api22.default.messages.GetDialogs({
-        offsetPeer: new import_api22.default.InputPeerEmpty(),
+      new import_api21.default.messages.GetDialogs({
+        offsetPeer: new import_api21.default.InputPeerEmpty(),
         folderId,
         limit: 100,
         offsetDate
       })
     );
-    if (!d || d instanceof import_api22.default.messages.DialogsNotModified) {
+    if (!d || d instanceof import_api21.default.messages.DialogsNotModified) {
       return [];
     }
     for (const dialog of d.dialogs) {
-      if (!(dialog instanceof import_api22.default.Dialog) || dialogs.find(
+      if (!(dialog instanceof import_api21.default.Dialog) || dialogs.find(
         ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
       )) {
         continue;
@@ -80208,14 +80188,14 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
         return [];
       }
-      if (dialog.peer instanceof import_api22.default.PeerUser) {
+      if (dialog.peer instanceof import_api21.default.PeerUser) {
         const user = d.users.find((m) => String(m.id) === id);
-        if (!user || user instanceof import_api22.default.UserEmpty || !user.accessHash) {
+        if (!user || user instanceof import_api21.default.UserEmpty || !user.accessHash) {
           await sendToMainBot(`** GET USERS: USER ERROR **
 ACCOUNT_ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-EMPTY_USER: ${user instanceof import_api22.default.UserEmpty} 
-USER_ACCESS_HASH: ${user instanceof import_api22.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
+EMPTY_USER: ${user instanceof import_api21.default.UserEmpty} 
+USER_ACCESS_HASH: ${user instanceof import_api21.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
           return [];
         }
         dialogs.push({
@@ -80225,13 +80205,13 @@ USER_ACCESS_HASH: ${user instanceof import_api22.default.UserEmpty ? "false" : B
           message,
           chat: null
         });
-      } else if (dialog.peer instanceof import_api22.default.PeerChat) {
+      } else if (dialog.peer instanceof import_api21.default.PeerChat) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api22.default.ChannelForbidden || chat instanceof import_api22.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api21.default.ChannelForbidden || chat instanceof import_api21.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHAT ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api22.default.ChannelForbidden || chat instanceof import_api22.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api21.default.ChannelForbidden || chat instanceof import_api21.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -80242,13 +80222,13 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           message,
           user: null
         });
-      } else if (dialog.peer instanceof import_api22.default.PeerChannel) {
+      } else if (dialog.peer instanceof import_api21.default.PeerChannel) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api22.default.ChannelForbidden || chat instanceof import_api22.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api21.default.ChannelForbidden || chat instanceof import_api21.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHANNEL ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api22.default.ChannelForbidden || chat instanceof import_api22.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api21.default.ChannelForbidden || chat instanceof import_api21.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -80268,11 +80248,11 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
       const lastMessage = d.messages.find(
         (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
       );
-      if (!lastMessage || lastMessage instanceof import_api22.default.MessageEmpty) {
+      if (!lastMessage || lastMessage instanceof import_api21.default.MessageEmpty) {
         await sendToMainBot(`** LAST MESSAGE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
-MESSAGE_EMPTY: ${lastMessage instanceof import_api22.default.MessageEmpty}
+MESSAGE_EMPTY: ${lastMessage instanceof import_api21.default.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
         return [];
       }
@@ -80283,15 +80263,15 @@ OFFSET DATE: ${offsetDate}`);
 };
 
 // src/methods/users/getFullUser.ts
-var import_big_integer6 = __toESM(require_BigInteger());
-var import_api23 = __toESM(require_api());
+var import_big_integer5 = __toESM(require_BigInteger());
+var import_api22 = __toESM(require_api());
 var getFullUser = async (client, userId, accessHash) => {
   const fullUser = await invokeRequest(
     client,
-    new import_api23.default.users.GetFullUser({
-      id: new import_api23.default.InputPeerUser({
-        userId: (0, import_big_integer6.default)(userId),
-        accessHash: (0, import_big_integer6.default)(accessHash)
+    new import_api22.default.users.GetFullUser({
+      id: new import_api22.default.InputPeerUser({
+        userId: (0, import_big_integer5.default)(userId),
+        accessHash: (0, import_big_integer5.default)(accessHash)
       })
     })
   );
@@ -80316,14 +80296,14 @@ var automaticCheck = async (client, accountId) => {
       if (dialog.pinned) {
         await togglePin(
           client,
-          new import_api24.default.InputDialogPeer({
+          new import_api23.default.InputDialogPeer({
             peer
           }),
           void 0
         );
       }
       folderPeers.push(
-        new import_api24.default.InputFolderPeer({
+        new import_api23.default.InputFolderPeer({
           peer,
           folderId: 0
         })
@@ -80343,11 +80323,11 @@ var automaticCheck = async (client, accountId) => {
         await leaveChannel(client, peer);
       } else if (type === "chat") {
         const { chat } = dialog;
-        if (chat instanceof import_api24.default.Chat || chat instanceof import_api24.default.ChatForbidden || chat instanceof import_api24.default.ChatEmpty) {
+        if (chat instanceof import_api23.default.Chat || chat instanceof import_api23.default.ChatForbidden || chat instanceof import_api23.default.ChatEmpty) {
           await deleteChatUser(
             client,
             String(chat.id),
-            new import_api24.default.InputUserSelf()
+            new import_api23.default.InputUserSelf()
           );
           await deleteHistory(client, peer, false);
         } else {
@@ -80355,7 +80335,7 @@ var automaticCheck = async (client, accountId) => {
         }
       } else if (type === "user") {
         const { user } = dialog;
-        if (user instanceof import_api24.default.User && user.bot) {
+        if (user instanceof import_api23.default.User && user.bot) {
           await deleteHistory(client, peer, false);
           await blockContact(client, peer);
         } else if (!dialogsIds.includes(String(user.id))) {
@@ -80368,9 +80348,9 @@ var automaticCheck = async (client, accountId) => {
     if (contacts && contacts.users.length > 0) {
       const users = [];
       for (const user of contacts.users) {
-        if (user instanceof import_api24.default.User && user.accessHash) {
+        if (user instanceof import_api23.default.User && user.accessHash) {
           users.push(
-            new import_api24.default.InputPeerUser({
+            new import_api23.default.InputPeerUser({
               userId: user.id,
               accessHash: user.accessHash
             })
@@ -80393,7 +80373,7 @@ var automaticCheck = async (client, accountId) => {
       } = accountDialogs.find((d) => d.recipientId === userId);
       if (!dialog) {
         const fullUser = await getFullUser(client, id, accessHash);
-        if (!fullUser || !fullUser.users.length || fullUser.users[0] instanceof import_api24.default.UserEmpty) {
+        if (!fullUser || !fullUser.users.length || fullUser.users[0] instanceof import_api23.default.UserEmpty) {
           await sendToMainBot(
             `** AUTOMATIC: FULL USER NOT FOUND **
 ACCOUNT_ID: ${accountId}
@@ -80409,7 +80389,7 @@ ACCESS_HASH: ${accessHash}`
             userId,
             "automatic:account-deleted"
           );
-        } else if (!user.status || user.status instanceof import_api24.default.UserStatusEmpty) {
+        } else if (!user.status || user.status instanceof import_api23.default.UserStatusEmpty) {
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -80423,16 +80403,6 @@ ACCESS_HASH: ${accessHash}`
             "automatic:artificial-blocked"
           );
         } else {
-          const history = await getHistory(client, id, accessHash);
-          if (history.length) {
-            await sendToMainBot(
-              `** AUTOMATIC: MISSING MESSAGES NOT DELETED FOR AUTOMATIC REASON **
-ACCOUNT_ID: ${accountId}
-ID: ${id}
-ACCESS_HASH: ${accessHash}`
-            );
-            continue;
-          }
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -80456,7 +80426,7 @@ DIALOG: ${JSON.stringify(dialog)}`
             userId,
             "automatic:account-deleted"
           );
-        } else if (!user.status || user.status instanceof import_api24.default.UserStatusEmpty) {
+        } else if (!user.status || user.status instanceof import_api23.default.UserStatusEmpty) {
           await updateAutomaticDialogue(
             accountId,
             userId,
@@ -80469,11 +80439,11 @@ DIALOG: ${JSON.stringify(dialog)}`
             userId,
             "automatic:artificial-blocked"
           );
-        } else if (!(message instanceof import_api24.default.Message)) {
-          if (message instanceof import_api24.default.MessageEmpty) {
+        } else if (!(message instanceof import_api23.default.Message)) {
+          if (message instanceof import_api23.default.MessageEmpty) {
             await deleteMessages(client, [message.id], true);
           } else {
-            if (message.action instanceof import_api24.default.MessageActionHistoryClear) {
+            if (message.action instanceof import_api23.default.MessageActionHistoryClear) {
               await updateAutomaticDialogue(
                 accountId,
                 userId,
@@ -80485,13 +80455,13 @@ DIALOG: ${JSON.stringify(dialog)}`
             }
           }
         }
-        const lastOnline = user.status instanceof import_api24.default.UserStatusOffline ? user.status.wasOnline : user.status instanceof import_api24.default.UserStatusOnline ? user.status.expires : null;
+        const lastOnline = user.status instanceof import_api23.default.UserStatusOffline ? user.status.wasOnline : user.status instanceof import_api23.default.UserStatusOnline ? user.status.expires : null;
         if (lastOnline !== lastOnlineAccount) {
           await updateSimpleDialogue(accountId, userId, {
             lastOnline
           });
         }
-        if ((dialog.dialog.topMessage <= dialog.dialog.readOutboxMaxId || dialog.dialog.topMessage <= dialog.dialog.readInboxMaxId || (message instanceof import_api24.default.Message ? !message.out : false)) && !readIds.includes(userId)) {
+        if ((dialog.dialog.topMessage <= dialog.dialog.readOutboxMaxId || dialog.dialog.topMessage <= dialog.dialog.readInboxMaxId || (message instanceof import_api23.default.Message ? !message.out : false)) && !readIds.includes(userId)) {
           await updateSimpleDialogue(accountId, userId, {
             read: true,
             dateUpdated: /* @__PURE__ */ new Date()
@@ -81031,8 +81001,8 @@ var sendToFormBot = async (text) => {
 };
 
 // src/methods/messages/sendMessage.ts
-var import_big_integer7 = __toESM(require_BigInteger());
-var import_api25 = __toESM(require_api());
+var import_big_integer6 = __toESM(require_BigInteger());
+var import_api24 = __toESM(require_api());
 init_helpers();
 init_sendToMainBot();
 var logPeerFloodError = async (message, accountId, userId) => {
@@ -81067,12 +81037,12 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
       for (let i = 0; i < iterations; i++) {
         await invokeRequest(
           client,
-          new import_api25.default.messages.SetTyping({
-            peer: new import_api25.default.InputPeerUser({
-              userId: (0, import_big_integer7.default)(userId),
-              accessHash: (0, import_big_integer7.default)(accessHash)
+          new import_api24.default.messages.SetTyping({
+            peer: new import_api24.default.InputPeerUser({
+              userId: (0, import_big_integer6.default)(userId),
+              accessHash: (0, import_big_integer6.default)(accessHash)
             }),
-            action: new import_api25.default.SendMessageTypingAction()
+            action: new import_api24.default.SendMessageTypingAction()
           })
         );
         await sleep(5e3);
@@ -81080,25 +81050,25 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     }
     const update = await invokeRequest(
       client,
-      new import_api25.default.messages.SendMessage({
+      new import_api24.default.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))
         ),
         clearDraft: true,
-        peer: new import_api25.default.InputPeerUser({
-          userId: (0, import_big_integer7.default)(userId),
-          accessHash: (0, import_big_integer7.default)(accessHash)
+        peer: new import_api24.default.InputPeerUser({
+          userId: (0, import_big_integer6.default)(userId),
+          accessHash: (0, import_big_integer6.default)(accessHash)
         }),
-        randomId: (0, import_big_integer7.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+        randomId: (0, import_big_integer6.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
       })
     );
     if (!update) {
       messageUpdate = null;
-    } else if (update instanceof import_api25.default.UpdateShortSentMessage || update instanceof import_api25.default.UpdateMessageID) {
+    } else if (update instanceof import_api24.default.UpdateShortSentMessage || update instanceof import_api24.default.UpdateMessageID) {
       messageUpdate = update;
     } else if ("updates" in update) {
       messageUpdate = update.updates.find(
-        (u) => u instanceof import_api25.default.UpdateMessageID
+        (u) => u instanceof import_api24.default.UpdateMessageID
       );
     }
     if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
@@ -81107,10 +81077,10 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     if (message !== "/start") {
       await invokeRequest(
         client,
-        new import_api25.default.messages.ReadHistory({
-          peer: new import_api25.default.InputPeerUser({
-            userId: (0, import_big_integer7.default)(userId),
-            accessHash: (0, import_big_integer7.default)(accessHash)
+        new import_api24.default.messages.ReadHistory({
+          peer: new import_api24.default.InputPeerUser({
+            userId: (0, import_big_integer6.default)(userId),
+            accessHash: (0, import_big_integer6.default)(accessHash)
           }),
           maxId: messageUpdate.id
         })
@@ -81231,18 +81201,10 @@ var saveRecipient = async (accountId, recipientId, recipientAccessHash, recipien
             multiplier
           });
         }
-        if (!recipientDb.username) {
-          await sendToMainBot(
-            `** SAVE RECIPIENT: NO USERNAME **
-ACCOUNT_ID: ${accountId}
-RECIPIENT_ID: ${recipientId}`
-          );
-        } else {
-          await updateSendMessage(recipientDb.username, String(groupId), {
-            s: true,
-            p: /* @__PURE__ */ new Date()
-          });
-        }
+        await updateSendMessage(recipientDb.username, String(groupId), {
+          s: true,
+          p: /* @__PURE__ */ new Date()
+        });
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
@@ -81264,7 +81226,26 @@ accountByID: ${JSON.stringify(accountByID)};`);
 
 // src/modules/getClassifiedDialogs.ts
 var import_api28 = __toESM(require_api());
-init_sendToMainBot();
+
+// src/methods/messages/getHistory.ts
+var import_big_integer7 = __toESM(require_BigInteger());
+var import_api25 = __toESM(require_api());
+var getHistory = async (client, userId, accessHash, minId) => {
+  const history = await invokeRequest(
+    client,
+    new import_api25.default.messages.GetHistory({
+      peer: new import_api25.default.InputPeerUser({
+        userId: (0, import_big_integer7.default)(userId),
+        accessHash: (0, import_big_integer7.default)(accessHash)
+      }),
+      minId
+    })
+  );
+  if (!history || history instanceof import_api25.default.messages.MessagesNotModified) {
+    return [];
+  }
+  return history.messages.filter((m) => m instanceof import_api25.default.Message);
+};
 
 // src/methods/messages/readHistory.ts
 var import_big_integer8 = __toESM(require_BigInteger());
@@ -81323,18 +81304,6 @@ var getClassifiedDialogs = async (client, accountId, meId) => {
       automaticReason = null
     } = dialogDb;
     if (blocked || reason || automaticReason) {
-      continue;
-    }
-    if (recipientId !== String(user.id) || recipientAccessHash !== String(user.accessHash)) {
-      await sendToMainBot(
-        `** CLASSIFIED DIALOG: NOT SAME ERROR **
-ACCOUNT_ID: ${accountId}
-GROUP_ID: ${groupId}
-ID: ${recipientId}
-USER_ID: ${user.id}
-ACCESS_HASH: ${recipientAccessHash}
-USER_ACCESS_HASH: ${user.accessHash}`
-      );
       continue;
     }
     const history = await getHistory(client, recipientId, recipientAccessHash);
@@ -82074,7 +82043,7 @@ SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
 var autoSender = async (client, accountId, telegramId) => {
   const account = await getAccountById(accountId);
   const spamBlockDate = await checkSpamBlock(client, account);
-  if (spamBlockDate) {
+  if (spamBlockDate || account.stopSender) {
     return;
   }
   const currentTime = /* @__PURE__ */ new Date();
