@@ -28,7 +28,7 @@ export const autoSender = async (
 ) => {
   const account = await getAccountById(accountId);
   const spamBlockDate = await checkSpamBlock(client, account);
-  if (spamBlockDate) {
+  if (spamBlockDate || account.stopSender) {
     return;
   }
 

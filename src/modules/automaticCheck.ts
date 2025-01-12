@@ -184,18 +184,6 @@ ACCESS_HASH: ${accessHash}`
             'automatic:artificial-blocked'
           );
         } else {
-          // TODO: remove this after testing
-          const history = await getHistory(client, id, accessHash);
-          if (history.length) {
-            await sendToMainBot(
-              `** AUTOMATIC: MISSING MESSAGES NOT DELETED FOR AUTOMATIC REASON **
-ACCOUNT_ID: ${accountId}
-ID: ${id}
-ACCESS_HASH: ${accessHash}`
-            );
-            continue;
-          }
-
           await updateAutomaticDialogue(
             accountId,
             userId,

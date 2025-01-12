@@ -93,19 +93,11 @@ export const saveRecipient = async (
           });
         }
 
-        // TODO: remove this after testing
-        if (!recipientDb.username) {
-          await sendToMainBot(
-            `** SAVE RECIPIENT: NO USERNAME **
-ACCOUNT_ID: ${accountId}
-RECIPIENT_ID: ${recipientId}`
-          );
-        } else {
-          await updateSendMessage(recipientDb.username, String(groupId), {
-            s: true,
-            p: new Date(),
-          });
-        }
+        await updateSendMessage(recipientDb.username!, String(groupId), {
+          s: true,
+          p: new Date(),
+        });
+
         await incrementMessageCount(accountId);
         await incrementCurrentCount(String(groupId));
       }
