@@ -188,6 +188,7 @@ export const autoSender = async (
           ].includes(e.message)
         ) {
           await updateFailedMessage(
+            accountId,
             recipient.username,
             recipient.groupId,
             e.message

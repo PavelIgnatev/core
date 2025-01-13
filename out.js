@@ -81103,11 +81103,11 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
 var getGroupIdUsersCollection = async () => {
   return (await DB()).collection("groupIdUsers");
 };
-var updateFailedMessage = async (username, groupId, reason) => {
+var updateFailedMessage = async (accountId, username, groupId, reason) => {
   const messagesCollection = await getGroupIdUsersCollection();
   await messagesCollection.updateOne(
     { g: groupId, u: username.toLowerCase() },
-    { $set: { f: true, p: /* @__PURE__ */ new Date(), r: reason } },
+    { $set: { f: true, p: /* @__PURE__ */ new Date(), r: reason, a: accountId } },
     { upsert: true }
   );
 };
@@ -82168,6 +82168,7 @@ var autoSender = async (client, accountId, telegramId) => {
           "DIALOG_DUPLICATE"
         ].includes(e.message)) {
           await updateFailedMessage(
+            accountId,
             recipient.username,
             recipient.groupId,
             e.message
