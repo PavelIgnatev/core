@@ -79367,6 +79367,31 @@ var updateDateCheckedIds = async (accountId, ids) => {
     }
   );
 };
+var getRandomPhone = async () => {
+  const dialoguesCollection = await getDialoguesCollection();
+  const oneMonthAgo = /* @__PURE__ */ new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 2);
+  const pipeline = [
+    {
+      $match: {
+        dateCreated: { $gte: oneMonthAgo },
+        recipientPhone: { $ne: null }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        recipientPhone: 1
+      }
+    },
+    { $sample: { size: 1 } }
+  ];
+  const result = await dialoguesCollection.aggregate(pipeline).toArray();
+  if (result.length > 0 && result[0].recipientPhone) {
+    return result[0].recipientPhone;
+  }
+  return null;
+};
 
 // src/methods/update/handleUpdate.ts
 function findValue(obj, valueKey) {
@@ -81853,14 +81878,24 @@ var import_api31 = __toESM(require_api());
 // src/methods/contacts/resolvePhone.ts
 var import_api29 = __toESM(require_api());
 var resolvePhone = async (client, phone) => {
-  const stableResult = await invokeRequest(
-    client,
-    new import_api29.default.contacts.ResolvePhone({
-      phone: "+79375958906"
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  if (!stableResult) {
+  let isStable = false;
+  for (let i = 0; i < 3; i++) {
+    const randomPhone = await getRandomPhone();
+    if (!randomPhone) {
+      throw new Error("RANDOM_PHONE_NOT_FOUND");
+    }
+    const stableResult = await invokeRequest(
+      client,
+      new import_api29.default.contacts.ResolvePhone({
+        phone: `+${randomPhone}`
+      }),
+      { shouldIgnoreErrors: true }
+    );
+    if (stableResult) {
+      isStable = true;
+    }
+  }
+  if (!isStable) {
     throw new Error("STABLE_RESULT_NOT_FOUND");
   }
   const userByPhone = await invokeRequest(
@@ -82050,6 +82085,12 @@ var autoSender = async (client, accountId, telegramId) => {
   const currentUTCHours = currentTime.getUTCHours();
   if (currentUTCHours < 5 || currentUTCHours > 14) {
     return;
+  }
+  if (!accountId.includes("-prefix-")) {
+    const weekday = getWeekday();
+    if (weekday === "Sat" || weekday === "Sun") {
+      return;
+    }
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;

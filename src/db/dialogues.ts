@@ -234,3 +234,33 @@ export const updateDateCheckedIds = async (
     }
   );
 };
+
+export const getRandomPhone = async (): Promise<string | null> => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 2);
+
+  const pipeline = [
+    {
+      $match: {
+        dateCreated: { $gte: oneMonthAgo },
+        recipientPhone: { $ne: null },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        recipientPhone: 1,
+      },
+    },
+    { $sample: { size: 1 } },
+  ];
+
+  const result = await dialoguesCollection.aggregate(pipeline).toArray();
+  if (result.length > 0 && result[0].recipientPhone) {
+    return result[0].recipientPhone;
+  }
+
+  return null;
+};

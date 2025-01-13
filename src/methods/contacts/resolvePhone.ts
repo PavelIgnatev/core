@@ -1,20 +1,31 @@
-import BigInt from 'big-integer';
-
 import { invokeRequest } from '../../common/gramjs';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
-import { sendToMainBot } from '../../helpers/sendToMainBot';
+import { getRandomPhone } from '../../db/dialogues';
 
 export const resolvePhone = async (client: TelegramClient, phone: string) => {
-  const stableResult = await invokeRequest(
-    client,
-    new GramJs.contacts.ResolvePhone({
-      phone: '+79375958906',
-    }),
-    { shouldIgnoreErrors: true }
-  );
+  let isStable = false;
 
-  if (!stableResult) {
+  for (let i = 0; i < 3; i++) {
+    const randomPhone = await getRandomPhone();
+    if (!randomPhone) {
+      throw new Error('RANDOM_PHONE_NOT_FOUND');
+    }
+
+    const stableResult = await invokeRequest(
+      client,
+      new GramJs.contacts.ResolvePhone({
+        phone: `+${randomPhone}`,
+      }),
+      { shouldIgnoreErrors: true }
+    );
+
+    if (stableResult) {
+      isStable = true;
+    }
+  }
+
+  if (!isStable) {
     throw new Error('STABLE_RESULT_NOT_FOUND');
   }
 
