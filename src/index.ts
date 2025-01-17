@@ -14,9 +14,9 @@ import {
   getTimeString,
   iterationErrors,
   peerFloods,
+  phoneSearchError,
   reconnectErrors,
   sleep,
-  phoneSearchError,
   startSender,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
