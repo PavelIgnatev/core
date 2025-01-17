@@ -16,13 +16,12 @@ import {
   peerFloods,
   reconnectErrors,
   sleep,
-  stableResultError,
+  phoneSearchError,
   startSender,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
-import { getFullUser } from './methods/users/getFullUser';
 import { getMe } from './methods/users/getMe';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
@@ -247,14 +246,14 @@ getAccounts().then(async (accounts) => {
       peerFloods,
       reconnectErrors,
       iterationErrors,
-      stableResultError,
+      phoneSearchError,
     });
     await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
 ИНИЦИИРОВАНО ОТПРАВОК: ${Object.keys(startSender).length}
 ПОДТВЕРЖДЕНО ОТПРАВОК: ${Object.keys(endSender).length}
 КОЛИЧЕСТВО ОШИБОК: ${Object.keys(errorSender).length}
 КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}
-КОЛИЧЕСТВО STABLE RESULT ERRORS: ${Object.keys(stableResultError).length}
+КОЛИЧЕСТВО STABLE RESULT ERRORS: ${Object.keys(phoneSearchError).length}
 КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
 КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
     clearInterval(interval);
