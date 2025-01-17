@@ -275,10 +275,8 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
-          k: 30,
-          temperature: 1,
-          presence_penalty: 0.8,
-          p: 0.95,
+          temperature: 0.5,
+          presence_penalty: 0.5,
           model: 'command-r-plus-08-2024',
           messages: fixedMessages,
         }

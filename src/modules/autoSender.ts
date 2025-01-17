@@ -9,8 +9,8 @@ import {
   errorSender,
   getWeekday,
   peerFloods,
+  phoneSearchError,
   sleep,
-  stableResultError,
   startSender,
 } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
@@ -60,6 +60,7 @@ export const autoSender = async (
           client,
           recipient.username
         );
+        console.log(fullContact, contact);
 
         const {
           id,
@@ -160,17 +161,15 @@ export const autoSender = async (
         endSender[accountId] = 1;
         break;
       } catch (e: any) {
-        if (e.message === 'STABLE_RESULT_NOT_FOUND') {
+        if (e.message === 'STABLE_RESULT_ERROR') {
           await updateSendMessage(recipient.username, recipient.groupId, {
             p: null,
           });
 
-          if (stableResultError[accountId] > 1) {
+          if (phoneSearchError[accountId] > 1) {
             return;
           }
-
-          stableResultError[accountId] =
-            (stableResultError[accountId] || 0) + 1;
+          phoneSearchError[accountId] = (phoneSearchError[accountId] || 0) + 1;
           continue;
         }
 
