@@ -60,7 +60,6 @@ export const autoSender = async (
           client,
           recipient.username
         );
-        console.log(fullContact, contact);
 
         const {
           id,
