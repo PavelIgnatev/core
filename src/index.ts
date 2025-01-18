@@ -8,7 +8,6 @@ import util from 'util';
 import { clearAuthorizations } from './common/gramjs/client/auth';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
-import { getSpamBotReason } from './helpers/getSpamBotReason';
 import {
   endSender,
   errorSender,

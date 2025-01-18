@@ -82052,10 +82052,10 @@ var fileComplaint = async (client, userId, accessHash, accountId) => {
   );
   await sleep(5e3);
   const m = await getHistory(client, userId, accessHash, mm.id);
-  if (!(m == null ? void 0 : m[0]) || !((m == null ? void 0 : m[0].message.includes("you like to submit a complaint")) || (m == null ? void 0 : m[0].message.includes("already submitted")))) {
+  if (!(m == null ? void 0 : m[0]) || !((m == null ? void 0 : m[0].message.includes("you like to submit a complaint")) || (m == null ? void 0 : m[0].message.includes("already submitted")) || (m == null ? void 0 : m[0].message.includes("use buttons to communicate with me")))) {
     throw new Error("SPAMBOT_MISTAKE_MESSAGE_NOT_FOUND");
   }
-  if (m[0].message.includes("already submitted")) {
+  if (m[0].message.includes("already submitted") || m[0].message.includes("use buttons to communicate with me")) {
     return;
   }
   const yy = await sendMessage(
