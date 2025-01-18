@@ -5,6 +5,7 @@ import './helpers/setConsole.log';
 
 import util from 'util';
 
+import { Account } from './@types/Account';
 import { clearAuthorizations } from './common/gramjs/client/auth';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
@@ -42,11 +43,12 @@ const main = async (ID: string) => {
 
   let isAutoResponse = true;
   let setOnlineInterval: any = null;
+  let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
 
   try {
-    const account = await getAccountById(ID);
+    const accountByID = await getAccountById(ID);
 
     const {
       dcId,
@@ -55,11 +57,13 @@ const main = async (ID: string) => {
       setuped = false,
       id: tgId,
       firstName,
-    } = account;
+    } = accountByID;
 
     if (![dcId, platform, userAgent].every(Boolean)) {
       throw new Error('NOT_ENOUGH_PARAMS');
     }
+
+    account = accountByID;
 
     client = await initClient(account, ID, (update: any) =>
       handleUpdate(ID, update, () => (isAutoResponse = true))
@@ -173,7 +177,10 @@ const main = async (ID: string) => {
       });
       await sendToMainBot(`** AUTH KEY DUPLICATED **
 ID: ${ID}`);
-      await exec('pm2 kill');
+
+      if (!account?.fucker) {
+        await exec('pm2 kill');
+      }
     } else if (
       [
         'USER_DEACTIVATED_BAN',

@@ -82410,10 +82410,11 @@ var main = async (ID) => {
   });
   let isAutoResponse = true;
   let setOnlineInterval = null;
+  let account = null;
   let client = null;
   let errored = false;
   try {
-    const account = await getAccountById(ID);
+    const accountByID = await getAccountById(ID);
     const {
       dcId,
       platform,
@@ -82421,10 +82422,11 @@ var main = async (ID) => {
       setuped = false,
       id: tgId,
       firstName
-    } = account;
+    } = accountByID;
     if (![dcId, platform, userAgent].every(Boolean)) {
       throw new Error("NOT_ENOUGH_PARAMS");
     }
+    account = accountByID;
     client = await initClient(
       account,
       ID,
@@ -82519,7 +82521,9 @@ var main = async (ID) => {
       });
       await sendToMainBot(`** AUTH KEY DUPLICATED **
 ID: ${ID}`);
-      await exec("pm2 kill");
+      if (!(account == null ? void 0 : account.fucker)) {
+        await exec("pm2 kill");
+      }
     } else if ([
       "USER_DEACTIVATED_BAN",
       "AUTH_KEY_UNREGISTERED",
