@@ -82492,8 +82492,10 @@ var main = async (ID) => {
             isAutoResponse = false;
             await autoResponse(client, ID, meId, tgFirstName);
           }
-          await automaticCheck(client, ID);
-          await autoSender(client, ID, meId);
+          if (i === randomI) {
+            await automaticCheck(client, ID);
+            await autoSender(client, ID, meId);
+          }
           await sleep(6e4);
         })(),
         timeout
