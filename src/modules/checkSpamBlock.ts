@@ -2,11 +2,91 @@ import { Account } from '../@types/Account';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
 import GramJs from '../common/gramjs/tl/api';
 import { updateAccountById } from '../db/accounts';
+import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
+
+const fileComplaint = async (
+  client: TelegramClient,
+  userId: string,
+  accessHash: string,
+  accountId: string
+) => {
+  const mm = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    'This is a mistake',
+    accountId,
+    false,
+    false
+  );
+  await sleep(5000);
+  const m = await getHistory(client, userId, accessHash, mm.id);
+  if (
+    !m?.[0] ||
+    !(
+      m?.[0].message.includes('you like to submit a complaint') ||
+      m?.[0].message.includes('already submitted')
+    )
+  ) {
+    throw new Error('SPAMBOT_MISTAKE_MESSAGE_NOT_FOUND');
+  }
+
+  if (m[0].message.includes('already submitted')) {
+    return;
+  }
+
+  const yy = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    'Yes',
+    accountId,
+    false,
+    false
+  );
+  await sleep(5000);
+  const y = await getHistory(client, userId, accessHash, yy.id);
+  if (!y?.[0] || !y?.[0].message.includes('Did you ever do any of this')) {
+    throw new Error('SPAMBOT_YES_MESSAGE_NOT_FOUND');
+  }
+
+  const nn = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    'No! Never did that!',
+    accountId,
+    false,
+    false
+  );
+  await sleep(5000);
+  const n = await getHistory(client, userId, accessHash, nn.id);
+
+  if (!n?.[0] || !n?.[0].message.includes('what went wrong')) {
+    throw new Error('SPAMBOT_NO_MESSAGE_NOT_FOUND');
+  }
+
+  const reason = await getSpamBotReason(accountId);
+  const rr = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    reason,
+    accountId,
+    false,
+    false
+  );
+  await sleep(5000);
+  const r = await getHistory(client, userId, accessHash, rr.id);
+  if (!r?.[0] || !r?.[0].message.includes('successfully submitted')) {
+    throw new Error('SPAMBOT_SUCCESS_MESSAGE_NOT_FOUND');
+  }
+};
 
 export const checkSpamBlock = async (
   client: TelegramClient,
@@ -26,7 +106,7 @@ export const checkSpamBlock = async (
     !result.users.length ||
     !(result.users[0] instanceof GramJs.User)
   ) {
-    throw new Error('SPAMBOT_NOT_FOUND');
+    throw new Error('SPAMBOT_NOT_USER');
   }
 
   const { id: userId, accessHash, username } = result.users[0];
@@ -40,12 +120,9 @@ export const checkSpamBlock = async (
     String(accessHash),
     '/start',
     accountId,
+    false,
     false
   );
-
-  if (!sentMessage?.id) {
-    throw new Error('SPAMBOT_ID_NOT_FOUND');
-  }
 
   await sleep(5000);
   const messages = await getHistory(
@@ -69,6 +146,8 @@ export const checkSpamBlock = async (
     });
     return false;
   }
+
+  await fileComplaint(client, String(userId), String(accessHash), accountId);
 
   const match = message.match(/until\s(.*)\./);
   const spamBlockDate = match ? match[1].replace('UTC', '').trim() : 'INFINITY';

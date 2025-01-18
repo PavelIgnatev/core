@@ -28,23 +28,23 @@ export const autoSender = async (
 ) => {
   const account = await getAccountById(accountId);
   const spamBlockDate = await checkSpamBlock(client, account);
-  if (spamBlockDate || account.stopSender) {
+  if (spamBlockDate) {
     return;
   }
 
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
+  if (currentUTCHours < 5 || currentUTCHours > 15) {
     return;
   }
 
-  if (!accountId.includes('-prefix-')) {
-    const weekday = getWeekday();
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = getWeekday();
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
@@ -122,6 +122,7 @@ export const autoSender = async (
           String(accessHash),
           firstMessage,
           accountId,
+          false,
           false
         );
         const sentSecondMessage = await sendMessage(
@@ -130,6 +131,7 @@ export const autoSender = async (
           String(accessHash),
           secondMessage,
           accountId,
+          false,
           false
         );
 

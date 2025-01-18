@@ -247,7 +247,8 @@ export async function makeRequestGpt(
   mandatoryQuestion: boolean,
   minimalProposalLength: number,
   isRemoveGreetings: boolean,
-  groupId: string | null
+  groupId: string,
+  aiParams: Record<string, any>
 ) {
   const generations = [];
   const errors: string[] = [];
@@ -275,10 +276,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
-          k: 30,
-          temperature: 1,
-          presence_penalty: 0.8,
-          p: 0.95,
+          ...aiParams,
           model: 'command-r-plus-08-2024',
           messages: fixedMessages,
         }

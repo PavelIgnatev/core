@@ -156,7 +156,8 @@ Current date and time: ${getDateNow()}`,
       stage <= 2,
       stage <= 2 ? 3 : 2,
       true,
-      dialogGroupId
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
     );
 
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
@@ -173,6 +174,7 @@ ${replyMessage}`);
         recipientAccessHash,
         replyMessage.replace(lastQuestion, ''),
         accountId,
+        true,
         true
       );
 
@@ -182,7 +184,8 @@ ${replyMessage}`);
         recipientAccessHash,
         lastQuestion,
         accountId,
-        false
+        false,
+        true
       );
 
       messages.push({
@@ -204,6 +207,7 @@ ${replyMessage}`);
         recipientAccessHash,
         replyMessage,
         accountId,
+        true,
         true
       );
 
@@ -289,7 +293,8 @@ ${messages
       false,
       1,
       false,
-      dialogGroupId
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
     );
 
     const sentPingMessage = await sendMessage(
@@ -298,6 +303,7 @@ ${messages
       recipientAccessHash,
       pingMessage,
       accountId,
+      true,
       true
     );
 
@@ -347,6 +353,7 @@ ${pingMessage}`);
         recipientAccessHash,
         managerMessage,
         accountId,
+        true,
         true
       );
 

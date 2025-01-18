@@ -66,7 +66,8 @@ export const sendMessage = async (
   accessHash: string,
   message: string,
   accountId: string,
-  withTyping: boolean
+  withTyping: boolean,
+  withReadHistory: boolean
 ) => {
   let messageUpdate;
   try {
@@ -121,7 +122,7 @@ export const sendMessage = async (
       throw new Error('MESSAGE_NOT_SENT');
     }
 
-    if (message !== '/start') {
+    if (withReadHistory) {
       await invokeRequest(
         client,
         new GramJs.messages.ReadHistory({

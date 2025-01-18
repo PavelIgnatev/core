@@ -80845,7 +80845,7 @@ function removeGreetings(text) {
   });
   return text.trim();
 }
-async function makeRequestGpt(accountId, messages, part, language, disableLink, mandatoryQuestion, minimalProposalLength, isRemoveGreetings, groupId) {
+async function makeRequestGpt(accountId, messages, part, language, disableLink, mandatoryQuestion, minimalProposalLength, isRemoveGreetings, groupId, aiParams) {
   var _a, _b, _c;
   const generations = [];
   const errors3 = [];
@@ -80870,10 +80870,7 @@ ${errors3.map((error) => `- **${error}**`).join("\n")}`
       const { data: resultData } = await axios_default.post(
         "http://91.198.220.234/chatv2",
         {
-          k: 30,
-          temperature: 1,
-          presence_penalty: 0.8,
-          p: 0.95,
+          ...aiParams,
           model: "command-r-plus-08-2024",
           messages: fixedMessages
         }
@@ -81056,7 +81053,7 @@ UserId: ${userId}
 Message: ${message}`
   );
 };
-var sendMessage = async (client, userId, accessHash, message, accountId, withTyping) => {
+var sendMessage = async (client, userId, accessHash, message, accountId, withTyping, withReadHistory) => {
   let messageUpdate;
   try {
     if (withTyping) {
@@ -81101,7 +81098,7 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
       throw new Error("MESSAGE_NOT_SENT");
     }
-    if (message !== "/start") {
+    if (withReadHistory) {
       await invokeRequest(
         client,
         new import_api24.default.messages.ReadHistory({
@@ -81507,7 +81504,8 @@ Current date and time: ${getDateNow()}`
       stage <= 2,
       stage <= 2 ? 3 : 2,
       true,
-      dialogGroupId
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
     );
     await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
 ID: ${accountId}
@@ -81522,6 +81520,7 @@ ${replyMessage}`);
         recipientAccessHash,
         replyMessage.replace(lastQuestion, ""),
         accountId,
+        true,
         true
       );
       const sentQuestionMessage = await sendMessage(
@@ -81530,7 +81529,8 @@ ${replyMessage}`);
         recipientAccessHash,
         lastQuestion,
         accountId,
-        false
+        false,
+        true
       );
       messages.push({
         id: sentReplyMessage.id,
@@ -81551,6 +81551,7 @@ ${replyMessage}`);
         recipientAccessHash,
         replyMessage,
         accountId,
+        true,
         true
       );
       messages.push({
@@ -81627,7 +81628,8 @@ ${messages.map((m) => ({
       false,
       1,
       false,
-      dialogGroupId
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
     );
     const sentPingMessage = await sendMessage(
       client,
@@ -81635,6 +81637,7 @@ ${messages.map((m) => ({
       recipientAccessHash,
       pingMessage,
       accountId,
+      true,
       true
     );
     messages.push({
@@ -81677,6 +81680,7 @@ ${pingMessage}`);
         recipientAccessHash,
         managerMessage,
         accountId,
+        true,
         true
       );
       messages.push({
@@ -81880,6 +81884,16 @@ var import_api31 = __toESM(require_api());
 // src/methods/contacts/resolvePhone.ts
 var import_api29 = __toESM(require_api());
 var resolvePhone = async (client, phone) => {
+  const contact = await invokeRequest(
+    client,
+    new import_api29.default.contacts.ResolvePhone({
+      phone
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  if (contact) {
+    return contact;
+  }
   const randomPhone = await getRandomPhone();
   if (!randomPhone) {
     throw new Error("RANDOM_PHONE_NOT_FOUND");
@@ -81893,16 +81907,6 @@ var resolvePhone = async (client, phone) => {
   );
   if (!randomContact) {
     throw new Error("STABLE_RESULT_ERROR");
-  }
-  const contact = await invokeRequest(
-    client,
-    new import_api29.default.contacts.ResolvePhone({
-      phone
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  if (contact) {
-    return contact;
   }
   return null;
 };
@@ -81989,8 +81993,115 @@ var getRecipient = async (accountId) => {
 
 // src/modules/checkSpamBlock.ts
 var import_api32 = __toESM(require_api());
+
+// src/helpers/getSpamBotReason.ts
+var randomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+var getSpamBotReason = async (accountId) => {
+  const reasons = [
+    "but not all my contacts know about my account, and I urgently need to reach them",
+    "even though I haven't engaged in spam or committed any violations",
+    "because I need to access communication with important contacts, but I can't do it",
+    "because I need to urgently send a message for work",
+    "since this is the only way to reach some important people"
+  ];
+  return await makeRequestGpt(
+    accountId,
+    [
+      {
+        role: "system",
+        content: `## CONTEXT
+You help to draft an appeal to Telegram support.
+
+## STYLE GUIDE  
+- The appeal must be as simple and concise as possible;
+- Sentence limit: no more than 3;
+- Character limit: no more than 300;
+- Do not directly address support in the appeal;
+- Do not include a greeting;
+- Use an informal tone, avoid formal language;
+- Do not use questions or exclamation marks, as they are not appropriate here.`
+      },
+      {
+        role: "user",
+        content: `Write a short but effective appeal to Telegram support requesting the restoration of my ability to send messages for my account (currently, I can only send messages to mutual contacts, ${randomElement(reasons)}). I believe the restriction on my ability to send messages was imposed in error and insist that I have not engaged in any negative or suspicious activities; this should be considered when drafting the appeal. Account suspension \u2260 restriction on the ability to send messages, keep this in mind. My account is restricted from sending messages, not suspended! Do not use the phrase that I was restricted from sending messages, as it is implied when writing the appeal. Character limit: no more than 300. Sentence limit: no more than 3. The appeal must be as simple and concise as possible. Do not use formal language.`
+      }
+    ],
+    "",
+    "ENGLISH",
+    true,
+    false,
+    2,
+    false,
+    "spam-bot-reason",
+    { temperature: 1, presence_penalty: 0.8, p: 0.85 }
+  );
+};
+
+// src/modules/checkSpamBlock.ts
 init_helpers();
 init_sendToMainBot();
+var fileComplaint = async (client, userId, accessHash, accountId) => {
+  const mm = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    "This is a mistake",
+    accountId,
+    false,
+    false
+  );
+  await sleep(5e3);
+  const m = await getHistory(client, userId, accessHash, mm.id);
+  if (!(m == null ? void 0 : m[0]) || !((m == null ? void 0 : m[0].message.includes("you like to submit a complaint")) || (m == null ? void 0 : m[0].message.includes("already submitted")))) {
+    throw new Error("SPAMBOT_MISTAKE_MESSAGE_NOT_FOUND");
+  }
+  if (m[0].message.includes("already submitted")) {
+    return;
+  }
+  const yy = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    "Yes",
+    accountId,
+    false,
+    false
+  );
+  await sleep(5e3);
+  const y = await getHistory(client, userId, accessHash, yy.id);
+  if (!(y == null ? void 0 : y[0]) || !(y == null ? void 0 : y[0].message.includes("Did you ever do any of this"))) {
+    throw new Error("SPAMBOT_YES_MESSAGE_NOT_FOUND");
+  }
+  const nn = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    "No! Never did that!",
+    accountId,
+    false,
+    false
+  );
+  await sleep(5e3);
+  const n = await getHistory(client, userId, accessHash, nn.id);
+  if (!(n == null ? void 0 : n[0]) || !(n == null ? void 0 : n[0].message.includes("what went wrong"))) {
+    throw new Error("SPAMBOT_NO_MESSAGE_NOT_FOUND");
+  }
+  const reason = await getSpamBotReason(accountId);
+  const rr = await sendMessage(
+    client,
+    userId,
+    accessHash,
+    reason,
+    accountId,
+    false,
+    false
+  );
+  await sleep(5e3);
+  const r = await getHistory(client, userId, accessHash, rr.id);
+  if (!(r == null ? void 0 : r[0]) || !(r == null ? void 0 : r[0].message.includes("successfully submitted"))) {
+    throw new Error("SPAMBOT_SUCCESS_MESSAGE_NOT_FOUND");
+  }
+};
 var checkSpamBlock = async (client, account) => {
   const {
     accountId,
@@ -82000,7 +82111,7 @@ var checkSpamBlock = async (client, account) => {
   } = account;
   const result = await resolveUsername(client, "spambot");
   if (!result || !result.users.length || !(result.users[0] instanceof import_api32.default.User)) {
-    throw new Error("SPAMBOT_NOT_FOUND");
+    throw new Error("SPAMBOT_NOT_USER");
   }
   const { id: userId, accessHash, username } = result.users[0];
   if (!accessHash || !username || username !== "SpamBot") {
@@ -82012,11 +82123,9 @@ var checkSpamBlock = async (client, account) => {
     String(accessHash),
     "/start",
     accountId,
+    false,
     false
   );
-  if (!(sentMessage == null ? void 0 : sentMessage.id)) {
-    throw new Error("SPAMBOT_ID_NOT_FOUND");
-  }
   await sleep(5e3);
   const messages = await getHistory(
     client,
@@ -82036,6 +82145,7 @@ var checkSpamBlock = async (client, account) => {
     });
     return false;
   }
+  await fileComplaint(client, String(userId), String(accessHash), accountId);
   const match = message.match(/until\s(.*)\./);
   const spamBlockDate = match ? match[1].replace("UTC", "").trim() : "INFINITY";
   const spamBlockDateUTC = /* @__PURE__ */ new Date(spamBlockDate + "Z");
@@ -82074,19 +82184,13 @@ SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
 var autoSender = async (client, accountId, telegramId) => {
   const account = await getAccountById(accountId);
   const spamBlockDate = await checkSpamBlock(client, account);
-  if (spamBlockDate || account.stopSender) {
+  if (spamBlockDate) {
     return;
   }
   const currentTime = /* @__PURE__ */ new Date();
   const currentUTCHours = currentTime.getUTCHours();
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
+  if (currentUTCHours < 5 || currentUTCHours > 15) {
     return;
-  }
-  if (!accountId.includes("-prefix-")) {
-    const weekday = getWeekday();
-    if (weekday === "Sat" || weekday === "Sun") {
-      return;
-    }
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
@@ -82146,6 +82250,7 @@ var autoSender = async (client, accountId, telegramId) => {
           String(accessHash),
           firstMessage,
           accountId,
+          false,
           false
         );
         const sentSecondMessage = await sendMessage(
@@ -82154,6 +82259,7 @@ var autoSender = async (client, accountId, telegramId) => {
           String(accessHash),
           secondMessage,
           accountId,
+          false,
           false
         );
         await saveRecipient(
