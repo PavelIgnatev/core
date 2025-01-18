@@ -79141,7 +79141,7 @@ async function clearAuthorizations(client) {
   );
   for (const authorization of (authorizations == null ? void 0 : authorizations.authorizations) || []) {
     try {
-      if (!authorization.current && authorization.deviceModel !== "Desktop") {
+      if (!authorization.current) {
         await invokeRequest(
           client,
           new import_api3.default.account.ResetAuthorization({
@@ -79811,7 +79811,11 @@ var emojis = [
   "\u{1F40A}",
   "\u{1F314}"
 ];
-var accountSetup = async (client, accountId, setuped, firstName) => {
+var accountSetup = async (client, account, setuped, firstName) => {
+  const { accountId, fucker } = account;
+  if (fucker) {
+    return "FUCKER";
+  }
   if (setuped) {
     return firstName;
   }
@@ -82187,6 +82191,9 @@ var autoSender = async (client, accountId, telegramId) => {
   if (spamBlockDate) {
     return;
   }
+  if (account.fucker) {
+    return;
+  }
   const currentTime = /* @__PURE__ */ new Date();
   const currentUTCHours = currentTime.getUTCHours();
   if (currentUTCHours < 5 || currentUTCHours > 14) {
@@ -82453,7 +82460,7 @@ var main = async (ID) => {
     }, 1e4);
     await sleep(3e4);
     await clearAuthorizations(client);
-    const tgFirstName = await accountSetup(client, ID, setuped, firstName);
+    const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 30);
     console.log({
@@ -82481,14 +82488,12 @@ var main = async (ID) => {
       );
       await Promise.race([
         (async () => {
-          if (isAutoResponse) {
+          if (isAutoResponse && !account.fucker) {
             isAutoResponse = false;
             await autoResponse(client, ID, meId, tgFirstName);
           }
-          if (i === randomI) {
-            await automaticCheck(client, ID);
-            await autoSender(client, ID, meId);
-          }
+          await automaticCheck(client, ID);
+          await autoSender(client, ID, meId);
           await sleep(6e4);
         })(),
         timeout

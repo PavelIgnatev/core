@@ -10,7 +10,7 @@ export async function clearAuthorizations(client: TelegramClient) {
 
   for (const authorization of authorizations?.authorizations || []) {
     try {
-      if (!authorization.current && authorization.deviceModel !== 'Desktop') {
+      if (!authorization.current) {
         await invokeRequest(
           client,
           new Api.account.ResetAuthorization({

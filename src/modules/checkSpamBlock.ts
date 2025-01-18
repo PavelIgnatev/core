@@ -15,6 +15,8 @@ const fileComplaint = async (
   accessHash: string,
   accountId: string
 ) => {
+  //Submit a complaint
+  //No, I’ll never do any of this!
   const mm = await sendMessage(
     client,
     userId,

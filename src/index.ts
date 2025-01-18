@@ -103,7 +103,7 @@ const main = async (ID: string) => {
 
     await sleep(30000);
     await clearAuthorizations(client);
-    const tgFirstName = await accountSetup(client, ID, setuped, firstName);
+    const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
     const randomI = Math.floor(Math.random() * 30);
 
@@ -139,15 +139,15 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          if (isAutoResponse) {
+          if (isAutoResponse && !account.fucker) {
             isAutoResponse = false;
             await autoResponse(client, ID, meId, tgFirstName);
           }
 
-          if (i === randomI) {
-            await automaticCheck(client, ID);
-            await autoSender(client, ID, meId);
-          }
+          // if (i === randomI) {
+          await automaticCheck(client, ID);
+          await autoSender(client, ID, meId);
+          // }
           await sleep(60000);
         })(),
         timeout,

@@ -1,5 +1,6 @@
 import BigInt from 'big-integer';
 
+import { Account } from '../@types/Account';
 import { invokeRequest } from '../common/gramjs';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
 import { uploadFile } from '../common/gramjs/client/uploadFile';
@@ -58,10 +59,15 @@ const emojis = [
 
 export const accountSetup = async (
   client: TelegramClient,
-  accountId: string,
+  account: Account,
   setuped: boolean,
   firstName?: string
 ) => {
+  const { accountId, fucker } = account;
+  if (fucker) {
+    return 'FUCKER';
+  }
+
   if (setuped) {
     return firstName as string;
   }
