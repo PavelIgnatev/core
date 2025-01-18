@@ -1,3 +1,4 @@
+import { Account } from '../@types/Account';
 import { Dialogue } from '../@types/Dialogue';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
 import GramJs from '../common/gramjs/tl/api';
@@ -17,7 +18,6 @@ import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
 import { deleteChatUser } from '../methods/messages/deleteChatUser';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { deleteMessages } from '../methods/messages/deleteMessages';
-import { getHistory } from '../methods/messages/getHistory';
 import { togglePin } from '../methods/messages/togglePin';
 import { buildInputPeer } from '../methods/peer/buildInputPeer';
 import { getIdByPeer } from '../methods/peer/getIdByPeer';
@@ -26,8 +26,9 @@ import { getFullUser } from '../methods/users/getFullUser';
 
 export const automaticCheck = async (
   client: TelegramClient,
-  accountId: string
+  account: Account
 ) => {
+  const { accountId, fucker } = account;
   try {
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
@@ -109,7 +110,9 @@ export const automaticCheck = async (
           await blockContact(client, peer);
         } else if (!dialogsIds.includes(String(user.id))) {
           await deleteHistory(client, peer, true);
-          await blockContact(client, peer);
+          if (!fucker) {
+            await blockContact(client, peer);
+          }
         }
       }
     }

@@ -16,7 +16,7 @@ export async function clearAuthorizations(client: TelegramClient) {
           new Api.account.ResetAuthorization({
             hash: authorization.hash,
           }),
-          { shouldIgnoreErrors: true }
+          { s  }
         );
       }
     } catch {}

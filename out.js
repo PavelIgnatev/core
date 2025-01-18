@@ -2208,8 +2208,8 @@ var require_metadata = __commonJS({
 // node_modules/ms/index.js
 var require_ms = __commonJS({
   "node_modules/ms/index.js"(exports2, module2) {
-    var s = 1e3;
-    var m = s * 60;
+    var s2 = 1e3;
+    var m = s2 * 60;
     var h = m * 60;
     var d = h * 24;
     var w = d * 7;
@@ -2271,7 +2271,7 @@ var require_ms = __commonJS({
         case "secs":
         case "sec":
         case "s":
-          return n * s;
+          return n * s2;
         case "milliseconds":
         case "millisecond":
         case "msecs":
@@ -2293,8 +2293,8 @@ var require_ms = __commonJS({
       if (msAbs >= m) {
         return Math.round(ms / m) + "m";
       }
-      if (msAbs >= s) {
-        return Math.round(ms / s) + "s";
+      if (msAbs >= s2) {
+        return Math.round(ms / s2) + "s";
       }
       return ms + "ms";
     }
@@ -2309,8 +2309,8 @@ var require_ms = __commonJS({
       if (msAbs >= m) {
         return plural(ms, msAbs, m, "minute");
       }
-      if (msAbs >= s) {
-        return plural(ms, msAbs, s, "second");
+      if (msAbs >= s2) {
+        return plural(ms, msAbs, s2, "second");
       }
       return ms + " ms";
     }
@@ -3528,13 +3528,13 @@ var require_buffer_list = __commonJS({
         }
       }, {
         key: "join",
-        value: function join(s) {
+        value: function join(s2) {
           if (this.length === 0)
             return "";
           var p = this.head;
           var ret = "" + p.data;
           while (p = p.next)
-            ret += s + p.data;
+            ret += s2 + p.data;
           return ret;
         }
       }, {
@@ -7307,10 +7307,10 @@ var require_color_string = __commonJS({
       if (match) {
         var alpha = parseFloat(match[4]);
         var h = (parseFloat(match[1]) % 360 + 360) % 360;
-        var s = clamp(parseFloat(match[2]), 0, 100);
+        var s2 = clamp(parseFloat(match[2]), 0, 100);
         var l = clamp(parseFloat(match[3]), 0, 100);
         var a = clamp(isNaN(alpha) ? 1 : alpha, 0, 1);
-        return [h, s, l, a];
+        return [h, s2, l, a];
       }
       return null;
     };
@@ -7585,7 +7585,7 @@ var require_conversions = __commonJS({
       var max = Math.max(r, g, b);
       var delta = max - min;
       var h;
-      var s;
+      var s2;
       var l;
       if (max === min) {
         h = 0;
@@ -7602,20 +7602,20 @@ var require_conversions = __commonJS({
       }
       l = (min + max) / 2;
       if (max === min) {
-        s = 0;
+        s2 = 0;
       } else if (l <= 0.5) {
-        s = delta / (max + min);
+        s2 = delta / (max + min);
       } else {
-        s = delta / (2 - max - min);
+        s2 = delta / (2 - max - min);
       }
-      return [h, s * 100, l * 100];
+      return [h, s2 * 100, l * 100];
     };
     convert.rgb.hsv = function(rgb) {
       var rdif;
       var gdif;
       var bdif;
       var h;
-      var s;
+      var s2;
       var r = rgb[0] / 255;
       var g = rgb[1] / 255;
       var b = rgb[2] / 255;
@@ -7625,9 +7625,9 @@ var require_conversions = __commonJS({
         return (v - c) / 6 / diff + 1 / 2;
       };
       if (diff === 0) {
-        h = s = 0;
+        h = s2 = 0;
       } else {
-        s = diff / v;
+        s2 = diff / v;
         rdif = diffc(r);
         gdif = diffc(g);
         bdif = diffc(b);
@@ -7646,7 +7646,7 @@ var require_conversions = __commonJS({
       }
       return [
         h * 360,
-        s * 100,
+        s2 * 100,
         v * 100
       ];
     };
@@ -7731,21 +7731,21 @@ var require_conversions = __commonJS({
     };
     convert.hsl.rgb = function(hsl) {
       var h = hsl[0] / 360;
-      var s = hsl[1] / 100;
+      var s2 = hsl[1] / 100;
       var l = hsl[2] / 100;
       var t1;
       var t2;
       var t3;
       var rgb;
       var val;
-      if (s === 0) {
+      if (s2 === 0) {
         val = l * 255;
         return [val, val, val];
       }
       if (l < 0.5) {
-        t2 = l * (1 + s);
+        t2 = l * (1 + s2);
       } else {
-        t2 = l + s - l * s;
+        t2 = l + s2 - l * s2;
       }
       t1 = 2 * l - t2;
       rgb = [0, 0, 0];
@@ -7772,28 +7772,28 @@ var require_conversions = __commonJS({
     };
     convert.hsl.hsv = function(hsl) {
       var h = hsl[0];
-      var s = hsl[1] / 100;
+      var s2 = hsl[1] / 100;
       var l = hsl[2] / 100;
-      var smin = s;
+      var smin = s2;
       var lmin = Math.max(l, 0.01);
       var sv;
       var v;
       l *= 2;
-      s *= l <= 1 ? l : 2 - l;
+      s2 *= l <= 1 ? l : 2 - l;
       smin *= lmin <= 1 ? lmin : 2 - lmin;
-      v = (l + s) / 2;
-      sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
+      v = (l + s2) / 2;
+      sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s2 / (l + s2);
       return [h, sv * 100, v * 100];
     };
     convert.hsv.rgb = function(hsv) {
       var h = hsv[0] / 60;
-      var s = hsv[1] / 100;
+      var s2 = hsv[1] / 100;
       var v = hsv[2] / 100;
       var hi = Math.floor(h) % 6;
       var f = h - Math.floor(h);
-      var p = 255 * v * (1 - s);
-      var q = 255 * v * (1 - s * f);
-      var t = 255 * v * (1 - s * (1 - f));
+      var p = 255 * v * (1 - s2);
+      var q = 255 * v * (1 - s2 * f);
+      var t = 255 * v * (1 - s2 * (1 - f));
       v *= 255;
       switch (hi) {
         case 0:
@@ -7812,15 +7812,15 @@ var require_conversions = __commonJS({
     };
     convert.hsv.hsl = function(hsv) {
       var h = hsv[0];
-      var s = hsv[1] / 100;
+      var s2 = hsv[1] / 100;
       var v = hsv[2] / 100;
       var vmin = Math.max(v, 0.01);
       var lmin;
       var sl;
       var l;
-      l = (2 - s) * v;
-      lmin = (2 - s) * vmin;
-      sl = s * vmin;
+      l = (2 - s2) * v;
+      lmin = (2 - s2) * vmin;
+      sl = s2 * vmin;
       sl /= lmin <= 1 ? lmin : 2 - lmin;
       sl = sl || 0;
       l /= 2;
@@ -8093,14 +8093,14 @@ var require_conversions = __commonJS({
       return [hue * 360, chroma * 100, grayscale * 100];
     };
     convert.hsl.hcg = function(hsl) {
-      var s = hsl[1] / 100;
+      var s2 = hsl[1] / 100;
       var l = hsl[2] / 100;
       var c = 1;
       var f = 0;
       if (l < 0.5) {
-        c = 2 * s * l;
+        c = 2 * s2 * l;
       } else {
-        c = 2 * s * (1 - l);
+        c = 2 * s2 * (1 - l);
       }
       if (c < 1) {
         f = (l - 0.5 * c) / (1 - c);
@@ -8108,9 +8108,9 @@ var require_conversions = __commonJS({
       return [hsl[0], c * 100, f * 100];
     };
     convert.hsv.hcg = function(hsv) {
-      var s = hsv[1] / 100;
+      var s2 = hsv[1] / 100;
       var v = hsv[2] / 100;
-      var c = s * v;
+      var c = s2 * v;
       var f = 0;
       if (c < 1) {
         f = (v - c) / (1 - c);
@@ -8181,13 +8181,13 @@ var require_conversions = __commonJS({
       var c = hcg[1] / 100;
       var g = hcg[2] / 100;
       var l = g * (1 - c) + 0.5 * c;
-      var s = 0;
+      var s2 = 0;
       if (l > 0 && l < 0.5) {
-        s = c / (2 * l);
+        s2 = c / (2 * l);
       } else if (l >= 0.5 && l < 1) {
-        s = c / (2 * (1 - l));
+        s2 = c / (2 * (1 - l));
       }
-      return [hcg[0], s * 100, l * 100];
+      return [hcg[0], s2 * 100, l * 100];
     };
     convert.hcg.hwb = function(hcg) {
       var c = hcg[1] / 100;
@@ -17122,7 +17122,7 @@ var require_server_selection = __commonJS({
     exports2.MIN_SECONDARY_WRITE_WIRE_VERSION = 13;
     function writableServerSelector() {
       return function writableServer(topologyDescription, servers) {
-        return latencyWindowReducer(topologyDescription, servers.filter((s) => s.isWritable));
+        return latencyWindowReducer(topologyDescription, servers.filter((s2) => s2.isWritable));
       };
     }
     function sameServerSelector(description) {
@@ -17168,7 +17168,7 @@ var require_server_selection = __commonJS({
         if (servers.length === 0) {
           return servers;
         }
-        const sMax = servers.reduce((max, s) => s.lastWriteDate > max.lastWriteDate ? s : max);
+        const sMax = servers.reduce((max, s2) => s2.lastWriteDate > max.lastWriteDate ? s2 : max);
         return servers.reduce((result, server) => {
           const stalenessMS = sMax.lastWriteDate - server.lastWriteDate + topologyDescription.heartbeatFrequencyMS;
           const staleness = stalenessMS / 1e3;
@@ -18702,8 +18702,8 @@ var require_utils = __commonJS({
         }
         return `${this.socketPath}`;
       }
-      static fromString(s) {
-        return new _HostAddress(s);
+      static fromString(s2) {
+        return new _HostAddress(s2);
       }
       static fromHostPort(host, port) {
         if (host.includes(":")) {
@@ -19523,9 +19523,9 @@ var require_mongo_logger = __commonJS({
       CONNECTION: "connection",
       CLIENT: "client"
     });
-    function parseSeverityFromString(s) {
+    function parseSeverityFromString(s2) {
       const validSeverities = Object.values(exports2.SeverityLevel);
-      const lowerSeverity = s == null ? void 0 : s.toLowerCase();
+      const lowerSeverity = s2 == null ? void 0 : s2.toLowerCase();
       if (lowerSeverity != null && validSeverities.includes(lowerSeverity)) {
         return lowerSeverity;
       }
@@ -26670,8 +26670,8 @@ var require_jsbn = __commonJS({
       function int2char(n) {
         return BI_RM.charAt(n);
       }
-      function intAt(s, i) {
-        var c = BI_RC[s.charCodeAt(i)];
+      function intAt(s2, i) {
+        var c = BI_RC[s2.charCodeAt(i)];
         return c == null ? -1 : c;
       }
       function bnpCopyTo(r) {
@@ -26695,7 +26695,7 @@ var require_jsbn = __commonJS({
         r.fromInt(i);
         return r;
       }
-      function bnpFromString(s, b) {
+      function bnpFromString(s2, b) {
         var k;
         if (b == 16)
           k = 4;
@@ -26710,16 +26710,16 @@ var require_jsbn = __commonJS({
         else if (b == 4)
           k = 2;
         else {
-          this.fromRadix(s, b);
+          this.fromRadix(s2, b);
           return;
         }
         this.t = 0;
         this.s = 0;
-        var i = s.length, mi = false, sh = 0;
+        var i = s2.length, mi = false, sh = 0;
         while (--i >= 0) {
-          var x = k == 8 ? s[i] & 255 : intAt(s, i);
+          var x = k == 8 ? s2[i] & 255 : intAt(s2, i);
           if (x < 0) {
-            if (s.charAt(i) == "-")
+            if (s2.charAt(i) == "-")
               mi = true;
             continue;
           }
@@ -26735,7 +26735,7 @@ var require_jsbn = __commonJS({
           if (sh >= this.DB)
             sh -= this.DB;
         }
-        if (k == 8 && (s[0] & 128) != 0) {
+        if (k == 8 && (s2[0] & 128) != 0) {
           this.s = -1;
           if (sh > 0)
             this[this.t - 1] |= (1 << this.DB - sh) - 1 << sh;
@@ -27216,16 +27216,16 @@ var require_jsbn = __commonJS({
         }
         return z2.intValue().toString(b) + r;
       }
-      function bnpFromRadix(s, b) {
+      function bnpFromRadix(s2, b) {
         this.fromInt(0);
         if (b == null)
           b = 10;
         var cs = this.chunkSize(b);
         var d = Math.pow(b, cs), mi = false, j = 0, w = 0;
-        for (var i = 0; i < s.length; ++i) {
-          var x = intAt(s, i);
+        for (var i = 0; i < s2.length; ++i) {
+          var x = intAt(s2, i);
           if (x < 0) {
-            if (s.charAt(i) == "-" && this.signum() == 0)
+            if (s2.charAt(i) == "-" && this.signum() == 0)
               mi = true;
             continue;
           }
@@ -28592,12 +28592,12 @@ var require_helpers = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.simpleGroup = exports2.spanLeadingZeroes = exports2.spanAll = exports2.spanAllZeroes = void 0;
     var sprintf_js_1 = require_sprintf();
-    function spanAllZeroes(s) {
-      return s.replace(/(0+)/g, '<span class="zero">$1</span>');
+    function spanAllZeroes(s2) {
+      return s2.replace(/(0+)/g, '<span class="zero">$1</span>');
     }
     exports2.spanAllZeroes = spanAllZeroes;
-    function spanAll(s, offset = 0) {
-      const letters = s.split("");
+    function spanAll(s2, offset = 0) {
+      const letters = s2.split("");
       return letters.map(
         (n, i) => (0, sprintf_js_1.sprintf)('<span class="digit value-%s position-%d">%s</span>', n, i + offset, spanAllZeroes(n))
         // XXX Use #base-2 .value-0 instead?
@@ -31450,8 +31450,8 @@ var require_utils3 = __commonJS({
       if (i === 2 ** 32 - 1) {
         return false;
       }
-      const s = `${i}`;
-      if (P !== s) {
+      const s2 = `${i}`;
+      if (P !== s2) {
         return false;
       }
       return true;
@@ -42138,7 +42138,7 @@ var require_connection_string = __commonJS({
         }
       }
       checkTLSOptions(allProvidedOptions);
-      const unsupportedOptions = (0, utils_1.setDifference)(allProvidedKeys, Array.from(Object.keys(exports2.OPTIONS)).map((s) => s.toLowerCase()));
+      const unsupportedOptions = (0, utils_1.setDifference)(allProvidedKeys, Array.from(Object.keys(exports2.OPTIONS)).map((s2) => s2.toLowerCase()));
       if (unsupportedOptions.size !== 0) {
         const optionWord = unsupportedOptions.size > 1 ? "options" : "option";
         const isOrAre = unsupportedOptions.size > 1 ? "are" : "is";
@@ -60004,8 +60004,8 @@ var require_proxy_from_env = __commonJS({
       ws: 80,
       wss: 443
     };
-    var stringEndsWith = String.prototype.endsWith || function(s) {
-      return s.length <= this.length && this.indexOf(s, this.length - s.length) !== -1;
+    var stringEndsWith = String.prototype.endsWith || function(s2) {
+      return s2.length <= this.length && this.indexOf(s2, this.length - s2.length) !== -1;
     };
     function getProxyForUrl2(url2) {
       var parsedUrl = typeof url2 === "string" ? parseUrl(url2) : url2 || {};
@@ -60064,8 +60064,8 @@ var require_proxy_from_env = __commonJS({
 // ../node_modules/ms/index.js
 var require_ms3 = __commonJS({
   "../node_modules/ms/index.js"(exports2, module2) {
-    var s = 1e3;
-    var m = s * 60;
+    var s2 = 1e3;
+    var m = s2 * 60;
     var h = m * 60;
     var d = h * 24;
     var w = d * 7;
@@ -60127,7 +60127,7 @@ var require_ms3 = __commonJS({
         case "secs":
         case "sec":
         case "s":
-          return n * s;
+          return n * s2;
         case "milliseconds":
         case "millisecond":
         case "msecs":
@@ -60149,8 +60149,8 @@ var require_ms3 = __commonJS({
       if (msAbs >= m) {
         return Math.round(ms / m) + "m";
       }
-      if (msAbs >= s) {
-        return Math.round(ms / s) + "s";
+      if (msAbs >= s2) {
+        return Math.round(ms / s2) + "s";
       }
       return ms + "ms";
     }
@@ -60165,8 +60165,8 @@ var require_ms3 = __commonJS({
       if (msAbs >= m) {
         return plural(ms, msAbs, m, "minute");
       }
-      if (msAbs >= s) {
-        return plural(ms, msAbs, s, "second");
+      if (msAbs >= s2) {
+        return plural(ms, msAbs, s2, "second");
       }
       return ms + " ms";
     }
@@ -63035,9 +63035,9 @@ var init_adapters = __esm({
           const reasons = Object.entries(rejectedReasons).map(
             ([id, state]) => `adapter ${id} ` + (state === false ? "is not supported by the environment" : "is not available in the build")
           );
-          let s = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
+          let s2 = length ? reasons.length > 1 ? "since :\n" + reasons.map(renderReason).join("\n") : " " + renderReason(reasons[0]) : "as no adapter specified";
           throw new AxiosError_default(
-            `There is no suitable adapter to dispatch the request ` + s,
+            `There is no suitable adapter to dispatch the request ` + s2,
             "ERR_NOT_SUPPORT"
           );
         }
@@ -65046,7 +65046,7 @@ var require_aes_min = __commonJS({
     var i = new Uint32Array(256);
     var h = new Uint32Array(256);
     var o = new Uint32Array(256);
-    var s = new Uint32Array(256);
+    var s2 = new Uint32Array(256);
     var c = new Uint32Array(256);
     var y = new Uint32Array(256);
     function a(t2) {
@@ -65078,7 +65078,7 @@ var require_aes_min = __commonJS({
       for (var a2, l2, f2, u2, g2, p = new Uint8Array(256), v = new Uint8Array(256), w = 0, A = 0, d = 0; d < 256; d++)
         p[d] = d << 1 ^ 283 * (d >> 7), v[p[d] ^ d] = d;
       for (; !t[w]; w ^= a2 || 1)
-        f2 = (f2 = A ^ A << 1 ^ A << 2 ^ A << 3 ^ A << 4) >> 8 ^ 255 & f2 ^ 99, t[w] = f2, e[f2] = w, g2 = 16843009 * p[l2 = p[a2 = p[w]]] ^ 65537 * l2 ^ 257 * a2 ^ 16843008 * w, u2 = 257 * p[f2] ^ 16843008 * f2, r[w] = u2 = u2 << 24 ^ u2 >>> 8, n[w] = u2 = u2 << 24 ^ u2 >>> 8, i[w] = u2 = u2 << 24 ^ u2 >>> 8, h[w] = u2 = u2 << 24 ^ u2 >>> 8, o[f2] = g2 = g2 << 24 ^ g2 >>> 8, s[f2] = g2 = g2 << 24 ^ g2 >>> 8, c[f2] = g2 = g2 << 24 ^ g2 >>> 8, y[f2] = g2 = g2 << 24 ^ g2 >>> 8, A = v[A] || 1;
+        f2 = (f2 = A ^ A << 1 ^ A << 2 ^ A << 3 ^ A << 4) >> 8 ^ 255 & f2 ^ 99, t[w] = f2, e[f2] = w, g2 = 16843009 * p[l2 = p[a2 = p[w]]] ^ 65537 * l2 ^ 257 * a2 ^ 16843008 * w, u2 = 257 * p[f2] ^ 16843008 * f2, r[w] = u2 = u2 << 24 ^ u2 >>> 8, n[w] = u2 = u2 << 24 ^ u2 >>> 8, i[w] = u2 = u2 << 24 ^ u2 >>> 8, h[w] = u2 = u2 << 24 ^ u2 >>> 8, o[f2] = g2 = g2 << 24 ^ g2 >>> 8, s2[f2] = g2 = g2 << 24 ^ g2 >>> 8, c[f2] = g2 = g2 << 24 ^ g2 >>> 8, y[f2] = g2 = g2 << 24 ^ g2 >>> 8, A = v[A] || 1;
     }();
     var f = function() {
       function l2(e2) {
@@ -65089,17 +65089,17 @@ var require_aes_min = __commonJS({
         for (var n2, i2 = 1, h2 = r2.length; h2 < 4 * r2.length + 28; h2++)
           n2 = this.encKey[h2 - 1], (h2 % r2.length == 0 || 8 === r2.length && h2 % r2.length == 4) && (n2 = t[n2 >>> 24] << 24 ^ t[n2 >> 16 & 255] << 16 ^ t[n2 >> 8 & 255] << 8 ^ t[255 & n2], h2 % r2.length == 0 && (n2 = n2 << 8 ^ n2 >>> 24 ^ i2 << 24, i2 = i2 << 1 ^ 283 * (i2 >> 7))), this.encKey[h2] = this.encKey[h2 - r2.length] ^ n2;
         for (var l3 = 0; h2; l3++, h2--)
-          n2 = this.encKey[3 & l3 ? h2 : h2 - 4], this.decKey[l3] = h2 <= 4 || l3 < 4 ? n2 : o[t[n2 >>> 24]] ^ s[t[n2 >> 16 & 255]] ^ c[t[n2 >> 8 & 255]] ^ y[t[255 & n2]];
+          n2 = this.encKey[3 & l3 ? h2 : h2 - 4], this.decKey[l3] = h2 <= 4 || l3 < 4 ? n2 : o[t[n2 >>> 24]] ^ s2[t[n2 >> 16 & 255]] ^ c[t[n2 >> 8 & 255]] ^ y[t[255 & n2]];
       }
       return l2.prototype.encrypt = function(e2) {
-        for (var o2, s2, c2, y2 = a(e2), l3 = new Uint32Array(4), f2 = y2[0] ^ this.encKey[0], u2 = y2[1] ^ this.encKey[1], g2 = y2[2] ^ this.encKey[2], p = y2[3] ^ this.encKey[3], v = this.encKey.length / 4 - 2, w = 4, A = 0; A < v; A++)
-          o2 = r[f2 >>> 24] ^ n[u2 >> 16 & 255] ^ i[g2 >> 8 & 255] ^ h[255 & p] ^ this.encKey[w], s2 = r[u2 >>> 24] ^ n[g2 >> 16 & 255] ^ i[p >> 8 & 255] ^ h[255 & f2] ^ this.encKey[w + 1], c2 = r[g2 >>> 24] ^ n[p >> 16 & 255] ^ i[f2 >> 8 & 255] ^ h[255 & u2] ^ this.encKey[w + 2], p = r[p >>> 24] ^ n[f2 >> 16 & 255] ^ i[u2 >> 8 & 255] ^ h[255 & g2] ^ this.encKey[w + 3], f2 = o2, u2 = s2, g2 = c2, w += 4;
+        for (var o2, s3, c2, y2 = a(e2), l3 = new Uint32Array(4), f2 = y2[0] ^ this.encKey[0], u2 = y2[1] ^ this.encKey[1], g2 = y2[2] ^ this.encKey[2], p = y2[3] ^ this.encKey[3], v = this.encKey.length / 4 - 2, w = 4, A = 0; A < v; A++)
+          o2 = r[f2 >>> 24] ^ n[u2 >> 16 & 255] ^ i[g2 >> 8 & 255] ^ h[255 & p] ^ this.encKey[w], s3 = r[u2 >>> 24] ^ n[g2 >> 16 & 255] ^ i[p >> 8 & 255] ^ h[255 & f2] ^ this.encKey[w + 1], c2 = r[g2 >>> 24] ^ n[p >> 16 & 255] ^ i[f2 >> 8 & 255] ^ h[255 & u2] ^ this.encKey[w + 2], p = r[p >>> 24] ^ n[f2 >> 16 & 255] ^ i[u2 >> 8 & 255] ^ h[255 & g2] ^ this.encKey[w + 3], f2 = o2, u2 = s3, g2 = c2, w += 4;
         for (A = 0; A < 4; A++)
           l3[A] = t[f2 >>> 24] << 24 ^ t[u2 >> 16 & 255] << 16 ^ t[g2 >> 8 & 255] << 8 ^ t[255 & p] ^ this.encKey[w++], o2 = f2, f2 = u2, u2 = g2, g2 = p, p = o2;
         return l3;
       }, l2.prototype.decrypt = function(t2) {
         for (var r2, n2, i2, h2 = a(t2), l3 = new Uint32Array(4), f2 = h2[0] ^ this.decKey[0], u2 = h2[3] ^ this.decKey[1], g2 = h2[2] ^ this.decKey[2], p = h2[1] ^ this.decKey[3], v = this.decKey.length / 4 - 2, w = 4, A = 0; A < v; A++)
-          r2 = o[f2 >>> 24] ^ s[u2 >> 16 & 255] ^ c[g2 >> 8 & 255] ^ y[255 & p] ^ this.decKey[w], n2 = o[u2 >>> 24] ^ s[g2 >> 16 & 255] ^ c[p >> 8 & 255] ^ y[255 & f2] ^ this.decKey[w + 1], i2 = o[g2 >>> 24] ^ s[p >> 16 & 255] ^ c[f2 >> 8 & 255] ^ y[255 & u2] ^ this.decKey[w + 2], p = o[p >>> 24] ^ s[f2 >> 16 & 255] ^ c[u2 >> 8 & 255] ^ y[255 & g2] ^ this.decKey[w + 3], f2 = r2, u2 = n2, g2 = i2, w += 4;
+          r2 = o[f2 >>> 24] ^ s2[u2 >> 16 & 255] ^ c[g2 >> 8 & 255] ^ y[255 & p] ^ this.decKey[w], n2 = o[u2 >>> 24] ^ s2[g2 >> 16 & 255] ^ c[p >> 8 & 255] ^ y[255 & f2] ^ this.decKey[w + 1], i2 = o[g2 >>> 24] ^ s2[p >> 16 & 255] ^ c[f2 >> 8 & 255] ^ y[255 & u2] ^ this.decKey[w + 2], p = o[p >>> 24] ^ s2[f2 >> 16 & 255] ^ c[u2 >> 8 & 255] ^ y[255 & g2] ^ this.decKey[w + 3], f2 = r2, u2 = n2, g2 = i2, w += 4;
         for (A = 0; A < 4; A++)
           l3[3 & -A] = e[f2 >>> 24] << 24 ^ e[u2 >> 16 & 255] << 16 ^ e[g2 >> 8 & 255] << 8 ^ e[255 & p] ^ this.decKey[w++], r2 = f2, f2 = u2, u2 = g2, g2 = p, p = r2;
         return l3;
@@ -65110,22 +65110,22 @@ var require_aes_min = __commonJS({
         void 0 === r2 && (r2 = 16), this.key = a(t3), this.iv = a(e2), this.cipher = new f(t3), this.blockSize = r2 / 4;
       }
       return t2.prototype.encrypt = function(t3, e2) {
-        for (var r2 = a(t3), n2 = e2 || new Uint32Array(r2.length), i2 = this.iv.subarray(this.blockSize, this.iv.length), h2 = this.iv.subarray(0, this.blockSize), o2 = new Uint32Array(this.blockSize), s2 = 0; s2 < r2.length; s2 += this.blockSize) {
-          var c2 = r2.subarray(s2, s2 + this.blockSize);
+        for (var r2 = a(t3), n2 = e2 || new Uint32Array(r2.length), i2 = this.iv.subarray(this.blockSize, this.iv.length), h2 = this.iv.subarray(0, this.blockSize), o2 = new Uint32Array(this.blockSize), s3 = 0; s3 < r2.length; s3 += this.blockSize) {
+          var c2 = r2.subarray(s3, s3 + this.blockSize);
           l(c2, h2, o2);
           var y2 = this.cipher.encrypt(o2);
           l(y2, i2), i2 = c2, h2 = y2;
-          for (var f2 = s2, u2 = 0; f2 < r2.length && u2 < 4; f2++, u2++)
+          for (var f2 = s3, u2 = 0; f2 < r2.length && u2 < 4; f2++, u2++)
             n2[f2] = y2[u2];
         }
         return n2;
       }, t2.prototype.decrypt = function(t3, e2) {
-        for (var r2 = a(t3), n2 = e2 || new Uint32Array(r2.length), i2 = this.iv.subarray(this.blockSize, this.iv.length), h2 = this.iv.subarray(0, this.blockSize), o2 = new Uint32Array(this.blockSize), s2 = 0; s2 < n2.length; s2 += this.blockSize) {
-          var c2 = r2.subarray(s2, s2 + this.blockSize);
+        for (var r2 = a(t3), n2 = e2 || new Uint32Array(r2.length), i2 = this.iv.subarray(this.blockSize, this.iv.length), h2 = this.iv.subarray(0, this.blockSize), o2 = new Uint32Array(this.blockSize), s3 = 0; s3 < n2.length; s3 += this.blockSize) {
+          var c2 = r2.subarray(s3, s3 + this.blockSize);
           l(c2, i2, o2);
           var y2 = this.cipher.decrypt(o2);
           l(y2, h2), h2 = c2, i2 = y2;
-          for (var f2 = s2, u2 = 0; f2 < n2.length && u2 < 4; f2++, u2++)
+          for (var f2 = s3, u2 = 0; f2 < n2.length && u2 < 4; f2++, u2++)
             n2[f2] = y2[u2];
         }
         return n2;
@@ -65138,8 +65138,8 @@ var require_aes_min = __commonJS({
       }
       return t2.prototype.encrypt = function(t3, e2) {
         for (var r2 = a(t3), n2 = e2 || new Uint32Array(r2.length), i2 = this.offset, h2 = 0; h2 < r2.length; h2 += this.blockSize) {
-          for (var o2 = this.cipher.encrypt(this.counter), s2 = h2, c2 = i2; s2 < r2.length && c2 < this.blockSize; s2++, c2++)
-            n2[s2] = o2[c2] ^ r2[s2];
+          for (var o2 = this.cipher.encrypt(this.counter), s3 = h2, c2 = i2; s3 < r2.length && c2 < this.blockSize; s3++, c2++)
+            n2[s3] = o2[c2] ^ r2[s3];
           r2.length - h2 >= this.blockSize && this.incrementCounter(), i2 && (h2 -= i2, i2 = 0);
         }
         return this.offset = (this.offset + r2.length % 4) % 4, n2;
@@ -71031,12 +71031,12 @@ var require_MTProtoState = __commonJS({
             }).getBytes()
           );
         }
-        const s = Buffer.alloc(4);
-        s.writeInt32LE(seqNo, 0);
+        const s2 = Buffer.alloc(4);
+        s2.writeInt32LE(seqNo, 0);
         const b = Buffer.alloc(4);
         b.writeInt32LE(body.length, 0);
         const m = toSignedLittleBuffer(msgId, 8);
-        buffer.write(Buffer.concat([m, s, b]));
+        buffer.write(Buffer.concat([m, s2, b]));
         buffer.write(body);
         return msgId;
       }
@@ -71072,9 +71072,9 @@ var require_MTProtoState = __commonJS({
           data = Helpers.convertToLittle(new aes.CTR(key2, iv2).encrypt(data));
           return Buffer.concat([msgKey2, data]);
         }
-        const s = toSignedLittleBuffer(this.salt, 8);
+        const s2 = toSignedLittleBuffer(this.salt, 8);
         const i = toSignedLittleBuffer(this.id, 8);
-        data = Buffer.concat([Buffer.concat([s, i]), data]);
+        data = Buffer.concat([Buffer.concat([s2, i]), data]);
         const padding = Helpers.generateRandomBytes(
           Helpers.mod(-(data.length + 12), 16) + 12
         );
@@ -71469,7 +71469,7 @@ var require_MessagePacker = __commonJS({
           this._pendingStates.push(state);
           state.promise.catch(() => {
           }).finally(() => {
-            this._pendingStates = this._pendingStates.filter((s) => s !== state);
+            this._pendingStates = this._pendingStates.filter((s2) => s2 !== state);
           });
         }
       }
@@ -71575,8 +71575,8 @@ var require_MessagePacker = __commonJS({
             data,
             false
           );
-          for (const s of batch) {
-            s.containerId = containerId;
+          for (const s2 of batch) {
+            s2.containerId = containerId;
           }
         }
         data = buffer.getValue();
@@ -72056,9 +72056,9 @@ var require_MTProtoSender = __commonJS({
                 this._pending_state.set(state.msgId, state);
               }
             } else {
-              for (const s of state) {
-                if (s.request.classType === "request" && s.request.className !== "HttpWait") {
-                  this._pending_state.set(s.msgId, s);
+              for (const s2 of state) {
+                if (s2.request.classType === "request" && s2.request.className !== "HttpWait") {
+                  this._pending_state.set(s2.msgId, s2);
                 }
               }
             }
@@ -72091,8 +72091,8 @@ var require_MTProtoSender = __commonJS({
                   state.resolve();
                 }
               } else {
-                for (const s of state) {
-                  if (s.request.className === "HttpWait") {
+                for (const s2 of state) {
+                  if (s2.request.className === "HttpWait") {
                     state.resolve();
                   }
                 }
@@ -73671,11 +73671,11 @@ var require_dist3 = __commonJS({
         socket.destroy();
         const fakeSocket = new net.Socket({ writable: false });
         fakeSocket.readable = true;
-        req.once("socket", (s) => {
+        req.once("socket", (s2) => {
           debug("Replaying proxy buffer for failed request");
-          (0, assert_1.default)(s.listenerCount("data") > 0);
-          s.push(buffered);
-          s.push(null);
+          (0, assert_1.default)(s2.listenerCount("data") > 0);
+          s2.push(buffered);
+          s2.push(null);
         });
         return fakeSocket;
       }
@@ -79147,7 +79147,7 @@ async function clearAuthorizations(client) {
           new import_api3.default.account.ResetAuthorization({
             hash: authorization.hash
           }),
-          { shouldIgnoreErrors: true }
+          { s }
         );
       }
     } catch {
@@ -80311,7 +80311,8 @@ var getFullUser = async (client, userId, accessHash) => {
 };
 
 // src/modules/automaticCheck.ts
-var automaticCheck = async (client, accountId) => {
+var automaticCheck = async (client, account) => {
+  const { accountId, fucker } = account;
   try {
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
@@ -80372,7 +80373,9 @@ var automaticCheck = async (client, accountId) => {
           await blockContact(client, peer);
         } else if (!dialogsIds.includes(String(user.id))) {
           await deleteHistory(client, peer, true);
-          await blockContact(client, peer);
+          if (!fucker) {
+            await blockContact(client, peer);
+          }
         }
       }
     }
@@ -82496,7 +82499,7 @@ var main = async (ID) => {
             await autoResponse(client, ID, meId, tgFirstName);
           }
           if (i === randomI) {
-            await automaticCheck(client, ID);
+            await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
           await sleep(6e4);

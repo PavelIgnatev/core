@@ -149,7 +149,7 @@ const main = async (ID: string) => {
           }
 
           if (i === randomI) {
-            await automaticCheck(client, ID);
+            await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
           await sleep(60000);
