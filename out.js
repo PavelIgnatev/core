@@ -79146,7 +79146,8 @@ async function clearAuthorizations(client) {
           client,
           new import_api3.default.account.ResetAuthorization({
             hash: authorization.hash
-          })
+          }),
+          { shouldIgnoreErrors: true }
         );
       }
     } catch {
