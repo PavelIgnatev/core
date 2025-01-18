@@ -82189,7 +82189,7 @@ var autoSender = async (client, accountId, telegramId) => {
   }
   const currentTime = /* @__PURE__ */ new Date();
   const currentUTCHours = currentTime.getUTCHours();
-  if (currentUTCHours < 5 || currentUTCHours > 15) {
+  if (currentUTCHours < 5 || currentUTCHours > 16) {
     return;
   }
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
