@@ -35,16 +35,16 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 16) {
+  if (currentUTCHours < 5 || currentUTCHours > 14) {
     return;
   }
 
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = getWeekday();
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     return;
-  //   }
-  // }
+  if (!accountId.includes('-prefix-')) {
+    const weekday = getWeekday();
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
+  }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
