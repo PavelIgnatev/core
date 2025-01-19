@@ -78324,7 +78324,6 @@ ERROR: ${e.message}`
             } else if (e.message === "CONNECTION_NOT_INITED") {
               throw new Error("CONNECTION_NOT_INITED");
             } else if (e instanceof errors3.TimedOutError) {
-              throw new Error(e);
             } else {
               state.finished.resolve();
               throw e;
