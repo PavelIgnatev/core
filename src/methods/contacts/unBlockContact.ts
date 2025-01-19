@@ -6,5 +6,10 @@ export const unBlockContact = async (
   client: TelegramClient,
   peer: GramJs.TypeInputPeer
 ) => {
-  return await invokeRequest(client, new GramJs.contacts.Unblock({ id: peer }));
+  try {
+    return await invokeRequest(
+      client,
+      new GramJs.contacts.Unblock({ id: peer })
+    );
+  } catch {}
 };

@@ -79976,7 +79976,10 @@ var leaveChannel = async (client, channel) => {
 // src/methods/contacts/blockContact.ts
 var import_api10 = __toESM(require_api());
 var blockContact = async (client, peer) => {
-  return await invokeRequest(client, new import_api10.default.contacts.Block({ id: peer }));
+  try {
+    return await invokeRequest(client, new import_api10.default.contacts.Block({ id: peer }));
+  } catch {
+  }
 };
 
 // src/methods/contacts/deleteContacts.ts
@@ -81988,7 +81991,13 @@ init_sendToMainBot();
 // src/methods/contacts/unBlockContact.ts
 var import_api32 = __toESM(require_api());
 var unBlockContact = async (client, peer) => {
-  return await invokeRequest(client, new import_api32.default.contacts.Unblock({ id: peer }));
+  try {
+    return await invokeRequest(
+      client,
+      new import_api32.default.contacts.Unblock({ id: peer })
+    );
+  } catch {
+  }
 };
 
 // src/modules/checkSpamBlock.ts
