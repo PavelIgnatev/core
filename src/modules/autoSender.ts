@@ -43,12 +43,12 @@ export const autoSender = async (
     return;
   }
 
-  if (!accountId.includes('-prefix-')) {
-    const weekday = getWeekday();
-    if (weekday === 'Sat' || weekday === 'Sun') {
-      return;
-    }
-  }
+  // if (!accountId.includes('-prefix-')) {
+  //   const weekday = getWeekday();
+  //   if (weekday === 'Sat' || weekday === 'Sun') {
+  //     return;
+  //   }
+  // }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
