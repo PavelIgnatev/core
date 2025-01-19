@@ -79103,7 +79103,8 @@ async function invokeRequest(client, request, params = {}) {
       "SESSION_EXPIRED",
       "AUTH_KEY_DUPLICATED",
       "AUTH_KEY_PERM_EMPTY",
-      "SESSION_PASSWORD_NEEDED"
+      "SESSION_PASSWORD_NEEDED",
+      "No workers running"
     ].includes(err.message)) {
       throw new Error(err.message);
     }
