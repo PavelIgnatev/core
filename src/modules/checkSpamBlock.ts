@@ -107,6 +107,7 @@ export const checkSpamBlock = async (
     spamBlockDate: dbSpamBlockDate,
     spamBlockInitDate,
     historySpamBlocks = [],
+    messageCount = 0,
   } = account;
 
   const result = await resolveUsername(client, 'spambot');
@@ -184,7 +185,7 @@ export const checkSpamBlock = async (
       const timeDiff = spamBlockDateUTC.getTime() - new Date().getTime();
       spamBlockDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     } else {
-      if ((historySpamBlocks || []).length) {
+      if (messageCount) {
         await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
 ACCOUNT_ID: ${accountId}
 SPAM_BLOCK_DATE: ${spamBlockDate}

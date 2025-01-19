@@ -82070,7 +82070,8 @@ var checkSpamBlock = async (client, account) => {
     accountId,
     spamBlockDate: dbSpamBlockDate,
     spamBlockInitDate,
-    historySpamBlocks = []
+    historySpamBlocks = [],
+    messageCount = 0
   } = account;
   const result = await resolveUsername(client, "spambot");
   if (!result || !result.users.length || !(result.users[0] instanceof import_api33.default.User)) {
@@ -82125,7 +82126,7 @@ var checkSpamBlock = async (client, account) => {
       const timeDiff = spamBlockDateUTC.getTime() - (/* @__PURE__ */ new Date()).getTime();
       spamBlockDays = Math.ceil(timeDiff / (1e3 * 3600 * 24));
     } else {
-      if ((historySpamBlocks || []).length) {
+      if (messageCount) {
         await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
 ACCOUNT_ID: ${accountId}
 SPAM_BLOCK_DATE: ${spamBlockDate}
