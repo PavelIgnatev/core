@@ -79747,6 +79747,9 @@ var emojis = [
 var accountSetup = async (client, account, setuped, firstName) => {
   const { accountId, fucker } = account;
   if (setuped) {
+    if (fucker) {
+      return "FUCKER";
+    }
     return firstName;
   }
   const dialogFilters = await invokeRequest(
@@ -79870,7 +79873,7 @@ ID: ${accountId}`);
       setuped: true,
       banned: false
     });
-    return;
+    return "FUCKER";
   }
   const photos = await invokeRequest(
     client,

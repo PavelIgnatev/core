@@ -66,7 +66,11 @@ export const accountSetup = async (
   const { accountId, fucker } = account;
 
   if (setuped) {
-    return firstName as string;
+    if (fucker) {
+      return 'FUCKER';
+    }
+
+    return firstName!;
   }
 
   const dialogFilters = await invokeRequest(
@@ -205,7 +209,7 @@ ID: ${accountId}`);
       setuped: true,
       banned: false,
     });
-    return;
+    return 'FUCKER';
   }
 
   const photos = await invokeRequest(
@@ -305,5 +309,5 @@ FILE_NAME: ${file.name}`);
     messageCount: 0,
   });
 
-  return firstName as string;
+  return firstName!;
 };
