@@ -192,8 +192,16 @@ class TelegramClient {
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
         ) {
+          if (
+            request.className === 'contacts.Block' ||
+            request.className === 'contacts.Unblock'
+          ) {
+            state.finished.resolve();
+            throw e;
+          }
+
           await sendToMainBot(
-            `** FLOOD WAIT ERROR **
+            `** FLOOD_WAIT_ERROR **
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
           );

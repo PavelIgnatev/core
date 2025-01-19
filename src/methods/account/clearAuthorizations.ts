@@ -9,13 +9,11 @@ export async function clearAuthorizations(client: TelegramClient) {
   );
   const authorizations = invokedAuthorizations?.authorizations || [];
 
-  if (authorizations.length > 1) {
-    console.warn({
-      accountId: client._accountId,
-      message: 'MULTIPLE_AUTHORIZATIONS',
-      payload: { authorizations },
-    });
-  }
+  console.warn({
+    accountId: client._accountId,
+    message: '[AUTHORIZATION_SESSIONS]',
+    payload: { authorizations },
+  });
 
   for (const authorization of authorizations) {
     try {

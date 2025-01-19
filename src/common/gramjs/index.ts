@@ -96,16 +96,21 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
         'USER_DEACTIVATED',
         'SESSION_REVOKED',
         'SESSION_EXPIRED',
-        "AUTH_KEY_DUPLICATED",
+        'AUTH_KEY_DUPLICATED',
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
       ].includes(err.message)
     ) {
       throw new Error(err.message);
     }
+
     if (shouldIgnoreErrors) return undefined;
 
-    if (err.message !== 'PEER_FLOOD') {
+    if (
+      err.message !== 'PEER_FLOOD' &&
+      request.className !== 'contacts.Block' &&
+      request.className !== 'contacts.Unblock'
+    ) {
       await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀
 ID: ${client._accountId}
 ERROR: ${err.message}

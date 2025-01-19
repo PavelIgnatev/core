@@ -78300,8 +78300,12 @@ var require_TelegramClient = __commonJS({
           } catch (e) {
             if (e instanceof errors3.ServerError || e.message === "RPC_CALL_FAIL" || e.message === "RPC_MCGET_FAIL") {
             } else if (e instanceof errors3.FloodWaitError || e instanceof errors3.FloodTestPhoneWaitError) {
+              if (request.className === "contacts.Block" || request.className === "contacts.Unblock") {
+                state.finished.resolve();
+                throw e;
+              }
               await sendToMainBot2(
-                `** FLOOD WAIT ERROR **
+                `** FLOOD_WAIT_ERROR **
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
               );
@@ -79105,7 +79109,7 @@ async function invokeRequest(client, request, params = {}) {
     }
     if (shouldIgnoreErrors)
       return void 0;
-    if (err.message !== "PEER_FLOOD") {
+    if (err.message !== "PEER_FLOOD" && request.className !== "contacts.Block" && request.className !== "contacts.Unblock") {
       await sendToMainBot(`\u{1F480} REQUEST ERROR (${request.className}) \u{1F480}
 ID: ${client._accountId}
 ERROR: ${err.message}
@@ -79123,13 +79127,11 @@ async function clearAuthorizations(client) {
     new import_api3.default.account.GetAuthorizations()
   );
   const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
-  if (authorizations.length > 1) {
-    console.warn({
-      accountId: client._accountId,
-      message: "MULTIPLE_AUTHORIZATIONS",
-      payload: { authorizations }
-    });
-  }
+  console.warn({
+    accountId: client._accountId,
+    message: "[AUTHORIZATION_SESSIONS]",
+    payload: { authorizations }
+  });
   for (const authorization of authorizations) {
     try {
       if (!authorization.current) {
