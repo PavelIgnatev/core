@@ -80149,7 +80149,8 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
         "1087968824",
         "136817688",
         "5434988373",
-        "777000"
+        "777000",
+        "2282583322"
       ].includes(id)) {
         continue;
       }

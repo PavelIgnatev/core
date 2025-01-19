@@ -47,6 +47,7 @@ export const getDialogs = async (
           '136817688',
           '5434988373',
           '777000',
+          '2282583322',
         ].includes(id)
       ) {
         continue;
