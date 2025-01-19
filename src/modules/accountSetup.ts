@@ -64,9 +64,6 @@ export const accountSetup = async (
   firstName?: string
 ) => {
   const { accountId, fucker } = account;
-  if (fucker) {
-    return 'FUCKER';
-  }
 
   if (setuped) {
     return firstName as string;
@@ -203,6 +200,14 @@ ID: ${accountId}`);
     })
   );
 
+  if (fucker) {
+    await updateAccountById(accountId, {
+      setuped: true,
+      banned: false,
+    });
+    return;
+  }
+
   const photos = await invokeRequest(
     client,
     new GramJs.photos.GetUserPhotos({
@@ -287,11 +292,6 @@ FILE_NAME: ${file.name}`);
 
       break;
     } catch (error: any) {
-      console.error({
-        accountId,
-        message: new Error(`Error when updating user data: ${error.message}`),
-      });
-
       await sleep(3000);
     }
   }

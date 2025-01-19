@@ -70,9 +70,10 @@ export const saveRecipient = async (
       } as Dialogue;
 
       await updateDialogue(data);
+
       console.log({
         accountId,
-        message: `**SAVE RECIPIENT**`,
+        message: `[SAVE_RECIPIENT]`,
         data,
       });
 

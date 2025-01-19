@@ -87,7 +87,6 @@ class Connection {
   }
 
   async _sendLoop() {
-    // TODO handle errors
     try {
       while (this._connected) {
         const data = await this._sendArray.pop();
@@ -100,7 +99,8 @@ class Connection {
     } catch (e) {
       console.warn({
         accountId: this._accountId,
-        message: `The server closed the connection while sending: ${e.message}`,
+        message: 'SERVER_CLOSED_CONNECTION',
+        payload: { error: e.message },
       });
     }
   }

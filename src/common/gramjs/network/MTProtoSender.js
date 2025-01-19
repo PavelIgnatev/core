@@ -30,6 +30,7 @@ const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 const { iterationErrors } = require('../../../helpers/helpers');
+const { sendToMainBot } = require('../../../helpers/sendToMainBot');
 
 /**
  * MTProto Mobile Protocol sender
@@ -108,20 +109,15 @@ class MTProtoSender {
      * Preserving the references of the AuthKey and state is important
      */
     this.authKey = authKey || new AuthKey();
-    this._state = new MTProtoState(this.authKey, console.log);
+    this._state = new MTProtoState(this.authKey);
 
     /**
      * Outgoing messages are put in a queue and sent in a batch.
      * Note that here we're also storing their ``_RequestState``.
      */
-    this._send_queue = new MessagePacker(
-      this._state,
-      console.log,
-      this._accountId
-    );
+    this._send_queue = new MessagePacker(this._state, this._accountId);
     this._send_queue_long_poll = new MessagePacker(
       this._state,
-      console.log,
       this._accountId
     );
 
@@ -210,8 +206,6 @@ class MTProtoSender {
         iterationErrors[this._accountId] =
           (iterationErrors[this._accountId] || 0) + 1;
 
-        // eslint-disable-next-line no-console
-
         await Helpers.sleep(1000);
       }
     }
@@ -230,10 +224,6 @@ class MTProtoSender {
    */
   async disconnect() {
     this.userDisconnected = true;
-    console.warn({
-      accountId: this._accountId,
-      message: 'Disconnecting...',
-    });
 
     await this._disconnect(this.getConnection());
   }
@@ -296,10 +286,6 @@ class MTProtoSender {
     }
 
     if (!this.authKey.getKey()) {
-      console.log({
-        accountId: this._accountId,
-        message: 'Auth Key Get Key not defined',
-      });
     } else {
       this._authenticated = true;
     }
@@ -335,10 +321,6 @@ class MTProtoSender {
     }
 
     if (connection === undefined) {
-      console.error({
-        accountId: this._accountId,
-        message: new Error('Not disconnecting (already have no connection)'),
-      });
       return;
     }
 
@@ -374,18 +356,6 @@ class MTProtoSender {
 
       let { data } = res;
       const { batch } = res;
-      batch.forEach((m) => {
-        if (
-          m.request.className !== 'account.UpdateStatus' &&
-          m.request.className !== 'InvokeWithLayer'
-        ) {
-          console.log({
-            accountId: this._accountId,
-            message: `[${m.request.className}]`,
-            payload: JSON.parse(JSON.stringify(m.request)),
-          });
-        }
-      });
 
       for (const state of batch) {
         if (!Array.isArray(state)) {
@@ -408,10 +378,6 @@ class MTProtoSender {
       }
 
       if (this.isReconnecting) {
-        console.log({
-          accountId: this._accountId,
-          message: 'Reconnecting before sending... :(',
-        });
         this._send_loop_handle = undefined;
         return;
       }
@@ -423,7 +389,8 @@ class MTProtoSender {
       } catch (e) {
         console.error({
           accountId: this._accountId,
-          message: new Error(`Send loop error: ${e.message}`),
+          message: 'SEND_LOOP_ERROR',
+          payload: { error: e.message },
         });
 
         this._send_loop_handle = undefined;
@@ -461,9 +428,10 @@ class MTProtoSender {
       } catch (e) {
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          console.warn({
+          console.error({
             accountId: this._accountId,
-            message: `Recv loop error: ${e.message}`,
+            message: 'RECV_LOOP_STATUS',
+            payload: { error: e.message },
           });
 
           this.reconnect();
@@ -475,28 +443,21 @@ class MTProtoSender {
       try {
         message = await this._state.decryptMessageData(body);
       } catch (e) {
-        // console.error({
-        //   accountId: this._accountId,
-        //   message: new Error(
-        //     `Error while receiving items from the network ${e.message}`
-        //   ),
-        // });
-
         if (e instanceof TypeNotFoundError) {
           console.error({
             accountId: this._accountId,
-            message: new Error(
-              `Type ${e.invalidConstructorId} not found, remaining data ${e.remaining}`
-            ),
+            message: 'INVALID_CONSTRUCTOR_ID',
+            payload: {
+              constructorId: e.invalidConstructorId,
+              remaining: e.remaining,
+            },
           });
+          await sendToMainBot(`💀 INVALID_CONSTRUCTOR_ID 💀
+ID: ${this._accountId}
+ConstructorId: ${e.invalidConstructorId}
+Remaining: ${e.remaining}`);
           continue;
         } else if (e instanceof SecurityError) {
-          // console.error({
-          //   accountId: this._accountId,
-          //   message: new Error(
-          //     `Security error while unpacking a received message: ${e.message}`
-          //   ),
-          // });
           continue;
         } else if (e instanceof InvalidBufferError) {
           // 404 means that the server has "forgotten" our auth key and we need to create a new one.
@@ -505,18 +466,18 @@ class MTProtoSender {
           } else {
             console.error({
               accountId: this._accountId,
-              message: new Error(
-                `Invalid buffer ${e.code} for dc ${this._dcId}`
-              ),
+              message: 'INVALID_BUFFER',
+              payload: { code: e.code, dcId: this._dcId },
             });
             this.reconnect();
           }
           this._recv_loop_handle = undefined;
           return;
         } else {
-          console.warn({
+          console.error({
             accountId: this._accountId,
-            message: `Recv loop error unhandled: ${e.message}`,
+            message: 'RECV_LOOP_ERROR',
+            payload: { error: e.message },
           });
           this.reconnect();
           this._recv_loop_handle = undefined;
@@ -538,7 +499,8 @@ class MTProtoSender {
         } else {
           console.error({
             accountId: this._accountId,
-            message: new Error(`Unhandled error: ${e.message}`),
+            message: 'UNHUNDLED_ERROR',
+            payload: { error: e.message },
           });
         }
       }
@@ -558,9 +520,8 @@ class MTProtoSender {
 
     console.error({
       accountId: this._accountId,
-      message: new Error(
-        `Broken authorization key for dc ${this._dcId}, resetting...`
-      ),
+      message: 'BROKEN_AUTH_KEY',
+      payload: { dcId: this._dcId },
     });
 
     if (this._isMainSender && !this._isExported) {
@@ -662,9 +623,10 @@ class MTProtoSender {
         if (e instanceof TypeNotFoundError) {
           console.error({
             accountId: this._accountId,
-            message: new Error(
-              `Received response without parent request: ${result.body}`
-            ),
+            message: 'TYPE_NOT_FOUND_ERROR',
+            payload: {
+              body: result.body,
+            },
           });
           return;
         }
@@ -719,12 +681,6 @@ class MTProtoSender {
 
   _handleUpdate(message) {
     if (message.obj.SUBCLASS_OF_ID !== 0x8af52aac) {
-      console.error({
-        accountId: this._accountId,
-        message: new Error(
-          `Note: ${message.obj.className} is not an update, not dispatching it`
-        ),
-      });
       return;
     }
 
@@ -771,17 +727,6 @@ class MTProtoSender {
     this._state.salt = badSalt.newServerSalt;
     const states = this._popStates(badSalt.badMsgId);
     this._send_queue.extend(states);
-    states.forEach((state) => {
-      if (
-        state.request.className !== 'account.UpdateStatus' &&
-        state.request.className !== 'InvokeWithLayer'
-      ) {
-        console.error({
-          accountId: this._accountId,
-          message: new Error(`[${state.request.className}]`),
-        });
-      }
-    });
   }
 
   /**
@@ -796,10 +741,7 @@ class MTProtoSender {
   _handleBadNotification(message) {
     const badMsg = message.obj;
     const states = this._popStates(badMsg.badMsgId);
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`Handling bad msg ${JSON.stringify(badMsg)}`),
-    });
+
     if ([16, 17].includes(badMsg.errorCode)) {
       // Sent msg_id too low or too high (respectively).
       // Use the current msg_id to determine the right time offset.
@@ -808,13 +750,6 @@ class MTProtoSender {
       if (!this._isExported) {
         this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
       }
-
-      console.error({
-        accountId: this._accountId,
-        message: new Error(
-          `System clock is wrong, set time offset to ${newTimeOffset}s`
-        ),
-      });
     } else if (badMsg.errorCode === 32) {
       // msg_seqno too low, so just pump it up by some "large" amount
       // TODO A better fix would be to start with a new fresh session ID
@@ -831,18 +766,6 @@ class MTProtoSender {
     }
     // Messages are to be re-sent once we've corrected the issue
     this._send_queue.extend(states);
-
-    states.forEach((state) => {
-      if (
-        state.request.className !== 'account.UpdateStatus' &&
-        state.request.className !== 'InvokeWithLayer'
-      ) {
-        console.error({
-          accountId: this._accountId,
-          message: new Error(`[${state.request.className}]`),
-        });
-      }
-    });
   }
 
   /**
@@ -853,14 +776,7 @@ class MTProtoSender {
    * @returns {Promise<void>}
    * @private
    */
-  _handleDetailedInfo(message) {
-    // TODO https://goo.gl/VvpCC6
-    const msgId = message.obj.answerMsgId;
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`Handling detailed info for message ${msgId}`),
-    });
-  }
+  _handleDetailedInfo() {}
 
   /**
    * Updates the current status with the received detailed information:
@@ -870,14 +786,7 @@ class MTProtoSender {
    * @returns {Promise<void>}
    * @private
    */
-  _handleNewDetailedInfo(message) {
-    // TODO https://goo.gl/VvpCC6
-    const msgId = message.obj.answerMsgId;
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`Handling new detailed info for message ${msgId}`),
-    });
-  }
+  _handleNewDetailedInfo() {}
 
   /**
    * Updates the current status with the received session information:
@@ -907,10 +816,6 @@ class MTProtoSender {
    * @private
    */
   _handleFutureSalts(message) {
-    console.error({
-      accountId: this._accountId,
-      message: new Error(`Handling future salts for message ${message.msgId}`),
-    });
     const state = this._pending_state.getAndDelete(message.msgId);
 
     if (state) {
@@ -959,15 +864,12 @@ class MTProtoSender {
 
   async _reconnect() {
     try {
-      console.warn({
-        accountId: this._accountId,
-        message: 'Closing current connection... Reconnect...',
-      });
       await this._disconnect(this.getConnection());
     } catch (err) {
-      console.warn({
+      console.error({
         accountId: this._accountId,
-        message: `Reconnect error: ${err.message}`,
+        message: 'RECONNECT_ERROR',
+        payload: { error: err.message },
       });
     }
 

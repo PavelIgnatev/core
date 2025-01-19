@@ -8,28 +8,6 @@ const { toSignedLittleBuffer } = require('../Helpers');
 const tlContent = require('./apiTl');
 const schemeContent = require('./schemaTl');
 
-/* CONTEST
-const NAMED_AUTO_CASTS = new Set([
-    'chatId,int'
-])
-const NAMED_BLACKLIST = new Set([
-    'discardEncryption'
-])
-const AUTO_CASTS = new Set([
-    'InputPeer',
-    'InputChannel',
-    'InputUser',
-    'InputDialogPeer',
-    'InputNotifyPeer',
-    'InputMedia',
-    'InputPhoto',
-    'InputMessage',
-    'InputDocument',
-    'InputChatPhoto'
-])
-
- */
-
 function buildApiFromTlSchema() {
   const definitions = loadFromTlSchemas();
 
@@ -115,37 +93,6 @@ function argToBytes(x, type) {
   }
 }
 
-/*
-CONTEST
-async function getInputFromResolve(utils, client, peer, peerType) {
-    switch (peerType) {
-        case 'InputPeer':
-            return utils.getInputPeer(await client.getInputEntity(peer))
-        case 'InputChannel':
-            return utils.getInputChannel(await client.getInputEntity(peer))
-        case 'InputUser':
-            return utils.getInputUser(await client.getInputEntity(peer))
-        case 'InputDialogPeer':
-            return await client._getInputDialog(peer)
-        case 'InputNotifyPeer':
-            return await client._getInputNotify(peer)
-        case 'InputMedia':
-            return utils.getInputMedia(peer)
-        case 'InputPhoto':
-            return utils.getInputPhoto(peer)
-        case 'InputMessage':
-            return utils.getInputMessage(peer)
-        case 'InputDocument':
-            return utils.getInputDocument(peer)
-        case 'InputChatPhoto':
-            return utils.getInputChatPhoto(peer)
-        case 'chatId,int' :
-            return await client.getPeerId(peer, false)
-        default:
-            throw new Error('unsupported peer type : ' + peerType)
-    }
-}
-*/
 function getArgFromReader(reader, arg) {
   if (arg.isVector) {
     if (arg.useVectorId) {
@@ -339,38 +286,6 @@ function createClasses(classesType, params) {
         }
         return reader.tgReadObject();
       }
-
-      /* CONTEST
-            async resolve(client, utils) {
-
-                if (classesType !== 'request') {
-                    throw new Error('`resolve()` called for non-request instance')
-                }
-
-                for (const arg in argsConfig) {
-                    if (argsConfig.hasOwnProperty(arg)) {
-                        if (!AUTO_CASTS.has(argsConfig[arg].type)) {
-                            if (!NAMED_AUTO_CASTS.has(`${argsConfig[arg].name},${argsConfig[arg].type}`)) {
-                                continue
-                            }
-                        }
-                        if (argsConfig[arg].isFlag) {
-                            if (!this[arg]) {
-                                continue
-                            }
-                        }
-                        if (argsConfig[arg].isVector) {
-                            const temp = []
-                            for (const x of this[arg]) {
-                                temp.push(await getInputFromResolve(utils, client, x, argsConfig[arg].type))
-                            }
-                            this[arg] = temp
-                        } else {
-                            this[arg] = await getInputFromResolve(utils, client, this[arg], argsConfig[arg].type)
-                        }
-                    }
-                }
-            } */
     }
 
     if (namespace) {

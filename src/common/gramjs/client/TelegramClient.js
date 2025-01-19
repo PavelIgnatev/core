@@ -150,7 +150,8 @@ class TelegramClient {
     } catch (err) {
       console.error({
         accountId: this._accountId,
-        message: new Error(`Destroy Error ${err.message}`),
+        message: 'DESTROY_ERROR',
+        payload: { error: err.message },
       });
     }
 
@@ -164,7 +165,7 @@ class TelegramClient {
 
   async invoke(request) {
     if (request.classType !== 'request') {
-      throw new Error('You can only invoke MTProtoRequests');
+      throw new Error('You can only invoke requests');
     }
 
     const sender = this._sender;
@@ -198,7 +199,8 @@ ERROR: ${e.message}`
           );
           console.error({
             accountId: this._accountId,
-            message: new Error(`Flood wait Error: ${e.message}`),
+            message: 'FLOOD_WAIT_ERROR',
+            payload: { error: e.message },
           });
           if (e.seconds <= 60) {
             await sleep(e.seconds * 1000);

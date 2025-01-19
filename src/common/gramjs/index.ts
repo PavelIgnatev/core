@@ -64,13 +64,48 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   params: InvokeRequestParams = {}
 ) {
   const { shouldIgnoreErrors } = params;
+
   try {
-    return await client.invoke(request);
+    const response = await client.invoke(request);
+    if (request.className !== 'account.UpdateStatus') {
+      console.log({
+        accountId: client._accountId,
+        message: `[${request.className}]`,
+        payload: {
+          request: JSON.parse(JSON.stringify(request)),
+        },
+      });
+    }
+
+    return response;
   } catch (err: any) {
+    console.error({
+      accountId: client._accountId,
+      message: `[${request.className}]`,
+      payload: {
+        request: JSON.parse(JSON.stringify(request)),
+        error: err.message,
+      },
+    });
+
+    if (
+      [
+        'USER_DEACTIVATED_BAN',
+        'AUTH_KEY_UNREGISTERED',
+        'AUTH_KEY_INVALID',
+        'USER_DEACTIVATED',
+        'SESSION_REVOKED',
+        'SESSION_EXPIRED',
+        'AUTH_KEY_PERM_EMPTY',
+        'SESSION_PASSWORD_NEEDED',
+      ].includes(err.message)
+    ) {
+      throw new Error(err.message);
+    }
     if (shouldIgnoreErrors) return undefined;
 
     if (err.message !== 'PEER_FLOOD') {
-      await sendToMainBot(`💀 REQUEST ERROR 💀
+      await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀
 ID: ${client._accountId}
 ERROR: ${err.message}
 REQUEST: ${JSON.stringify(request)}`);

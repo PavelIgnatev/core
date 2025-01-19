@@ -255,11 +255,21 @@ export async function makeRequestGpt(
 
   console.log({
     accountId,
-    message: `**MAKE REQUEST GPT**`,
-    messages,
+    message: `[AI_REQUEST]`,
+    payload: {
+      groupId,
+      part,
+      language,
+      disableLink,
+      mandatoryQuestion,
+      minimalProposalLength,
+      isRemoveGreetings,
+      aiParams,
+      messages,
+    },
   });
-  let i = 0;
 
+  let i = 0;
   while (i !== 5) {
     try {
       const fixedMessages = messages.map((message) => {
@@ -340,12 +350,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
 
       generations.push(message);
 
-      console.log({
-        accountId,
-        message: `**REQUEST GPT MESSAGE**`,
-        varianMessage: message,
-      });
-
       if (hasTextLink && disableLink) {
         throw new Error(
           'The reply should not contain any references at this stage'
@@ -386,6 +390,12 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
+      console.log({
+        accountId,
+        message: `[AI_RESPONSE]`,
+        payload: { message },
+      });
+
       return filterString(
         varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ''),
         'mainlink',
@@ -393,11 +403,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       );
     } catch (error: any) {
       await sleep(2500);
-
-      console.error({
-        accountId,
-        message: new Error(`Request Gpt Error: ${error.message}`),
-      });
 
       if (
         error.message !==
@@ -413,8 +418,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
     }
   }
 
-  try {
-    await sendToMainBot(`!!!GPT GENERATION ERROR (gpt)!!!
+  await sendToMainBot(`** GENERATION_ERROR **
 GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________
@@ -422,14 +426,14 @@ GENERATIONS:
 ${generations.map((g, i) => `${i + 1}: ${g}`).join('\n')}
 ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}`);
-  } catch (e: any) {
-    console.error({
-      accountId,
-      message: new Error(`GPT GENERATION ERROR: ${e.message}`),
-    });
-  }
 
   if (generations[0]) {
+    console.log({
+      accountId,
+      message: `[AI_RESPONSE]`,
+      variantMessage: generations[0],
+    });
+
     return filterString(
       generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ''),
       'mainlink',

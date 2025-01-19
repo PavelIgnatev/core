@@ -11,7 +11,7 @@ const USE_INVOKE_AFTER_WITH = new Set([
 ]);
 
 class MessagePacker {
-  constructor(state, logger, accountId) {
+  constructor(state, accountId) {
     this._state = state;
     this._queue = [];
     this._pendingStates = [];
@@ -105,12 +105,6 @@ class MessagePacker {
 
       return buffer.getValue();
     }
-    console.log({
-      accountId: this._accountId,
-      message: `Message payload for ${
-        state.request.className || state.request.constructor.name
-      } is too long ${state.data.length} and cannot be sent`,
-    });
 
     state.reject('Request Payload is too big');
 
@@ -172,13 +166,6 @@ class MessagePacker {
         this._queue.unshift(state);
         break;
       }
-
-      console.log({
-        accountId: this._accountId,
-        message: `Message payload for ${
-          state.request.className || state.request.constructor.name
-        } is too long ${state.data.length} and cannot be sent`,
-      });
 
       state.reject('Request Payload is too big');
       size = 0;

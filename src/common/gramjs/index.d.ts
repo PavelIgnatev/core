@@ -2,8 +2,6 @@ export { default as Api } from './tl/api';
 export { default as TelegramClient } from './client/TelegramClient';
 export { default as connection } from './network';
 export { default as tl } from './tl';
-export { default as version } from './Version';
-export { default as events } from './events';
 export { default as utils } from './Utils';
 export { default as errors } from './errors';
 export { default as sessions } from './sessions';

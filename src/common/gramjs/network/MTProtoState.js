@@ -31,10 +31,10 @@ class MTProtoState {
      * @param isCall
      * @param isOutgoing
      */
-  constructor(authKey, loggers, isCall = false, isOutgoing = false) {
+  constructor(authKey) {
     this.authKey = authKey;
-    this._isCall = isCall;
-    this._isOutgoing = isOutgoing;
+    this._isCall = false;
+    this._isOutgoing = false;
     this.timeOffset = 0;
     this.salt = 0;
 

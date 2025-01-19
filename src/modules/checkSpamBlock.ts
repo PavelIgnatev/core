@@ -6,8 +6,10 @@ import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
+import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
+import { getFullUser } from '../methods/users/getFullUser';
 
 const fileComplaint = async (
   client: TelegramClient,
@@ -122,6 +124,14 @@ export const checkSpamBlock = async (
   if (!accessHash || !username || username !== 'SpamBot') {
     throw new Error('SPAMBOT_NOT_FOUND');
   }
+
+  await unBlockContact(
+    client,
+    new GramJs.InputPeerUser({
+      userId,
+      accessHash,
+    })
+  );
 
   const sentMessage = await sendMessage(
     client,

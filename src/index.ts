@@ -6,7 +6,6 @@ import './helpers/setConsole.log';
 import util from 'util';
 
 import { Account } from './@types/Account';
-import { clearAuthorizations } from './common/gramjs/client/auth';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import {
@@ -21,6 +20,7 @@ import {
   startSender,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
+import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { getMe } from './methods/users/getMe';
@@ -36,10 +36,6 @@ const accountsInWork: Record<string, number> = {};
 
 const main = async (ID: string) => {
   const startTime = performance.now();
-  console.log({
-    accountId: ID,
-    message: `💥 LOG IN ${ID} 💥`,
-  });
 
   let isAutoResponse = true;
   let setOnlineInterval: any = null;
@@ -48,7 +44,14 @@ const main = async (ID: string) => {
   let errored = false;
 
   try {
+    const randomI = Math.floor(Math.random() * 30);
     const accountByID = await getAccountById(ID);
+
+    console.log({
+      accountId: ID,
+      message: `💥 LOG IN ${ID} 💥`,
+      paylod: { count: randomI },
+    });
 
     const {
       dcId,
@@ -93,10 +96,6 @@ const main = async (ID: string) => {
         await Promise.race([updateStatus(client, false), timeoutPromise]);
       } catch (error: any) {
         if (error.message === 'RECONNECT') {
-          console.warn({
-            accountId: ID,
-            message: 'RECONNECT_DUE_TO_SET_OFFLINE',
-          });
           reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
           client?._sender?.reconnect();
         } else {
@@ -109,12 +108,6 @@ const main = async (ID: string) => {
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
-    const randomI = Math.floor(Math.random() * 30);
-
-    console.log({
-      accountId: ID,
-      message: `Random number: ${randomI}`,
-    });
 
     let i = -1;
     while (true) {
@@ -133,25 +126,22 @@ const main = async (ID: string) => {
       const timeout = new Promise(
         (_, rej) =>
           (timer = setTimeout(
-            () =>
-              rej(
-                new Error(`Iteration [${i + 1}] took longer than 15 minutes`)
-              ),
+            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
             900000
           ))
       );
 
       await Promise.race([
         (async () => {
-          if (isAutoResponse && !account.fucker) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
-          }
+          // if (isAutoResponse && !account.fucker) {
+          //   isAutoResponse = false;
+          //   await autoResponse(client, ID, meId, tgFirstName);
+          // }
 
-          if (i === randomI) {
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
+          // if (i === randomI) {
+          await automaticCheck(client, account);
+          await autoSender(client, ID, meId);
+          // }
           await sleep(60000);
         })(),
         timeout,
@@ -162,7 +152,7 @@ const main = async (ID: string) => {
   } catch (e: any) {
     console.error({
       accountId: ID,
-      message: new Error(`MAIN_ERROR: ${e.message}`),
+      message: `MAIN_ERROR (${e.message})`,
     });
 
     if (e.message.includes('GLOBAL_ERROR')) {

@@ -40,10 +40,6 @@ export const getRecipient = async (accountId: string) => {
         language?: string;
       };
     } catch (error: any) {
-      console.error({
-        accountId,
-        message: new Error(`GET RECIPIENT ERROR: ${error.message}`),
-      });
       await sleep(10000);
     }
   }

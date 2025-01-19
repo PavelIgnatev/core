@@ -79,7 +79,6 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onerror = (error) => {
-        // eslint-disable-next-line no-console
         reject(error);
         hasResolved = true;
         if (timeout) clearTimeout(timeout);

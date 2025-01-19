@@ -27,9 +27,9 @@ export const initClient = async (
     return client as TelegramClient;
   } catch (e: any) {
     if (e.message === 'TIMEOUT_ERROR') {
-      console.error({
+      console.warn({
         accountId,
-        message: new Error(`Timeout error. Retrying init client...`),
+        message: 'CLIENT_TIMEOUT_RECONNECT',
       });
       return await initClient(account, accountId, onUpdate);
     }
@@ -46,11 +46,6 @@ export const initClient = async (
         'SESSION_PASSWORD_NEEDED',
       ].includes(e.message)
     ) {
-      console.error({
-        accountId,
-        message: new Error(e.message),
-      });
-
       await updateAccountById(account.accountId, {
         banned: true,
         reason: e.message,
