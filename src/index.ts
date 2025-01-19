@@ -165,7 +165,7 @@ const main = async (ID: string) => {
         banned: true,
         reason: 'AUTH_KEY_DUPLICATED',
       });
-      await sendToMainBot(`** AUTH KEY DUPLICATED **
+      await sendToMainBot(`💀 AUTH_KEY_DUPLICATED 💀
 ID: ${ID}`);
 
       if (!account?.fucker) {

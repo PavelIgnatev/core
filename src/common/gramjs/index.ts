@@ -96,6 +96,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
         'USER_DEACTIVATED',
         'SESSION_REVOKED',
         'SESSION_EXPIRED',
+        "AUTH_KEY_DUPLICATED",
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
       ].includes(err.message)

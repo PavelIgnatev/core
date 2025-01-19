@@ -79098,6 +79098,7 @@ async function invokeRequest(client, request, params = {}) {
       "USER_DEACTIVATED",
       "SESSION_REVOKED",
       "SESSION_EXPIRED",
+      "AUTH_KEY_DUPLICATED",
       "AUTH_KEY_PERM_EMPTY",
       "SESSION_PASSWORD_NEEDED"
     ].includes(err.message)) {
@@ -82329,6 +82330,7 @@ var initClient = async (account, accountId, onUpdate) => {
       "USER_DEACTIVATED",
       "SESSION_REVOKED",
       "SESSION_EXPIRED",
+      "AUTH_KEY_DUPLICATED",
       "AUTH_KEY_PERM_EMPTY",
       "SESSION_PASSWORD_NEEDED"
     ].includes(e.message)) {
@@ -82454,7 +82456,7 @@ var main = async (ID) => {
         banned: true,
         reason: "AUTH_KEY_DUPLICATED"
       });
-      await sendToMainBot(`** AUTH KEY DUPLICATED **
+      await sendToMainBot(`\u{1F480} AUTH_KEY_DUPLICATED \u{1F480}
 ID: ${ID}`);
       if (!(account == null ? void 0 : account.fucker)) {
         await exec("pm2 kill");
