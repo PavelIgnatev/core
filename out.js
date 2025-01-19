@@ -14182,9 +14182,9 @@ var require_bson = __commonJS({
       get _bsontype() {
         return "BSONRegExp";
       }
-      constructor(pattern, options) {
+      constructor(pattern2, options) {
         super();
-        this.pattern = pattern;
+        this.pattern = pattern2;
         this.options = alphabetize(options ?? "");
         if (this.pattern.indexOf("\0") !== -1) {
           throw new BSONError(`BSON Regex patterns cannot contain null bytes, found: ${JSON.stringify(this.pattern)}`);
@@ -14226,9 +14226,9 @@ var require_bson = __commonJS({
       inspect(depth, options, inspect) {
         const stylize = getStylizeFunction(options) ?? ((v) => v);
         inspect ?? (inspect = defaultInspect);
-        const pattern = stylize(inspect(this.pattern), "regexp");
+        const pattern2 = stylize(inspect(this.pattern), "regexp");
         const flags = stylize(inspect(this.options), "regexp");
-        return `new BSONRegExp(${pattern}, ${flags})`;
+        return `new BSONRegExp(${pattern2}, ${flags})`;
       }
     };
     var BSONSymbol = class _BSONSymbol extends BSONValue {
@@ -65475,7 +65475,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/common/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt9 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer2(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -65483,14 +65483,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt = BigInt9(randBuffer.toString("hex"), 16);
+      let bigInt = BigInt10(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt.toString(2).length / 8) >= bytesNumber) {
-        bigInt = bigInt.subtract(BigInt9(2).pow(BigInt9(bytesNumber * 8)));
+        bigInt = bigInt.subtract(BigInt10(2).pow(BigInt10(bytesNumber * 8)));
       }
       return bigInt;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt9(big);
+      const bigNumber = BigInt10(big);
       const byteArray = [];
       for (let i = 0; i < number; i++) {
         byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
@@ -65498,17 +65498,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt(bigInt, bytesNumber, little = true, signed = false) {
-      bigInt = BigInt9(bigInt);
+      bigInt = BigInt10(bigInt);
       const bitLength = bigInt.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt.lesser(BigInt9(0))) {
+      if (!signed && bigInt.lesser(BigInt10(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt.lesser(BigInt9(0))) {
+      if (bigInt.lesser(BigInt10(0))) {
         below = true;
         bigInt = bigInt.abs();
       }
@@ -65575,12 +65575,12 @@ var require_Helpers = __commonJS({
     }
     function modExp(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt9.one;
+      let result = BigInt10.one;
       let x = a;
-      while (b.greater(BigInt9.zero)) {
-        const leastSignificantBit = b.remainder(BigInt9(2));
-        b = b.divide(BigInt9(2));
-        if (leastSignificantBit.eq(BigInt9.one)) {
+      while (b.greater(BigInt10.zero)) {
+        const leastSignificantBit = b.remainder(BigInt10(2));
+        b = b.divide(BigInt10(2));
+        if (leastSignificantBit.eq(BigInt10.one)) {
           result = result.multiply(x);
           result = result.remainder(n);
         }
@@ -65592,7 +65592,7 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt(BigInt9(integer), byteLength, false, signed);
+      return readBufferFromBigInt(BigInt10(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
@@ -70976,7 +70976,7 @@ var require_BinaryReader = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/common/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt9 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers = require_Helpers();
     var IGE = require_IGE();
@@ -71025,7 +71025,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt9(0);
+        this._lastMsgId = BigInt10(0);
         this.msgIds = [];
       }
       /**
@@ -71264,9 +71264,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt9(Math.floor(now)).shiftLeft(BigInt9(32)).or(BigInt9(nanoseconds).shiftLeft(BigInt9(2)));
+        let newMsgId = BigInt10(Math.floor(now)).shiftLeft(BigInt10(32)).or(BigInt10(nanoseconds).shiftLeft(BigInt10(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt9(4));
+          newMsgId = this._lastMsgId.add(BigInt10(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -71278,7 +71278,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt9(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt10(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -71289,10 +71289,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt9(32));
+        const correct = correctMsgId.shiftRight(BigInt10(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt9(0);
+          this._lastMsgId = BigInt10(0);
         }
         return this.timeOffset;
       }
@@ -77622,7 +77622,7 @@ var require_TCPFull = __commonJS({
 var require_TCPAbridged = __commonJS({
   "src/common/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt9 = require_BigInteger();
+    var BigInt10 = require_BigInteger();
     var { readBufferFromBigInt } = require_Helpers();
     var { Connection, PacketCodec } = require_Connection();
     var AbridgedPacketCodec = class _AbridgedPacketCodec extends PacketCodec {
@@ -77642,7 +77642,7 @@ var require_TCPAbridged = __commonJS({
         } else {
           length = Buffer.concat([
             Buffer.from("7f", "hex"),
-            readBufferFromBigInt(BigInt9(length), 3)
+            readBufferFromBigInt(BigInt10(length), 3)
           ]);
         }
         return Buffer.concat([length, data]);
@@ -79203,6 +79203,38 @@ var getAccountDialogs = async (accountId) => {
   ).toArray();
   return dialogues;
 };
+var getPingDialogsIds = async (accountId) => {
+  const dialoguesCollection = await getDialoguesCollection();
+  const twelveHoursAgo = /* @__PURE__ */ new Date();
+  twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
+  const hours24Ago = /* @__PURE__ */ new Date();
+  hours24Ago.setHours(hours24Ago.getHours() - 24);
+  const oneWeekAgo = /* @__PURE__ */ new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const pingDialogsIds = await dialoguesCollection.distinct("recipientId", {
+    accountId,
+    step: 3,
+    ping: { $ne: true },
+    stopped: { $ne: true },
+    blocked: { $ne: true },
+    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
+    dateCreated: { $gte: oneWeekAgo }
+  });
+  return pingDialogsIds;
+};
+var getManualControlDialogsIds = async (accountId) => {
+  const dialoguesCollection = await getDialoguesCollection();
+  const manualControlDialogsIds = await dialoguesCollection.distinct(
+    "recipientId",
+    {
+      accountId,
+      stopped: true,
+      blocked: { $ne: true },
+      managerMessage: { $ne: null }
+    }
+  );
+  return manualControlDialogsIds;
+};
 var updateDialogue = async (dialogue) => {
   const dialoguesCollection = await getDialoguesCollection();
   await dialoguesCollection.updateOne(
@@ -80437,410 +80469,19 @@ ERROR: ${e.message}`);
   }
 };
 
-// src/modules/autoSender.ts
-var import_api31 = __toESM(require_api());
-
-// src/db/groupIdUsers.ts
-var getGroupIdUsersCollection = async () => {
-  return (await DB()).collection("groupIdUsers");
-};
-var updateFailedMessage = async (accountId, username, groupId, reason) => {
-  const messagesCollection = await getGroupIdUsersCollection();
-  await messagesCollection.updateOne(
-    { g: groupId, u: username.toLowerCase() },
-    { $set: { f: true, p: /* @__PURE__ */ new Date(), r: reason, a: accountId } },
-    { upsert: true }
-  );
-};
-var updateSendMessage = async (username, groupId, data) => {
-  const messagesCollection = await getGroupIdUsersCollection();
-  await messagesCollection.updateOne(
-    { g: groupId, u: username.toLowerCase() },
-    { $set: data },
-    { upsert: true }
-  );
-};
-
-// src/helpers/getUserInformation.ts
-init_axios2();
-init_helpers();
-
-// src/helpers/sendToNameBot.ts
-var sendToBotByChatIdText2 = async (chatId, text) => {
-  const token = "7722797934:AAHjsfnd8D21ZsfhR4j_gfc40BEsm798C5U";
-  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
-    const chunks = [];
-    let currentIndex = 0;
-    while (currentIndex < text2.length) {
-      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
-      currentIndex += chunkSize;
-    }
-    return chunks;
-  };
-  const textChunks = splitTextIntoChunks(text);
-  for (const chunk of textChunks) {
-    await fetch(sendMessageUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: chunk,
-        disable_web_page_preview: true
-      })
-    });
-  }
-};
-var sendToNameBot = async (text) => {
-  const chatIds = ["483779758", "324820826"];
-  try {
-    await Promise.all(
-      chatIds.map(async (chatId) => {
-        await sendToBotByChatIdText2(chatId, text);
-      })
-    );
-  } catch {
-  }
-};
-
-// src/helpers/getUserInformation.ts
-var isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
-var withTimeout = (promise, ms) => {
-  const timeout = new Promise(
-    (_, reject) => setTimeout(() => reject(new Error("TIMEOUT_EXCEEDED")), ms)
-  );
-  return Promise.race([promise, timeout]);
-};
-var makeRequest = async (word) => {
-  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(async (error) => {
-    await sendToNameBot(`** NAME SERVER ERROR **
-WORD: ${word}
-ERROR: ${error.message}`);
-    return null;
-  });
-};
-var getUser = async (userContent, language) => {
-  var _a;
-  if (language !== "RUSSIAN") {
-    return null;
-  }
-  const content = userContent.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, " ").replace(/\s+/g, " ").toLowerCase().trim();
-  const words = content.split(" ");
-  const requests = words.map((w) => w.trim()).filter(Boolean).map(makeRequest);
-  let contentMap = /* @__PURE__ */ new Set();
-  try {
-    const promises2 = await Promise.all(requests);
-    for (const promise of promises2) {
-      const nameData = (_a = promise == null ? void 0 : promise.result) == null ? void 0 : _a.first_name;
-      if ((nameData == null ? void 0 : nameData.gender) && (nameData.gender.Female || nameData.gender.Male) && Object.values(nameData.rank).filter((rank) => rank !== null).length > 3) {
-        contentMap.add(promise.name);
-      }
-    }
-  } catch {
-  }
-  const contentRequets = [...contentMap].reduce(
-    (a, b) => a.length >= b.length ? a : b,
-    ""
-  );
-  if (contentRequets.length < 2) {
-    return null;
-  }
-  const processRequest = async () => {
-    var _a2, _b, _c, _d, _e;
-    for (let i = 0; i < 5; i++) {
-      try {
-        const { data: resultData } = await axios_default.post(
-          "http://91.198.220.234/chatv2",
-          {
-            temperature: 0.4,
-            model: "command-r-plus",
-            safety_mode: "NONE",
-            messages: [
-              {
-                role: "system",
-                content: `Your task is to accurately identify and extract the real first name from the provided message and adjust it to its **${language}** version. The message may contain various elements such as usernames, display names, nicknames, titles, descriptors, and irrelevant words. Your primary goal is to extract the most likely real first name of the person and provide it in its **${language}** form, ensuring proper communication.
-
-Please disregard usernames unless they are the only source of the name. If the display name is available and contains a plausible first name, prioritize it. Remove words like 'undefined', titles (e.g., 'Coach', 'Founder'), descriptors, emojis, and special characters. If multiple names are present, choose the first one that is likely the first name. Ignore additional information like surnames or middle names, as they are already removed automatically by the system.
-                
-**Important clarifications:**
-1. If the name is a short form, do not attempt to convert it to a full form, even if the full form is commonly known. and "Alex" must remain "Alex"
-2. If only a patronymic is present (e.g., 'Ivanovich', 'Vladimirovna'), **do not extract a first name from the patronymic**. If no first name is present alongside the patronymic, return "null."
-3. If the input does not contain any recognizable short, full, or transliterated form of a real first name, you must return "null." Do not fabricate or infer a name in such cases.
-
-Ensure the extracted name is adjusted to its **${language}** version, either by translation or transliteration, and maintain correct spelling and cultural appropriateness in **${language}**. If the name is already in **${language}**, leave it as is. Return only the name as plain text or "null" if no valid name is found. Do not provide any explanations or additional information.`
-              },
-              {
-                role: "user",
-                content: contentRequets
-              }
-            ]
-          }
-        );
-        const userInfo = (_c = (_b = (_a2 = resultData == null ? void 0 : resultData.message) == null ? void 0 : _a2.content) == null ? void 0 : _b[0]) == null ? void 0 : _c.text;
-        if (userInfo === "null") {
-          return null;
-        }
-        if (language === "RUSSIAN" && !isRussian(userInfo)) {
-          throw new Error("INCORRECT_NAME");
-        }
-        const data = await makeRequest(userInfo);
-        const { Female = 0, Male = 0 } = ((_e = (_d = data == null ? void 0 : data.result) == null ? void 0 : _d.first_name) == null ? void 0 : _e.gender) || {};
-        if (!Female && !Male) {
-          throw new Error("INCORRECT_GENDER");
-        }
-        return {
-          aiName: capitalizeFirstLetter(userInfo.toLowerCase()),
-          aiGender: Female > Male ? "female" : "male"
-        };
-      } catch (error) {
-        await sleep(1e3);
-      }
-    }
-    return null;
-  };
-  try {
-    return await withTimeout(processRequest(), 3e5);
-  } catch {
-    return null;
-  }
-};
-var getUserInformation = async (firstMessagePrompt, secondMessagePrompt, language, firstName, lastName, username) => {
-  let user = null;
-  let firstMessage = generateRandomString(firstMessagePrompt);
-  const secondMessage = generateRandomString(secondMessagePrompt);
-  if (language === "RUSSIAN") {
-    const fm = firstMessage.replace(/[^а-яА-ЯёЁ]+/g, "");
-    const userData = await getUser(
-      `${firstName.toLowerCase()} ${lastName.toLowerCase()} ${username}`,
-      language
-    );
-    if (userData == null ? void 0 : userData.aiName) {
-      user = userData;
-      firstMessage = `${fm}, ${userData.aiName}!`;
-    } else {
-      firstMessage = `${fm}!`;
-    }
-  }
-  return { user, firstMessage, secondMessage };
-};
-
-// src/modules/autoSender.ts
-init_helpers();
-init_sendToMainBot();
-
-// src/methods/contacts/resolveContact.ts
-var import_api26 = __toESM(require_api());
-
-// src/methods/contacts/resolvePhone.ts
-var import_api24 = __toESM(require_api());
-var resolvePhone = async (client, phone) => {
-  const contact = await invokeRequest(
-    client,
-    new import_api24.default.contacts.ResolvePhone({
-      phone
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  if (contact) {
-    return contact;
-  }
-  const randomPhone = await getRandomPhone();
-  if (!randomPhone) {
-    throw new Error("RANDOM_PHONE_NOT_FOUND");
-  }
-  const randomContact = await invokeRequest(
-    client,
-    new import_api24.default.contacts.ResolvePhone({
-      phone: `+${randomPhone}`
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  if (!randomContact) {
-    throw new Error("STABLE_RESULT_ERROR");
-  }
-  return null;
-};
-
-// src/methods/contacts/resolveUsername.ts
-var import_api25 = __toESM(require_api());
-var resolveUsername = async (client, username) => {
-  const userByUsername = await invokeRequest(
-    client,
-    new import_api25.default.contacts.ResolveUsername({
-      username
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  return userByUsername;
-};
-
-// src/methods/contacts/resolveContact.ts
-var resolveContact = async (client, contact) => {
-  const resolveMethod = contact.includes("+") ? resolvePhone : resolveUsername;
-  const resolvedContact = await resolveMethod(client, contact);
-  if (!resolvedContact) {
-    throw new Error("CONTACT_NOT_RESOLVED");
-  }
-  if (!resolvedContact.users.length) {
-    throw new Error("CONTACT_USERS_LENGTH");
-  }
-  if (resolvedContact.users[0] instanceof import_api26.default.UserEmpty) {
-    throw new Error("CONTACT_USER_EMPTY");
-  }
-  if (!resolvedContact.users[0].accessHash) {
-    throw new Error("ACCESS_HASH_NOT_FOUND");
-  }
-  const { id: userId, accessHash } = resolvedContact.users[0];
-  const fullUser = await getFullUser(
-    client,
-    String(userId),
-    String(accessHash)
-  );
-  if (!fullUser || !fullUser.users.length || fullUser.users[0] instanceof import_api26.default.UserEmpty || !fullUser.users[0].accessHash) {
-    throw new Error("USER_NOT_FOUND");
-  }
-  return {
-    fullContact: fullUser,
-    contact: fullUser.users[0]
-  };
-};
-
-// src/methods/messages/sendMessage.ts
-var import_big_integer6 = __toESM(require_BigInteger());
-var import_api27 = __toESM(require_api());
-init_helpers();
-init_sendToMainBot();
-var logPeerFloodError = async (message, accountId, userId) => {
-  const fullAccount = await getAccountById(accountId);
-  const dialog = await getDialogue(accountId, String(userId));
-  const createdDateFormatted = (dialog == null ? void 0 : dialog.dateCreated) ? formatDateToUTC(dialog.dateCreated) : "N/A";
-  const updatedDateFormatted = (dialog == null ? void 0 : dialog.dateUpdated) ? formatDateToUTC(dialog.dateUpdated) : "N/A";
-  const spamBlockDateFormatted = (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate !== "INFINITY" ? formatDateToUTC(fullAccount.spamBlockDate) : (fullAccount == null ? void 0 : fullAccount.spamBlockDate) === "INFINITY" ? "INFINITY" : "N/A";
-  await sendToMainBot(
-    `*** PEER_FLOOD ***
-QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
-MESSAGE: ${message}
-
-SPAMBLOCK DATE: ${spamBlockDateFormatted}
-DIALOG CREATED DATE: ${createdDateFormatted}
-DIALOG UPDATED DATE: ${updatedDateFormatted}`
-  );
-};
-var logGeneralError = async (error, accountId, userId, message) => {
-  await sendToMainBot(
-    `*** ${error.message} ***
-AccountId: ${accountId}
-UserId: ${userId}
-Message: ${message}`
-  );
-};
-var sendMessage = async (client, userId, accessHash, message, accountId, withTyping, withReadHistory) => {
-  let messageUpdate;
-  try {
-    if (withTyping) {
-      const iterations = Math.ceil(message.length / 250 * 60 * 1e3 / 5e3);
-      for (let i = 0; i < iterations; i++) {
-        await invokeRequest(
-          client,
-          new import_api27.default.messages.SetTyping({
-            peer: new import_api27.default.InputPeerUser({
-              userId: (0, import_big_integer6.default)(userId),
-              accessHash: (0, import_big_integer6.default)(accessHash)
-            }),
-            action: new import_api27.default.SendMessageTypingAction()
-          })
-        );
-        await sleep(5e3);
-      }
-    }
-    const update = await invokeRequest(
-      client,
-      new import_api27.default.messages.SendMessage({
-        message: removeNonAlphaPrefix(
-          capitalizeFirstLetter(reduceSpaces(message))
-        ),
-        clearDraft: true,
-        peer: new import_api27.default.InputPeerUser({
-          userId: (0, import_big_integer6.default)(userId),
-          accessHash: (0, import_big_integer6.default)(accessHash)
-        }),
-        randomId: (0, import_big_integer6.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
-      })
-    );
-    if (!update) {
-      messageUpdate = null;
-    } else if (update instanceof import_api27.default.UpdateShortSentMessage || update instanceof import_api27.default.UpdateMessageID) {
-      messageUpdate = update;
-    } else if ("updates" in update) {
-      messageUpdate = update.updates.find(
-        (u) => u instanceof import_api27.default.UpdateMessageID
-      );
-    }
-    if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
-      throw new Error("MESSAGE_NOT_SENT");
-    }
-    if (withReadHistory) {
-      await invokeRequest(
-        client,
-        new import_api27.default.messages.ReadHistory({
-          peer: new import_api27.default.InputPeerUser({
-            userId: (0, import_big_integer6.default)(userId),
-            accessHash: (0, import_big_integer6.default)(accessHash)
-          }),
-          maxId: messageUpdate.id
-        })
-      );
-    }
-    return messageUpdate;
-  } catch (error) {
-    if (error.message === "PEER_FLOOD") {
-      if (message.length > 30) {
-        await logPeerFloodError(message, accountId, userId);
-      }
-    } else {
-      await logGeneralError(error, accountId, userId, message);
-    }
-    throw error;
-  }
-};
-
-// src/methods/recipient/getRecipient.ts
-init_axios2();
-init_helpers();
-var defaultFirstMessagePrompt = "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!";
-var defaultSecondMessagePrompt = "{\u042F |}{\u0437\u0430\u043C\u0435\u0442\u0438\u043B|\u0443\u0432\u0438\u0434\u0435\u043B|\u043E\u0431\u0440\u0430\u0442\u0438\u043B \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u0435|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u0438\u043C\u0430\u044E|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0438\u043B|\u0432\u0435\u0440\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u0437\u0430\u043F\u043E\u043C\u043D\u0438\u043B|\u043F\u043E\u0434\u043C\u0435\u0442\u0438\u043B}, {\u0447\u0442\u043E \u0432\u044B|\u0447\u0442\u043E \u0412\u044B|\u0432\u044B|\u0412\u044B} {\u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C|\u0432\u0435\u0434\u0435\u0442\u0435 \u0431\u0438\u0437\u043D\u0435\u0441|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E\u043C|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u0432\u0435\u0434\u0435\u043D\u0438\u0435\u043C \u0431\u0438\u0437\u043D\u0435\u0441\u0430|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043A\u043E\u043C\u043C\u0435\u0440\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C\u044E}{?|.|,} {\u044D\u0442\u043E \u0442\u0430\u043A|\u044F \u043F\u0440\u0430\u0432|\u043F\u0440\u0430\u0432 \u043B\u0438 \u044F|\u044D\u0442\u043E \u043F\u0440\u0430\u0432\u0434\u0430|\u0442\u0430\u043A \u043B\u0438 \u044D\u0442\u043E|\u044D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0442\u0430\u043A|\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u043B\u0438 \u0442\u0430\u043A|\u043D\u0435 \u043E\u0448\u0438\u0431\u0441\u044F|\u0432\u0435\u0440\u043D\u043E|\u044D\u0442\u043E \u0432\u0435\u0440\u043D\u043E}?";
-var getRecipient = async (accountId) => {
-  while (true) {
-    try {
-      const url2 = new URL(String(process.env.RECIPIENT_URL));
-      if (accountId.includes("-prefix-")) {
-        url2.searchParams.append("prefix", accountId.split("-prefix-")[1]);
-      }
-      const { data: user } = await axios_default(url2.toString());
-      if (user === "GROUP_ID_NOT_DEFINED") {
-        return null;
-      }
-      if (!user || !user.username || !user.groupId) {
-        throw new Error("USER_NOT_DEFINED");
-      }
-      if (!user.firstMessagePrompt) {
-        user.firstMessagePrompt = defaultFirstMessagePrompt;
-      }
-      if (!user.secondMessagePrompt) {
-        user.secondMessagePrompt = defaultSecondMessagePrompt;
-      }
-      return user;
-    } catch (error) {
-      await sleep(1e4);
-    }
-  }
-};
-
 // src/db/groupId.ts
 var getGroupIdCollection = async () => {
   return (await DB()).collection("groupId");
+};
+var getGroupId = async (groupId) => {
+  const groupIdCollection = await getGroupIdCollection();
+  const result = await groupIdCollection.findOne(
+    {
+      groupId: String(groupId)
+    },
+    { projection: { history: 0, dateUpdated: 0, _id: 0 } }
+  );
+  return result;
 };
 var incrementCurrentCount = async (groupId) => {
   const groupIdCollection = await getGroupIdCollection();
@@ -80853,112 +80494,106 @@ var incrementCurrentCount = async (groupId) => {
   );
 };
 
-// src/helpers/getCombinedMessages.ts
-var getCombinedMessages = (messages) => {
-  const combinedMessages = [];
-  for (let i = 0; i < messages.length; i++) {
-    const curr = { ...messages[i] };
-    if (combinedMessages.length > 0) {
-      const lastItem = combinedMessages[combinedMessages.length - 1];
-      if (lastItem.fromId === curr.fromId) {
-        lastItem.text += `.${curr.text}`;
-      } else {
-        combinedMessages.push(curr);
-      }
-    } else {
-      combinedMessages.push(curr);
-    }
-  }
-  return combinedMessages;
+// src/helpers/converterName.ts
+var russianNames = {
+  anatoliy: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
+  anton: "\u0410\u043D\u0442\u043E\u043D",
+  arkadiy: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
+  artur: "\u0410\u0440\u0442\u0443\u0440",
+  boris: "\u0411\u043E\u0440\u0438\u0441",
+  vadim: "\u0412\u0430\u0434\u0438\u043C",
+  valentin: "\u0412\u0430\u043B\u0435\u043D\u0442\u0438\u043D",
+  valeriy: "\u0412\u0430\u043B\u0435\u0440\u0438\u0439",
+  viktor: "\u0412\u0438\u043A\u0442\u043E\u0440",
+  vitaliy: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
+  vladimir: "\u0412\u043B\u0430\u0434\u0438\u043C\u0438\u0440",
+  vladislav: "\u0412\u043B\u0430\u0434\u0438\u0441\u043B\u0430\u0432",
+  gennadiy: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
+  georgiy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
+  denis: "\u0414\u0435\u043D\u0438\u0441",
+  dmitriy: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
+  egor: "\u0415\u0433\u043E\u0440",
+  ivan: "\u0418\u0432\u0430\u043D",
+  igor: "\u0418\u0433\u043E\u0440\u044C",
+  ilya: "\u0418\u043B\u044C\u044F",
+  kirill: "\u041A\u0438\u0440\u0438\u043B\u043B",
+  konstantin: "\u041A\u043E\u043D\u0441\u0442\u0430\u043D\u0442\u0438\u043D",
+  leonid: "\u041B\u0435\u043E\u043D\u0438\u0434",
+  maksim: "\u041C\u0430\u043A\u0441\u0438\u043C",
+  mikhail: "\u041C\u0438\u0445\u0430\u0438\u043B",
+  nikita: "\u041D\u0438\u043A\u0438\u0442\u0430",
+  nikolai: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
+  oleg: "\u041E\u043B\u0435\u0433",
+  pavel: "\u041F\u0430\u0432\u0435\u043B",
+  roman: "\u0420\u043E\u043C\u0430\u043D",
+  ruslan: "\u0420\u0443\u0441\u043B\u0430\u043D",
+  sergey: "\u0421\u0435\u0440\u0433\u0435\u0439",
+  stepan: "\u0421\u0442\u0435\u043F\u0430\u043D",
+  timofey: "\u0422\u0438\u043C\u043E\u0444\u0435\u0439",
+  fedor: "\u0424\u0435\u0434\u043E\u0440",
+  aleksandr: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
+  alexander: "\u0410\u043B\u0435\u043A\u0441\u0430\u043D\u0434\u0440",
+  aleksey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
+  alexey: "\u0410\u043B\u0435\u043A\u0441\u0435\u0439",
+  alex: "\u0410\u043B\u0435\u043A\u0441",
+  anatoly: "\u0410\u043D\u0430\u0442\u043E\u043B\u0438\u0439",
+  andrey: "\u0410\u043D\u0434\u0440\u0435\u0439",
+  andrew: "\u0410\u043D\u0434\u0440\u0435\u0439",
+  arkady: "\u0410\u0440\u043A\u0430\u0434\u0438\u0439",
+  artem: "\u0410\u0440\u0442\u0435\u043C",
+  arthur: "\u0410\u0440\u0442\u0443\u0440",
+  valera: "\u0412\u0430\u043B\u0435\u0440\u0430",
+  vasily: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
+  vasiliy: "\u0412\u0430\u0441\u0438\u043B\u0438\u0439",
+  victor: "\u0412\u0438\u043A\u0442\u043E\u0440",
+  vitaly: "\u0412\u0438\u0442\u0430\u043B\u0438\u0439",
+  gennady: "\u0413\u0435\u043D\u043D\u0430\u0434\u0438\u0439",
+  georgy: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
+  george: "\u0413\u0435\u043E\u0440\u0433\u0438\u0439",
+  gleb: "\u0413\u043B\u0435\u0431",
+  grigory: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
+  grigoriy: "\u0413\u0440\u0438\u0433\u043E\u0440\u0438\u0439",
+  grisha: "\u0413\u0440\u0438\u0448\u0430",
+  daniil: "\u0414\u0430\u043D\u0438\u0438\u043B",
+  danila: "\u0414\u0430\u043D\u0438\u043B\u0430",
+  dmitry: "\u0414\u043C\u0438\u0442\u0440\u0438\u0439",
+  dima: "\u0414\u0438\u043C\u0430",
+  zakhar: "\u0417\u0430\u0445\u0430\u0440",
+  matvey: "\u041C\u0430\u0442\u0432\u0435\u0439",
+  nikolay: "\u041D\u0438\u043A\u043E\u043B\u0430\u0439",
+  petr: "\u041F\u0435\u0442\u0440",
+  stanislav: "\u0421\u0442\u0430\u043D\u0438\u0441\u043B\u0430\u0432",
+  timur: "\u0422\u0438\u043C\u0443\u0440",
+  yaroslav: "\u042F\u0440\u043E\u0441\u043B\u0430\u0432"
+};
+var converterName = (aiName) => {
+  const lowerCaseName = aiName.toLowerCase().replace(".", "").trim();
+  return russianNames[lowerCaseName] || aiName;
 };
 
-// src/methods/recipient/saveRecipient.ts
+// src/helpers/extractLastQuestion.ts
+var extractLastQuestion = (text) => {
+  const urlRegex = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+  const links = [];
+  let replacedStr = text;
+  let match;
+  while ((match = urlRegex.exec(text)) !== null) {
+    const key = `__LINK_${links.length}__`;
+    const fullLink = match[0].replace(/[?.!,]$/, "");
+    links.push({ key, url: fullLink });
+    replacedStr = replacedStr.replace(fullLink, key);
+  }
+  const matches = replacedStr.match(/[^.?!]*\?/g);
+  const lastQuestion = matches ? matches[matches.length - 1].trim() : null;
+  const restoredLastQuestion = lastQuestion ? lastQuestion.replace(/__LINK_\d+__/g, (key) => {
+    const link = links.find((item) => item.key === key);
+    return link ? link.url : key;
+  }) : null;
+  return restoredLastQuestion;
+};
+
+// src/modules/autoResponse.ts
 init_helpers();
-init_sendToMainBot();
-var saveRecipient = async (accountId, recipientId, recipientAccessHash, recipient, recipientDb, messages, status, addedData = {}, accountByID = null) => {
-  var _a;
-  let isSave = false;
-  while (!isSave) {
-    try {
-      const {
-        phone,
-        username,
-        firstName,
-        lastName = ""
-      } = recipient.users[0];
-      const {
-        fullUser: { about }
-      } = recipient;
-      const {
-        groupId,
-        recipientUsername,
-        username: varSecondUsername,
-        recipientPhone
-      } = recipientDb;
-      const recUsername = (username || recipientUsername || varSecondUsername || "").toLowerCase();
-      const data = {
-        groupId,
-        accountId,
-        recipientId,
-        recipientAccessHash,
-        recipientUsername: recUsername,
-        recipientTitle: `${firstName} ${lastName}`.trim(),
-        recipientBio: about || "",
-        aiName: (recipientDb == null ? void 0 : recipientDb.aiName) || null,
-        aiGender: (recipientDb == null ? void 0 : recipientDb.aiGender) || null,
-        recipientPhone: (status === "create" && ((_a = recipientDb == null ? void 0 : recipientDb.username) == null ? void 0 : _a.includes("+")) ? recipientDb.username.replace("+", "") : null) || phone || recipientPhone || null,
-        messages,
-        step: getCombinedMessages(messages).length,
-        read: false,
-        ...addedData
-      };
-      await updateDialogue(data);
-      console.log({
-        accountId,
-        message: `[SAVE_RECIPIENT]`,
-        data
-      });
-      if (status === "create") {
-        const messageCount = (accountByID == null ? void 0 : accountByID.messageCount) || 0;
-        const multiplier = messageCount < 40 ? 1.5 : 1;
-        if (accountId.includes("-prefix-premium")) {
-          await updateAccountById(accountId, {
-            remainingTime: new Date((/* @__PURE__ */ new Date()).getTime() + 15e5),
-            multiplier: 1
-          });
-        } else {
-          await updateAccountById(accountId, {
-            remainingTime: new Date(
-              (/* @__PURE__ */ new Date()).getTime() + 72e5 * multiplier
-            ),
-            multiplier
-          });
-        }
-        await updateSendMessage(recipientDb.username, String(groupId), {
-          s: true,
-          p: /* @__PURE__ */ new Date()
-        });
-        await incrementMessageCount(accountId);
-        await incrementCurrentCount(String(groupId));
-      }
-      isSave = true;
-    } catch (error) {
-      await sendToMainBot(`** ERROR SAVE RECIPIENT **
-ERROR: ${error.message};
-accountId: ${accountId};
-status: ${status};
-recipient: ${JSON.stringify(recipient)};
-recipientDb: ${JSON.stringify(recipientDb)};
-messages: ${JSON.stringify(messages)};
-addedData: ${JSON.stringify(addedData)};
-accountByID: ${JSON.stringify(accountByID)};`);
-      await sleep(3e3);
-    }
-  }
-};
-
-// src/modules/checkSpamBlock.ts
-var import_api30 = __toESM(require_api());
 
 // src/helpers/makeRequestGpt.ts
 init_axios2();
@@ -80999,8 +80634,8 @@ var validateText = (companyData, inputString, language) => {
   const words = inputString.replace(/[.,!?;:'`"()@«»…—\-/]/g, " ").split(/\s+/);
   const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
   const englishRegex = /^[a-z]+$/i;
-  const pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-  const links = inputString.match(pattern);
+  const pattern2 = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+  const links = inputString.match(pattern2);
   if (links) {
     for (const link of links) {
       if (!companyDataLowerCase.includes(trimmer(link.trim().toLowerCase()))) {
@@ -81199,8 +80834,8 @@ ${errors3.map((error) => `- **${error}**`).join("\n")}`
         (part || "").trim(),
         "mainlink"
       );
-      const pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
-      const hasTextLink = message.match(pattern);
+      const pattern2 = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+      const hasTextLink = message.match(pattern2);
       message = isRemoveGreetings ? removeGreetings(message) : message;
       if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("section") || message.includes("sign")) {
         throw new Error(
@@ -81293,6 +80928,1012 @@ ${errors3.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
   throw new Error("STOPPED_ERROR");
 }
 
+// src/helpers/sendToFormBot.ts
+var sendToBotByChatIdText2 = async (chatId, text) => {
+  const token = "7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM";
+  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
+    const chunks = [];
+    let currentIndex = 0;
+    while (currentIndex < text2.length) {
+      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
+      currentIndex += chunkSize;
+    }
+    return chunks;
+  };
+  const textChunks = splitTextIntoChunks(text);
+  for (const chunk of textChunks) {
+    await fetch(sendMessageUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: chunk,
+        disable_web_page_preview: true
+      })
+    });
+  }
+};
+var sendToFormBot = async (text) => {
+  const chatIds = ["483779758", "324820826", "6957002018"];
+  try {
+    await Promise.all(
+      chatIds.map(async (chatId) => {
+        await sendToBotByChatIdText2(chatId, text);
+      })
+    );
+  } catch {
+  }
+};
+
+// src/methods/messages/sendMessage.ts
+var import_big_integer6 = __toESM(require_BigInteger());
+var import_api24 = __toESM(require_api());
+init_helpers();
+init_sendToMainBot();
+var logPeerFloodError = async (message, accountId, userId) => {
+  const fullAccount = await getAccountById(accountId);
+  const dialog = await getDialogue(accountId, String(userId));
+  const createdDateFormatted = (dialog == null ? void 0 : dialog.dateCreated) ? formatDateToUTC(dialog.dateCreated) : "N/A";
+  const updatedDateFormatted = (dialog == null ? void 0 : dialog.dateUpdated) ? formatDateToUTC(dialog.dateUpdated) : "N/A";
+  const spamBlockDateFormatted = (fullAccount == null ? void 0 : fullAccount.spamBlockDate) && fullAccount.spamBlockDate !== "INFINITY" ? formatDateToUTC(fullAccount.spamBlockDate) : (fullAccount == null ? void 0 : fullAccount.spamBlockDate) === "INFINITY" ? "INFINITY" : "N/A";
+  await sendToMainBot(
+    `*** PEER_FLOOD ***
+QUERY: { accountId: "${accountId}", recipientId: "${userId}" }
+MESSAGE: ${message}
+
+SPAMBLOCK DATE: ${spamBlockDateFormatted}
+DIALOG CREATED DATE: ${createdDateFormatted}
+DIALOG UPDATED DATE: ${updatedDateFormatted}`
+  );
+};
+var logGeneralError = async (error, accountId, userId, message) => {
+  await sendToMainBot(
+    `*** ${error.message} ***
+AccountId: ${accountId}
+UserId: ${userId}
+Message: ${message}`
+  );
+};
+var sendMessage = async (client, userId, accessHash, message, accountId, withTyping, withReadHistory) => {
+  let messageUpdate;
+  try {
+    if (withTyping) {
+      const iterations = Math.ceil(message.length / 250 * 60 * 1e3 / 5e3);
+      for (let i = 0; i < iterations; i++) {
+        await invokeRequest(
+          client,
+          new import_api24.default.messages.SetTyping({
+            peer: new import_api24.default.InputPeerUser({
+              userId: (0, import_big_integer6.default)(userId),
+              accessHash: (0, import_big_integer6.default)(accessHash)
+            }),
+            action: new import_api24.default.SendMessageTypingAction()
+          })
+        );
+        await sleep(5e3);
+      }
+    }
+    const update = await invokeRequest(
+      client,
+      new import_api24.default.messages.SendMessage({
+        message: removeNonAlphaPrefix(
+          capitalizeFirstLetter(reduceSpaces(message))
+        ),
+        clearDraft: true,
+        peer: new import_api24.default.InputPeerUser({
+          userId: (0, import_big_integer6.default)(userId),
+          accessHash: (0, import_big_integer6.default)(accessHash)
+        }),
+        randomId: (0, import_big_integer6.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+      })
+    );
+    if (!update) {
+      messageUpdate = null;
+    } else if (update instanceof import_api24.default.UpdateShortSentMessage || update instanceof import_api24.default.UpdateMessageID) {
+      messageUpdate = update;
+    } else if ("updates" in update) {
+      messageUpdate = update.updates.find(
+        (u) => u instanceof import_api24.default.UpdateMessageID
+      );
+    }
+    if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
+      throw new Error("MESSAGE_NOT_SENT");
+    }
+    if (withReadHistory) {
+      await invokeRequest(
+        client,
+        new import_api24.default.messages.ReadHistory({
+          peer: new import_api24.default.InputPeerUser({
+            userId: (0, import_big_integer6.default)(userId),
+            accessHash: (0, import_big_integer6.default)(accessHash)
+          }),
+          maxId: messageUpdate.id
+        })
+      );
+    }
+    return messageUpdate;
+  } catch (error) {
+    if (error.message === "PEER_FLOOD") {
+      if (message.length > 30) {
+        await logPeerFloodError(message, accountId, userId);
+      }
+    } else {
+      await logGeneralError(error, accountId, userId, message);
+    }
+    throw error;
+  }
+};
+
+// src/db/groupIdUsers.ts
+var getGroupIdUsersCollection = async () => {
+  return (await DB()).collection("groupIdUsers");
+};
+var updateFailedMessage = async (accountId, username, groupId, reason) => {
+  const messagesCollection = await getGroupIdUsersCollection();
+  await messagesCollection.updateOne(
+    { g: groupId, u: username.toLowerCase() },
+    { $set: { f: true, p: /* @__PURE__ */ new Date(), r: reason, a: accountId } },
+    { upsert: true }
+  );
+};
+var updateSendMessage = async (username, groupId, data) => {
+  const messagesCollection = await getGroupIdUsersCollection();
+  await messagesCollection.updateOne(
+    { g: groupId, u: username.toLowerCase() },
+    { $set: data },
+    { upsert: true }
+  );
+};
+
+// src/helpers/getCombinedMessages.ts
+var getCombinedMessages = (messages) => {
+  const combinedMessages = [];
+  for (let i = 0; i < messages.length; i++) {
+    const curr = { ...messages[i] };
+    if (combinedMessages.length > 0) {
+      const lastItem = combinedMessages[combinedMessages.length - 1];
+      if (lastItem.fromId === curr.fromId) {
+        lastItem.text += `.${curr.text}`;
+      } else {
+        combinedMessages.push(curr);
+      }
+    } else {
+      combinedMessages.push(curr);
+    }
+  }
+  return combinedMessages;
+};
+
+// src/methods/recipient/saveRecipient.ts
+init_helpers();
+init_sendToMainBot();
+var saveRecipient = async (accountId, recipientId, recipientAccessHash, recipient, recipientDb, messages, status, addedData = {}, accountByID = null) => {
+  var _a;
+  let isSave = false;
+  while (!isSave) {
+    try {
+      const {
+        phone,
+        username,
+        firstName,
+        lastName = ""
+      } = recipient.users[0];
+      const {
+        fullUser: { about }
+      } = recipient;
+      const {
+        groupId,
+        recipientUsername,
+        username: varSecondUsername,
+        recipientPhone
+      } = recipientDb;
+      const recUsername = (username || recipientUsername || varSecondUsername || "").toLowerCase();
+      const data = {
+        groupId,
+        accountId,
+        recipientId,
+        recipientAccessHash,
+        recipientUsername: recUsername,
+        recipientTitle: `${firstName} ${lastName}`.trim(),
+        recipientBio: about || "",
+        aiName: (recipientDb == null ? void 0 : recipientDb.aiName) || null,
+        aiGender: (recipientDb == null ? void 0 : recipientDb.aiGender) || null,
+        recipientPhone: (status === "create" && ((_a = recipientDb == null ? void 0 : recipientDb.username) == null ? void 0 : _a.includes("+")) ? recipientDb.username.replace("+", "") : null) || phone || recipientPhone || null,
+        messages,
+        step: getCombinedMessages(messages).length,
+        read: false,
+        ...addedData
+      };
+      await updateDialogue(data);
+      console.log({
+        accountId,
+        message: `[SAVE_RECIPIENT]`,
+        data
+      });
+      if (status === "create") {
+        const messageCount = (accountByID == null ? void 0 : accountByID.messageCount) || 0;
+        const multiplier = messageCount < 40 ? 1.5 : 1;
+        if (accountId.includes("-prefix-premium")) {
+          await updateAccountById(accountId, {
+            remainingTime: new Date((/* @__PURE__ */ new Date()).getTime() + 15e5),
+            multiplier: 1
+          });
+        } else {
+          await updateAccountById(accountId, {
+            remainingTime: new Date(
+              (/* @__PURE__ */ new Date()).getTime() + 72e5 * multiplier
+            ),
+            multiplier
+          });
+        }
+        await updateSendMessage(recipientDb.username, String(groupId), {
+          s: true,
+          p: /* @__PURE__ */ new Date()
+        });
+        await incrementMessageCount(accountId);
+        await incrementCurrentCount(String(groupId));
+      }
+      isSave = true;
+    } catch (error) {
+      await sendToMainBot(`** ERROR SAVE RECIPIENT **
+ERROR: ${error.message};
+accountId: ${accountId};
+status: ${status};
+recipient: ${JSON.stringify(recipient)};
+recipientDb: ${JSON.stringify(recipientDb)};
+messages: ${JSON.stringify(messages)};
+addedData: ${JSON.stringify(addedData)};
+accountByID: ${JSON.stringify(accountByID)};`);
+      await sleep(3e3);
+    }
+  }
+};
+
+// src/modules/getClassifiedDialogs.ts
+var import_api28 = __toESM(require_api());
+
+// src/methods/messages/getHistory.ts
+var import_big_integer7 = __toESM(require_BigInteger());
+var import_api25 = __toESM(require_api());
+var getHistory = async (client, userId, accessHash, minId) => {
+  const history = await invokeRequest(
+    client,
+    new import_api25.default.messages.GetHistory({
+      peer: new import_api25.default.InputPeerUser({
+        userId: (0, import_big_integer7.default)(userId),
+        accessHash: (0, import_big_integer7.default)(accessHash)
+      }),
+      minId
+    })
+  );
+  if (!history || history instanceof import_api25.default.messages.MessagesNotModified) {
+    return [];
+  }
+  return history.messages.filter((m) => m instanceof import_api25.default.Message);
+};
+
+// src/methods/messages/readHistory.ts
+var import_big_integer8 = __toESM(require_BigInteger());
+var import_api26 = __toESM(require_api());
+var readHistory = async (client, id, accessHash, maxId) => {
+  await invokeRequest(
+    client,
+    new import_api26.default.messages.ReadHistory({
+      peer: new import_api26.default.InputPeerUser({
+        userId: (0, import_big_integer8.default)(id),
+        accessHash: (0, import_big_integer8.default)(accessHash)
+      }),
+      maxId
+    })
+  );
+};
+
+// src/methods/messages/readMessageContents.ts
+var import_api27 = __toESM(require_api());
+var readMessageContents = async (client, id) => {
+  await invokeRequest(
+    client,
+    new import_api27.default.messages.ReadMessageContents({
+      id: [id]
+    })
+  );
+};
+
+// src/modules/getClassifiedDialogs.ts
+var getClassifiedDialogs = async (client, accountId, meId) => {
+  const dialogs = await getDialogs(client, accountId, 0, true);
+  if (!dialogs.length) {
+    return [[], [], []];
+  }
+  const pingDialogsIds = await getPingDialogsIds(accountId);
+  const manualControlDialogsIds = await getManualControlDialogsIds(accountId);
+  const stableDialogs = [];
+  const pingDialogs = [];
+  const manualDialogs = [];
+  for (const dialog of dialogs) {
+    const { type, message, user } = dialog;
+    if (type !== "user" || !(message instanceof import_api28.default.Message) || !user.status || user.deleted || user.self || user.status instanceof import_api28.default.UserStatusEmpty || message.out && !pingDialogsIds.includes(String(user.id)) && !manualControlDialogsIds.includes(String(user.id))) {
+      continue;
+    }
+    const dialogDb = await getDialogue(accountId, String(user.id));
+    if (!dialogDb || !dialogDb.groupId) {
+      continue;
+    }
+    const {
+      groupId,
+      recipientId,
+      recipientAccessHash,
+      blocked = false,
+      reason = null,
+      messages = [],
+      automaticReason = null
+    } = dialogDb;
+    if (blocked || reason || automaticReason) {
+      continue;
+    }
+    const history = await getHistory(client, recipientId, recipientAccessHash);
+    if (!history.length) {
+      continue;
+    }
+    await readHistory(client, recipientId, recipientAccessHash, 1e6);
+    for (const msg of history.reverse()) {
+      if (messages.find((m) => m.id === msg.id)) {
+        continue;
+      }
+      const {
+        photo = false,
+        voice = false,
+        round = false,
+        video = false,
+        document: document2 = false,
+        spoiler = false
+      } = msg.media || {};
+      let text;
+      if (msg.fwdFrom) {
+        text = "[FORWARDED MESSAGE]";
+      } else if (msg.message) {
+        text = msg.message;
+      } else if (voice || round) {
+        await readMessageContents(client, msg.id);
+        text = "[VOICE MESSAGE]";
+      } else if (photo) {
+        text = "[PHOTO]";
+      } else if (video) {
+        text = "[VIDEO]";
+      } else if (document2) {
+        text = "[DOCUMENT]";
+      } else if (spoiler) {
+        text = "[SPOILER MESSAGE]";
+      } else {
+        text = "[UNKNOWN MESSAGE]";
+      }
+      messages.push({
+        id: msg.id,
+        text,
+        fromId: msg.out ? meId : recipientId,
+        date: msg.date
+      });
+    }
+    const step = getCombinedMessages(messages).length;
+    if (step > 50) {
+      await updateAutomaticDialogue(
+        accountId,
+        recipientId,
+        "automatic:max-step-50"
+      );
+      continue;
+    }
+    const dialogData = {
+      ...user,
+      ...dialogDb,
+      step,
+      groupId,
+      messages
+    };
+    if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
+      const account = await getAccountById(accountId);
+      if (!account.spamBlockDate) {
+        manualDialogs.push(dialogData);
+      }
+    } else if (pingDialogsIds.includes(recipientId)) {
+      pingDialogs.push(dialogData);
+    } else {
+      stableDialogs.push(dialogData);
+    }
+  }
+  return [stableDialogs, pingDialogs, manualDialogs];
+};
+
+// src/modules/autoResponse.ts
+var pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+var autoResponse = async (client, accountId, meId, meName) => {
+  const [dialogs, pingDialogs, manualDialogs] = await getClassifiedDialogs(
+    client,
+    accountId,
+    meId
+  );
+  for (const dialog of dialogs) {
+    const {
+      recipientId,
+      recipientAccessHash,
+      messages,
+      groupId: dialogGroupId,
+      step,
+      aiName,
+      aiGender
+    } = dialog;
+    const groupId = await getGroupId(dialogGroupId);
+    if (!groupId) {
+      continue;
+    }
+    const recipientFull = await getFullUser(
+      client,
+      recipientId,
+      recipientAccessHash
+    );
+    if (!recipientFull) {
+      continue;
+    }
+    const {
+      fullUser: { about }
+    } = recipientFull;
+    const {
+      goal = "",
+      part = "",
+      aiRole = "",
+      language: gLanguage,
+      messagesCount = 4,
+      addedQuestion = "",
+      flowHandling = "",
+      addedInformation = "",
+      companyDescription = ""
+    } = groupId;
+    const language = gLanguage || "RUSSIAN";
+    const myName = language === "RUSSIAN" ? converterName(meName) : meName;
+    const stage = Math.ceil(step / 2);
+    const parted = stage === 2 && part ? part.trim() : "";
+    const replyMessage = await makeRequestGpt(
+      accountId,
+      [
+        {
+          role: "system",
+          content: `You are "${myName}" (role assistant, role <ASSISTANT>, male gender), acting as role "${aiRole}". Your name: ${myName}. Your gender: male. Fully adopt this identity as a real person whose task is to deeply engage the user within the context of ASSISTANT_COMPANY_DESCRIPTION. You have initiated the conversation with the user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION.${stage >= 2 && goal ? `
+!IMPORTANT INSTRUCTION!: **${goal}**` : ""}${stage === 1 ? `
+You \u201C${myName}\u201D (role assistant, role <ASSISTANT>, male gender) have asked a question **${messages[1].text}** to initiate a (cold) dialog with a user, and regardless of the interlocutor's reaction to your question, you must give your clear and rigorous answer that will maximize the interlocutor's liking and encourage further communication` : ""}
+IMPORTANT CONTEXT: You work with cold traffic, conducting unsolicited communications to potential clients via Telegram messenger. Your interaction is \u201Ccold\u201D, meaning you initiate contact with a user who has not interacted with you before. Communication and possible communication with the user takes place via text messages only. It is important to note that neither you nor the user know each other or have met in real life. The user doesn't know you or the context of your message. You offer various services and solutions in an effort to convert these cold potential customers into interested ones. Never under any circumstances apologize in your reply;
+
+## INFORMATION ABOUT USER (is the interlocutor to whose messages you generate a reply)
+NAME: ${aiName || "unknown"};
+GENDER: ${aiGender || "unknown"};${about ? `
+BIO: ${about.replace(pattern, "")}` : ""}
+IMPORTANT CONTEXT: A genuine individual who has never interacted with the assistant before. He or she is receiving a message from the role assistant for the first time and has no prior knowledge of your products. The data is for contextual understanding only and does not imply personalized treatment. It is an important aspect of the assistant's context that should be considered when forming a reply.
+
+## STYLE GUIDE FOR ASSISTANT REPLY
+- Your reply must **strictly** be approximately ${messagesCount * 60} characters in length, consisting of around ${messagesCount * 10} words and approximately ${messagesCount} sentences. **It is imperative that you meet these length requirements exactly**.${stage <= 2 ? `
+- You should always begin your reply with a brief reply to the user's last message. The reply is mandatory and should be minimal but correct to the user's last message.` : ""}${stage === 1 && addedQuestion ? `
+- Smoothly weave the following question into the end of your reply in a way that feels natural and relevant: \u201C${generateRandomString(addedQuestion)}\u201D. Ensure it connects logically with the preceding content without adding any extra questions. **it's a must**` : stage === 2 ? `
+- **Make sure to ask a leading question to further engage the user**. Conclude your answer with a simple, easy-to-answer question that flows naturally from the conversation and further engages the user. It should be a question along the lines of \u201Cwhat do you think?\u201D, \u201Ccan I tell you more?\u201D, \u201Cinteresting?\u201D or a question that can better qualify the user.` : ""}${parted ? `
+- Ensure the phrase "${parted}" is **meaningfully integrated** into the reply, not just randomly added. Adjust your reply so that it flows naturally with this phrase.` : ""}
+- Reply language: **${language}**.
+- Never apologize in your reply, under any circumstances. **don't apologize**
+- Do not use generic greetings like "Hello" or "Hi".
+- Never use the name of the interlocutor, any form of personal address, or title such as \u201Cclient,\u201D \u201Cinterlocutor,\u201D \u201Crespected,\u201D and so on
+- Use the company description to craft your reply, highlighting relevant points for the user.
+- Focus on providing value based on the company's offerings.
+- Avoid making assumptions about the user's profession or activities.
+
+
+${companyDescription ? `## ASSISTANT_COMPANY_DESCRIPTION
+${companyDescription}` : ""}
+
+${flowHandling ? `## ASSISTANT_COMMON_FLOW_HANDLING
+${flowHandling}` : ""}
+
+${stage !== 1 && addedInformation ? `## ASSISTANT_ADDED_INFORMATION
+${addedInformation}` : ""}
+
+Current date and time: ${getDateNow()}`
+        },
+        ...messages.map((m) => ({
+          role: m.fromId === String(recipientId) ? "user" : "assistant",
+          content: m.text
+        }))
+      ],
+      parted,
+      language,
+      stage === 1,
+      stage <= 2,
+      stage <= 2 ? 3 : 2,
+      true,
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
+    );
+    await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
+ID: ${accountId}
+GID: ${dialogGroupId}
+RID: ${recipientId}
+${replyMessage}`);
+    const lastQuestion = extractLastQuestion(replyMessage);
+    if (lastQuestion && replyMessage.replace(lastQuestion, "").length > 0) {
+      const sentReplyMessage = await sendMessage(
+        client,
+        recipientId,
+        recipientAccessHash,
+        replyMessage.replace(lastQuestion, ""),
+        accountId,
+        true,
+        true
+      );
+      const sentQuestionMessage = await sendMessage(
+        client,
+        recipientId,
+        recipientAccessHash,
+        lastQuestion,
+        accountId,
+        false,
+        true
+      );
+      messages.push({
+        id: sentReplyMessage.id,
+        text: replyMessage.replace(lastQuestion, ""),
+        fromId: meId,
+        date: Math.round(Date.now() / 1e3)
+      });
+      messages.push({
+        id: sentQuestionMessage.id,
+        text: lastQuestion,
+        fromId: meId,
+        date: Math.round(Date.now() / 1e3)
+      });
+    } else {
+      const sentReplyMessage = await sendMessage(
+        client,
+        recipientId,
+        recipientAccessHash,
+        replyMessage,
+        accountId,
+        true,
+        true
+      );
+      messages.push({
+        id: sentReplyMessage.id,
+        text: replyMessage,
+        fromId: meId,
+        date: Math.round(Date.now() / 1e3)
+      });
+    }
+    await saveRecipient(
+      accountId,
+      recipientId,
+      recipientAccessHash,
+      recipientFull,
+      dialog,
+      messages,
+      "update",
+      {
+        viewed: false
+      }
+    );
+  }
+  for (const dialog of pingDialogs) {
+    const {
+      recipientId,
+      recipientAccessHash,
+      messages,
+      groupId: dialogGroupId,
+      aiName,
+      aiGender
+    } = dialog;
+    const groupId = await getGroupId(dialogGroupId);
+    if (!groupId) {
+      continue;
+    }
+    const recipientFull = await getFullUser(
+      client,
+      recipientId,
+      recipientAccessHash
+    );
+    if (!recipientFull) {
+      continue;
+    }
+    const { language: gLanguage } = groupId;
+    const language = gLanguage || "RUSSIAN";
+    const pingMessage = await makeRequestGpt(
+      accountId,
+      [
+        {
+          role: "system",
+          content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`
+        },
+        {
+          role: "user",
+          content: `## STYLE GUIDE
+Maximum length of reminder message 100 characters
+
+## USER DATA
+${aiName ? `
+NAME: ${aiName};
+GENDER: ${aiGender}` : ""}
+Today's date is ${getDateNow()};
+      
+## DIALOG
+${messages.map((m) => ({
+            role: m.fromId === String(recipientId) ? "USER" : "CHATBOT",
+            message: m.text
+          })).slice(-15).map((chat) => `${chat.role}: ${chat.message}`).join("\n")}`
+        }
+      ],
+      "",
+      "ANY",
+      false,
+      false,
+      1,
+      false,
+      dialogGroupId,
+      { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
+    );
+    const sentPingMessage = await sendMessage(
+      client,
+      recipientId,
+      recipientAccessHash,
+      pingMessage,
+      accountId,
+      true,
+      true
+    );
+    messages.push({
+      id: sentPingMessage.id,
+      text: pingMessage,
+      fromId: meId,
+      date: Math.round(Date.now() / 1e3)
+    });
+    await sendToFormBot(`**** PING MESSAGE (${language}) ****
+ID: ${accountId}
+GID: ${dialogGroupId}
+${pingMessage}`);
+    await saveRecipient(
+      accountId,
+      recipientId,
+      recipientAccessHash,
+      recipientFull,
+      dialog,
+      messages,
+      "update",
+      {
+        ping: true
+      }
+    );
+  }
+  for (const dialog of manualDialogs) {
+    const { recipientId, recipientAccessHash, messages, managerMessage } = dialog;
+    const recipientFull = await getFullUser(
+      client,
+      recipientId,
+      recipientAccessHash
+    );
+    if (!recipientFull) {
+      continue;
+    }
+    if (managerMessage) {
+      const sentManagerMessage = await sendMessage(
+        client,
+        recipientId,
+        recipientAccessHash,
+        managerMessage,
+        accountId,
+        true,
+        true
+      );
+      messages.push({
+        id: sentManagerMessage.id,
+        text: managerMessage,
+        fromId: meId,
+        date: Math.round(Date.now() / 1e3)
+      });
+    }
+    await saveRecipient(
+      accountId,
+      recipientId,
+      recipientAccessHash,
+      recipientFull,
+      dialog,
+      messages,
+      "update",
+      {
+        managerMessage: null,
+        viewed: false
+      }
+    );
+  }
+};
+
+// src/modules/autoSender.ts
+var import_api34 = __toESM(require_api());
+
+// src/helpers/getUserInformation.ts
+init_axios2();
+init_helpers();
+
+// src/helpers/sendToNameBot.ts
+var sendToBotByChatIdText3 = async (chatId, text) => {
+  const token = "7722797934:AAHjsfnd8D21ZsfhR4j_gfc40BEsm798C5U";
+  const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+  const splitTextIntoChunks = (text2, chunkSize = 4096) => {
+    const chunks = [];
+    let currentIndex = 0;
+    while (currentIndex < text2.length) {
+      chunks.push(text2.slice(currentIndex, currentIndex + chunkSize));
+      currentIndex += chunkSize;
+    }
+    return chunks;
+  };
+  const textChunks = splitTextIntoChunks(text);
+  for (const chunk of textChunks) {
+    await fetch(sendMessageUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: chunk,
+        disable_web_page_preview: true
+      })
+    });
+  }
+};
+var sendToNameBot = async (text) => {
+  const chatIds = ["483779758", "324820826"];
+  try {
+    await Promise.all(
+      chatIds.map(async (chatId) => {
+        await sendToBotByChatIdText3(chatId, text);
+      })
+    );
+  } catch {
+  }
+};
+
+// src/helpers/getUserInformation.ts
+var isRussian = (str) => /^[А-Яа-яЁё]+$/.test(str);
+var withTimeout = (promise, ms) => {
+  const timeout = new Promise(
+    (_, reject) => setTimeout(() => reject(new Error("TIMEOUT_EXCEEDED")), ms)
+  );
+  return Promise.race([promise, timeout]);
+};
+var makeRequest = async (word) => {
+  return await axios_default.get(`http://185.84.162.158:5000/search?name=${encodeURIComponent(word)}`).then((response) => response.data).catch(async (error) => {
+    await sendToNameBot(`** NAME SERVER ERROR **
+WORD: ${word}
+ERROR: ${error.message}`);
+    return null;
+  });
+};
+var getUser = async (userContent, language) => {
+  var _a;
+  if (language !== "RUSSIAN") {
+    return null;
+  }
+  const content = userContent.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[^a-zA-Zа-яА-ЯёЁ\s]/g, " ").replace(/\s+/g, " ").toLowerCase().trim();
+  const words = content.split(" ");
+  const requests = words.map((w) => w.trim()).filter(Boolean).map(makeRequest);
+  let contentMap = /* @__PURE__ */ new Set();
+  try {
+    const promises2 = await Promise.all(requests);
+    for (const promise of promises2) {
+      const nameData = (_a = promise == null ? void 0 : promise.result) == null ? void 0 : _a.first_name;
+      if ((nameData == null ? void 0 : nameData.gender) && (nameData.gender.Female || nameData.gender.Male) && Object.values(nameData.rank).filter((rank) => rank !== null).length > 3) {
+        contentMap.add(promise.name);
+      }
+    }
+  } catch {
+  }
+  const contentRequets = [...contentMap].reduce(
+    (a, b) => a.length >= b.length ? a : b,
+    ""
+  );
+  if (contentRequets.length < 2) {
+    return null;
+  }
+  const processRequest = async () => {
+    var _a2, _b, _c, _d, _e;
+    for (let i = 0; i < 5; i++) {
+      try {
+        const { data: resultData } = await axios_default.post(
+          "http://91.198.220.234/chatv2",
+          {
+            temperature: 0.4,
+            model: "command-r-plus",
+            safety_mode: "NONE",
+            messages: [
+              {
+                role: "system",
+                content: `Your task is to accurately identify and extract the real first name from the provided message and adjust it to its **${language}** version. The message may contain various elements such as usernames, display names, nicknames, titles, descriptors, and irrelevant words. Your primary goal is to extract the most likely real first name of the person and provide it in its **${language}** form, ensuring proper communication.
+
+Please disregard usernames unless they are the only source of the name. If the display name is available and contains a plausible first name, prioritize it. Remove words like 'undefined', titles (e.g., 'Coach', 'Founder'), descriptors, emojis, and special characters. If multiple names are present, choose the first one that is likely the first name. Ignore additional information like surnames or middle names, as they are already removed automatically by the system.
+                
+**Important clarifications:**
+1. If the name is a short form, do not attempt to convert it to a full form, even if the full form is commonly known. and "Alex" must remain "Alex"
+2. If only a patronymic is present (e.g., 'Ivanovich', 'Vladimirovna'), **do not extract a first name from the patronymic**. If no first name is present alongside the patronymic, return "null."
+3. If the input does not contain any recognizable short, full, or transliterated form of a real first name, you must return "null." Do not fabricate or infer a name in such cases.
+
+Ensure the extracted name is adjusted to its **${language}** version, either by translation or transliteration, and maintain correct spelling and cultural appropriateness in **${language}**. If the name is already in **${language}**, leave it as is. Return only the name as plain text or "null" if no valid name is found. Do not provide any explanations or additional information.`
+              },
+              {
+                role: "user",
+                content: contentRequets
+              }
+            ]
+          }
+        );
+        const userInfo = (_c = (_b = (_a2 = resultData == null ? void 0 : resultData.message) == null ? void 0 : _a2.content) == null ? void 0 : _b[0]) == null ? void 0 : _c.text;
+        if (userInfo === "null") {
+          return null;
+        }
+        if (language === "RUSSIAN" && !isRussian(userInfo)) {
+          throw new Error("INCORRECT_NAME");
+        }
+        const data = await makeRequest(userInfo);
+        const { Female = 0, Male = 0 } = ((_e = (_d = data == null ? void 0 : data.result) == null ? void 0 : _d.first_name) == null ? void 0 : _e.gender) || {};
+        if (!Female && !Male) {
+          throw new Error("INCORRECT_GENDER");
+        }
+        return {
+          aiName: capitalizeFirstLetter(userInfo.toLowerCase()),
+          aiGender: Female > Male ? "female" : "male"
+        };
+      } catch (error) {
+        await sleep(1e3);
+      }
+    }
+    return null;
+  };
+  try {
+    return await withTimeout(processRequest(), 3e5);
+  } catch {
+    return null;
+  }
+};
+var getUserInformation = async (firstMessagePrompt, secondMessagePrompt, language, firstName, lastName, username) => {
+  let user = null;
+  let firstMessage = generateRandomString(firstMessagePrompt);
+  const secondMessage = generateRandomString(secondMessagePrompt);
+  if (language === "RUSSIAN") {
+    const fm = firstMessage.replace(/[^а-яА-ЯёЁ]+/g, "");
+    const userData = await getUser(
+      `${firstName.toLowerCase()} ${lastName.toLowerCase()} ${username}`,
+      language
+    );
+    if (userData == null ? void 0 : userData.aiName) {
+      user = userData;
+      firstMessage = `${fm}, ${userData.aiName}!`;
+    } else {
+      firstMessage = `${fm}!`;
+    }
+  }
+  return { user, firstMessage, secondMessage };
+};
+
+// src/modules/autoSender.ts
+init_helpers();
+init_sendToMainBot();
+
+// src/methods/contacts/resolveContact.ts
+var import_api31 = __toESM(require_api());
+
+// src/methods/contacts/resolvePhone.ts
+var import_api29 = __toESM(require_api());
+var resolvePhone = async (client, phone) => {
+  const contact = await invokeRequest(
+    client,
+    new import_api29.default.contacts.ResolvePhone({
+      phone
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  if (contact) {
+    return contact;
+  }
+  const randomPhone = await getRandomPhone();
+  if (!randomPhone) {
+    throw new Error("RANDOM_PHONE_NOT_FOUND");
+  }
+  const randomContact = await invokeRequest(
+    client,
+    new import_api29.default.contacts.ResolvePhone({
+      phone: `+${randomPhone}`
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  if (!randomContact) {
+    throw new Error("STABLE_RESULT_ERROR");
+  }
+  return null;
+};
+
+// src/methods/contacts/resolveUsername.ts
+var import_api30 = __toESM(require_api());
+var resolveUsername = async (client, username) => {
+  const userByUsername = await invokeRequest(
+    client,
+    new import_api30.default.contacts.ResolveUsername({
+      username
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  return userByUsername;
+};
+
+// src/methods/contacts/resolveContact.ts
+var resolveContact = async (client, contact) => {
+  const resolveMethod = contact.includes("+") ? resolvePhone : resolveUsername;
+  const resolvedContact = await resolveMethod(client, contact);
+  if (!resolvedContact) {
+    throw new Error("CONTACT_NOT_RESOLVED");
+  }
+  if (!resolvedContact.users.length) {
+    throw new Error("CONTACT_USERS_LENGTH");
+  }
+  if (resolvedContact.users[0] instanceof import_api31.default.UserEmpty) {
+    throw new Error("CONTACT_USER_EMPTY");
+  }
+  if (!resolvedContact.users[0].accessHash) {
+    throw new Error("ACCESS_HASH_NOT_FOUND");
+  }
+  const { id: userId, accessHash } = resolvedContact.users[0];
+  const fullUser = await getFullUser(
+    client,
+    String(userId),
+    String(accessHash)
+  );
+  if (!fullUser || !fullUser.users.length || fullUser.users[0] instanceof import_api31.default.UserEmpty || !fullUser.users[0].accessHash) {
+    throw new Error("USER_NOT_FOUND");
+  }
+  return {
+    fullContact: fullUser,
+    contact: fullUser.users[0]
+  };
+};
+
+// src/methods/recipient/getRecipient.ts
+init_axios2();
+init_helpers();
+var defaultFirstMessagePrompt = "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435!";
+var defaultSecondMessagePrompt = "{\u042F |}{\u0437\u0430\u043C\u0435\u0442\u0438\u043B|\u0443\u0432\u0438\u0434\u0435\u043B|\u043E\u0431\u0440\u0430\u0442\u0438\u043B \u0432\u043D\u0438\u043C\u0430\u043D\u0438\u0435|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u0438\u043C\u0430\u044E|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u043F\u0440\u0430\u0432\u0438\u043B\u044C\u043D\u043E \u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043F\u0440\u0435\u0434\u043F\u043E\u043B\u0430\u0433\u0430\u044E|\u043E\u0431\u043D\u0430\u0440\u0443\u0436\u0438\u043B|\u0432\u0435\u0440\u043D\u043E \u043F\u043E\u043D\u044F\u043B|\u0437\u0430\u043F\u043E\u043C\u043D\u0438\u043B|\u043F\u043E\u0434\u043C\u0435\u0442\u0438\u043B}, {\u0447\u0442\u043E \u0432\u044B|\u0447\u0442\u043E \u0412\u044B|\u0432\u044B|\u0412\u044B} {\u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C|\u0432\u0435\u0434\u0435\u0442\u0435 \u0431\u0438\u0437\u043D\u0435\u0441|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043F\u0440\u0435\u0434\u043F\u0440\u0438\u043D\u0438\u043C\u0430\u0442\u0435\u043B\u044C\u0441\u0442\u0432\u043E\u043C|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u0432\u0435\u0434\u0435\u043D\u0438\u0435\u043C \u0431\u0438\u0437\u043D\u0435\u0441\u0430|\u0437\u0430\u043D\u0438\u043C\u0430\u0435\u0442\u0435\u0441\u044C \u043A\u043E\u043C\u043C\u0435\u0440\u0447\u0435\u0441\u043A\u043E\u0439 \u0434\u0435\u044F\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C\u044E}{?|.|,} {\u044D\u0442\u043E \u0442\u0430\u043A|\u044F \u043F\u0440\u0430\u0432|\u043F\u0440\u0430\u0432 \u043B\u0438 \u044F|\u044D\u0442\u043E \u043F\u0440\u0430\u0432\u0434\u0430|\u0442\u0430\u043A \u043B\u0438 \u044D\u0442\u043E|\u044D\u0442\u043E \u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u0442\u0430\u043A|\u0434\u0435\u0439\u0441\u0442\u0432\u0438\u0442\u0435\u043B\u044C\u043D\u043E \u043B\u0438 \u0442\u0430\u043A|\u043D\u0435 \u043E\u0448\u0438\u0431\u0441\u044F|\u0432\u0435\u0440\u043D\u043E|\u044D\u0442\u043E \u0432\u0435\u0440\u043D\u043E}?";
+var getRecipient = async (accountId) => {
+  while (true) {
+    try {
+      const url2 = new URL(String(process.env.RECIPIENT_URL));
+      if (accountId.includes("-prefix-")) {
+        url2.searchParams.append("prefix", accountId.split("-prefix-")[1]);
+      }
+      const { data: user } = await axios_default(url2.toString());
+      if (user === "GROUP_ID_NOT_DEFINED") {
+        return null;
+      }
+      if (!user || !user.username || !user.groupId) {
+        throw new Error("USER_NOT_DEFINED");
+      }
+      if (!user.firstMessagePrompt) {
+        user.firstMessagePrompt = defaultFirstMessagePrompt;
+      }
+      if (!user.secondMessagePrompt) {
+        user.secondMessagePrompt = defaultSecondMessagePrompt;
+      }
+      return user;
+    } catch (error) {
+      await sleep(1e4);
+    }
+  }
+};
+
+// src/modules/checkSpamBlock.ts
+var import_api33 = __toESM(require_api());
+
 // src/helpers/getSpamBotReason.ts
 var randomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 var getSpamBotReason = async (accountId) => {
@@ -81341,29 +81982,9 @@ init_helpers();
 init_sendToMainBot();
 
 // src/methods/contacts/unBlockContact.ts
-var import_api28 = __toESM(require_api());
+var import_api32 = __toESM(require_api());
 var unBlockContact = async (client, peer) => {
-  return await invokeRequest(client, new import_api28.default.contacts.Unblock({ id: peer }));
-};
-
-// src/methods/messages/getHistory.ts
-var import_big_integer7 = __toESM(require_BigInteger());
-var import_api29 = __toESM(require_api());
-var getHistory = async (client, userId, accessHash, minId) => {
-  const history = await invokeRequest(
-    client,
-    new import_api29.default.messages.GetHistory({
-      peer: new import_api29.default.InputPeerUser({
-        userId: (0, import_big_integer7.default)(userId),
-        accessHash: (0, import_big_integer7.default)(accessHash)
-      }),
-      minId
-    })
-  );
-  if (!history || history instanceof import_api29.default.messages.MessagesNotModified) {
-    return [];
-  }
-  return history.messages.filter((m) => m instanceof import_api29.default.Message);
+  return await invokeRequest(client, new import_api32.default.contacts.Unblock({ id: peer }));
 };
 
 // src/modules/checkSpamBlock.ts
@@ -81437,7 +82058,7 @@ var checkSpamBlock = async (client, account) => {
     historySpamBlocks = []
   } = account;
   const result = await resolveUsername(client, "spambot");
-  if (!result || !result.users.length || !(result.users[0] instanceof import_api30.default.User)) {
+  if (!result || !result.users.length || !(result.users[0] instanceof import_api33.default.User)) {
     throw new Error("SPAMBOT_NOT_USER");
   }
   const { id: userId, accessHash, username } = result.users[0];
@@ -81446,7 +82067,7 @@ var checkSpamBlock = async (client, account) => {
   }
   await unBlockContact(
     client,
-    new import_api30.default.InputPeerUser({
+    new import_api33.default.InputPeerUser({
       userId,
       accessHash
     })
@@ -81566,7 +82187,7 @@ var autoSender = async (client, accountId, telegramId) => {
         }
         await deleteHistory(
           client,
-          new import_api31.default.InputPeerUser({
+          new import_api34.default.InputPeerUser({
             userId: id,
             accessHash
           }),
@@ -81801,8 +82422,14 @@ var main = async (ID) => {
       );
       await Promise.race([
         (async () => {
-          await automaticCheck(client, account);
-          await autoSender(client, ID, meId);
+          if (isAutoResponse && !account.fucker) {
+            isAutoResponse = false;
+            await autoResponse(client, ID, meId, tgFirstName);
+          }
+          if (i === randomI) {
+            await automaticCheck(client, account);
+            await autoSender(client, ID, meId);
+          }
           await sleep(6e4);
         })(),
         timeout
