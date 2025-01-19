@@ -17,6 +17,7 @@ const fileComplaint = async (
 ) => {
   //Submit a complaint
   //No, I’ll never do any of this!
+  //Hello! I’m Telegram’s official Spam Info Bot. I can help you find out if your account was limited. I’ll also explain why this happens and what you can do to regain the full functionality. Send /start to launch me.
   const mm = await sendMessage(
     client,
     userId,
@@ -33,7 +34,8 @@ const fileComplaint = async (
     !(
       m?.[0].message.includes('you like to submit a complaint') ||
       m?.[0].message.includes('already submitted') ||
-      m?.[0].message.includes('use buttons to communicate with me')
+      m?.[0].message.includes('use buttons to communicate with me') ||
+      m?.[0].message.includes('regain the full functionality')
     )
   ) {
     throw new Error('SPAMBOT_MISTAKE_MESSAGE_NOT_FOUND');
@@ -41,7 +43,8 @@ const fileComplaint = async (
 
   if (
     m[0].message.includes('already submitted') ||
-    m[0].message.includes('use buttons to communicate with me')
+    m[0].message.includes('use buttons to communicate with me') ||
+    m[0].message.includes('regain the full functionality')
   ) {
     return;
   }

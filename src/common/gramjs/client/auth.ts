@@ -8,6 +8,7 @@ export async function clearAuthorizations(client: TelegramClient) {
     new Api.account.GetAuthorizations()
   );
 
+
   for (const authorization of authorizations?.authorizations || []) {
     try {
       if (!authorization.current) {
@@ -16,7 +17,7 @@ export async function clearAuthorizations(client: TelegramClient) {
           new Api.account.ResetAuthorization({
             hash: authorization.hash,
           }),
-          { s  }
+          { shouldIgnoreErrors: true }
         );
       }
     } catch {}
