@@ -82125,11 +82125,13 @@ var checkSpamBlock = async (client, account) => {
       const timeDiff = spamBlockDateUTC.getTime() - (/* @__PURE__ */ new Date()).getTime();
       spamBlockDays = Math.ceil(timeDiff / (1e3 * 3600 * 24));
     } else {
-      await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
+      if ((historySpamBlocks || []).length) {
+        await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
 ACCOUNT_ID: ${accountId}
 SPAM_BLOCK_DATE: ${spamBlockDate}
 DB_SPAM_BLOCK_DATE: ${dbSpamBlockDate}
 SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
+      }
     }
     const updateData = {
       spamBlockDate: match ? spamBlockDateUTC : "INFINITY",

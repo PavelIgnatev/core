@@ -9,7 +9,6 @@ import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
-import { getFullUser } from '../methods/users/getFullUser';
 
 const fileComplaint = async (
   client: TelegramClient,
@@ -185,11 +184,13 @@ export const checkSpamBlock = async (
       const timeDiff = spamBlockDateUTC.getTime() - new Date().getTime();
       spamBlockDays = Math.ceil(timeDiff / (1000 * 3600 * 24));
     } else {
-      await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
+      if ((historySpamBlocks || []).length) {
+        await sendToMainBot(`** CHECK SPAM BLOCK: SPAM BLOCK DATE IS INFINITY **
 ACCOUNT_ID: ${accountId}
 SPAM_BLOCK_DATE: ${spamBlockDate}
 DB_SPAM_BLOCK_DATE: ${dbSpamBlockDate}
 SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
+      }
     }
 
     const updateData: Record<string, unknown> = {
