@@ -18,7 +18,7 @@ const fileComplaint = async (
 ) => {
   //Submit a complaint
   //No, I’ll never do any of this!
-  //Hello! I’m Telegram’s official Spam Info Bot. I can help you find out if your account was limited. I’ll also explain why this happens and what you can do to regain the full functionality. Send /start to launch me.
+  //Hello! I’m Telegram’s official Spam Info Bot. I can help you find out if your account was limited. I’ll also explain why this happens and what you can do to regain //the full functionality. Send /start to launch me.
   const mm = await sendMessage(
     client,
     userId,
