@@ -222,8 +222,8 @@ getAccounts().then(async (accounts) => {
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
-      accountsInWork,
       peerFloods,
+      accountsInWork,
       reconnectErrors,
       iterationErrors,
     });
