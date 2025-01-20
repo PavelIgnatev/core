@@ -278,6 +278,7 @@ function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
   // Once all objects have been parsed, replace the
   // string type from the arguments with references
   for (const obj of objAll) {
+    // console.log(obj)
     if (AUTH_KEY_TYPES.has(obj.constructorId)) {
       for (const arg in obj.argsConfig) {
         if (obj.argsConfig[arg].type === 'string') {
@@ -293,11 +294,10 @@ function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
 }
 
 function serializeBytes(data) {
+
   if (!(data instanceof Buffer)) {
     if (typeof data === 'string') {
       data = Buffer.from(data);
-    } else {
-      throw Error(`Bytes or str expected, not ${data.constructor.name}`);
     }
   }
   const r = [];
