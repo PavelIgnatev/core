@@ -35,7 +35,7 @@ const fileComplaint = async (
     !(
       m?.[0].message.includes('you like to submit a complaint') ||
       m?.[0].message.includes('already submitted') ||
-      m?.[0].message.includes('use buttons to communicate with me') ||
+      m?.[0].message.includes('buttons to communicate with me') ||
       m?.[0].message.includes('regain the full functionality')
     )
   ) {
@@ -44,7 +44,7 @@ const fileComplaint = async (
 
   if (
     m[0].message.includes('already submitted') ||
-    m[0].message.includes('use buttons to communicate with me') ||
+    m[0].message.includes('buttons to communicate with me') ||
     m[0].message.includes('regain the full functionality')
   ) {
     return;
