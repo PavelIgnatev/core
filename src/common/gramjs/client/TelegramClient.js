@@ -1,3 +1,5 @@
+const UserAgent = require('user-agents');
+
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
 
@@ -15,13 +17,8 @@ class TelegramClient {
    * @param apiId
    * @param opts
    */
-  constructor(session, apiId, opts) {
-    if (!apiId) {
-      throw Error(
-        'Your API ID or Hash are invalid. Please read "Requirements" on README.md'
-      );
-    }
-    if (typeof opts.accountId !== 'string') {
+  constructor(session, acountId) {
+    if (typeof acountId !== 'string') {
       throw new Error('Account Id not defined');
     }
 
@@ -31,11 +28,10 @@ class TelegramClient {
       connectionRetries: Infinity,
       retryDelay: 1000,
       autoReconnect: true,
-      ...opts,
     };
 
     this.session = session;
-    this.apiId = parseInt(apiId, 10);
+    this.apiId = 2496;
     this.defaultDcId = 2;
     this._eventBuilders = [];
     this._phoneCodeHash = {};
@@ -45,17 +41,17 @@ class TelegramClient {
     this._timeout = args.timeout;
     this._autoReconnect = args.autoReconnect;
     this._connection = ConnectionTCPObfuscated;
-    this._accountId = args.accountId;
+    this._accountId = acountId;
 
     this._initWith = (x) => {
+      const userAgent = new UserAgent();
+
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
           apiId: this.apiId,
-          deviceModel:
-            args.deviceModel ||
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
-          systemVersion: args.systemVersion || 'Win64',
+          deviceModel: userAgent.userAgent,
+          systemVersion: userAgent.platform,
           appVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
             Math.random() * 10
           )}.${Math.floor(Math.random() * 10)} A`,
@@ -201,7 +197,7 @@ class TelegramClient {
           }
 
           await sendToMainBot(
-            `** FLOOD_WAIT_ERROR **
+            `💀 FLOOD_WAIT_ERROR 💀
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
           );

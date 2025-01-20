@@ -1,15 +1,12 @@
 import { Account } from '../../@types/Account';
+import { updateAccountById } from '../../db/accounts';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
 import TelegramClient from './client/TelegramClient';
 import CallbackSession from './sessions/CallbackSession';
 import GramJs from './tl/api';
 
-export async function init(
-  accountData: Account,
-  accountId: string,
-  onUpdate: any
-) {
-  const { dcId, dc1, dc2, dc3, dc4, dc5, platform, userAgent } = accountData;
+async function init(accountData: Account, accountId: string, onUpdate: any) {
+  const { dcId, dc1, dc2, dc3, dc4, dc5 } = accountData;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -24,12 +21,7 @@ export async function init(
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {});
-
-  const client = new TelegramClient(session, 2496, {
-    deviceModel: userAgent,
-    systemVersion: platform,
-    accountId,
-  });
+  const client = new TelegramClient(session, accountId);
 
   if (!client) {
     throw new Error('Client not inited');
@@ -53,6 +45,41 @@ export async function init(
 
   return client;
 }
+
+export const initClient = async (
+  account: Account,
+  accountId: string,
+  onUpdate: any
+): Promise<TelegramClient> => {
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error('TIMEOUT_ERROR'));
+      }, 90000);
+    });
+
+    const client = await Promise.race([
+      init(account, accountId, onUpdate),
+      timeoutPromise,
+    ]);
+
+    if (!client) {
+      throw new Error('GLOBAL_ERROR');
+    }
+
+    return client as TelegramClient;
+  } catch (e: any) {
+    if (e.message === 'TIMEOUT_ERROR') {
+      console.warn({
+        accountId,
+        message: 'CLIENT_TIMEOUT_RECONNECT',
+      });
+      return await initClient(account, accountId, onUpdate);
+    }
+
+    throw new Error(e.message);
+  }
+};
 
 type InvokeRequestParams = {
   shouldIgnoreErrors?: boolean;
@@ -88,6 +115,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       },
     });
 
+    if (err.message === 'No workers running') {
+      throw new Error(err.message);
+    }
     if (
       [
         'USER_DEACTIVATED_BAN',
@@ -99,9 +129,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
         'AUTH_KEY_DUPLICATED',
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
-        'No workers running',
       ].includes(err.message)
     ) {
+      await updateAccountById(client._accountId, {
+        banned: true,
+        reason: err.message,
+      });
       throw new Error(err.message);
     }
 

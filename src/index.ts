@@ -6,6 +6,7 @@ import './helpers/setConsole.log';
 import util from 'util';
 
 import { Account } from './@types/Account';
+import { initClient } from './common/gramjs';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import {
@@ -28,7 +29,6 @@ import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
-import { initClient } from './modules/initClient';
 
 const exec = util.promisify(childExec);
 const promises: Promise<any>[] = [];
@@ -53,21 +53,13 @@ const main = async (ID: string) => {
       paylod: { count: randomI },
     });
 
-    const {
-      dcId,
-      platform,
-      userAgent,
-      setuped = false,
-      id: tgId,
-      firstName,
-    } = accountByID;
+    const { dcId, id: tgId, firstName, setuped = false } = accountByID;
 
-    if (![dcId, platform, userAgent].every(Boolean)) {
+    if (!dcId) {
       throw new Error('NOT_ENOUGH_PARAMS');
     }
 
     account = accountByID;
-
     client = await initClient(account, ID, (update: any) =>
       handleUpdate(ID, update, () => (isAutoResponse = true))
     );
@@ -82,6 +74,7 @@ const main = async (ID: string) => {
           !client?._sender ||
           !client._sender._user_connected ||
           client._sender.isReconnecting ||
+          client._sender.userDisconnected ||
           errored
         ) {
           return;
