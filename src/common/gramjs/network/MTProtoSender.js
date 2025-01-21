@@ -403,11 +403,7 @@ MESSAGE: ${JSON.stringify(message)}`);
       }
       try {
         await this._processMessage(message);
-      } catch (e) {
-        await sendToMainBot(`💀 PROCESS_MESSAGE_ERROR 💀
-ID: ${this._accountId}
-MESSAGE: ${JSON.stringify(message)}`);
-      }
+      } catch {}
     }
 
     this._recv_loop_handle = undefined;
