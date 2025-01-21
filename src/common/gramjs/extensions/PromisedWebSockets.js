@@ -1,5 +1,6 @@
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
+const { Mutex } = require('async-mutex');
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
@@ -11,6 +12,7 @@ class PromisedWebSockets {
     this.closed = true;
     this.disconnectedCallback = disconnectedCallback;
     this.timeout = CONNECTION_TIMEOUT;
+    this.mutex = new Mutex();
   }
 
   async readExactly(number) {
@@ -123,8 +125,14 @@ class PromisedWebSockets {
 
   receive() {
     this.client.onmessage = async (message) => {
-      this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
-      this.resolveRead(true);
+      await this.mutex.runExclusive(async () => {
+        const data =
+          message.data instanceof ArrayBuffer
+            ? Buffer.from(message.data)
+            : Buffer.from(await new Response(message.data).arrayBuffer());
+        this.stream = Buffer.concat([this.stream, data]);
+        this.resolveRead(true);
+      });
     };
   }
 }
