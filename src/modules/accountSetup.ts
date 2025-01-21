@@ -1,7 +1,6 @@
 import BigInt from 'big-integer';
 
 import { Account } from '../@types/Account';
-import { invokeRequest } from '../common/gramjs';
 import TelegramClient from '../common/gramjs/client/TelegramClient';
 import { uploadFile } from '../common/gramjs/client/uploadFile';
 import GramJs from '../common/gramjs/tl/api';
@@ -12,6 +11,7 @@ import { getProfileFiles } from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
+import { invokeRequest } from './invokeRequest';
 
 const settings = {
   muteUntil: 2147483647,

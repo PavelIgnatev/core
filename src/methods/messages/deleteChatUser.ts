@@ -1,6 +1,6 @@
 import BigInt from 'big-integer';
 
-import { invokeRequest } from '../../common/gramjs';
+import { invokeRequest } from '../../modules/invokeRequest';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
 

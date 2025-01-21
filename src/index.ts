@@ -60,7 +60,7 @@ const main = async (ID: string) => {
     }
 
     account = accountByID;
-    client = await initClient(account, ID, (update: any) =>
+    client = await initClient(account, (update: any) =>
       handleUpdate(ID, update, () => (isAutoResponse = true))
     );
 

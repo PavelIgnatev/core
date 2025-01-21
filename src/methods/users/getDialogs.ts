@@ -1,5 +1,5 @@
 import { Dialog } from '../../@types/Dialog';
-import { invokeRequest } from '../../common/gramjs';
+import { invokeRequest } from '../../modules/invokeRequest';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
 import { sendToMainBot } from '../../helpers/sendToMainBot';

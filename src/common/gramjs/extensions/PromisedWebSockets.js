@@ -1,6 +1,5 @@
 const { HttpsProxyAgent } = require('https-proxy-agent');
-const WebSocketClient = require('websocket').w3cwebsocket;
-const { Mutex } = require('async-mutex');
+const { WebSocket } = require('ws');
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
@@ -12,7 +11,6 @@ class PromisedWebSockets {
     this.closed = true;
     this.disconnectedCallback = disconnectedCallback;
     this.timeout = CONNECTION_TIMEOUT;
-    this.mutex = new Mutex();
   }
 
   async readExactly(number) {
@@ -66,7 +64,7 @@ class PromisedWebSockets {
     this.closed = false;
     this.website = this.getWebSocketLink(ip, port);
 
-    this.client = new WebSocketClient(this.website, 'binary', {
+    this.client = new WebSocket(this.website, 'binary', {
       agent: new HttpsProxyAgent(
         'http://2NN9t04blzUA9505Py-dc-ANY:i2pkKrlPqQW92Zp@gw.thunderproxy.net:5959'
       ),
@@ -125,14 +123,8 @@ class PromisedWebSockets {
 
   receive() {
     this.client.onmessage = async (message) => {
-      await this.mutex.runExclusive(async () => {
-        const data =
-          message.data instanceof ArrayBuffer
-            ? Buffer.from(message.data)
-            : Buffer.from(await new Response(message.data).arrayBuffer());
-        this.stream = Buffer.concat([this.stream, data]);
-        this.resolveRead(true);
-      });
+      this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
+      this.resolveRead(true);
     };
   }
 }

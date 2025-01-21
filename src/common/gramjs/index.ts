@@ -1,12 +1,21 @@
-import { Account } from '../../@types/Account';
-import { updateAccountById } from '../../db/accounts';
-import { sendToMainBot } from '../../helpers/sendToMainBot';
 import TelegramClient from './client/TelegramClient';
 import CallbackSession from './sessions/CallbackSession';
 import GramJs from './tl/api';
 
-async function init(accountData: Account, accountId: string, onUpdate: any) {
-  const { dcId, dc1, dc2, dc3, dc4, dc5 } = accountData;
+async function init(
+  account: {
+    accountId: string;
+
+    dcId: number;
+    dc1?: string;
+    dc2?: string;
+    dc3?: string;
+    dc4?: string;
+    dc5?: string;
+  },
+  onUpdate: any
+) {
+  const { dcId, dc1, dc2, dc3, dc4, dc5 } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -21,7 +30,7 @@ async function init(accountData: Account, accountId: string, onUpdate: any) {
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {});
-  const client = new TelegramClient(session, accountId);
+  const client = new TelegramClient(session, account.accountId);
 
   if (!client) {
     throw new Error('Client not inited');
@@ -47,8 +56,16 @@ async function init(accountData: Account, accountId: string, onUpdate: any) {
 }
 
 export const initClient = async (
-  account: Account,
-  accountId: string,
+  account: {
+    accountId: string;
+
+    dcId: number;
+    dc1?: string;
+    dc2?: string;
+    dc3?: string;
+    dc4?: string;
+    dc5?: string;
+  },
   onUpdate: any
 ): Promise<TelegramClient> => {
   try {
@@ -59,7 +76,7 @@ export const initClient = async (
     });
 
     const client = await Promise.race([
-      init(account, accountId, onUpdate),
+      init(account, onUpdate),
       timeoutPromise,
     ]);
 
@@ -71,86 +88,12 @@ export const initClient = async (
   } catch (e: any) {
     if (e.message === 'TIMEOUT_ERROR') {
       console.warn({
-        accountId,
+        accountId: account.accountId,
         message: 'CLIENT_TIMEOUT_RECONNECT',
       });
-      return await initClient(account, accountId, onUpdate);
+      return await initClient(account, onUpdate);
     }
 
     throw new Error(e.message);
   }
 };
-
-type InvokeRequestParams = {
-  shouldIgnoreErrors?: boolean;
-};
-
-export async function invokeRequest<T extends GramJs.AnyRequest>(
-  client: TelegramClient,
-  request: T,
-  params: InvokeRequestParams = {}
-) {
-  const { shouldIgnoreErrors } = params;
-
-  try {
-    const response = await client.invoke(request);
-    if (request.className !== 'account.UpdateStatus') {
-      console.log({
-        accountId: client._accountId,
-        message: `[${request.className}]`,
-        payload: {
-          request: JSON.parse(JSON.stringify(request)),
-        },
-      });
-    }
-
-    return response;
-  } catch (err: any) {
-    console.error({
-      accountId: client._accountId,
-      message: `[${request.className}]`,
-      payload: {
-        request: JSON.parse(JSON.stringify(request)),
-        error: err.message,
-      },
-    });
-
-    if (err.message === 'No workers running') {
-      throw new Error(err.message);
-    }
-    if (
-      [
-        'USER_DEACTIVATED_BAN',
-        'AUTH_KEY_UNREGISTERED',
-        'AUTH_KEY_INVALID',
-        'USER_DEACTIVATED',
-        'SESSION_REVOKED',
-        'SESSION_EXPIRED',
-        'AUTH_KEY_DUPLICATED',
-        'AUTH_KEY_PERM_EMPTY',
-        'SESSION_PASSWORD_NEEDED',
-      ].includes(err.message)
-    ) {
-      await updateAccountById(client._accountId, {
-        banned: true,
-        reason: err.message,
-      });
-      throw new Error(err.message);
-    }
-
-    if (shouldIgnoreErrors) return undefined;
-
-    if (
-      err.message !== 'PEER_FLOOD' &&
-      request.className !== 'contacts.Block' &&
-      request.className !== 'contacts.Unblock'
-    ) {
-      await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀
-ID: ${client._accountId}
-ERROR: ${err.message}
-REQUEST: ${JSON.stringify(request)}`);
-    }
-
-    throw new Error(err.message);
-  }
-}
