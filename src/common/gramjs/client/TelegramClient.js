@@ -9,39 +9,23 @@ const { ConnectionTCPObfuscated, MTProtoSender } = require('../network');
 const { uploadFile } = require('./uploadFile');
 const RequestState = require('../network/RequestState');
 const { sendToMainBot } = require('../../../helpers/sendToMainBot');
-const Deferred = require('../Deferred').default;
 
 class TelegramClient {
-  /**
-   *
-   * @param apiId
-   * @param opts
-   */
   constructor(session, acountId) {
     if (typeof acountId !== 'string') {
       throw new Error('Account Id not defined');
     }
 
-    const args = {
-      timeout: 10,
-      requestRetries: 5,
-      connectionRetries: Infinity,
-      retryDelay: 1000,
-      autoReconnect: true,
-    };
-
-    this.session = session;
     this.apiId = 2496;
     this.defaultDcId = 2;
+    this.session = session;
+    this._accountId = acountId;
     this._eventBuilders = [];
     this._phoneCodeHash = {};
-    this._requestRetries = args.requestRetries;
-    this._connectionRetries = args.connectionRetries;
-    this._retryDelay = args.retryDelay || 0;
-    this._timeout = args.timeout;
-    this._autoReconnect = args.autoReconnect;
+    this._requestRetries = 5;
+    this._connectionRetries = Infinity;
+    this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
-    this._accountId = acountId;
 
     this._initWith = (x) => {
       const userAgent = new UserAgent();
@@ -63,24 +47,16 @@ class TelegramClient {
         }),
       });
     };
-
-    this._args = args;
-    this._loopStarted = false;
-    this._connectedDeferred = new Deferred();
   }
 
   async connect() {
     await this._initSession();
 
     if (this._sender === undefined) {
-      // only init sender once to avoid multiple loops.
       this._sender = new MTProtoSender(this.session.getAuthKey(), {
-        logger: null,
         dcId: this.session.dcId,
         retries: this._connectionRetries,
         delay: this._retryDelay,
-        autoReconnect: this._autoReconnect,
-        connectTimeout: this._timeout,
         updateCallback: this._handleUpdate.bind(this),
         isMainSender: true,
         accountId: this._accountId,
@@ -101,29 +77,16 @@ class TelegramClient {
 
     const newConnection = await this._sender.connect(connection, undefined);
     if (!newConnection) {
-      // we're already connected so no need to reset auth key.
-      if (!this._loopStarted) {
-        this._updateLoop();
-        this._loopStarted = true;
-      }
       return;
     }
 
     this.session.setAuthKey(this._sender.authKey);
     await this._sender.send(this._initWith(new requests.help.GetConfig({})));
-
-    if (!this._loopStarted) {
-      this._updateLoop();
-      this._loopStarted = true;
-    }
-    this._connectedDeferred.resolve();
   }
 
   async _initSession() {
     await this.session.load();
   }
-
-  async _updateLoop() {}
 
   /**
    * Disconnects from the Telegram server
@@ -143,13 +106,7 @@ class TelegramClient {
     try {
       await this.disconnect();
       this._sender.destroy();
-    } catch (err) {
-      console.error({
-        accountId: this._accountId,
-        message: 'DESTROY_ERROR',
-        payload: { error: err.message },
-      });
-    }
+    } catch (err) {}
 
     this.session.delete();
     this._eventBuilders = [];
@@ -164,16 +121,10 @@ class TelegramClient {
       throw new Error('You can only invoke requests');
     }
 
-    const sender = this._sender;
-    this._lastRequest = Date.now();
-
-    await this._connectedDeferred.promise;
-
-    const state = new RequestState(request, undefined);
-
+    const state = new RequestState(request);
     let attempt = 0;
     for (attempt = 0; attempt < this._requestRetries; attempt++) {
-      sender.addStateToQueue(state);
+      this._sender.addStateToQueue(state);
       try {
         const result = await state.promise;
         state.finished.resolve();
@@ -184,6 +135,11 @@ class TelegramClient {
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
+          await sendToMainBot(
+            `💀 SERVER_ERROR 💀
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`
+          );
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
@@ -196,19 +152,14 @@ class TelegramClient {
             throw e;
           }
 
-          await sendToMainBot(
-            `💀 FLOOD_WAIT_ERROR 💀
-ACCOUNT ID: ${this._accountId}
-ERROR: ${e.message}`
-          );
-          console.error({
-            accountId: this._accountId,
-            message: 'FLOOD_WAIT_ERROR',
-            payload: { error: e.message },
-          });
           if (e.seconds <= 60) {
             await sleep(e.seconds * 1000);
           } else {
+            await sendToMainBot(
+              `💀 FLOOD_WAIT_ERROR 💀
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`
+            );
             state.finished.resolve();
             throw e;
           }
@@ -217,13 +168,25 @@ ERROR: ${e.message}`
           e instanceof errors.NetworkMigrateError ||
           e instanceof errors.UserMigrateError
         ) {
-          throw new Error(`Phone migrated to ${e.newDc}`);
-        } else if (e instanceof errors.MsgWaitError) {
-          await state.isReady();
+          await sendToMainBot(
+            `💀 PHONE_MIGRATED 💀
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`
+          );
 
+          throw new Error(`PHONE_MIGRATED_TO: ${e.newDc}`);
+        } else if (e instanceof errors.MsgWaitError) {
+          await sendToMainBot(
+            `💀 MSG_WAIT_ERROR 💀
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`
+          );
+          await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {
-          throw new Error('CONNECTION_NOT_INITED');
+          await this.disconnect();
+          await sleep(2000);
+          await this.connect();
         } else if (e instanceof errors.TimedOutError) {
         } else {
           state.finished.resolve();
@@ -246,7 +209,6 @@ ERROR: ${e.message}`
     return uploadFile(this, fileParams, false);
   }
 
-  // event region
   addEventHandler(callback, event) {
     this._eventBuilders.push([event, callback]);
   }
@@ -256,7 +218,6 @@ ERROR: ${e.message}`
       update instanceof constructors.Updates ||
       update instanceof constructors.UpdatesCombined
     ) {
-      // TODO deal with entities
       const entities = [];
       for (const x of [...update.users, ...update.chats]) {
         entities.push(x);
@@ -271,10 +232,9 @@ ERROR: ${e.message}`
 
   _processUpdate(update, entities) {
     update._entities = entities || [];
-    const args = {
+    this._dispatchUpdate({
       update,
-    };
-    this._dispatchUpdate(args);
+    });
   }
 
   async _dispatchUpdate(

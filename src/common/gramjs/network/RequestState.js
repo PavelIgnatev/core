@@ -1,14 +1,13 @@
 const Deferred = require('../Deferred').default;
 
 class RequestState {
-  constructor(request, abortSignal = undefined) {
+  constructor(request) {
     this.containerId = undefined;
     this.msgId = undefined;
     this.request = request;
     this.data = request.getBytes();
     this.after = undefined;
     this.result = undefined;
-    this.abortSignal = abortSignal;
     this.finished = new Deferred();
 
     this.resetPromise();

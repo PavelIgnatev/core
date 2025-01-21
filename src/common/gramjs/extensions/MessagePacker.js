@@ -140,11 +140,6 @@ class MessagePacker {
         continue;
       }
 
-      if (state.abortSignal?.aborted) {
-        state.reject(new Error('Request aborted'));
-        continue;
-      }
-
       size += state.data.length + TLMessage.SIZE_OVERHEAD;
       if (size <= MessageContainer.MAXIMUM_SIZE) {
         let afterId;
