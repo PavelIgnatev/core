@@ -106,7 +106,7 @@ class TelegramClient {
     try {
       await this.disconnect();
       this._sender.destroy();
-    } catch (err) {}
+    } catch {}
 
     this.session.delete();
     this._eventBuilders = [];

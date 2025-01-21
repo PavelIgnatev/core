@@ -1,4 +1,4 @@
-const PromisedWebSockets = require('../../extensions/PromisedWebSockets');
+const PromisedWebSockets = require('../../extensions/PromisedWebSockets.js');
 const AsyncQueue = require('../../extensions/AsyncQueue');
 
 /**

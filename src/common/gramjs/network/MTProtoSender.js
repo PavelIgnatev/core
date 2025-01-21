@@ -26,7 +26,6 @@ const {
   MsgsAllInfo,
 } = require('../tl').constructors;
 const { SecurityError } = require('../errors/Common');
-const { InvalidBufferError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 const { iterationErrors } = require('../../../helpers/helpers');
