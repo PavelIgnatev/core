@@ -1,5 +1,3 @@
-const { RPCError } = require('../errors');
-
 const MTProtoState = require('./MTProtoState');
 const Helpers = require('../Helpers');
 const AuthKey = require('../crypto/AuthKey');
@@ -28,8 +26,6 @@ const {
 const { SecurityError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
-const { iterationErrors } = require('../../../helpers/helpers');
-const { sendToMainBot } = require('../../../helpers/sendToMainBot');
 
 /**
  * MTProto Mobile Protocol sender
@@ -50,8 +46,6 @@ class MTProtoSender {
     delay: 0,
     authKeyCallback: undefined,
     updateCallback: undefined,
-    isMainSender: undefined,
-    isExported: undefined,
   };
 
   /**
@@ -67,6 +61,11 @@ class MTProtoSender {
     this._delay = args.delay;
     this._updateCallback = args.updateCallback;
     this._accountId = args.accountId;
+    this._onError = args.onError;
+    this._connectCounts = 0;
+    this._reconnectCounts = 0;
+    this._disconnectCounts = 0;
+    this._connectErrorCounts = 0;
 
     /**
      * whether we disconnected ourself or telegram did it.
@@ -156,6 +155,7 @@ class MTProtoSender {
    * @returns {Promise<boolean>}
    */
   async connect(connection, force) {
+    this._connectCounts += 1;
     this.userDisconnected = false;
     if (this._user_connected && !force) {
       return false;
@@ -173,6 +173,8 @@ class MTProtoSender {
 
         break;
       } catch (err) {
+        this._connectErrorCounts += 1;
+
         if (attempt === 0) {
           this._updateCallback?.(
             new UpdateConnectionState(UpdateConnectionState.disconnected)
@@ -183,9 +185,6 @@ class MTProtoSender {
           accountId: this._accountId,
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
-        iterationErrors[this._accountId] =
-          (iterationErrors[this._accountId] || 0) + 1;
-
         await Helpers.sleep(1000);
       }
     }
@@ -204,7 +203,6 @@ class MTProtoSender {
    */
   async disconnect() {
     this.userDisconnected = true;
-
     await this._disconnect(this.getConnection());
   }
 
@@ -280,6 +278,7 @@ class MTProtoSender {
   }
 
   async _disconnect(connection) {
+    this._disconnectCounts += 1;
     this._updateCallback?.(
       new UpdateConnectionState(UpdateConnectionState.disconnected)
     );
@@ -344,7 +343,7 @@ class MTProtoSender {
       } catch (e) {
         this._send_loop_handle = undefined;
         if (!this.userDisconnected) {
-          this.reconnect();
+          await this.reconnect();
         }
         return;
       } finally {
@@ -377,7 +376,7 @@ class MTProtoSender {
       } catch (e) {
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          this.reconnect();
+          await this.reconnect();
         }
         this._recv_loop_handle = undefined;
         return;
@@ -387,7 +386,7 @@ class MTProtoSender {
         message = await this._state.decryptMessageData(body);
       } catch (e) {
         if (e instanceof TypeNotFoundError) {
-          await sendToMainBot(`💀 INVALID_CONSTRUCTOR_ID 💀
+          this._onError(`💀 INVALID_CONSTRUCTOR_ID 💀
 ID: ${this._accountId}
 ConstructorId: ${e.invalidConstructorId}
 Remaining: ${e.remaining}`);
@@ -395,7 +394,7 @@ Remaining: ${e.remaining}`);
         } else if (e instanceof SecurityError) {
           continue;
         } else {
-          await sendToMainBot(`💀 DECRYPT_MESSAGE_ERROR 💀
+          this._onError(`💀 DECRYPT_MESSAGE_ERROR 💀
 ID: ${this._accountId}
 MESSAGE: ${JSON.stringify(message)}`);
         }
@@ -408,17 +407,17 @@ MESSAGE: ${JSON.stringify(message)}`);
     this._recv_loop_handle = undefined;
   }
 
-  reconnect() {
+  async reconnect() {
     if (this._user_connected && !this.isReconnecting) {
       this.isReconnecting = true;
 
-      Helpers.sleep(1000).then(() => {
-        this._reconnect();
-      });
+      await Helpers.sleep(1000);
+      await this._reconnect();
     }
   }
 
   async _reconnect() {
+    this._reconnectCounts += 1;
     try {
       await this._disconnect(this.getConnection());
     } catch (err) {}

@@ -1,9 +1,8 @@
-export const reconnectErrors: Record<string, number> = {};
-export const iterationErrors: Record<string, number> = {};
 export const startSender: Record<string, number> = {};
 export const phoneSearchError: Record<string, number> = {};
 export const endSender: Record<string, number> = {};
 export const errorSender: Record<string, number> = {};
+export const aiRetryError: Record<string, number> = {};
 export const peerFloods: Record<string, number> = {};
 
 export function reduceSpaces(string: string) {
@@ -34,6 +33,21 @@ export const sleep = (delay: number) => {
 
 export const getTimeString = (startTime: number) => {
   const time = Math.round((performance.now() - startTime) / 1000);
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+
+  let timeString;
+  if (minutes > 0) {
+    timeString = `${minutes}m ${seconds}s`;
+  } else {
+    timeString = `${seconds}s`;
+  }
+
+  return timeString;
+};
+
+export const getTimeStringByTime = (timeDate: number) => {
+  const time = Math.round(timeDate / 1000);
   const minutes = Math.floor(time / 60);
   const seconds = time % 60;
 

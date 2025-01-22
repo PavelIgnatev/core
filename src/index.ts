@@ -10,13 +10,13 @@ import { initClient } from './common/gramjs';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import {
+  aiRetryError,
   endSender,
   errorSender,
   getTimeString,
-  iterationErrors,
+  getTimeStringByTime,
   peerFloods,
   phoneSearchError,
-  reconnectErrors,
   sleep,
   startSender,
 } from './helpers/helpers';
@@ -38,7 +38,6 @@ const main = async (ID: string) => {
   const startTime = performance.now();
 
   let isAutoResponse = true;
-  let setOnlineInterval: any = null;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
@@ -60,15 +59,19 @@ const main = async (ID: string) => {
     }
 
     account = accountByID;
-    client = await initClient(account, (update: any) =>
-      handleUpdate(ID, update, () => (isAutoResponse = true))
+    client = await initClient(
+      account,
+      (update) => handleUpdate(ID, update, () => (isAutoResponse = true)),
+      (error) => {
+        sendToMainBot(error);
+      }
     );
 
     if (!client) {
       throw new Error('CLIENT_NOT_INITED');
     }
 
-    setOnlineInterval = setInterval(async () => {
+    setInterval(async () => {
       try {
         if (
           !client?._sender ||
@@ -80,24 +83,13 @@ const main = async (ID: string) => {
           return;
         }
 
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => {
-            reject(new Error('RECONNECT'));
-          }, 10000);
-        });
-
-        await Promise.race([updateStatus(client, false), timeoutPromise]);
+        await updateStatus(client, false);
       } catch (error: any) {
-        if (error.message === 'RECONNECT') {
-          reconnectErrors[ID] = (reconnectErrors[ID] || 0) + 1;
-          client?._sender?.reconnect();
-        } else {
-          errored = error.message;
-        }
+        errored = error.message;
       }
     }, 10000);
 
-    await sleep(30000);
+    await updateStatus(client, false);
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
@@ -195,19 +187,16 @@ Error: ${e.message}`
   }
 
   delete accountsInWork[ID];
-
-  if (setOnlineInterval) {
-    clearInterval(setOnlineInterval);
-  }
-
   if (client) {
-    await client.destroy();
+    client._endTime = Number(performance.now() - startTime).toFixed(0);
   }
 
   console.log({
     accountId: ID,
     message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
   });
+
+  return client;
 };
 
 getAccounts().then(async (accounts) => {
@@ -222,30 +211,115 @@ getAccounts().then(async (accounts) => {
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
-      peerFloods,
       accountsInWork,
-      reconnectErrors,
-      iterationErrors,
     });
   }, 60000);
 
-  // уйти от promise all
-  Promise.all(promises).then(async () => {
+  Promise.all(promises).then(async (clients) => {
+    const ps = clients.filter(Boolean);
+    const senders = ps.map((p) => p._sender);
+    const initTimings = ps.map((p) => ({
+      id: p._accountId,
+      value: p._initTime,
+    }));
+    const endTimings = ps.map((p) => ({
+      id: p._accountId,
+      value: p._endTime,
+    }));
+    const midInitTimings =
+      initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length;
+    const maxInitTiming = initTimings.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const midEndTimings =
+      endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length;
+    const maxEndTiming = endTimings.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const connectCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._connectCounts,
+    }));
+    const midConnectCounts =
+      connectCounts.reduce((acc, num) => acc + num.value, 0) /
+      connectCounts.length;
+    const maxConnectCounts = connectCounts.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const reconnectCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._reconnectCounts,
+    }));
+    const midReconnectCounts =
+      reconnectCounts.reduce((acc, num) => acc + num.value, 0) /
+      reconnectCounts.length;
+    const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const disconnectCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._disconnectCounts,
+    }));
+    const midDisconnectCounts =
+      disconnectCounts.reduce((acc, num) => acc + num.value, 0) /
+      disconnectCounts.length;
+    const maxDisconnectCounts = disconnectCounts.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const connectErrorCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._connectErrorCounts,
+    }));
+    const midConnectErrorCounts =
+      connectErrorCounts.reduce((acc, num) => acc + num.value, 0) /
+      connectErrorCounts.length;
+    const maxConnectErrorCounts = connectErrorCounts.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
     console.log({
       message: `💥 ITERATION DONE (${getTimeString(startTime)}) 💥`,
-      peerFloods,
-      reconnectErrors,
-      iterationErrors,
-      phoneSearchError,
+      initTimings,
+      endTimings,
+      connectCounts,
+      reconnectCounts,
+      disconnectCounts,
+      connectErrorCounts,
+      accountsInWork,
     });
+
+    // await new Promise((res) => setTimeout(res, 50000));
     await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
-ИНИЦИИРОВАНО ОТПРАВОК: ${Object.keys(startSender).length}
-ПОДТВЕРЖДЕНО ОТПРАВОК: ${Object.keys(endSender).length}
-КОЛИЧЕСТВО ОШИБОК: ${Object.keys(errorSender).length}
-КОЛИЧЕСТВО PEER FLOOD: ${Object.keys(peerFloods).length}
-КОЛИЧЕСТВО STABLE RESULT ERRORS: ${Object.keys(phoneSearchError).length}
-КОЛИЧЕСТВО RECONNECT ERRORS: ${Object.keys(reconnectErrors).length}
-КОЛИЧЕСТВО ITERATION ERRORS: ${Object.keys(iterationErrors).length}`);
+
+* АККАУНТЫ * 
+В РАБОТЕ: ${promises.length} ${promises.length !== promises.filter(Boolean).length ? `(${promises.filter(Boolean).length})` : ''}
+ВРЕМЯ ЗАПУСКА: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
+ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
+
+* СТАБИЛЬНОСТЬ *
+CONNECT: ${midConnectCounts} (max: ${maxConnectCounts.value})
+RECONNECT: ${midReconnectCounts} (max: ${maxReconnectCounts.value})
+DISCONNECT: ${midDisconnectCounts} (max: ${maxDisconnectCounts.value})
+NETWORK_ERRORS: ${midConnectErrorCounts} (max: ${maxConnectErrorCounts.value})
+
+* ОТПРАВКИ *
+ИНИЦИИРОВАНО: ${Object.keys(startSender).length}
+ПОДТВЕРЖДЕНО: ${Object.keys(endSender).length}
+ОШИБОК: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length})` : ''}
+БЛОКИРОВКА ПОИСКА ПО НОМЕРУ: ${Object.keys(phoneSearchError).length}${
+      Object.keys(aiRetryError).length > 0
+        ? `\n\n* ИИ *
+${Object.keys(aiRetryError)
+  .map((r) => `${r}: ${aiRetryError[r]}`)
+  .join('\n')}`
+        : ''
+    }
+`);
     clearInterval(interval);
     await sleep(10000);
     process.exit(1);

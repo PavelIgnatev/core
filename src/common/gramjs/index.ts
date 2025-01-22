@@ -13,8 +13,10 @@ async function init(
     dc4?: string;
     dc5?: string;
   },
-  onUpdate: any
+  onUpdate: (update: any) => void,
+  onError: (error: any) => void
 ) {
+  const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5 } = account;
   const keys: Record<string, string> = {};
 
@@ -30,13 +32,19 @@ async function init(
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {});
-  const client = new TelegramClient(session, account.accountId);
+  const client = new TelegramClient(session, account.accountId, onError);
 
   if (!client) {
-    throw new Error('Client not inited');
+    throw new Error('CLIENT_NOT_INITED');
   }
 
   await client.start();
+  client._initTime = Number(performance.now() - startTime).toFixed(0);
+
+  console.log({
+    accountId: account.accountId,
+    message: `CLIENT INIT (${client._initTime}ms)`,
+  });
 
   client.addEventHandler(
     (update: any) => {
@@ -66,7 +74,8 @@ export const initClient = async (
     dc4?: string;
     dc5?: string;
   },
-  onUpdate: any
+  onUpdate: (update: any) => void,
+  onError: (update: any) => void
 ): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
@@ -76,7 +85,7 @@ export const initClient = async (
     });
 
     const client = await Promise.race([
-      init(account, onUpdate),
+      init(account, onUpdate, onError),
       timeoutPromise,
     ]);
 
@@ -91,7 +100,7 @@ export const initClient = async (
         accountId: account.accountId,
         message: 'CLIENT_TIMEOUT_RECONNECT',
       });
-      return await initClient(account, onUpdate);
+      return await initClient(account, onUpdate, onError);
     }
 
     throw new Error(e.message);

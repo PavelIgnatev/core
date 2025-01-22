@@ -68,9 +68,9 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       request.className !== 'contacts.Unblock'
     ) {
       await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀
-  ID: ${client._accountId}
-  ERROR: ${err.message}
-  REQUEST: ${JSON.stringify(request)}`);
+ID: ${client._accountId}
+ERROR: ${err.message}
+REQUEST: ${JSON.stringify(request)}`);
     }
 
     throw new Error(err.message);

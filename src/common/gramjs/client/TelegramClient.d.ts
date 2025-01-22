@@ -13,8 +13,6 @@ declare class TelegramClient {
 
   async start();
 
-  async destroy();
-
   async invoke<R extends Api.AnyRequest>(request: R): Promise<R['__response']>;
 
   async uploadFile(

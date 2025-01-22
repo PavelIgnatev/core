@@ -2,7 +2,7 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
 
 const closeError = new Error('WebSocket was closed');
-const CONNECTION_TIMEOUT = 15000;
+const CONNECTION_TIMEOUT = 3250;
 const MAX_TIMEOUT = 30000;
 
 class PromisedWebSockets {
@@ -102,6 +102,7 @@ class PromisedWebSockets {
           this.disconnectedCallback();
         }
         this.client.close();
+
         this.timeout *= 2;
         this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
         timeout = undefined;

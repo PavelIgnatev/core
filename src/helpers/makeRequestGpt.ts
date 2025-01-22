@@ -1,7 +1,7 @@
 import axios from 'axios';
 import emojiRegex from 'emoji-regex';
 
-import { sleep } from './helpers';
+import { aiRetryError, sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
 
 function trimmer(str: string) {
@@ -411,6 +411,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
           'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"' &&
         !error.message.includes('is not allowed in reply')
       ) {
+        aiRetryError[groupId] = (aiRetryError[groupId] || 0) + 1;
         i += 1;
       }
 

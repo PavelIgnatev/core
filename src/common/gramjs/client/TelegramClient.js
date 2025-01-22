@@ -8,12 +8,11 @@ const { constructors, requests } = require('../tl');
 const { ConnectionTCPObfuscated, MTProtoSender } = require('../network');
 const { uploadFile } = require('./uploadFile');
 const RequestState = require('../network/RequestState');
-const { sendToMainBot } = require('../../../helpers/sendToMainBot');
 
 class TelegramClient {
-  constructor(session, acountId) {
-    if (typeof acountId !== 'string') {
-      throw new Error('Account Id not defined');
+  constructor(session, acountId, onError) {
+    if (typeof acountId !== 'string' || typeof onError !== 'function') {
+      throw new Error('Account Id or onError not defined');
     }
 
     this.apiId = 2496;
@@ -26,10 +25,12 @@ class TelegramClient {
     this._connectionRetries = Infinity;
     this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
+    this._onError = onError;
+    this._initTime = 0;
+    this._endTime = 0
 
     this._initWith = (x) => {
       const userAgent = new UserAgent();
-
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
@@ -58,8 +59,8 @@ class TelegramClient {
         retries: this._connectionRetries,
         delay: this._retryDelay,
         updateCallback: this._handleUpdate.bind(this),
-        isMainSender: true,
         accountId: this._accountId,
+        onError: this._onError,
       });
     }
     // set defaults vars
@@ -77,6 +78,8 @@ class TelegramClient {
 
     const newConnection = await this._sender.connect(connection, undefined);
     if (!newConnection) {
+      this._onError(`💀 NEW_CONNECTION_NOT_FOUND 💀
+ID: ${this._accountId}`);
       return;
     }
 
@@ -98,20 +101,6 @@ class TelegramClient {
     }
   }
 
-  /**
-   * Disconnects all senders and removes all handlers
-   * @returns {Promise<void>}
-   */
-  async destroy() {
-    try {
-      await this.disconnect();
-      this._sender.destroy();
-    } catch {}
-
-    this.session.delete();
-    this._eventBuilders = [];
-  }
-
   getSender() {
     return Promise.resolve(this._sender);
   }
@@ -121,21 +110,32 @@ class TelegramClient {
       throw new Error('You can only invoke requests');
     }
 
+    const es = [];
+    const maxTimeout =
+      request.className === 'account.UpdateStatus' ? 10000 : 30000;
     const state = new RequestState(request);
+
     let attempt = 0;
     for (attempt = 0; attempt < this._requestRetries; attempt++) {
       this._sender.addStateToQueue(state);
       try {
-        const result = await state.promise;
+        const result = await Promise.race([
+          state.promise,
+          new Promise((_, r) =>
+            setTimeout(() => r(new Error('TIMEOUT_ERROR')), maxTimeout)
+          ),
+        ]);
+
         state.finished.resolve();
         return result;
       } catch (e) {
+        es.push(e.message);
         if (
           e instanceof errors.ServerError ||
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
-          await sendToMainBot(
+          this._onError(
             `💀 SERVER_ERROR 💀
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
@@ -155,7 +155,7 @@ ERROR: ${e.message}`
           if (e.seconds <= 60) {
             await sleep(e.seconds * 1000);
           } else {
-            await sendToMainBot(
+            this._onError(
               `💀 FLOOD_WAIT_ERROR 💀
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
@@ -168,7 +168,7 @@ ERROR: ${e.message}`
           e instanceof errors.NetworkMigrateError ||
           e instanceof errors.UserMigrateError
         ) {
-          await sendToMainBot(
+          this._onError(
             `💀 PHONE_MIGRATED 💀
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
@@ -176,7 +176,7 @@ ERROR: ${e.message}`
 
           throw new Error(`PHONE_MIGRATED_TO: ${e.newDc}`);
         } else if (e instanceof errors.MsgWaitError) {
-          await sendToMainBot(
+          this._onError(
             `💀 MSG_WAIT_ERROR 💀
 ACCOUNT ID: ${this._accountId}
 ERROR: ${e.message}`
@@ -187,7 +187,17 @@ ERROR: ${e.message}`
           await this.disconnect();
           await sleep(2000);
           await this.connect();
+        } else if (e.message === 'TIMEOUT_ERROR') {
+          if (request.className !== 'account.UpdateStatus') {
+            this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
+ID: ${this._accountId}
+REQUEST: ${request.className}`);
+          }
+          await this._sender.reconnect();
         } else if (e instanceof errors.TimedOutError) {
+          this._onError(`💀 TIMED_OUT_ERROR 💀
+ID: ${this._accountId}
+REQUEST: ${request.className}`);
         } else {
           state.finished.resolve();
           throw e;
@@ -196,7 +206,9 @@ ERROR: ${e.message}`
 
       state.resetPromise();
     }
-    throw new Error(`Request was unsuccessful ${attempt} time(s)`);
+    throw new Error(
+      `Request was unsuccessful ${attempt} time(s) [${es.join(', ')}]`
+    );
   }
 
   async start() {
