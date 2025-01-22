@@ -238,7 +238,6 @@ getAccounts().then(async (accounts) => {
     const maxEndTiming = endTimings.reduce((max, current) =>
       current.value > max.value ? current : max
     );
-    console.log(midEndTimings, maxEndTiming);
 
     const connectCounts = senders.map((s) => ({
       id: s._accountId,
