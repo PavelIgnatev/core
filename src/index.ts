@@ -101,6 +101,10 @@ const main = async (ID: string) => {
       i += 1;
       accountsInWork[ID] = i;
 
+      if (i === 30) {
+        client._endTime = Number(performance.now() - startTime).toFixed(0);
+      }
+
       if (Object.values(accountsInWork).every((n) => n >= 30)) {
         break;
       }
@@ -185,9 +189,6 @@ Error: ${e.message}`
   }
 
   delete accountsInWork[ID];
-  if (client) {
-    client._endTime = Number(performance.now() - startTime).toFixed(0);
-  }
 
   console.log({
     accountId: ID,
@@ -201,7 +202,7 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.slice(0, 50).forEach((accountId: string) => {
+  accounts.forEach((accountId: string) => {
     promises.push(main(accountId));
   });
   // 447828819872-2026165-en
@@ -224,25 +225,29 @@ getAccounts().then(async (accounts) => {
       id: p._accountId,
       value: p._endTime,
     }));
-    const midInitTimings =
-      initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length;
+    const midInitTimings = Math.floor(
+      initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length
+    );
     const maxInitTiming = initTimings.reduce((max, current) =>
       current.value > max.value ? current : max
     );
 
-    const midEndTimings =
-      endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length;
+    const midEndTimings = Math.floor(
+      endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length
+    );
     const maxEndTiming = endTimings.reduce((max, current) =>
       current.value > max.value ? current : max
     );
+    console.log(midEndTimings, maxEndTiming);
 
     const connectCounts = senders.map((s) => ({
       id: s._accountId,
       value: s._connectCounts,
     }));
-    const midConnectCounts =
+    const midConnectCounts = (
       connectCounts.reduce((acc, num) => acc + num.value, 0) /
-      connectCounts.length;
+      connectCounts.length
+    ).toFixed(2);
     const maxConnectCounts = connectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
     );
@@ -251,9 +256,10 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._reconnectCounts,
     }));
-    const midReconnectCounts =
+    const midReconnectCounts = (
       reconnectCounts.reduce((acc, num) => acc + num.value, 0) /
-      reconnectCounts.length;
+      reconnectCounts.length
+    ).toFixed(2);
     const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
     );
@@ -262,9 +268,10 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._disconnectCounts,
     }));
-    const midDisconnectCounts =
+    const midDisconnectCounts = (
       disconnectCounts.reduce((acc, num) => acc + num.value, 0) /
-      disconnectCounts.length;
+      disconnectCounts.length
+    ).toFixed(2);
     const maxDisconnectCounts = disconnectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
     );
@@ -273,9 +280,10 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._connectErrorCounts,
     }));
-    const midConnectErrorCounts =
+    const midConnectErrorCounts = (
       connectErrorCounts.reduce((acc, num) => acc + num.value, 0) /
-      connectErrorCounts.length;
+      connectErrorCounts.length
+    ).toFixed(2);
     const maxConnectErrorCounts = connectErrorCounts.reduce((max, current) =>
       current.value > max.value ? current : max
     );
@@ -288,7 +296,6 @@ getAccounts().then(async (accounts) => {
       reconnectCounts,
       disconnectCounts,
       connectErrorCounts,
-      accountsInWork,
     });
 
     await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥

@@ -41,7 +41,7 @@ You help to draft an appeal to Telegram support.
     false,
     2,
     false,
-    'spam-bot-reason',
+    'SPAMBOT-REASON',
     { temperature: 1, presence_penalty: 0.8, p: 0.85 }
   );
 };
