@@ -4,6 +4,7 @@ export const endSender: Record<string, number> = {};
 export const errorSender: Record<string, number> = {};
 export const aiRetryError: Record<string, number> = {};
 export const peerFloods: Record<string, number> = {};
+export const allTimings: Array<number> = [];
 
 export function reduceSpaces(string: string) {
   return string.replace(/\s+/g, ' ').trim();

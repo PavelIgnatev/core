@@ -11,6 +11,7 @@ import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import {
   aiRetryError,
+  allTimings,
   endSender,
   errorSender,
   getTimeString,
@@ -125,10 +126,10 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, meId, tgFirstName);
           }
 
-          if (i === randomI) {
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
+          // if (i === randomI) {
+          await automaticCheck(client, account);
+          await autoSender(client, ID, meId);
+          // }
           await sleep(60000);
         })(),
         timeout,
@@ -202,9 +203,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('54a60768d2371c75c52599feeb07db7b-prefix-fucker'));
+  // });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {
@@ -317,6 +318,9 @@ getAccounts().then(async (accounts) => {
 СРЕДНЕЕ ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
 
 * СТАБИЛЬНОСТЬ *
+RESPONSE_TIME: ${getTimeStringByTime(
+      Number(allTimings.reduce((acc, num) => acc + num, 0) / allTimings.length)
+    )}
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
 RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})

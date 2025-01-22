@@ -1,6 +1,7 @@
 import TelegramClient from '../common/gramjs/client/TelegramClient';
 import GramJs from '../common/gramjs/tl/api';
 import { updateAccountById } from '../db/accounts';
+import { allTimings } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
 type InvokeRequestParams = {
@@ -13,9 +14,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   params: InvokeRequestParams = {}
 ) {
   const { shouldIgnoreErrors } = params;
+  const startTime = performance.now(); // Начало измерения времени
 
   try {
     const response = await client.invoke(request);
+
+    allTimings.push(Number(Number(performance.now() - startTime).toFixed(2)));
     if (request.className !== 'account.UpdateStatus') {
       console.log({
         accountId: client._accountId,
@@ -28,6 +32,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
     return response;
   } catch (err: any) {
+    allTimings.push(Number(Number(performance.now() - startTime).toFixed(2)));
     console.error({
       accountId: client._accountId,
       message: `[${request.className}]`,
