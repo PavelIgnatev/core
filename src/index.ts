@@ -318,6 +318,7 @@ getAccounts().then(async (accounts) => {
 СРЕДНЕЕ ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
 
 * СТАБИЛЬНОСТЬ *
+REQUEST_COUNT: ${allTimings.length}
 RESPONSE_TIME: ${getTimeStringByTime(
       Number(allTimings.reduce((acc, num) => acc + num, 0) / allTimings.length)
     )}
