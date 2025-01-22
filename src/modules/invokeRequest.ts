@@ -14,7 +14,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   params: InvokeRequestParams = {}
 ) {
   const { shouldIgnoreErrors } = params;
-  const startTime = performance.now(); // Начало измерения времени
+  const startTime = performance.now(); 
 
   try {
     const response = await client.invoke(request);
