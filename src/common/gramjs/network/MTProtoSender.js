@@ -275,6 +275,8 @@ class MTProtoSender {
         connection.toString()
       ),
     });
+
+    await Helpers.sleep(1000);
   }
 
   async _disconnect(connection) {

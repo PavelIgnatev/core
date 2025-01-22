@@ -340,7 +340,7 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
       Object.keys(aiReqest).length > 0
         ? `\n\n* ИИ *
 ${Object.keys(aiReqest)
-  .map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r]} errors`)
+  .map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r] || 0} errors`)
   .join('\n')}`
         : ''
     }
