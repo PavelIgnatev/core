@@ -320,9 +320,13 @@ getAccounts().then(async (accounts) => {
 
 * СТАБИЛЬНОСТЬ *
 REQUEST_COUNT: ${allTimings.length}
-RESPONSE_TIME: ${getTimeStringByTime(
-      Number(allTimings.reduce((acc, num) => acc + num, 0) / allTimings.length)
-    )}
+RESPONSE_TIME: ${Number(
+      (
+        allTimings.reduce((acc, num) => acc + num, 0) /
+        allTimings.length /
+        1000
+      ).toFixed(2)
+    )}ms
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
 RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
