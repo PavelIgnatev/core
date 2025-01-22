@@ -202,9 +202,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('447828819872-2026165-en'));
+  // });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {
@@ -219,11 +219,11 @@ getAccounts().then(async (accounts) => {
     const senders = ps.map((p) => p._sender);
     const initTimings = ps.map((p) => ({
       id: p._accountId,
-      value: p._initTime,
+      value: Number(p._initTime),
     }));
     const endTimings = ps.map((p) => ({
       id: p._accountId,
-      value: p._endTime,
+      value: Number(p._endTime),
     }));
     const midInitTimings = Math.floor(
       initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length
@@ -243,9 +243,12 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._connectCounts,
     }));
+    const totalConnectCounts = connectCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
     const midConnectCounts = (
-      connectCounts.reduce((acc, num) => acc + num.value, 0) /
-      connectCounts.length
+      totalConnectCounts / connectCounts.length
     ).toFixed(2);
     const maxConnectCounts = connectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
@@ -255,9 +258,12 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._reconnectCounts,
     }));
+    const totalReconnectCounts = reconnectCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
     const midReconnectCounts = (
-      reconnectCounts.reduce((acc, num) => acc + num.value, 0) /
-      reconnectCounts.length
+      totalReconnectCounts / reconnectCounts.length
     ).toFixed(2);
     const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
@@ -267,9 +273,12 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._disconnectCounts,
     }));
+    const totalDisconnectCounts = disconnectCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
     const midDisconnectCounts = (
-      disconnectCounts.reduce((acc, num) => acc + num.value, 0) /
-      disconnectCounts.length
+      totalDisconnectCounts / disconnectCounts.length
     ).toFixed(2);
     const maxDisconnectCounts = disconnectCounts.reduce((max, current) =>
       current.value > max.value ? current : max
@@ -279,9 +288,12 @@ getAccounts().then(async (accounts) => {
       id: s._accountId,
       value: s._connectErrorCounts,
     }));
+    const totalConnectErrorCounts = connectErrorCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
     const midConnectErrorCounts = (
-      connectErrorCounts.reduce((acc, num) => acc + num.value, 0) /
-      connectErrorCounts.length
+      totalConnectErrorCounts / connectErrorCounts.length
     ).toFixed(2);
     const maxConnectErrorCounts = connectErrorCounts.reduce((max, current) =>
       current.value > max.value ? current : max
@@ -301,14 +313,14 @@ getAccounts().then(async (accounts) => {
 
 * АККАУНТЫ * 
 В РАБОТЕ: ${promises.length} ${promises.length !== promises.filter(Boolean).length ? `(${promises.filter(Boolean).length})` : ''}
-ВРЕМЯ ЗАПУСКА: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
-ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
+СРЕДНЕЕ ВРЕМЯ ЗАПУСКА: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
+СРЕДНЕЕ ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
 
 * СТАБИЛЬНОСТЬ *
-CONNECT: ${midConnectCounts} (max: ${maxConnectCounts.value})
-RECONNECT: ${midReconnectCounts} (max: ${maxReconnectCounts.value})
-DISCONNECT: ${midDisconnectCounts} (max: ${maxDisconnectCounts.value})
-NETWORK_ERRORS: ${midConnectErrorCounts} (max: ${maxConnectErrorCounts.value})
+CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
+RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
+DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
+NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})
 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(startSender).length}

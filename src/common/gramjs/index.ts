@@ -41,9 +41,9 @@ async function init(
   await client.start();
   client._initTime = Number(performance.now() - startTime).toFixed(0);
 
-  console.log({
+  console.warn({
     accountId: account.accountId,
-    message: `CLIENT INIT (${client._initTime}ms)`,
+    message: `CLIENT STARTED (${client._initTime}ms)`,
   });
 
   client.addEventHandler(

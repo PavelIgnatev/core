@@ -27,7 +27,7 @@ class TelegramClient {
     this._connection = ConnectionTCPObfuscated;
     this._onError = onError;
     this._initTime = 0;
-    this._endTime = 0
+    this._endTime = 0;
 
     this._initWith = (x) => {
       const userAgent = new UserAgent();
@@ -135,11 +135,6 @@ ID: ${this._accountId}`);
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
-          this._onError(
-            `💀 SERVER_ERROR 💀
-ACCOUNT ID: ${this._accountId}
-ERROR: ${e.message}`
-          );
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
@@ -176,11 +171,6 @@ ERROR: ${e.message}`
 
           throw new Error(`PHONE_MIGRATED_TO: ${e.newDc}`);
         } else if (e instanceof errors.MsgWaitError) {
-          this._onError(
-            `💀 MSG_WAIT_ERROR 💀
-ACCOUNT ID: ${this._accountId}
-ERROR: ${e.message}`
-          );
           await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {

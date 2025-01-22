@@ -65,6 +65,14 @@ export const handleUpdate = async (
       if (dialog && !dialog.reason && !dialog.automaticReason) {
         onNewMessage();
       }
+
+      if (String(userId) === '777000') {
+        console.warn({
+          accountId,
+          message: 'TELEGRAM_SERVICE_NOTIFICATION',
+          payload: JSON.parse(JSON.stringify(update)),
+        });
+      }
     }
   } else if (
     update instanceof GramJs.UpdateReadHistoryOutbox ||

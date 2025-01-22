@@ -1,6 +1,7 @@
-import { invokeRequest } from '../../modules/invokeRequest';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import GramJs from '../../common/gramjs/tl/api';
+import { sleep } from '../../helpers/helpers';
+import { invokeRequest } from '../../modules/invokeRequest';
 
 export async function clearAuthorizations(client: TelegramClient) {
   const invokedAuthorizations = await invokeRequest(
@@ -9,10 +10,11 @@ export async function clearAuthorizations(client: TelegramClient) {
   );
   const authorizations = invokedAuthorizations?.authorizations || [];
 
+  await sleep(100);
   console.warn({
     accountId: client._accountId,
     message: '[AUTHORIZATION_SESSIONS]',
-    payload: { authorizations },
+    payload: authorizations,
   });
 
   for (const authorization of authorizations) {
