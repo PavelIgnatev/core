@@ -62,9 +62,7 @@ const main = async (ID: string) => {
     client = await initClient(
       account,
       (update) => handleUpdate(ID, update, () => (isAutoResponse = true)),
-      (error) => {
-        sendToMainBot(error);
-      }
+      (error) => sendToMainBot(error)
     );
 
     if (!client) {
@@ -199,7 +197,7 @@ Error: ${e.message}`
   return client;
 };
 
-getAccounts().then(async (accounts) => {
+getAccounts().slice(0, 100).then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
@@ -293,7 +291,6 @@ getAccounts().then(async (accounts) => {
       accountsInWork,
     });
 
-    // await new Promise((res) => setTimeout(res, 50000));
     await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
 
 * АККАУНТЫ * 
