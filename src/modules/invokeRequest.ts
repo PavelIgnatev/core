@@ -14,12 +14,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
   params: InvokeRequestParams = {}
 ) {
   const { shouldIgnoreErrors } = params;
-  const startTime = performance.now(); 
+  const startTime = performance.now();
 
   try {
     const response = await client.invoke(request);
 
-    allTimings.push(Number(Number(performance.now() - startTime).toFixed(2)));
+    allTimings.push(Number((performance.now() - startTime).toFixed(0)));
     if (request.className !== 'account.UpdateStatus') {
       console.log({
         accountId: client._accountId,
@@ -32,7 +32,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
 
     return response;
   } catch (err: any) {
-    allTimings.push(Number(Number(performance.now() - startTime).toFixed(2)));
+    allTimings.push(Number((performance.now() - startTime).toFixed(0)));
     console.error({
       accountId: client._accountId,
       message: `[${request.className}]`,
