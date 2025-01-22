@@ -10,6 +10,7 @@ import { initClient } from './common/gramjs';
 import TelegramClient from './common/gramjs/client/TelegramClient';
 import { getAccountById, getAccounts, updateAccountById } from './db/accounts';
 import {
+  aiReqest,
   aiRetryError,
   allTimings,
   endSender,
@@ -332,10 +333,10 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
 ПОДТВЕРЖДЕНО: ${Object.keys(endSender).length}
 ОШИБОК: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length})` : ''}
 БЛОКИРОВКА ПОИСКА ПО НОМЕРУ: ${Object.keys(phoneSearchError).length}${
-      Object.keys(aiRetryError).length > 0
+      Object.keys(aiReqest).length > 0
         ? `\n\n* ИИ *
-${Object.keys(aiRetryError)
-  .map((r) => `${r}: ${aiRetryError[r]}`)
+${Object.keys(aiReqest)
+  .map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r]} errors`)
   .join('\n')}`
         : ''
     }

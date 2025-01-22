@@ -1,7 +1,7 @@
 import axios from 'axios';
 import emojiRegex from 'emoji-regex';
 
-import { aiRetryError, sleep } from './helpers';
+import { aiReqest, aiRetryError, sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
 
 function trimmer(str: string) {
@@ -252,6 +252,7 @@ export async function makeRequestGpt(
 ) {
   const generations = [];
   const errors: string[] = [];
+  aiReqest[groupId] = (aiReqest[groupId] || 0) + 1;
 
   console.log({
     accountId,

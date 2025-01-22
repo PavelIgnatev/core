@@ -1,4 +1,3 @@
-import TelegramClient from '../common/gramjs/client/TelegramClient';
 import { makeRequestGpt } from './makeRequestGpt';
 
 const randomElement = (arr: string[]) =>
