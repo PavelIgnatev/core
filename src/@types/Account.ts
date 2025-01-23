@@ -40,5 +40,8 @@ export interface Account {
   banned?: boolean;
   setuped?: boolean;
 
+  twoFa?: boolean;
+  unknownTwoFa?: boolean;
+
   remainingTime?: string;
 }

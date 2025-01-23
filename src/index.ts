@@ -24,6 +24,7 @@ import {
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
+import { setup2FA } from './methods/account/setup2FA';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { getMe } from './methods/users/getMe';
@@ -91,6 +92,7 @@ const main = async (ID: string) => {
 
     await updateStatus(client, false);
     await clearAuthorizations(client);
+    await setup2FA(client,account);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
 
@@ -204,9 +206,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+  promises.push(main('1716295652-support-new-100'));
+  // });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {
