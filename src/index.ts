@@ -92,7 +92,7 @@ const main = async (ID: string) => {
 
     await updateStatus(client, false);
     await clearAuthorizations(client);
-    await setup2FA(client,account);
+    await setup2FA(client, account);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
 
