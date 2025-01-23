@@ -2,7 +2,8 @@
   "scripts": {
     "prettier:fix": "prettier --write .",
     "eslint:fix": "eslint . --ext .ts --fix",
-    "fix": "npm run prettier:fix && npm run eslint:fix"
+    "fix": "npm run prettier:fix && npm run eslint:fix",
+    "watch": "concurrently \"npx esbuild src/sender/index.ts --bundle --platform=node --target=node14 --outfile=sender.js --format=cjs --watch\" \"npx esbuild src/support/index.ts --bundle --platform=node --target=node14 --outfile=support.js --format=cjs --watch\""
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",
@@ -32,6 +33,7 @@
     "@types/node": "^20.12.7",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "concurrently": "^9.1.2",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

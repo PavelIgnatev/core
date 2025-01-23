@@ -27,5 +27,5 @@ yarn-error.log*
 
 .eslintrc.js
 .prettierrc
-src/common/images
+src/[sender]/images
 out.js
