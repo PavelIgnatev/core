@@ -1,7 +1,7 @@
 import { Account } from '../../@types/Account';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import { generateRandomBytes } from '../../common/gramjs/Helpers';
-import { computeCheck, computeDigest } from '../../common/gramjs/Password';
+import { computeDigest } from '../../common/gramjs/Password';
 import GramJs from '../../common/gramjs/tl/api';
 import { updateAccountById } from '../../db/accounts';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
@@ -12,28 +12,7 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
     const { twoFa, unknownTwoFa } = account;
     if (twoFa) {
-      const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
-      if (!pwd) {
-        throw new Error('PWD_EMPTY');
-      }
-
-      const passwordCorected = await invokeRequest(
-        client,
-        new GramJs.auth.CheckPassword({
-          password: await computeCheck(pwd, twoFaPassword),
-        }),
-        { shouldIgnoreErrors: true }
-      );
-
-      if (passwordCorected) {
-        console.warn({
-          accountId: client._accountId,
-          message: `[PASSWORD_2FA_CORRECT]`,
-        });
-        return;
-      }
-
-      throw new Error('PASSWORD_2FA_INCORRECT');
+      return;
     }
 
     const resetPassword = await invokeRequest(
@@ -66,7 +45,7 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
 
       try {
         const newPasswordHash = await computeDigest(pwd.newAlgo, twoFaPassword);
-        await invokeRequest(
+        const passwordSettings = await invokeRequest(
           client,
           new GramJs.account.UpdatePasswordSettings({
             password: new GramJs.InputCheckPasswordEmpty(),
@@ -80,6 +59,13 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
           })
         );
 
+        if (!passwordSettings) {
+          await sendToMainBot(
+            `💀 ERROR_SETTING_UP_2FA 💀
+ID: ${client._accountId}
+ERROR: PASSWORD_SETTINGS_EMPTY`
+          );
+        }
         await updateAccountById(client._accountId, {
           unknownTwoFa: false,
           twoFa: true,
