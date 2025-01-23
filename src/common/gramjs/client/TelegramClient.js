@@ -114,7 +114,8 @@ ID: ${this._accountId}`);
     const maxTimeout =
       request.className === 'account.UpdateStatus'
         ? 10000
-        : request.className === 'auth.CheckPassword'
+        : request.className === 'auth.CheckPassword' ||
+            request.className === 'account.GetPassword'
           ? 90000
           : 30000;
     const state = new RequestState(request);
