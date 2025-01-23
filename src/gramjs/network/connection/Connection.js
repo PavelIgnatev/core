@@ -37,8 +37,6 @@ class Connection {
   }
 
   async disconnectCallback() {
-    this._onError(`💀 DISCONNECT_CALLBACK 💀
-ID: ${this._accountId}`);
     await this.disconnect(true);
   }
 
@@ -85,6 +83,8 @@ ID: ${this._accountId}`);
         return result;
       }
     }
+    this._onError(`💀 NOT_CONNECTED 💀
+ID: ${this._accountId}`);
     throw new Error('Not connected');
   }
 
@@ -117,6 +117,7 @@ Error: ${e.message}`);
         this._onError(`💀 RECV_LOOP_ERROR 💀
 ID: ${this._accountId}
 Error: ${e.message}`);
+        this.disconnect();
         return;
       }
       await this._recvArray.push(data);
