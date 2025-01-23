@@ -60,12 +60,9 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
         );
 
         if (!passwordSettings) {
-          await sendToMainBot(
-            `💀 ERROR_SETTING_UP_2FA 💀
-ID: ${client._accountId}
-ERROR: PASSWORD_SETTINGS_EMPTY`
-          );
+          throw new Error('PASSWORD_SETTINGS_EMPTY');
         }
+
         await updateAccountById(client._accountId, {
           unknownTwoFa: false,
           twoFa: true,
