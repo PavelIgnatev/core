@@ -19,8 +19,6 @@ export interface Account {
   messageCount?: number;
   aiContactCount?: number;
 
-  fucker?: boolean;
-
   stopSender?: boolean;
 
   spamBlockDate?: Date | 'INFINITY';

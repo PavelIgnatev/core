@@ -63,13 +63,9 @@ export const accountSetup = async (
   setuped: boolean,
   firstName?: string
 ) => {
-  const { accountId, fucker } = account;
+  const { accountId } = account;
 
   if (setuped) {
-    if (fucker) {
-      return 'FUCKER';
-    }
-
     return firstName!;
   }
 
@@ -203,14 +199,6 @@ ID: ${accountId}`);
       rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
-
-  if (fucker) {
-    await updateAccountById(accountId, {
-      setuped: true,
-      banned: false,
-    });
-    return 'FUCKER';
-  }
 
   const photos = await invokeRequest(
     client,

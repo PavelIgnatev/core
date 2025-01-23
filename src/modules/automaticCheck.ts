@@ -28,7 +28,7 @@ export const automaticCheck = async (
   client: TelegramClient,
   account: Account
 ) => {
-  const { accountId, fucker } = account;
+  const { accountId } = account;
   try {
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
@@ -110,9 +110,7 @@ export const automaticCheck = async (
           await blockContact(client, peer);
         } else if (!dialogsIds.includes(String(user.id))) {
           await deleteHistory(client, peer, true);
-          if (!fucker) {
-            await blockContact(client, peer);
-          }
+          await blockContact(client, peer);
         }
       }
     }

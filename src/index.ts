@@ -125,7 +125,7 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          if (isAutoResponse && !account.fucker) {
+          if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, meId, tgFirstName);
           }
@@ -160,9 +160,7 @@ const main = async (ID: string) => {
       await sendToMainBot(`💀 AUTH_KEY_DUPLICATED 💀
 ID: ${ID}`);
 
-      if (!account?.fucker) {
-        await exec('pm2 kill');
-      }
+      await exec('pm2 kill');
     } else if (
       [
         'USER_DEACTIVATED_BAN',
