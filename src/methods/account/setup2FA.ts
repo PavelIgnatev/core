@@ -5,6 +5,7 @@ import { computeDigest } from '../../common/gramjs/Password';
 import GramJs from '../../common/gramjs/tl/api';
 import { updateAccountById } from '../../db/accounts';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
+import { invokeRequest } from '../../modules/invokeRequest';
 
 export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
@@ -13,7 +14,8 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       return;
     }
 
-    const resetPassword = await client.invoke(
+    const resetPassword = await invokeRequest(
+      client,
       new GramJs.account.ResetPassword()
     );
 
@@ -28,7 +30,10 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
     }
   } catch (e: any) {
     if (e.message === 'PASSWORD_EMPTY') {
-      const pwd = await client.invoke(new GramJs.account.GetPassword());
+      const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
+      if (!pwd) {
+        throw new Error('PWD_EMPTY');
+      }
 
       if (!(pwd.newAlgo instanceof GramJs.PasswordKdfAlgoUnknown)) {
         pwd.newAlgo.salt1 = Buffer.concat([
@@ -38,7 +43,8 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       }
 
       try {
-        await client.invoke(
+        await invokeRequest(
+          client,
           new GramJs.account.UpdatePasswordSettings({
             password: new GramJs.InputCheckPasswordEmpty(),
             newSettings: new GramJs.account.PasswordInputSettings({
@@ -62,6 +68,12 @@ ID: ${client._accountId}
 ERROR: ${e.message}`
         );
       }
+    } else {
+      await sendToMainBot(
+        `💀 ERROR_SETTING_UP_2FA_PASSWORD 💀
+ID: ${client._accountId}
+ERROR: ${e.message}`
+      );
     }
   }
 };
