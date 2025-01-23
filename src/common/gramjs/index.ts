@@ -43,7 +43,10 @@ async function init(
 
   console.warn({
     accountId: account.accountId,
-    message: `CLIENT STARTED (${client._initTime}ms)`,
+    message: `[CLIENT_STARTED]`,
+    payload: {
+      initTime : `${client._initTime}ms`,
+    },
   });
 
   client.addEventHandler(

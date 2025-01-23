@@ -1,17 +1,39 @@
 import { Account } from '../../@types/Account';
 import TelegramClient from '../../common/gramjs/client/TelegramClient';
 import { generateRandomBytes } from '../../common/gramjs/Helpers';
-import { computeDigest } from '../../common/gramjs/Password';
+import { computeCheck, computeDigest } from '../../common/gramjs/Password';
 import GramJs from '../../common/gramjs/tl/api';
 import { updateAccountById } from '../../db/accounts';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { invokeRequest } from '../../modules/invokeRequest';
 
+const twoFaPassword = '2fapassword';
 export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
     const { twoFa, unknownTwoFa } = account;
     if (twoFa) {
-      return;
+      const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
+      if (!pwd) {
+        throw new Error('PWD_EMPTY');
+      }
+
+      const passwordCorected = await invokeRequest(
+        client,
+        new GramJs.auth.CheckPassword({
+          password: await computeCheck(pwd, twoFaPassword),
+        }),
+        { shouldIgnoreErrors: true }
+      );
+
+      if (passwordCorected) {
+        console.warn({
+          accountId: client._accountId,
+          message: `[PASSWORD_2FA_CORRECT]`,
+        });
+        return;
+      }
+
+      throw new Error('PASSWORD_2FA_INCORRECT');
     }
 
     const resetPassword = await invokeRequest(
@@ -49,7 +71,7 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
             password: new GramJs.InputCheckPasswordEmpty(),
             newSettings: new GramJs.account.PasswordInputSettings({
               newAlgo: pwd.newAlgo,
-              newPasswordHash: await computeDigest(pwd.newAlgo, '2fapassword'),
+              newPasswordHash: await computeDigest(pwd.newAlgo, twoFaPassword),
               hint: '',
               email: undefined,
               newSecureSettings: undefined,

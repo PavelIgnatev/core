@@ -276,7 +276,7 @@ class MTProtoSender {
       ),
     });
 
-    await Helpers.sleep(1000);
+    await Helpers.sleep(100);
   }
 
   async _disconnect(connection) {
@@ -295,6 +295,7 @@ class MTProtoSender {
     });
     this._user_connected = false;
     await connection.disconnect();
+    await Helpers.sleep(100);
   }
 
   async _sendLoop() {

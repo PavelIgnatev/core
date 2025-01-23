@@ -21,6 +21,7 @@ import {
   phoneSearchError,
   sleep,
   startSender,
+  withoutRecipientError,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
@@ -49,7 +50,7 @@ const main = async (ID: string) => {
     const randomI = Math.floor(Math.random() * 30);
     const accountByID = await getAccountById(ID);
 
-    console.log({
+    console.warn({
       accountId: ID,
       message: `💥 LOG IN ${ID} 💥`,
       paylod: { count: randomI },
@@ -129,10 +130,10 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, meId, tgFirstName);
           }
 
-          if (i === randomI) {
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
+          // if (i === randomI) {
+          await automaticCheck(client, account);
+          await autoSender(client, ID, meId);
+          // }
           await sleep(60000);
         })(),
         timeout,
@@ -194,7 +195,7 @@ Error: ${e.message}`
 
   delete accountsInWork[ID];
 
-  console.log({
+  console.warn({
     accountId: ID,
     message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
   });
@@ -337,7 +338,7 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(startSender).length}
 ПОДТВЕРЖДЕНО: ${Object.keys(endSender).length}
-ОШИБОК: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length})` : ''}
+ОШИБОК: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(withoutRecipientError).length})` : ''}
 БЛОКИРОВКА ПОИСКА ПО НОМЕРУ: ${Object.keys(phoneSearchError).length}${
       Object.keys(aiReqest).length > 0
         ? `\n\n* ИИ *

@@ -12,6 +12,7 @@ import {
   phoneSearchError,
   sleep,
   startSender,
+  withoutRecipientError,
 } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveContact } from '../methods/contacts/resolveContact';
@@ -56,6 +57,8 @@ export const autoSender = async (
     while (true) {
       const recipient = await getRecipient(accountId);
       if (!recipient) {
+        errorSender[accountId] = 1;
+        withoutRecipientError[accountId] = 1;
         return;
       }
 
