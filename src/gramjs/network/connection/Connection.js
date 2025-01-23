@@ -83,8 +83,6 @@ class Connection {
         return result;
       }
     }
-    this._onError(`💀 NOT_CONNECTED 💀
-ID: ${this._accountId}`);
     throw new Error('Not connected');
   }
 
@@ -114,9 +112,6 @@ Error: ${e.message}`);
           throw new Error('no data received');
         }
       } catch (e) {
-        this._onError(`💀 RECV_LOOP_ERROR 💀
-ID: ${this._accountId}
-Error: ${e.message}`);
         this.disconnect();
         return;
       }
