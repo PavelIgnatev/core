@@ -65,13 +65,14 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       }
 
       try {
+        const newPasswordHash = await computeDigest(pwd.newAlgo, twoFaPassword);
         await invokeRequest(
           client,
           new GramJs.account.UpdatePasswordSettings({
             password: new GramJs.InputCheckPasswordEmpty(),
             newSettings: new GramJs.account.PasswordInputSettings({
               newAlgo: pwd.newAlgo,
-              newPasswordHash: await computeDigest(pwd.newAlgo, twoFaPassword),
+              newPasswordHash,
               hint: '',
               email: undefined,
               newSecureSettings: undefined,
