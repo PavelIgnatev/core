@@ -51,8 +51,8 @@ const reChecker = async () => {
 };
 
 const main = async () => {
-  await reLoginner();
-  // await reChecker();
+  // await reLoginner();
+  await reChecker();
 
   await sleep(10000);
   process.exit(1);
