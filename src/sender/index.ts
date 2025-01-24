@@ -205,7 +205,7 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
+  accounts.slice(0, 50).forEach((accountId: string) => {
     promises.push(main(accountId));
   });
   // 447828819872-2026165-en
