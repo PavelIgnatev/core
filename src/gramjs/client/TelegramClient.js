@@ -19,6 +19,7 @@ class TelegramClient {
     langPack,
     systemLangCode,
     acountId,
+    specialdcId,
     onError
   ) {
     if (typeof acountId !== 'string' || typeof onError !== 'function') {
@@ -27,6 +28,7 @@ class TelegramClient {
 
     this.apiId = apiId;
     this.defaultDcId = 2;
+    this.specialDcId = specialdcId;
     this.session = session;
     this._accountId = acountId;
     this._eventBuilders = [];
@@ -104,9 +106,9 @@ ID: ${this._accountId}`);
   async _initSession() {
     await this.session.load();
 
-    if (!this.session._working) {
-      const DC = utils.getDC(this.defaultDcId);
-      this.session.setDC(this.defaultDcId, DC.ipAddress, 443);
+    if (!this.session._working && this.specialDcId) {
+      const DC = utils.getDC(this.specialDcId);
+      this.session.setDC(this.specialDcId, DC.ipAddress, 443);
     }
   }
 

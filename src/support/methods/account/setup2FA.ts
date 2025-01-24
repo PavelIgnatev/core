@@ -22,17 +22,20 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
         twoFa: true,
       });
     }
+    return true;
   } catch (e: any) {
     if (e.message === 'PASSWORD_EMPTY') {
       await updateAccountById(client._accountId, {
         twoFa: false,
       });
+      return false;
     } else {
       await sendToMainBot(
         `💀 DELETED_2FA_ERROR 💀
 ID: ${client._accountId}
 ERROR: ${e.message}`
       );
+      return true
     }
   }
 };

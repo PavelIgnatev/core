@@ -5,12 +5,24 @@ const getAccountCollection = async () => {
   return (await DB()).collection('accounts');
 };
 
+export const getAccountsReLogin = async () => {
+  const accountCollection = await getAccountCollection();
+
+  const accounts = await accountCollection.distinct('accountId', {
+    banned: { $ne: true },
+    parentAccountId: null,
+    workedOut: { $ne: true },
+  });
+
+  return accounts;
+};
+
 export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
-    stopped: { $ne: true },
+    parentAccountId: { $ne: null },
   });
 
   return accounts;
@@ -36,6 +48,7 @@ export const updateAccountById = async (
 
   await accountCollection.findOneAndUpdate(
     { accountId },
-    { $set: { ...accountData, dateUpdated: new Date() } }
+    { $set: { ...accountData, dateUpdated: new Date() } },
+    { upsert: true }
   );
 };

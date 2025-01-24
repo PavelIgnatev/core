@@ -14,6 +14,8 @@ export interface Account {
   banned?: boolean;
   setuped?: boolean;
 
+  prefix?: string;
+
   twoFa?: boolean;
   unknownTwoFa?: boolean;
 
