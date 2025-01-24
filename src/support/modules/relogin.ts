@@ -64,7 +64,6 @@ export const relogin = async (ID: string) => {
       },
       (error) => sendToMainBot(error)
     );
-    clients.push(client);
 
     const interval = setInterval(async () => {
       try {
@@ -93,7 +92,6 @@ export const relogin = async (ID: string) => {
     }
 
     const [id, phoneNumber] = await getMe(client, ID);
-    console.log(id, phoneNumber);
 
     const clientReLogin = await initClient(
       {
@@ -108,6 +106,8 @@ export const relogin = async (ID: string) => {
 
     await clientReLogin.start();
 
+    //2496
+    //8da85b0d5bfe62527e5b244c209159c3
     const sendCode = await invokeRequest(
       clientReLogin,
       new GramJs.auth.SendCode({

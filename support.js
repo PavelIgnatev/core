@@ -78535,11 +78535,13 @@ var DB = async () => {
 var getAccountCollection = async () => {
   return (await DB()).collection("accounts");
 };
-var getAccounts = async () => {
+var getAccountsReLogin = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.distinct("accountId", {
     banned: { $ne: true },
-    parentAccountId: { $ne: null }
+    parentAccountId: null,
+    workedOut: { $ne: true },
+    prefix: { $ne: "test" }
   });
   return accounts;
 };
@@ -78876,479 +78878,48 @@ var handleUpdate = async (accountId, update) => {
 
 // src/support/modules/accountSetup.ts
 var import_api4 = __toESM(require_api());
-var settings = {
-  muteUntil: 2147483647,
-  showPreviews: false,
-  silent: true
-};
-var accountSetup = async (client, account, setuped) => {
-  const { accountId } = account;
-  if (setuped) {
-    return;
-  }
-  const dialogFilters = await invokeRequest(
-    client,
-    new import_api4.default.messages.GetDialogFilters()
-  );
-  for (const filter2 of (dialogFilters == null ? void 0 : dialogFilters.filters) || []) {
-    if (filter2 instanceof import_api4.default.DialogFilterDefault) {
-      continue;
-    }
-    const isDeleted = await invokeRequest(
-      client,
-      new import_api4.default.messages.UpdateDialogFilter({
-        id: filter2.id,
-        filter: void 0
-      })
-    );
-    if (!isDeleted) {
-      await sendToMainBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
-ID: ${accountId}
-FID: ${filter2.id}`);
-      throw new Error("GLOBAL_ERROR");
-    }
-  }
-  const isNC = await invokeRequest(
-    client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyChats(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
-    })
-  );
-  const isNB = await invokeRequest(
-    client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyBroadcasts(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
-    })
-  );
-  const isNU = await invokeRequest(
-    client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyUsers(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
-    })
-  );
-  if (!isNC || !isNB || !isNU) {
-    await sendToMainBot(`** ACCOUNT SETUP: UPDATE NOTIFY SETTINGS ERROR **
-ID: ${accountId}
-CHATS: ${isNC}
-BROADCASTS: ${isNB}
-USERS: ${isNU}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  const isSN = await invokeRequest(
-    client,
-    new import_api4.default.account.SetContactSignUpNotification({ silent: true })
-  );
-  if (!isSN) {
-    await sendToMainBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
-ID: ${accountId}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyAbout(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyForwards(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await updateAccountById(accountId, {
-    setuped: true,
-    banned: false
-  });
-};
 
 // src/support/modules/automaticCheck.ts
 var import_api17 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
 var import_api5 = __toESM(require_api());
-var leaveChannel = async (client, channel) => {
-  await invokeRequest(client, new import_api5.default.channels.LeaveChannel({ channel }));
-};
 
 // src/support/methods/contacts/blockContact.ts
 var import_api6 = __toESM(require_api());
-var blockContact = async (client, peer) => {
-  await invokeRequest(client, new import_api6.default.contacts.Block({ id: peer }), {
-    shouldIgnoreErrors: true
-  });
-};
 
 // src/support/methods/contacts/deleteContacts.ts
 var import_api7 = __toESM(require_api());
-var deleteContacts = async (client, users) => {
-  await invokeRequest(
-    client,
-    new import_api7.default.contacts.DeleteContacts({ id: users })
-  );
-};
 
 // src/support/methods/contacts/getContacts.ts
 var import_big_integer = __toESM(require_BigInteger());
 var import_api8 = __toESM(require_api());
-var getContacts = async (client) => {
-  const contacts = await invokeRequest(
-    client,
-    new import_api8.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
-  );
-  if (!contacts || contacts instanceof import_api8.default.contacts.ContactsNotModified) {
-    return null;
-  }
-  return contacts;
-};
 
 // src/support/methods/folders/editFolders.ts
 var import_api9 = __toESM(require_api());
-var editFolders = async (client, folderPeers) => {
-  await invokeRequest(
-    client,
-    new import_api9.default.folders.EditPeerFolders({ folderPeers })
-  );
-};
 
 // src/support/methods/messages/clearAllDrafts.ts
 var import_api10 = __toESM(require_api());
-var clearAllDrafts = async (client) => {
-  await invokeRequest(client, new import_api10.default.messages.ClearAllDrafts());
-};
 
 // src/support/methods/messages/deleteChatUser.ts
 var import_big_integer2 = __toESM(require_BigInteger());
 var import_api11 = __toESM(require_api());
-var deleteChatUser = async (client, chatId, userId) => {
-  await invokeRequest(
-    client,
-    new import_api11.default.messages.DeleteChatUser({
-      chatId: (0, import_big_integer2.default)(chatId),
-      userId
-    })
-  );
-};
 
 // src/support/methods/messages/deleteHistory.ts
 var import_api12 = __toESM(require_api());
-async function deleteHistory(client, peer, shouldDeleteForAll) {
-  const result = await invokeRequest(
-    client,
-    new import_api12.default.messages.DeleteHistory({
-      peer,
-      ...shouldDeleteForAll && { revoke: true },
-      ...!shouldDeleteForAll && { just_clear: true }
-    })
-  );
-  if (!result) {
-    return;
-  }
-  if (result.offset) {
-    await deleteHistory(client, peer, shouldDeleteForAll);
-    return;
-  }
-}
 
 // src/support/methods/messages/togglePin.ts
 var import_api13 = __toESM(require_api());
-var togglePin = async (client, peer, pinned) => {
-  await invokeRequest(
-    client,
-    new import_api13.default.messages.ToggleDialogPin({ peer, pinned })
-  );
-};
 
 // src/support/methods/peer/buildInputPeer.ts
 var import_big_integer3 = __toESM(require_BigInteger());
 var import_api14 = __toESM(require_api());
-function buildInputPeer(dialog) {
-  const { type } = dialog;
-  if (type === "user") {
-    const { user } = dialog;
-    return new import_api14.default.InputPeerUser({
-      userId: user.id,
-      accessHash: (0, import_big_integer3.default)(user.accessHash)
-    });
-  } else if (type === "channel") {
-    const { chat } = dialog;
-    if (chat instanceof import_api14.default.ChatEmpty || chat instanceof import_api14.default.Chat || chat instanceof import_api14.default.ChatForbidden) {
-      return new import_api14.default.InputPeerChat({
-        chatId: chat.id
-      });
-    }
-    return new import_api14.default.InputPeerChannel({
-      channelId: chat.id,
-      accessHash: (0, import_big_integer3.default)(chat.accessHash)
-    });
-  }
-  return new import_api14.default.InputPeerChat({
-    chatId: dialog.chat.id
-  });
-}
 
 // src/support/methods/users/getDialogs.ts
 var import_api16 = __toESM(require_api());
 
 // src/support/methods/peer/getIdByPeer.ts
 var import_api15 = __toESM(require_api());
-var getIdByPeer = (peer) => {
-  if (!peer) {
-    return "-1";
-  }
-  if (peer instanceof import_api15.default.PeerUser) {
-    return String(peer.userId);
-  } else if (peer instanceof import_api15.default.PeerChannel) {
-    return String(peer.channelId);
-  }
-  return String(peer.chatId);
-};
-
-// src/support/methods/users/getDialogs.ts
-var getDialogs = async (client, accountId, folderId, notAll = false) => {
-  const dialogs = [];
-  let offsetDate = 0;
-  while (true) {
-    const d = await invokeRequest(
-      client,
-      new import_api16.default.messages.GetDialogs({
-        offsetPeer: new import_api16.default.InputPeerEmpty(),
-        folderId,
-        limit: 100,
-        offsetDate
-      })
-    );
-    if (!d || d instanceof import_api16.default.messages.DialogsNotModified) {
-      return [];
-    }
-    for (const dialog of d.dialogs) {
-      if (!(dialog instanceof import_api16.default.Dialog) || dialogs.find(
-        ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
-      )) {
-        continue;
-      }
-      const id = getIdByPeer(dialog.peer);
-      if ([
-        "178220800",
-        "1271266957",
-        "1087968824",
-        "136817688",
-        "5434988373",
-        "777000",
-        "2282583322"
-      ].includes(id)) {
-        continue;
-      }
-      const message = d.messages.find((m) => getIdByPeer(m.peerId) === id);
-      if (!message) {
-        await sendToMainBot(`** GET USERS: MESSAGE ERROR **
-ACCOUNT ID: ${accountId}
-DIALOG: ${JSON.stringify(dialog)}`);
-        return [];
-      }
-      if (dialog.peer instanceof import_api16.default.PeerUser) {
-        const user = d.users.find((m) => String(m.id) === id);
-        if (!user || user instanceof import_api16.default.UserEmpty || !user.accessHash) {
-          await sendToMainBot(`** GET USERS: USER ERROR **
-ACCOUNT_ID: ${accountId}
-DIALOG: ${JSON.stringify(dialog)}
-EMPTY_USER: ${user instanceof import_api16.default.UserEmpty} 
-USER_ACCESS_HASH: ${user instanceof import_api16.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
-          return [];
-        }
-        dialogs.push({
-          type: "user",
-          user,
-          dialog,
-          message,
-          chat: null
-        });
-      } else if (dialog.peer instanceof import_api16.default.PeerChat) {
-        const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
-          await sendToMainBot(`** GET USERS: CHAT ERROR **
-ACCOUNT ID: ${accountId}
-DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
-ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
-          return [];
-        }
-        dialogs.push({
-          type: "chat",
-          chat,
-          dialog,
-          message,
-          user: null
-        });
-      } else if (dialog.peer instanceof import_api16.default.PeerChannel) {
-        const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
-          await sendToMainBot(`** GET USERS: CHANNEL ERROR **
-ACCOUNT ID: ${accountId}
-DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
-ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
-          return [];
-        }
-        dialogs.push({
-          type: "channel",
-          chat,
-          dialog,
-          message,
-          user: null
-        });
-      }
-    }
-    if (d.dialogs.length < 100 || notAll) {
-      break;
-    } else {
-      const lastDialog = dialogs[dialogs.length - 1].dialog;
-      const lastMessage = d.messages.find(
-        (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
-      );
-      if (!lastMessage || lastMessage instanceof import_api16.default.MessageEmpty) {
-        await sendToMainBot(`** LAST MESSAGE NOT DEFINED **
-ACCOUNT ID: ${accountId}
-MESSAGE: ${JSON.stringify(lastMessage)}
-MESSAGE_EMPTY: ${lastMessage instanceof import_api16.default.MessageEmpty}
-OFFSET DATE: ${offsetDate}`);
-        return [];
-      }
-      offsetDate = lastMessage.date;
-    }
-  }
-  return dialogs;
-};
-
-// src/support/modules/automaticCheck.ts
-var automaticCheck = async (client, account) => {
-  const { accountId } = account;
-  try {
-    await clearAllDrafts(client);
-    const folderPeers = [];
-    const archiveDialogs = await getDialogs(client, accountId, 1);
-    for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
-      const peer = buildInputPeer(archiveDialog);
-      if (dialog.pinned) {
-        await togglePin(
-          client,
-          new import_api17.default.InputDialogPeer({
-            peer
-          }),
-          void 0
-        );
-      }
-      folderPeers.push(
-        new import_api17.default.InputFolderPeer({
-          peer,
-          folderId: 0
-        })
-      );
-    }
-    if (folderPeers.length) {
-      for (let i = 0; i < folderPeers.length; i += 100) {
-        const chunk = folderPeers.slice(i, i + 100);
-        await editFolders(client, chunk);
-      }
-    }
-    const dialogs = await getDialogs(client, accountId, 0);
-    for (const dialog of dialogs) {
-      const { type } = dialog;
-      const peer = buildInputPeer(dialog);
-      if (type === "channel") {
-        await leaveChannel(client, peer);
-      } else if (type === "chat") {
-        const { chat } = dialog;
-        if (chat instanceof import_api17.default.Chat || chat instanceof import_api17.default.ChatForbidden || chat instanceof import_api17.default.ChatEmpty) {
-          await deleteChatUser(
-            client,
-            String(chat.id),
-            new import_api17.default.InputUserSelf()
-          );
-          await deleteHistory(client, peer, false);
-        } else {
-          await leaveChannel(client, peer);
-        }
-      } else if (type === "user") {
-        const { user } = dialog;
-        if (user instanceof import_api17.default.User && user.bot) {
-          await deleteHistory(client, peer, false);
-          await blockContact(client, peer);
-        } else {
-          await deleteHistory(client, peer, true);
-        }
-      }
-    }
-    const contacts = await getContacts(client);
-    if (contacts && contacts.users.length > 0) {
-      const users = [];
-      for (const user of contacts.users) {
-        if (user instanceof import_api17.default.User && user.accessHash) {
-          users.push(
-            new import_api17.default.InputPeerUser({
-              userId: user.id,
-              accessHash: user.accessHash
-            })
-          );
-        }
-      }
-      if (users.length > 0) {
-        await deleteContacts(client, users);
-      }
-    }
-  } catch (e) {
-    await sendToMainBot(`** AUTOMATIC CHECK ERROR **
-ACCOUNT ID: ${accountId}
-ERROR: ${e.message}`);
-  }
-};
 
 // src/support/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
@@ -79443,147 +79014,200 @@ var initClient = async (account, onUpdate, onError) => {
   }
 };
 
-// src/support/modules/checker.ts
-var checker = async (ID, accountsInWork) => {
-  const startTime = performance.now();
-  let account = null;
-  let client = null;
-  let errored = false;
-  try {
-    const randomI = Math.floor(Math.random() * 30);
-    const accountByID = await getAccountById(ID);
-    console.warn({
-      accountId: ID,
-      message: `\u{1F4A5} LOG IN ${ID} \u{1F4A5}`,
-      paylod: { count: randomI }
-    });
-    const { dcId, setuped = false } = accountByID;
-    if (!dcId) {
-      throw new Error("NOT_ENOUGH_PARAMS");
-    }
-    account = accountByID;
-    client = await initClient(
-      { ...account, empty: false },
-      (update) => handleUpdate(ID, update),
-      (error) => sendToMainBot(error)
-    );
-    if (!client) {
-      throw new Error("CLIENT_NOT_INITED");
-    }
-    setInterval(async () => {
-      try {
-        if (!(client == null ? void 0 : client._sender) || !client._sender._user_connected || client._sender.isReconnecting || client._sender.userDisconnected || errored) {
-          return;
-        }
-        await updateStatus(client, false);
-      } catch (error) {
-        errored = error.message;
-      }
-    }, 1e4);
-    await updateStatus(client, false);
-    await clearAuthorizations(client);
-    await setup2FA(client, account);
-    await accountSetup(client, account, setuped);
-    let i = -1;
-    while (true) {
-      if (errored) {
-        throw new Error(errored);
-      }
-      i += 1;
-      accountsInWork[ID] = i;
-      if (i === 30) {
-        client._endTime = Number(performance.now() - startTime).toFixed(0);
-      }
-      if (Object.values(accountsInWork).every((n) => n >= 30)) {
-        break;
-      }
-      let timer;
-      const timeout = new Promise(
-        (_, rej) => timer = setTimeout(
-          () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-          9e5
-        )
-      );
-      await Promise.race([
-        (async () => {
-          if (i === randomI) {
-            await automaticCheck(client, account);
-          }
-          await sleep(6e4);
-        })(),
-        timeout
-      ]);
-      clearTimeout(timer);
-    }
-  } catch (e) {
-    console.error({
-      accountId: ID,
-      message: `MAIN_ERROR (${e.message})`
-    });
-    if ([
-      "USER_DEACTIVATED_BAN",
-      "AUTH_KEY_UNREGISTERED",
-      "AUTH_KEY_INVALID",
-      "USER_DEACTIVATED",
-      "SESSION_REVOKED",
-      "SESSION_EXPIRED",
-      "AUTH_KEY_PERM_EMPTY",
-      "SESSION_PASSWORD_NEEDED",
-      "AUTH_KEY_DUPLICATED"
-    ].includes(e.message)) {
-      await updateAccountById(ID, {
-        banned: true,
-        reason: e.message
-      });
-      await sendToMainBot(
-        `** BAN ACCOUNT **
-ID: ${ID};
-Error: ${e.message}`
-      );
-    } else {
-      await sendToMainBot(
-        `** UNKNOWN_ERROR **
-ID: ${ID};
-Error: ${e.message}`
-      );
-    }
-  }
-  delete accountsInWork[ID];
-  console.warn({
-    accountId: ID,
-    message: `\u{1F4A5} EXIT FROM ${ID} (${getTimeString(startTime)}) \u{1F4A5}`
-  });
-  return client;
-};
-
 // src/support/modules/relogin.ts
 var import_api22 = __toESM(require_api());
 
 // src/support/methods/users/getMe.ts
 var import_api21 = __toESM(require_api());
+var getMe = async (client, accountId) => {
+  const me = await invokeRequest(
+    client,
+    new import_api21.default.users.GetFullUser({
+      id: new import_api21.default.InputUserSelf()
+    })
+  );
+  if (!me || me.users[0] instanceof import_api21.default.UserEmpty || !me.users[0].phone) {
+    throw new Error("GET_ME_ERROR");
+  }
+  await updateAccountById(accountId, {
+    id: String(me.fullUser.id),
+    phone: me.users[0].phone
+  });
+  return [String(me.fullUser.id), me.users[0].phone];
+};
+
+// src/support/modules/relogin.ts
+var relogin = async (ID) => {
+  const createCodePromise = () => {
+    let resolveRef;
+    const promise = new Promise((resolve) => {
+      resolveRef = resolve;
+    });
+    return { promise, resolve: resolveRef };
+  };
+  const codePromise = createCodePromise();
+  const handleUpdateWithCode = (update) => {
+    var _a, _b;
+    if ((update.className === "UpdateShortMessage" || update.className === "UpdateNewMessage") && String(update.userId) === "777000" && ((_a = update.message) == null ? void 0 : _a.includes("Login code:"))) {
+      const code = (_b = update.message.match(/Login code: (\d+)/)) == null ? void 0 : _b[1];
+      if (code) {
+        codePromise.resolve(code);
+      }
+    }
+  };
+  const clients = [];
+  try {
+    const account = await getAccountById(ID);
+    const { prefix } = account;
+    if (!prefix) {
+      throw new Error("PREFIX_NOT_DEFINED");
+    }
+    console.warn({
+      accountId: ID,
+      message: `\u{1F4A5} LOG IN FOR RELOGIN ${ID} \u{1F4A5}`
+    });
+    const client = await initClient(
+      { ...account, empty: false },
+      (update) => {
+        handleUpdate(ID, update);
+        handleUpdateWithCode(update);
+      },
+      (error) => sendToMainBot(error)
+    );
+    const interval = setInterval(async () => {
+      try {
+        if (!client._sender._user_connected || client._sender.isReconnecting || client._sender.userDisconnected) {
+          return;
+        }
+        await updateStatus(client, false);
+      } catch {
+      }
+    }, 1e4);
+    await updateStatus(client, false);
+    await clearAuthorizations(client);
+    const twoFa = await setup2FA(client, account);
+    if (twoFa) {
+      console.error({
+        accountId: ID,
+        message: `[ACCOUNT_HAVE_2FA]`
+      });
+      return [client];
+    }
+    const [id, phoneNumber] = await getMe(client, ID);
+    const clientReLogin = await initClient(
+      {
+        accountId: id,
+        dcId: account.dcId,
+        empty: true
+      },
+      (update) => handleUpdate(id, update),
+      (error) => sendToMainBot(error)
+    );
+    clients.push(clientReLogin);
+    await clientReLogin.start();
+    const sendCode = await invokeRequest(
+      clientReLogin,
+      new import_api22.default.auth.SendCode({
+        phoneNumber,
+        apiId: 2040,
+        apiHash: "b18441a1ff607e10a989891a5462e627",
+        settings: new import_api22.default.CodeSettings()
+      })
+    );
+    if (!sendCode || !(sendCode instanceof import_api22.default.auth.SentCode) || !(sendCode.type instanceof import_api22.default.auth.SentCodeTypeApp) || typeof sendCode.phoneCodeHash !== "string") {
+      console.error({
+        accountId: id,
+        message: `[SENT_CODE_ERROR]`,
+        payload: sendCode
+      });
+      throw Error("SENT_CODE_ERROR");
+    }
+    const { phoneCodeHash } = sendCode;
+    let phoneCode;
+    try {
+      phoneCode = await Promise.race([
+        codePromise.promise,
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error("CODE_TIMEOUT")), 1e4);
+        })
+      ]);
+    } catch (error) {
+      console.error({
+        accountId: id,
+        message: `[CODE_TIMEOUT]`,
+        payload: error
+      });
+      throw error;
+    }
+    const signIn = await invokeRequest(
+      clientReLogin,
+      new import_api22.default.auth.SignIn({
+        phoneNumber,
+        phoneCodeHash,
+        phoneCode
+      })
+    );
+    if (!signIn || signIn instanceof import_api22.default.auth.AuthorizationSignUpRequired) {
+      console.error({
+        accountId: id,
+        message: `[SIGN_IN_ERROR]`,
+        payload: signIn
+      });
+      throw Error("SIGN_IN_ERROR");
+    }
+    const sessionData = clientReLogin.session.getSessionData();
+    const { keys, mainDcId } = sessionData;
+    if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
+      console.error({
+        accountId: id,
+        message: `[KEYS_EMPTY_ERROR]`,
+        payload: sessionData
+      });
+      throw Error("KEYS_EMPTY_ERROR");
+    }
+    const data = {
+      accountId: id,
+      parentAccountId: ID,
+      phone: phoneNumber,
+      dcId: Number(mainDcId),
+      prefix
+    };
+    data[`dc${mainDcId}`] = keys[mainDcId];
+    await updateAccountById(id, data);
+    await updateAccountById(ID, { workedOut: true });
+    clearInterval(interval);
+    await invokeRequest(client, new import_api22.default.auth.LogOut());
+    await sleep(2e3);
+    await clearAuthorizations(clientReLogin);
+    return [client, clientReLogin];
+  } catch (error) {
+    await sendToMainBot(
+      `\u{1F480} RELOGIN_ERROR \u{1F480}
+ACCOUNT_ID: ${ID}
+ERROR: ${error}`
+    );
+    return clients;
+  }
+};
 
 // src/support/index.ts
-var reChecker = async () => {
-  const accounts = await getAccounts();
-  console.log({ message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}" });
+var reLoginner = async () => {
+  const accounts = await getAccountsReLogin();
+  if (!accounts.length) {
+    return;
+  }
+  console.log({ message: "\u{1F4A5} RELOGIN ITERATION INIT \u{1F4A5}" });
   const startCheckerTime = performance.now();
-  const checkerPromises = [];
-  const checkerAccounts = {};
+  const reloginPromises = [];
   accounts.forEach((accountId) => {
-    checkerPromises.push(checker(accountId, checkerAccounts));
+    reloginPromises.push(relogin(accountId));
   });
-  setInterval(() => {
-    console.log({
-      message: `CHECK ITERATION IN PROGRESS (${Object.keys(checkerAccounts).length})`,
-      checkerAccounts
-    });
-  }, 6e4);
-  await Promise.all(checkerPromises).then(async (clients) => {
-    await makeMetrics(clients, startCheckerTime, "CHECK");
+  await Promise.all(reloginPromises).then(async (clients) => {
+    await makeMetrics(clients.flat(1), startCheckerTime, "RELOGIN");
   });
 };
 var main = async () => {
-  await reChecker();
+  await reLoginner();
   await sleep(1e4);
   process.exit(1);
 };

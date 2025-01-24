@@ -17,7 +17,7 @@ const reLoginner = async () => {
   console.log({ message: '💥 RELOGIN ITERATION INIT 💥' });
   const startCheckerTime = performance.now();
   const reloginPromises: Promise<any>[] = [];
-  console.log(accounts)
+
   accounts.forEach((accountId: string) => {
     reloginPromises.push(relogin(accountId));
   });
@@ -51,8 +51,8 @@ const reChecker = async () => {
 };
 
 const main = async () => {
-  // await reLoginner();
-  await reChecker();
+  await reLoginner();
+  // await reChecker();
 
   await sleep(10000);
   process.exit(1);
