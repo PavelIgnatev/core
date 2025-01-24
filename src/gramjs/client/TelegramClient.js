@@ -1,5 +1,3 @@
-const UserAgent = require('user-agents');
-
 const { sleep } = require('../Helpers');
 const errors = require('../errors');
 
@@ -11,12 +9,23 @@ const RequestState = require('../network/RequestState');
 const utils = require('../Utils');
 
 class TelegramClient {
-  constructor(session, acountId, onError) {
+  constructor(
+    session,
+    apiId,
+    deviceModel,
+    systemVersion,
+    appVersion,
+    langCode,
+    langPack,
+    systemLangCode,
+    acountId,
+    onError
+  ) {
     if (typeof acountId !== 'string' || typeof onError !== 'function') {
       throw new Error('Account Id or onError not defined');
     }
 
-    this.apiId = 2496;
+    this.apiId = apiId;
     this.defaultDcId = 2;
     this.session = session;
     this._accountId = acountId;
@@ -31,19 +40,16 @@ class TelegramClient {
     this._endTime = 0;
 
     this._initWith = (x) => {
-      const userAgent = new UserAgent();
       return new requests.InvokeWithLayer({
         layer: LAYER,
         query: new requests.InitConnection({
           apiId: this.apiId,
-          deviceModel: userAgent.userAgent,
-          systemVersion: userAgent.platform,
-          appVersion: `${Math.floor(Math.random() * 10)}.${Math.floor(
-            Math.random() * 10
-          )}.${Math.floor(Math.random() * 10)} A`,
-          langCode: 'en',
-          langPack: 'weba',
-          systemLangCode: 'en',
+          deviceModel,
+          systemVersion,
+          appVersion,
+          langCode,
+          langPack,
+          systemLangCode,
           query: x,
           proxy: undefined,
         }),
@@ -154,7 +160,8 @@ ID: ${this._accountId}`);
         ) {
           if (
             request.className === 'contacts.Block' ||
-            request.className === 'contacts.Unblock'
+            request.className === 'contacts.Unblock' ||
+            request.className === 'messages.DeleteChatUser'
           ) {
             state.finished.resolve();
             throw e;

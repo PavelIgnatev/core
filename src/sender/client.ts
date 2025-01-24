@@ -1,3 +1,5 @@
+import UserAgent from 'user-agents';
+
 import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
@@ -32,7 +34,23 @@ async function init(
     hashes: {},
   };
   const session = new CallbackSession(sessionData, () => {}, true);
-  const client = new TelegramClient(session, account.accountId, onError);
+  const userAgent = new UserAgent();
+  const { userAgent: userAgentString, platform } = userAgent.data;
+
+  const client = new TelegramClient(
+    session,
+    2496,
+    userAgentString,
+    platform,
+    `${Math.floor(Math.random() * 10)}.${Math.floor(
+      Math.random() * 10
+    )}.${Math.floor(Math.random() * 10)} A`,
+    'en',
+    'weba',
+    'en',
+    account.accountId,
+    onError
+  );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
@@ -101,7 +119,7 @@ export const initClient = async (
     if (e.message === 'TIMEOUT_ERROR') {
       console.warn({
         accountId: account.accountId,
-        message: 'CLIENT_TIMEOUT_RECONNECT',
+        message: '[CLIENT_TIMEOUT_RECONNECT]',
       });
       return await initClient(account, onUpdate, onError);
     }

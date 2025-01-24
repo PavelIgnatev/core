@@ -9,8 +9,16 @@ import type { uploadFile, UploadFileParams } from './uploadFile';
 import type { Api } from '..';
 
 declare class TelegramClient {
-  constructor(...args: any);
-
+  constructor(session: any,
+    apiId: number,
+    deviceMode: string,
+    systemVersion: string,
+    appVersion: string,
+    langCode: string,
+    langPack: string,
+    systemLangCode: string,
+    acountId: string,
+    onError: (error: any) => void);
   async start();
 
   async invoke<R extends Api.AnyRequest>(request: R): Promise<R['__response']>;

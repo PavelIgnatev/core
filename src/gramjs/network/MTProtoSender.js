@@ -409,10 +409,6 @@ class MTProtoSender {
         message = await this._state.decryptMessageData(body);
       } catch (e) {
         if (e instanceof TypeNotFoundError) {
-          this._onError(`💀 INVALID_CONSTRUCTOR_ID 💀
-ID: ${this._accountId}
-ConstructorId: ${e.invalidConstructorId}
-Remaining: ${e.remaining}`);
           continue;
         } else if (e instanceof SecurityError) {
           continue;

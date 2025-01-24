@@ -1,4 +1,4 @@
-import TelegramClient from '../gramjs/client/TelegramClient';
+import TelegramClient from '../../gramjs/client/TelegramClient';
 import { getGroupId } from '../db/groupId';
 import { converterName } from '../helpers/converterName';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
