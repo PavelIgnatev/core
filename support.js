@@ -75174,7 +75174,18 @@ async function init(account, onUpdate, onError) {
   const session = empty ? new import_CallbackSession.default(void 0, () => {
   }) : new import_CallbackSession.default(sessionData, () => {
   }, true);
-  const client = new import_TelegramClient.default(session, 2040, account.accountId, onError);
+  const client = new import_TelegramClient.default(
+    session,
+    2040,
+    "Desktop",
+    "Windows 11",
+    "5.4.1 x64",
+    "en",
+    "tdesktop",
+    "en",
+    account.accountId,
+    onError
+  );
   if (!client) {
     throw new Error("CLIENT_NOT_INITED");
   }
@@ -78607,8 +78618,8 @@ var getAccountCollection = async () => {
 var getAccounts = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.distinct("accountId", {
-    // banned: { $ne: true },
-    reason: "AUTH_KEY_UNREGISTERED"
+    banned: { $ne: true },
+    stopped: { $ne: true }
   });
   return accounts;
 };
@@ -79402,7 +79413,9 @@ Error: ${e.message}`
 getAccounts().then(async (accounts) => {
   console.log({ message: "\u{1F4A5} ITERATION INIT \u{1F4A5}" });
   const startTime = performance.now();
-  promises.push(main("165f0e0e4db9f88453bf906a541c954b"));
+  accounts.forEach((accountId) => {
+    promises.push(main(accountId));
+  });
   const interval = setInterval(() => {
     console.log({
       message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,

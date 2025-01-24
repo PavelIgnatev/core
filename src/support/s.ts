@@ -1,14 +1,20 @@
-// npm i input
-import TelegramClient from '../gramjs/client/TelegramClient';
-import CallbackSession from '../gramjs/sessions/CallbackSession';
+import { initClient } from './client';
 
 const GramJs = require('../gramjs/tl/api');
 
 const input = require('input');
 
 (async () => {
-  const session = new CallbackSession(undefined, () => {});
-  const client = new TelegramClient(session, 2040, 'REGISTER_ACCOUNT', () => {});
+  const client = await initClient(
+    {
+      accountId: 'LOGIN_ACCOUNT',
+      empty: true,
+    },
+    (update) => {
+      console.log(update);
+    },
+    () => {}
+  );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
@@ -19,8 +25,8 @@ const input = require('input');
   const sendResult = await client.invoke(
     new GramJs.auth.SendCode({
       phoneNumber: '+77058226192',
-      apiId: 2496,
-      apiHash: '8da85b0d5bfe62527e5b244c209159c3',
+      apiId: 2040,
+      apiHash: 'b18441a1ff607e10a989891a5462e627',
       settings: new GramJs.CodeSettings(),
     })
   );
@@ -50,5 +56,5 @@ const input = require('input');
   );
   console.log(result);
 
-  console.log(session.getSessionData());
+  console.log(client.session.getSessionData());
 })();

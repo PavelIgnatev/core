@@ -35,7 +35,19 @@ async function init(
   const session = empty
     ? new CallbackSession(undefined, () => {})
     : new CallbackSession(sessionData, () => {}, true);
-  const client = new TelegramClient(session, 2040, account.accountId, onError);
+
+  const client = new TelegramClient(
+    session,
+    2040,
+    'Desktop',
+    'Windows 11',
+    '5.4.1 x64',
+    'en',
+    'tdesktop',
+    'en',
+    account.accountId,
+    onError
+  );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
