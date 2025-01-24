@@ -59887,6 +59887,293 @@ var require_follow_redirects = __commonJS({
   }
 });
 
+// src/gramjs/tl/generationHelpers.js
+var require_generationHelpers = __commonJS({
+  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
+    "use strict";
+    var snakeToCamelCase = (name) => {
+      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
+      return result.replace(/_/g, "");
+    };
+    var variableSnakeToCamelCase = (str) => str.replace(
+      /([-_][a-z])/g,
+      (group) => group.toUpperCase().replace("-", "").replace("_", "")
+    );
+    var CORE_TYPES = /* @__PURE__ */ new Set([
+      3162085175,
+      // boolFalse#bc799737 = Bool;
+      2574415285,
+      // boolTrue#997275b5 = Bool;
+      1072550713,
+      // true#3fedd339 = True;
+      3300522427,
+      // error#c4b9f9bb code:int text:string = Error;
+      1450380236
+      // null#56730bcc = Null;
+    ]);
+    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
+      85337187,
+      // resPQ,
+      2211011308,
+      // p_q_inner_data
+      2851430293,
+      // p_q_inner_data_dc
+      1013613780,
+      // p_q_inner_data_temp
+      1459478408,
+      // p_q_inner_data_temp_dc
+      3504867164,
+      // server_DH_params_ok
+      3045658042,
+      // server_DH_inner_data
+      1715713620,
+      // client_DH_inner_data
+      3608339646,
+      // req_DH_params
+      4110704415,
+      // set_client_DH_params
+      812830625
+      // gzip_packed
+    ]);
+    function makeCRCTable() {
+      let c;
+      const crcTable2 = [];
+      for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
+        }
+        crcTable2[n] = c;
+      }
+      return crcTable2;
+    }
+    var crcTable;
+    function crc32(buf) {
+      if (!crcTable) {
+        crcTable = makeCRCTable();
+      }
+      if (!Buffer.isBuffer(buf)) {
+        buf = Buffer.from(buf);
+      }
+      let crc = -1;
+      for (let index = 0; index < buf.length; index++) {
+        const byte = buf[index];
+        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
+      }
+      return (crc ^ -1) >>> 0;
+    }
+    var findAll = (regex, str, matches = []) => {
+      if (!regex.flags.includes("g")) {
+        regex = new RegExp(regex.source, "g");
+      }
+      const res = regex.exec(str);
+      if (res) {
+        matches.push(res.slice(1));
+        findAll(regex, str, matches);
+      }
+      return matches;
+    };
+    var fromLine = (line, isFunction2) => {
+      const match = line.match(
+        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
+      );
+      if (!match) {
+        throw new Error(`Cannot parse TLObject ${line}`);
+      }
+      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
+      const currentConfig = {
+        name: match[1],
+        constructorId: parseInt(match[2], 16),
+        argsConfig: {},
+        subclassOfId: crc32(match[3]),
+        result: match[3],
+        isFunction: isFunction2,
+        namespace: void 0
+      };
+      if (!currentConfig.constructorId) {
+        const hexId = "";
+        let args;
+        if (Object.values(currentConfig.argsConfig).length) {
+          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
+        } else {
+          args = "";
+        }
+        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
+        if (currentConfig.name === "inputMediaInvoice") {
+          if (currentConfig.name === "inputMediaInvoice") {
+          }
+        }
+        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
+      }
+      for (const [brace, name, argType] of argsMatch) {
+        if (brace === void 0) {
+          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
+            name,
+            argType
+          );
+        }
+      }
+      if (currentConfig.name.includes(".")) {
+        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
+      }
+      currentConfig.name = snakeToCamelCase(currentConfig.name);
+      return currentConfig;
+    };
+    function buildArgConfig(name, argType) {
+      name = name === "self" ? "is_self" : name;
+      const currentConfig = {
+        isVector: false,
+        isFlag: false,
+        skipConstructorId: false,
+        flagGroup: 0,
+        flagIndex: -1,
+        flagIndicator: true,
+        type: void 0,
+        useVectorId: void 0
+      };
+      if (argType !== "#") {
+        currentConfig.flagIndicator = false;
+        currentConfig.type = argType.replace(/^!+/, "");
+        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
+        if (flagMatch) {
+          currentConfig.isFlag = true;
+          currentConfig.flagGroup = Number(flagMatch[1] || 1);
+          currentConfig.flagIndex = Number(flagMatch[2]);
+          [, , , currentConfig.type] = flagMatch;
+        }
+        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
+        if (vectorMatch) {
+          currentConfig.isVector = true;
+          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
+          [, currentConfig.type] = vectorMatch;
+        }
+        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
+          currentConfig.skipConstructorId = true;
+        }
+      }
+      return currentConfig;
+    }
+    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
+      (methods || []).reduce(
+        (o, m) => ({
+          ...o,
+          [m.name]: m
+        }),
+        {}
+      );
+      const objAll = [];
+      const objByName = {};
+      const objByType = {};
+      const file = content;
+      let isFunction2 = false;
+      for (let line of file.split("\n")) {
+        const commentIndex = line.indexOf("//");
+        if (commentIndex !== -1) {
+          line = line.slice(0, commentIndex);
+        }
+        line = line.trim();
+        if (!line) {
+          continue;
+        }
+        const match = line.match(/---(\w+)---/);
+        if (match) {
+          const [, followingTypes] = match;
+          isFunction2 = followingTypes === "functions";
+          continue;
+        }
+        try {
+          const result = fromLine(line, isFunction2);
+          if (ignoreIds.has(result.constructorId)) {
+            continue;
+          }
+          objAll.push(result);
+          if (!result.isFunction) {
+            if (!objByType[result.result]) {
+              objByType[result.result] = [];
+            }
+            objByName[result.name] = result;
+            objByType[result.result].push(result);
+          }
+        } catch (e) {
+          if (!e.toString().includes("vector#1cb5c415")) {
+            throw e;
+          }
+        }
+      }
+      for (const obj of objAll) {
+        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
+          for (const arg in obj.argsConfig) {
+            if (obj.argsConfig[arg].type === "string") {
+              obj.argsConfig[arg].type = "bytes";
+            }
+          }
+        }
+      }
+      for (const obj of objAll) {
+        yield obj;
+      }
+    }
+    function serializeBytes(data) {
+      if (!(data instanceof Buffer)) {
+        if (typeof data === "string") {
+          data = Buffer.from(data);
+        }
+      }
+      const r = [];
+      let padding;
+      if (data.length < 254) {
+        padding = (data.length + 1) % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(Buffer.from([data.length]));
+        r.push(data);
+      } else {
+        padding = data.length % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(
+          Buffer.from([
+            254,
+            data.length % 256,
+            (data.length >> 8) % 256,
+            (data.length >> 16) % 256
+          ])
+        );
+        r.push(data);
+      }
+      r.push(Buffer.alloc(padding).fill(0));
+      return Buffer.concat(r);
+    }
+    function serializeDate(dt) {
+      if (!dt) {
+        return Buffer.alloc(4).fill(0);
+      }
+      if (dt instanceof Date) {
+        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
+      }
+      if (typeof dt === "number") {
+        const t = Buffer.alloc(4);
+        t.writeInt32LE(dt, 0);
+        return t;
+      }
+      throw Error(`Cannot interpret "${dt}" as a date`);
+    }
+    module2.exports = {
+      findAll,
+      parseTl,
+      buildArgConfig,
+      fromLine,
+      CORE_TYPES,
+      serializeDate,
+      serializeBytes,
+      snakeToCamelCase,
+      variableSnakeToCamelCase
+    };
+  }
+});
+
 // node_modules/big-integer/BigInteger.js
 var require_BigInteger = __commonJS({
   "node_modules/big-integer/BigInteger.js"(exports2, module2) {
@@ -61761,627 +62048,6 @@ var require_Helpers = __commonJS({
       toSignedLittleBuffer,
       convertToLittle,
       bufferXor
-    };
-  }
-});
-
-// src/gramjs/errors/RPCBaseErrors.js
-var require_RPCBaseErrors = __commonJS({
-  "src/gramjs/errors/RPCBaseErrors.js"(exports2, module2) {
-    "use strict";
-    var RPCError = class _RPCError extends Error {
-      constructor(message, request, code = void 0) {
-        super(
-          "RPCError {0}: {1}{2}".replace("{0}", code).replace("{1}", message).replace("{2}", _RPCError._fmtRequest(request))
-        );
-        this.code = code;
-        this.message = message;
-      }
-      static _fmtRequest(request) {
-        if (request) {
-          return ` (caused by ${request.className})`;
-        }
-        return "";
-      }
-    };
-    var InvalidDCError = class extends RPCError {
-      constructor(request, message, code) {
-        super(message, request, code);
-        this.code = code || 303;
-        this.message = message || "ERROR_SEE_OTHER";
-      }
-    };
-    var BadRequestError = class extends RPCError {
-      code = 400;
-      message = "BAD_REQUEST";
-    };
-    var UnauthorizedError = class extends RPCError {
-      code = 401;
-      message = "UNAUTHORIZED";
-    };
-    var ForbiddenError = class extends RPCError {
-      code = 403;
-      message = "FORBIDDEN";
-    };
-    var NotFoundError = class extends RPCError {
-      code = 404;
-      message = "NOT_FOUND";
-    };
-    var AuthKeyError = class extends RPCError {
-      code = 406;
-      message = "AUTH_KEY";
-    };
-    var FloodError = class extends RPCError {
-      code = 420;
-      message = "FLOOD";
-    };
-    var ServerError = class extends RPCError {
-      code = 500;
-      // Also witnessed as -500
-      message = "INTERNAL";
-    };
-    var TimedOutError = class extends RPCError {
-      code = 503;
-      // Only witnessed as -503
-      message = "Timeout";
-    };
-    module2.exports = {
-      RPCError,
-      InvalidDCError,
-      BadRequestError,
-      UnauthorizedError,
-      ForbiddenError,
-      NotFoundError,
-      AuthKeyError,
-      FloodError,
-      ServerError,
-      TimedOutError
-    };
-  }
-});
-
-// src/gramjs/errors/RPCErrorList.js
-var require_RPCErrorList = __commonJS({
-  "src/gramjs/errors/RPCErrorList.js"(exports2, module2) {
-    "use strict";
-    var {
-      RPCError,
-      InvalidDCError,
-      FloodError,
-      BadRequestError,
-      TimedOutError
-    } = require_RPCBaseErrors();
-    var UserMigrateError = class extends InvalidDCError {
-      constructor(args) {
-        const newDc = Number(args.capture || 0);
-        super(
-          `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
-        this.newDc = newDc;
-      }
-    };
-    var PhoneMigrateError = class extends InvalidDCError {
-      constructor(args) {
-        const newDc = Number(args.capture || 0);
-        super(
-          `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
-        this.newDc = newDc;
-      }
-    };
-    var SlowModeWaitError = class extends FloodError {
-      constructor(args) {
-        const seconds = Number(args.capture || 0);
-        super(
-          `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`;
-        this.seconds = seconds;
-      }
-    };
-    var FloodWaitError = class extends FloodError {
-      constructor(args) {
-        const seconds = Number(args.capture || 0);
-        super(
-          `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
-        this.seconds = seconds;
-      }
-    };
-    var FloodPremiumWaitError = class extends FloodWaitError {
-      constructor(args) {
-        const seconds = Number(args.capture || 0);
-        super(
-          `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
-        this.seconds = seconds;
-      }
-    };
-    var MsgWaitError = class extends FloodError {
-      constructor(args) {
-        super(`Message failed to be sent.${RPCError._fmtRequest(args.request)}`);
-        this.message = `Message failed to be sent.${RPCError._fmtRequest(args.request)}`;
-      }
-    };
-    var FloodTestPhoneWaitError = class extends FloodError {
-      constructor(args) {
-        const seconds = Number(args.capture || 0);
-        super(
-          `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`;
-        this.seconds = seconds;
-      }
-    };
-    var FileMigrateError = class extends InvalidDCError {
-      constructor(args) {
-        const newDc = Number(args.capture || 0);
-        super(
-          `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`;
-        this.newDc = newDc;
-      }
-    };
-    var NetworkMigrateError = class extends InvalidDCError {
-      constructor(args) {
-        const newDc = Number(args.capture || 0);
-        super(
-          `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
-        this.newDc = newDc;
-      }
-    };
-    var EmailUnconfirmedError = class extends BadRequestError {
-      constructor(args) {
-        const codeLength = Number(args.capture || 0);
-        super(
-          `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`
-        );
-        this.message = `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`;
-        this.codeLength = codeLength;
-      }
-    };
-    var rpcErrorRe = [
-      [/FILE_MIGRATE_(\d+)/, FileMigrateError],
-      [/FLOOD_TEST_PHONE_WAIT_(\d+)/, FloodTestPhoneWaitError],
-      [/FLOOD_WAIT_(\d+)/, FloodWaitError],
-      [/FLOOD_PREMIUM_WAIT_(\d+)/, FloodPremiumWaitError],
-      [/MSG_WAIT_(.*)/, MsgWaitError],
-      [/PHONE_MIGRATE_(\d+)/, PhoneMigrateError],
-      [/SLOWMODE_WAIT_(\d+)/, SlowModeWaitError],
-      [/USER_MIGRATE_(\d+)/, UserMigrateError],
-      [/NETWORK_MIGRATE_(\d+)/, NetworkMigrateError],
-      [/EMAIL_UNCONFIRMED_(\d+)/, EmailUnconfirmedError],
-      [/^Timeout$/, TimedOutError]
-    ];
-    module2.exports = {
-      rpcErrorRe,
-      FileMigrateError,
-      FloodTestPhoneWaitError,
-      FloodWaitError,
-      FloodPremiumWaitError,
-      PhoneMigrateError,
-      SlowModeWaitError,
-      UserMigrateError,
-      NetworkMigrateError,
-      MsgWaitError,
-      EmailUnconfirmedError
-    };
-  }
-});
-
-// src/gramjs/errors/Common.js
-var require_Common = __commonJS({
-  "src/gramjs/errors/Common.js"(exports2, module2) {
-    "use strict";
-    var ReadCancelledError = class extends Error {
-      constructor() {
-        super("The read operation was cancelled.");
-      }
-    };
-    var TypeNotFoundError = class extends Error {
-      constructor(invalidConstructorId, remaining) {
-        super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
-        read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
-         it should not be read. Remaining bytes: ${remaining.length}`);
-        if (typeof alert !== "undefined") {
-          alert(
-            `Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`
-          );
-        }
-        this.invalidConstructorId = invalidConstructorId;
-        this.remaining = remaining;
-      }
-    };
-    var InvalidChecksumError = class extends Error {
-      constructor(checksum, validChecksum) {
-        super(
-          `Invalid checksum (${checksum} when ${validChecksum} was expected). This packet should be skipped.`
-        );
-        this.checksum = checksum;
-        this.validChecksum = validChecksum;
-      }
-    };
-    var InvalidBufferError = class extends Error {
-      constructor(payload) {
-        let code;
-        if (payload.length === 4) {
-          code = -payload.readInt32LE(0);
-          super(`Invalid response buffer (HTTP code ${code})`);
-        } else {
-          super(`Invalid response buffer (too short ${payload})`);
-        }
-        this.code = code;
-        this.payload = payload;
-      }
-    };
-    var SecurityError2 = class extends Error {
-      constructor(...args) {
-        if (!args.length) {
-          args = ["A security check failed."];
-        }
-        super(...args);
-      }
-    };
-    var CdnFileTamperedError = class extends SecurityError2 {
-      constructor() {
-        super("The CDN file has been altered and its download cancelled.");
-      }
-    };
-    var BadMessageError = class _BadMessageError extends Error {
-      static ErrorMessages = {
-        16: "msg_id too low (most likely, client time is wrong it would be worthwhile to synchronize it using msg_id notifications and re-send the original message with the \u201Ccorrect\u201D msg_id or wrap it in a container with a new msg_id if the original message had waited too long on the client to be transmitted).",
-        17: "msg_id too high (similar to the previous case, the client time has to be synchronized, and the message re-sent with the correct msg_id).",
-        18: "Incorrect two lower order msg_id bits (the server expects client message msg_id to be divisible by 4).",
-        19: "Container msg_id is the same as msg_id of a previously received message (this must never happen).",
-        20: "Message too old, and it cannot be verified whether the server has received a message with this msg_id or not.",
-        32: "msg_seqno too low (the server has already received a message with a lower msg_id but with either a higher or an equal and odd seqno).",
-        33: "msg_seqno too high (similarly, there is a message with a higher msg_id but with either a lower or an equal and odd seqno).",
-        34: "An even msg_seqno expected (irrelevant message), but odd received.",
-        35: "Odd msg_seqno expected (relevant message), but even received.",
-        48: "Incorrect server salt (in this case, the bad_server_salt response is received with the correct salt, and the message is to be re-sent with it).",
-        64: "Invalid container."
-      };
-      constructor(request, code) {
-        let errorMessage = _BadMessageError.ErrorMessages[code] || `Unknown error code (this should not happen): ${code}.`;
-        errorMessage += `  Caused by ${request.className}`;
-        super(errorMessage);
-        this.message = errorMessage;
-        this.code = code;
-      }
-    };
-    module2.exports = {
-      ReadCancelledError,
-      TypeNotFoundError,
-      InvalidChecksumError,
-      InvalidBufferError,
-      SecurityError: SecurityError2,
-      CdnFileTamperedError,
-      BadMessageError
-    };
-  }
-});
-
-// src/gramjs/errors/index.js
-var require_errors5 = __commonJS({
-  "src/gramjs/errors/index.js"(exports2, module2) {
-    "use strict";
-    var { RPCError } = require_RPCBaseErrors();
-    var { rpcErrorRe } = require_RPCErrorList();
-    function RPCMessageToError(rpcError, request) {
-      for (const [msgRegex, Cls] of rpcErrorRe) {
-        const m = rpcError.errorMessage.match(msgRegex);
-        if (m) {
-          const capture = m.length === 2 ? parseInt(m[1], 10) : void 0;
-          return new Cls({
-            request,
-            capture
-          });
-        }
-      }
-      return new RPCError(rpcError.errorMessage, request);
-    }
-    var Common = require_Common();
-    var RPCBaseErrors = require_RPCBaseErrors();
-    var RPCErrorList = require_RPCErrorList();
-    module2.exports = {
-      RPCMessageToError,
-      ...Common,
-      ...RPCBaseErrors,
-      ...RPCErrorList
-    };
-  }
-});
-
-// src/gramjs/tl/generationHelpers.js
-var require_generationHelpers = __commonJS({
-  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
-    "use strict";
-    var snakeToCamelCase = (name) => {
-      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
-      return result.replace(/_/g, "");
-    };
-    var variableSnakeToCamelCase = (str) => str.replace(
-      /([-_][a-z])/g,
-      (group) => group.toUpperCase().replace("-", "").replace("_", "")
-    );
-    var CORE_TYPES = /* @__PURE__ */ new Set([
-      3162085175,
-      // boolFalse#bc799737 = Bool;
-      2574415285,
-      // boolTrue#997275b5 = Bool;
-      1072550713,
-      // true#3fedd339 = True;
-      3300522427,
-      // error#c4b9f9bb code:int text:string = Error;
-      1450380236
-      // null#56730bcc = Null;
-    ]);
-    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
-      85337187,
-      // resPQ,
-      2211011308,
-      // p_q_inner_data
-      2851430293,
-      // p_q_inner_data_dc
-      1013613780,
-      // p_q_inner_data_temp
-      1459478408,
-      // p_q_inner_data_temp_dc
-      3504867164,
-      // server_DH_params_ok
-      3045658042,
-      // server_DH_inner_data
-      1715713620,
-      // client_DH_inner_data
-      3608339646,
-      // req_DH_params
-      4110704415,
-      // set_client_DH_params
-      812830625
-      // gzip_packed
-    ]);
-    function makeCRCTable() {
-      let c;
-      const crcTable2 = [];
-      for (let n = 0; n < 256; n++) {
-        c = n;
-        for (let k = 0; k < 8; k++) {
-          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
-        }
-        crcTable2[n] = c;
-      }
-      return crcTable2;
-    }
-    var crcTable;
-    function crc32(buf) {
-      if (!crcTable) {
-        crcTable = makeCRCTable();
-      }
-      if (!Buffer.isBuffer(buf)) {
-        buf = Buffer.from(buf);
-      }
-      let crc = -1;
-      for (let index = 0; index < buf.length; index++) {
-        const byte = buf[index];
-        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
-      }
-      return (crc ^ -1) >>> 0;
-    }
-    var findAll = (regex, str, matches = []) => {
-      if (!regex.flags.includes("g")) {
-        regex = new RegExp(regex.source, "g");
-      }
-      const res = regex.exec(str);
-      if (res) {
-        matches.push(res.slice(1));
-        findAll(regex, str, matches);
-      }
-      return matches;
-    };
-    var fromLine = (line, isFunction2) => {
-      const match = line.match(
-        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
-      );
-      if (!match) {
-        throw new Error(`Cannot parse TLObject ${line}`);
-      }
-      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
-      const currentConfig = {
-        name: match[1],
-        constructorId: parseInt(match[2], 16),
-        argsConfig: {},
-        subclassOfId: crc32(match[3]),
-        result: match[3],
-        isFunction: isFunction2,
-        namespace: void 0
-      };
-      if (!currentConfig.constructorId) {
-        const hexId = "";
-        let args;
-        if (Object.values(currentConfig.argsConfig).length) {
-          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
-        } else {
-          args = "";
-        }
-        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
-        if (currentConfig.name === "inputMediaInvoice") {
-          if (currentConfig.name === "inputMediaInvoice") {
-          }
-        }
-        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
-      }
-      for (const [brace, name, argType] of argsMatch) {
-        if (brace === void 0) {
-          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
-            name,
-            argType
-          );
-        }
-      }
-      if (currentConfig.name.includes(".")) {
-        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
-      }
-      currentConfig.name = snakeToCamelCase(currentConfig.name);
-      return currentConfig;
-    };
-    function buildArgConfig(name, argType) {
-      name = name === "self" ? "is_self" : name;
-      const currentConfig = {
-        isVector: false,
-        isFlag: false,
-        skipConstructorId: false,
-        flagGroup: 0,
-        flagIndex: -1,
-        flagIndicator: true,
-        type: void 0,
-        useVectorId: void 0
-      };
-      if (argType !== "#") {
-        currentConfig.flagIndicator = false;
-        currentConfig.type = argType.replace(/^!+/, "");
-        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
-        if (flagMatch) {
-          currentConfig.isFlag = true;
-          currentConfig.flagGroup = Number(flagMatch[1] || 1);
-          currentConfig.flagIndex = Number(flagMatch[2]);
-          [, , , currentConfig.type] = flagMatch;
-        }
-        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
-        if (vectorMatch) {
-          currentConfig.isVector = true;
-          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
-          [, currentConfig.type] = vectorMatch;
-        }
-        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
-          currentConfig.skipConstructorId = true;
-        }
-      }
-      return currentConfig;
-    }
-    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
-      (methods || []).reduce(
-        (o, m) => ({
-          ...o,
-          [m.name]: m
-        }),
-        {}
-      );
-      const objAll = [];
-      const objByName = {};
-      const objByType = {};
-      const file = content;
-      let isFunction2 = false;
-      for (let line of file.split("\n")) {
-        const commentIndex = line.indexOf("//");
-        if (commentIndex !== -1) {
-          line = line.slice(0, commentIndex);
-        }
-        line = line.trim();
-        if (!line) {
-          continue;
-        }
-        const match = line.match(/---(\w+)---/);
-        if (match) {
-          const [, followingTypes] = match;
-          isFunction2 = followingTypes === "functions";
-          continue;
-        }
-        try {
-          const result = fromLine(line, isFunction2);
-          if (ignoreIds.has(result.constructorId)) {
-            continue;
-          }
-          objAll.push(result);
-          if (!result.isFunction) {
-            if (!objByType[result.result]) {
-              objByType[result.result] = [];
-            }
-            objByName[result.name] = result;
-            objByType[result.result].push(result);
-          }
-        } catch (e) {
-          if (!e.toString().includes("vector#1cb5c415")) {
-            throw e;
-          }
-        }
-      }
-      for (const obj of objAll) {
-        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
-          for (const arg in obj.argsConfig) {
-            if (obj.argsConfig[arg].type === "string") {
-              obj.argsConfig[arg].type = "bytes";
-            }
-          }
-        }
-      }
-      for (const obj of objAll) {
-        yield obj;
-      }
-    }
-    function serializeBytes(data) {
-      if (!(data instanceof Buffer)) {
-        if (typeof data === "string") {
-          data = Buffer.from(data);
-        }
-      }
-      const r = [];
-      let padding;
-      if (data.length < 254) {
-        padding = (data.length + 1) % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(Buffer.from([data.length]));
-        r.push(data);
-      } else {
-        padding = data.length % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(
-          Buffer.from([
-            254,
-            data.length % 256,
-            (data.length >> 8) % 256,
-            (data.length >> 16) % 256
-          ])
-        );
-        r.push(data);
-      }
-      r.push(Buffer.alloc(padding).fill(0));
-      return Buffer.concat(r);
-    }
-    function serializeDate(dt) {
-      if (!dt) {
-        return Buffer.alloc(4).fill(0);
-      }
-      if (dt instanceof Date) {
-        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
-      }
-      if (typeof dt === "number") {
-        const t = Buffer.alloc(4);
-        t.writeInt32LE(dt, 0);
-        return t;
-      }
-      throw Error(`Cannot interpret "${dt}" as a date`);
-    }
-    module2.exports = {
-      findAll,
-      parseTl,
-      buildArgConfig,
-      fromLine,
-      CORE_TYPES,
-      serializeDate,
-      serializeBytes,
-      snakeToCamelCase,
-      variableSnakeToCamelCase
     };
   }
 });
@@ -64538,6 +64204,340 @@ var require_api = __commonJS({
       return classes;
     }
     module2.exports = buildApiFromTlSchema();
+  }
+});
+
+// src/gramjs/errors/RPCBaseErrors.js
+var require_RPCBaseErrors = __commonJS({
+  "src/gramjs/errors/RPCBaseErrors.js"(exports2, module2) {
+    "use strict";
+    var RPCError = class _RPCError extends Error {
+      constructor(message, request, code = void 0) {
+        super(
+          "RPCError {0}: {1}{2}".replace("{0}", code).replace("{1}", message).replace("{2}", _RPCError._fmtRequest(request))
+        );
+        this.code = code;
+        this.message = message;
+      }
+      static _fmtRequest(request) {
+        if (request) {
+          return ` (caused by ${request.className})`;
+        }
+        return "";
+      }
+    };
+    var InvalidDCError = class extends RPCError {
+      constructor(request, message, code) {
+        super(message, request, code);
+        this.code = code || 303;
+        this.message = message || "ERROR_SEE_OTHER";
+      }
+    };
+    var BadRequestError = class extends RPCError {
+      code = 400;
+      message = "BAD_REQUEST";
+    };
+    var UnauthorizedError = class extends RPCError {
+      code = 401;
+      message = "UNAUTHORIZED";
+    };
+    var ForbiddenError = class extends RPCError {
+      code = 403;
+      message = "FORBIDDEN";
+    };
+    var NotFoundError = class extends RPCError {
+      code = 404;
+      message = "NOT_FOUND";
+    };
+    var AuthKeyError = class extends RPCError {
+      code = 406;
+      message = "AUTH_KEY";
+    };
+    var FloodError = class extends RPCError {
+      code = 420;
+      message = "FLOOD";
+    };
+    var ServerError = class extends RPCError {
+      code = 500;
+      // Also witnessed as -500
+      message = "INTERNAL";
+    };
+    var TimedOutError = class extends RPCError {
+      code = 503;
+      // Only witnessed as -503
+      message = "Timeout";
+    };
+    module2.exports = {
+      RPCError,
+      InvalidDCError,
+      BadRequestError,
+      UnauthorizedError,
+      ForbiddenError,
+      NotFoundError,
+      AuthKeyError,
+      FloodError,
+      ServerError,
+      TimedOutError
+    };
+  }
+});
+
+// src/gramjs/errors/RPCErrorList.js
+var require_RPCErrorList = __commonJS({
+  "src/gramjs/errors/RPCErrorList.js"(exports2, module2) {
+    "use strict";
+    var {
+      RPCError,
+      InvalidDCError,
+      FloodError,
+      BadRequestError,
+      TimedOutError
+    } = require_RPCBaseErrors();
+    var UserMigrateError = class extends InvalidDCError {
+      constructor(args) {
+        const newDc = Number(args.capture || 0);
+        super(
+          `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `The user whose identity is being used to execute queries is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+        this.newDc = newDc;
+      }
+    };
+    var PhoneMigrateError = class extends InvalidDCError {
+      constructor(args) {
+        const newDc = Number(args.capture || 0);
+        super(
+          `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `The phone number a user is trying to use for authorization is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+        this.newDc = newDc;
+      }
+    };
+    var SlowModeWaitError = class extends FloodError {
+      constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(
+          `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `A wait of ${seconds} seconds is required before sending another message in this chat${RPCError._fmtRequest(args.request)}`;
+        this.seconds = seconds;
+      }
+    };
+    var FloodWaitError = class extends FloodError {
+      constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(
+          `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
+        this.seconds = seconds;
+      }
+    };
+    var FloodPremiumWaitError = class extends FloodWaitError {
+      constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(
+          `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `A wait of ${seconds} seconds is required${RPCError._fmtRequest(args.request)}`;
+        this.seconds = seconds;
+      }
+    };
+    var MsgWaitError = class extends FloodError {
+      constructor(args) {
+        super(`Message failed to be sent.${RPCError._fmtRequest(args.request)}`);
+        this.message = `Message failed to be sent.${RPCError._fmtRequest(args.request)}`;
+      }
+    };
+    var FloodTestPhoneWaitError = class extends FloodError {
+      constructor(args) {
+        const seconds = Number(args.capture || 0);
+        super(
+          `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `A wait of ${seconds} seconds is required in the test servers${RPCError._fmtRequest(args.request)}`;
+        this.seconds = seconds;
+      }
+    };
+    var FileMigrateError = class extends InvalidDCError {
+      constructor(args) {
+        const newDc = Number(args.capture || 0);
+        super(
+          `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `The file to be accessed is currently stored in DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+        this.newDc = newDc;
+      }
+    };
+    var NetworkMigrateError = class extends InvalidDCError {
+      constructor(args) {
+        const newDc = Number(args.capture || 0);
+        super(
+          `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `The source IP address is associated with DC ${newDc}${RPCError._fmtRequest(args.request)}`;
+        this.newDc = newDc;
+      }
+    };
+    var EmailUnconfirmedError = class extends BadRequestError {
+      constructor(args) {
+        const codeLength = Number(args.capture || 0);
+        super(
+          `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`
+        );
+        this.message = `Email unconfirmed, the length of the code must be ${codeLength}${RPCError._fmtRequest(args.request)}`;
+        this.codeLength = codeLength;
+      }
+    };
+    var rpcErrorRe = [
+      [/FILE_MIGRATE_(\d+)/, FileMigrateError],
+      [/FLOOD_TEST_PHONE_WAIT_(\d+)/, FloodTestPhoneWaitError],
+      [/FLOOD_WAIT_(\d+)/, FloodWaitError],
+      [/FLOOD_PREMIUM_WAIT_(\d+)/, FloodPremiumWaitError],
+      [/MSG_WAIT_(.*)/, MsgWaitError],
+      [/PHONE_MIGRATE_(\d+)/, PhoneMigrateError],
+      [/SLOWMODE_WAIT_(\d+)/, SlowModeWaitError],
+      [/USER_MIGRATE_(\d+)/, UserMigrateError],
+      [/NETWORK_MIGRATE_(\d+)/, NetworkMigrateError],
+      [/EMAIL_UNCONFIRMED_(\d+)/, EmailUnconfirmedError],
+      [/^Timeout$/, TimedOutError]
+    ];
+    module2.exports = {
+      rpcErrorRe,
+      FileMigrateError,
+      FloodTestPhoneWaitError,
+      FloodWaitError,
+      FloodPremiumWaitError,
+      PhoneMigrateError,
+      SlowModeWaitError,
+      UserMigrateError,
+      NetworkMigrateError,
+      MsgWaitError,
+      EmailUnconfirmedError
+    };
+  }
+});
+
+// src/gramjs/errors/Common.js
+var require_Common = __commonJS({
+  "src/gramjs/errors/Common.js"(exports2, module2) {
+    "use strict";
+    var ReadCancelledError = class extends Error {
+      constructor() {
+        super("The read operation was cancelled.");
+      }
+    };
+    var TypeNotFoundError = class extends Error {
+      constructor(invalidConstructorId, remaining) {
+        super(`Could not find a matching Constructor ID for the TLObject that was supposed to be
+        read with ID ${invalidConstructorId}. Most likely, a TLObject was trying to be read when
+         it should not be read. Remaining bytes: ${remaining.length}`);
+        if (typeof alert !== "undefined") {
+          alert(
+            `Missing MTProto Entity: Please, make sure to add TL definition for ID ${invalidConstructorId}`
+          );
+        }
+        this.invalidConstructorId = invalidConstructorId;
+        this.remaining = remaining;
+      }
+    };
+    var InvalidChecksumError = class extends Error {
+      constructor(checksum, validChecksum) {
+        super(
+          `Invalid checksum (${checksum} when ${validChecksum} was expected). This packet should be skipped.`
+        );
+        this.checksum = checksum;
+        this.validChecksum = validChecksum;
+      }
+    };
+    var InvalidBufferError = class extends Error {
+      constructor(payload) {
+        let code;
+        if (payload.length === 4) {
+          code = -payload.readInt32LE(0);
+          super(`Invalid response buffer (HTTP code ${code})`);
+        } else {
+          super(`Invalid response buffer (too short ${payload})`);
+        }
+        this.code = code;
+        this.payload = payload;
+      }
+    };
+    var SecurityError2 = class extends Error {
+      constructor(...args) {
+        if (!args.length) {
+          args = ["A security check failed."];
+        }
+        super(...args);
+      }
+    };
+    var CdnFileTamperedError = class extends SecurityError2 {
+      constructor() {
+        super("The CDN file has been altered and its download cancelled.");
+      }
+    };
+    var BadMessageError = class _BadMessageError extends Error {
+      static ErrorMessages = {
+        16: "msg_id too low (most likely, client time is wrong it would be worthwhile to synchronize it using msg_id notifications and re-send the original message with the \u201Ccorrect\u201D msg_id or wrap it in a container with a new msg_id if the original message had waited too long on the client to be transmitted).",
+        17: "msg_id too high (similar to the previous case, the client time has to be synchronized, and the message re-sent with the correct msg_id).",
+        18: "Incorrect two lower order msg_id bits (the server expects client message msg_id to be divisible by 4).",
+        19: "Container msg_id is the same as msg_id of a previously received message (this must never happen).",
+        20: "Message too old, and it cannot be verified whether the server has received a message with this msg_id or not.",
+        32: "msg_seqno too low (the server has already received a message with a lower msg_id but with either a higher or an equal and odd seqno).",
+        33: "msg_seqno too high (similarly, there is a message with a higher msg_id but with either a lower or an equal and odd seqno).",
+        34: "An even msg_seqno expected (irrelevant message), but odd received.",
+        35: "Odd msg_seqno expected (relevant message), but even received.",
+        48: "Incorrect server salt (in this case, the bad_server_salt response is received with the correct salt, and the message is to be re-sent with it).",
+        64: "Invalid container."
+      };
+      constructor(request, code) {
+        let errorMessage = _BadMessageError.ErrorMessages[code] || `Unknown error code (this should not happen): ${code}.`;
+        errorMessage += `  Caused by ${request.className}`;
+        super(errorMessage);
+        this.message = errorMessage;
+        this.code = code;
+      }
+    };
+    module2.exports = {
+      ReadCancelledError,
+      TypeNotFoundError,
+      InvalidChecksumError,
+      InvalidBufferError,
+      SecurityError: SecurityError2,
+      CdnFileTamperedError,
+      BadMessageError
+    };
+  }
+});
+
+// src/gramjs/errors/index.js
+var require_errors5 = __commonJS({
+  "src/gramjs/errors/index.js"(exports2, module2) {
+    "use strict";
+    var { RPCError } = require_RPCBaseErrors();
+    var { rpcErrorRe } = require_RPCErrorList();
+    function RPCMessageToError(rpcError, request) {
+      for (const [msgRegex, Cls] of rpcErrorRe) {
+        const m = rpcError.errorMessage.match(msgRegex);
+        if (m) {
+          const capture = m.length === 2 ? parseInt(m[1], 10) : void 0;
+          return new Cls({
+            request,
+            capture
+          });
+        }
+      }
+      return new RPCError(rpcError.errorMessage, request);
+    }
+    var Common = require_Common();
+    var RPCBaseErrors = require_RPCBaseErrors();
+    var RPCErrorList = require_RPCErrorList();
+    module2.exports = {
+      RPCMessageToError,
+      ...Common,
+      ...RPCBaseErrors,
+      ...RPCErrorList
+    };
   }
 });
 
@@ -68051,23 +68051,23 @@ var require_updates = __commonJS({
 });
 
 // src/gramjs/crypto/RSA.ts
-var import_big_integer, import_Helpers, SERVER_KEYS;
+var import_big_integer4, import_Helpers, SERVER_KEYS;
 var init_RSA = __esm({
   "src/gramjs/crypto/RSA.ts"() {
     "use strict";
-    import_big_integer = __toESM(require_BigInteger());
+    import_big_integer4 = __toESM(require_BigInteger());
     import_Helpers = __toESM(require_Helpers());
     SERVER_KEYS = [
       {
-        fingerprint: (0, import_big_integer.default)("-3414540481677951611"),
-        n: (0, import_big_integer.default)(
+        fingerprint: (0, import_big_integer4.default)("-3414540481677951611"),
+        n: (0, import_big_integer4.default)(
           "29379598170669337022986177149456128565388431120058863768162556424047512191330847455146576344487764408661701890505066208632169112269581063774293102577308490531282748465986139880977280302242772832972539403531316010870401287642763009136156734339538042419388722777357134487746169093539093850251243897188928735903389451772730245253062963384108812842079887538976360465290946139638691491496062099570836476454855996319192747663615955633778034897140982517446405334423701359108810182097749467210509584293428076654573384828809574217079944388301239431309115013843331317877374435868468779972014486325557807783825502498215169806323"
         ),
         e: 65537
       },
       {
-        fingerprint: (0, import_big_integer.default)("-5595554452916591101"),
-        n: (0, import_big_integer.default)(
+        fingerprint: (0, import_big_integer4.default)("-5595554452916591101"),
+        n: (0, import_big_integer4.default)(
           "25342889448840415564971689590713473206898847759084779052582026594546022463853940585885215951168491965708222649399180603818074200620463776135424884632162512403163793083921641631564740959529419359595852941166848940585952337613333022396096584117954892216031229237302943701877588456738335398602461675225081791820393153757504952636234951323237820036543581047826906120927972487366805292115792231423684261262330394324750785450942589751755390156647751460719351439969059949569615302809050721500330239005077889855323917509948255722081644689442127297605422579707142646660768825302832201908302295573257427896031830742328565032949"
         ),
         e: 65537
@@ -68171,8 +68171,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api18.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api18.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -68184,7 +68184,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api.default.PQInnerData({
+  const pqInnerData = new import_api18.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -68252,7 +68252,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api.default.ReqDHParams({
+    new import_api18.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -68261,7 +68261,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api.default.ServerDHParamsOk || serverDhParams instanceof import_api.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api18.default.ServerDHParamsOk || serverDhParams instanceof import_api18.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -68270,7 +68270,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api18.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -68279,7 +68279,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api18.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -68294,7 +68294,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api18.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -68344,7 +68344,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api.default.ClientDHInnerData({
+  const clientDhInner = new import_api18.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -68357,13 +68357,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api.default.SetClientDHParams({
+    new import_api18.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api.default.DhGenOk, import_api.default.DhGenRetry, import_api.default.DhGenFail];
+  const nonceTypes = [import_api18.default.DhGenOk, import_api18.default.DhGenRetry, import_api18.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -68383,18 +68383,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api18.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api18, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors5());
-    import_api = __toESM(require_api());
+    import_api18 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -74529,12 +74529,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api2.default.upload.SaveBigFilePart({
+              isLarge ? new import_api19.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api2.default.upload.SaveFilePart({
+              }) : new import_api19.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -74558,23 +74558,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api2.default.InputFileBig({
+  return isLarge ? new import_api19.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api2.default.InputFile({
+  }) : new import_api19.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api2, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api19, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api2 = __toESM(require_api());
+    import_api19 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors5());
@@ -78719,101 +78719,8 @@ DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDis
 NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})`);
 };
 
-// src/support/modules/client.ts
-var import_TelegramClient = __toESM(require_TelegramClient());
-var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api3 = __toESM(require_api());
-async function init(account, onUpdate, onError) {
-  const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
-  const keys = {};
-  if (dc1)
-    keys["1"] = dc1;
-  if (dc2)
-    keys["2"] = dc2;
-  if (dc3)
-    keys["3"] = dc3;
-  if (dc4)
-    keys["4"] = dc4;
-  if (dc5)
-    keys["5"] = dc5;
-  const sessionData = {
-    mainDcId: Number(dcId),
-    keys,
-    hashes: {}
-  };
-  const session = empty ? new import_CallbackSession.default(void 0, () => {
-  }) : new import_CallbackSession.default(sessionData, () => {
-  }, true);
-  const client = new import_TelegramClient.default(
-    session,
-    2040,
-    "Desktop",
-    "Windows 11",
-    "5.4.1 x64",
-    "en",
-    "tdesktop",
-    "en",
-    account.accountId,
-    dcId,
-    onError
-  );
-  if (!client) {
-    throw new Error("CLIENT_NOT_INITED");
-  }
-  await client.start();
-  client._initTime = Number(performance.now() - startTime).toFixed(0);
-  console.warn({
-    accountId: account.accountId,
-    message: `[CLIENT_STARTED]`,
-    payload: {
-      initTime: `${client._initTime}ms`
-    }
-  });
-  client.addEventHandler(
-    (update) => {
-      if (!(update instanceof import_api3.default.UpdatesTooLong)) {
-        const updates = "updates" in update ? update.updates : [update];
-        updates.forEach(async (update2) => {
-          onUpdate(update2);
-        });
-      }
-    },
-    {
-      build: (update) => update
-    }
-  );
-  return client;
-}
-var initClient = async (account, onUpdate, onError) => {
-  try {
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error("TIMEOUT_ERROR"));
-      }, 9e4);
-    });
-    const client = await Promise.race([
-      init(account, onUpdate, onError),
-      timeoutPromise
-    ]);
-    if (!client) {
-      throw new Error("GLOBAL_ERROR");
-    }
-    return client;
-  } catch (e) {
-    if (e.message === "TIMEOUT_ERROR") {
-      console.warn({
-        accountId: account.accountId,
-        message: "[CLIENT_TIMEOUT_RECONNECT]"
-      });
-      return await initClient(account, onUpdate, onError);
-    }
-    throw new Error(e.message);
-  }
-};
-
 // src/support/methods/account/clearAuthorizations.ts
-var import_api4 = __toESM(require_api());
+var import_api = __toESM(require_api());
 
 // src/support/modules/invokeRequest.ts
 async function invokeRequest(client, request, params = {}) {
@@ -78864,7 +78771,7 @@ async function invokeRequest(client, request, params = {}) {
     }
     if (shouldIgnoreErrors)
       return void 0;
-    if (err.message !== "PEER_FLOOD" && err.message !== "PASSWORD_EMPTY" && request.className !== "contacts.Block" && request.className !== "contacts.Unblock" && request.className !== "messages.DeleteChatUser") {
+    if (err.message !== "PEER_FLOOD" && err.message !== "PASSWORD_EMPTY" && request.className !== "messages.DeleteChatUser") {
       await sendToMainBot(`\u{1F480} REQUEST ERROR (${request.className}) \u{1F480}
 ID: ${client._accountId}
 ERROR: ${err.message}
@@ -78878,7 +78785,7 @@ REQUEST: ${JSON.stringify(request)}`);
 async function clearAuthorizations(client) {
   const invokedAuthorizations = await invokeRequest(
     client,
-    new import_api4.default.account.GetAuthorizations()
+    new import_api.default.account.GetAuthorizations()
   );
   const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
   await sleep(100);
@@ -78892,7 +78799,7 @@ async function clearAuthorizations(client) {
       if (!authorization.current) {
         await invokeRequest(
           client,
-          new import_api4.default.account.ResetAuthorization({
+          new import_api.default.account.ResetAuthorization({
             hash: authorization.hash
           }),
           { shouldIgnoreErrors: true }
@@ -78904,15 +78811,15 @@ async function clearAuthorizations(client) {
 }
 
 // src/support/methods/account/setup2FA.ts
-var import_api5 = __toESM(require_api());
+var import_api2 = __toESM(require_api());
 var setup2FA = async (client, account) => {
   try {
     const { twoFa } = account;
     const resetPassword = await invokeRequest(
       client,
-      new import_api5.default.account.ResetPassword()
+      new import_api2.default.account.ResetPassword()
     );
-    if (resetPassword instanceof import_api5.default.account.ResetPasswordOk) {
+    if (resetPassword instanceof import_api2.default.account.ResetPasswordOk) {
       throw new Error("PASSWORD_EMPTY");
     }
     if (!twoFa) {
@@ -78939,11 +78846,11 @@ ERROR: ${e.message}`
 };
 
 // src/support/methods/account/updateStatus.ts
-var import_api6 = __toESM(require_api());
+var import_api3 = __toESM(require_api());
 var updateStatus = async (client, offline) => {
   const result = await invokeRequest(
     client,
-    new import_api6.default.account.UpdateStatus({
+    new import_api3.default.account.UpdateStatus({
       offline
     })
   );
@@ -78968,7 +78875,7 @@ var handleUpdate = async (accountId, update) => {
 };
 
 // src/support/modules/accountSetup.ts
-var import_api7 = __toESM(require_api());
+var import_api4 = __toESM(require_api());
 var settings = {
   muteUntil: 2147483647,
   showPreviews: false,
@@ -78981,15 +78888,15 @@ var accountSetup = async (client, account, setuped) => {
   }
   const dialogFilters = await invokeRequest(
     client,
-    new import_api7.default.messages.GetDialogFilters()
+    new import_api4.default.messages.GetDialogFilters()
   );
   for (const filter2 of (dialogFilters == null ? void 0 : dialogFilters.filters) || []) {
-    if (filter2 instanceof import_api7.default.DialogFilterDefault) {
+    if (filter2 instanceof import_api4.default.DialogFilterDefault) {
       continue;
     }
     const isDeleted = await invokeRequest(
       client,
-      new import_api7.default.messages.UpdateDialogFilter({
+      new import_api4.default.messages.UpdateDialogFilter({
         id: filter2.id,
         filter: void 0
       })
@@ -79003,23 +78910,23 @@ FID: ${filter2.id}`);
   }
   const isNC = await invokeRequest(
     client,
-    new import_api7.default.account.UpdateNotifySettings({
-      peer: new import_api7.default.InputNotifyChats(),
-      settings: new import_api7.default.InputPeerNotifySettings(settings)
+    new import_api4.default.account.UpdateNotifySettings({
+      peer: new import_api4.default.InputNotifyChats(),
+      settings: new import_api4.default.InputPeerNotifySettings(settings)
     })
   );
   const isNB = await invokeRequest(
     client,
-    new import_api7.default.account.UpdateNotifySettings({
-      peer: new import_api7.default.InputNotifyBroadcasts(),
-      settings: new import_api7.default.InputPeerNotifySettings(settings)
+    new import_api4.default.account.UpdateNotifySettings({
+      peer: new import_api4.default.InputNotifyBroadcasts(),
+      settings: new import_api4.default.InputPeerNotifySettings(settings)
     })
   );
   const isNU = await invokeRequest(
     client,
-    new import_api7.default.account.UpdateNotifySettings({
-      peer: new import_api7.default.InputNotifyUsers(),
-      settings: new import_api7.default.InputPeerNotifySettings(settings)
+    new import_api4.default.account.UpdateNotifySettings({
+      peer: new import_api4.default.InputNotifyUsers(),
+      settings: new import_api4.default.InputPeerNotifySettings(settings)
     })
   );
   if (!isNC || !isNB || !isNU) {
@@ -79032,7 +78939,7 @@ USERS: ${isNU}`);
   }
   const isSN = await invokeRequest(
     client,
-    new import_api7.default.account.SetContactSignUpNotification({ silent: true })
+    new import_api4.default.account.SetContactSignUpNotification({ silent: true })
   );
   if (!isSN) {
     await sendToMainBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
@@ -79041,58 +78948,58 @@ ID: ${accountId}`);
   }
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyAbout(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyAbout(),
+      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api7.default.InputPrivacyValueAllowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyPhoneP2P(),
+      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyForwards(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyForwards(),
+      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api7.default.account.SetPrivacy({
-      key: new import_api7.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api7.default.InputPrivacyValueDisallowAll()]
+    new import_api4.default.account.SetPrivacy({
+      key: new import_api4.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
     })
   );
   await updateAccountById(accountId, {
@@ -79102,79 +79009,79 @@ ID: ${accountId}`);
 };
 
 // src/support/modules/automaticCheck.ts
-var import_api20 = __toESM(require_api());
+var import_api17 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
-var import_api8 = __toESM(require_api());
+var import_api5 = __toESM(require_api());
 var leaveChannel = async (client, channel) => {
-  await invokeRequest(client, new import_api8.default.channels.LeaveChannel({ channel }));
+  await invokeRequest(client, new import_api5.default.channels.LeaveChannel({ channel }));
 };
 
 // src/support/methods/contacts/blockContact.ts
-var import_api9 = __toESM(require_api());
+var import_api6 = __toESM(require_api());
 var blockContact = async (client, peer) => {
-  await invokeRequest(client, new import_api9.default.contacts.Block({ id: peer }), {
+  await invokeRequest(client, new import_api6.default.contacts.Block({ id: peer }), {
     shouldIgnoreErrors: true
   });
 };
 
 // src/support/methods/contacts/deleteContacts.ts
-var import_api10 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 var deleteContacts = async (client, users) => {
   await invokeRequest(
     client,
-    new import_api10.default.contacts.DeleteContacts({ id: users })
+    new import_api7.default.contacts.DeleteContacts({ id: users })
   );
 };
 
 // src/support/methods/contacts/getContacts.ts
-var import_big_integer2 = __toESM(require_BigInteger());
-var import_api11 = __toESM(require_api());
+var import_big_integer = __toESM(require_BigInteger());
+var import_api8 = __toESM(require_api());
 var getContacts = async (client) => {
   const contacts = await invokeRequest(
     client,
-    new import_api11.default.contacts.GetContacts({ hash: (0, import_big_integer2.default)("0") })
+    new import_api8.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
   );
-  if (!contacts || contacts instanceof import_api11.default.contacts.ContactsNotModified) {
+  if (!contacts || contacts instanceof import_api8.default.contacts.ContactsNotModified) {
     return null;
   }
   return contacts;
 };
 
 // src/support/methods/folders/editFolders.ts
-var import_api12 = __toESM(require_api());
+var import_api9 = __toESM(require_api());
 var editFolders = async (client, folderPeers) => {
   await invokeRequest(
     client,
-    new import_api12.default.folders.EditPeerFolders({ folderPeers })
+    new import_api9.default.folders.EditPeerFolders({ folderPeers })
   );
 };
 
 // src/support/methods/messages/clearAllDrafts.ts
-var import_api13 = __toESM(require_api());
+var import_api10 = __toESM(require_api());
 var clearAllDrafts = async (client) => {
-  await invokeRequest(client, new import_api13.default.messages.ClearAllDrafts());
+  await invokeRequest(client, new import_api10.default.messages.ClearAllDrafts());
 };
 
 // src/support/methods/messages/deleteChatUser.ts
-var import_big_integer3 = __toESM(require_BigInteger());
-var import_api14 = __toESM(require_api());
+var import_big_integer2 = __toESM(require_BigInteger());
+var import_api11 = __toESM(require_api());
 var deleteChatUser = async (client, chatId, userId) => {
   await invokeRequest(
     client,
-    new import_api14.default.messages.DeleteChatUser({
-      chatId: (0, import_big_integer3.default)(chatId),
+    new import_api11.default.messages.DeleteChatUser({
+      chatId: (0, import_big_integer2.default)(chatId),
       userId
     })
   );
 };
 
 // src/support/methods/messages/deleteHistory.ts
-var import_api15 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
     client,
-    new import_api15.default.messages.DeleteHistory({
+    new import_api12.default.messages.DeleteHistory({
       peer,
       ...shouldDeleteForAll && { revoke: true },
       ...!shouldDeleteForAll && { just_clear: true }
@@ -79190,54 +79097,54 @@ async function deleteHistory(client, peer, shouldDeleteForAll) {
 }
 
 // src/support/methods/messages/togglePin.ts
-var import_api16 = __toESM(require_api());
+var import_api13 = __toESM(require_api());
 var togglePin = async (client, peer, pinned) => {
   await invokeRequest(
     client,
-    new import_api16.default.messages.ToggleDialogPin({ peer, pinned })
+    new import_api13.default.messages.ToggleDialogPin({ peer, pinned })
   );
 };
 
 // src/support/methods/peer/buildInputPeer.ts
-var import_big_integer4 = __toESM(require_BigInteger());
-var import_api17 = __toESM(require_api());
+var import_big_integer3 = __toESM(require_BigInteger());
+var import_api14 = __toESM(require_api());
 function buildInputPeer(dialog) {
   const { type } = dialog;
   if (type === "user") {
     const { user } = dialog;
-    return new import_api17.default.InputPeerUser({
+    return new import_api14.default.InputPeerUser({
       userId: user.id,
-      accessHash: (0, import_big_integer4.default)(user.accessHash)
+      accessHash: (0, import_big_integer3.default)(user.accessHash)
     });
   } else if (type === "channel") {
     const { chat } = dialog;
-    if (chat instanceof import_api17.default.ChatEmpty || chat instanceof import_api17.default.Chat || chat instanceof import_api17.default.ChatForbidden) {
-      return new import_api17.default.InputPeerChat({
+    if (chat instanceof import_api14.default.ChatEmpty || chat instanceof import_api14.default.Chat || chat instanceof import_api14.default.ChatForbidden) {
+      return new import_api14.default.InputPeerChat({
         chatId: chat.id
       });
     }
-    return new import_api17.default.InputPeerChannel({
+    return new import_api14.default.InputPeerChannel({
       channelId: chat.id,
-      accessHash: (0, import_big_integer4.default)(chat.accessHash)
+      accessHash: (0, import_big_integer3.default)(chat.accessHash)
     });
   }
-  return new import_api17.default.InputPeerChat({
+  return new import_api14.default.InputPeerChat({
     chatId: dialog.chat.id
   });
 }
 
 // src/support/methods/users/getDialogs.ts
-var import_api19 = __toESM(require_api());
+var import_api16 = __toESM(require_api());
 
 // src/support/methods/peer/getIdByPeer.ts
-var import_api18 = __toESM(require_api());
+var import_api15 = __toESM(require_api());
 var getIdByPeer = (peer) => {
   if (!peer) {
     return "-1";
   }
-  if (peer instanceof import_api18.default.PeerUser) {
+  if (peer instanceof import_api15.default.PeerUser) {
     return String(peer.userId);
-  } else if (peer instanceof import_api18.default.PeerChannel) {
+  } else if (peer instanceof import_api15.default.PeerChannel) {
     return String(peer.channelId);
   }
   return String(peer.chatId);
@@ -79250,18 +79157,18 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
   while (true) {
     const d = await invokeRequest(
       client,
-      new import_api19.default.messages.GetDialogs({
-        offsetPeer: new import_api19.default.InputPeerEmpty(),
+      new import_api16.default.messages.GetDialogs({
+        offsetPeer: new import_api16.default.InputPeerEmpty(),
         folderId,
         limit: 100,
         offsetDate
       })
     );
-    if (!d || d instanceof import_api19.default.messages.DialogsNotModified) {
+    if (!d || d instanceof import_api16.default.messages.DialogsNotModified) {
       return [];
     }
     for (const dialog of d.dialogs) {
-      if (!(dialog instanceof import_api19.default.Dialog) || dialogs.find(
+      if (!(dialog instanceof import_api16.default.Dialog) || dialogs.find(
         ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
       )) {
         continue;
@@ -79285,14 +79192,14 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
         return [];
       }
-      if (dialog.peer instanceof import_api19.default.PeerUser) {
+      if (dialog.peer instanceof import_api16.default.PeerUser) {
         const user = d.users.find((m) => String(m.id) === id);
-        if (!user || user instanceof import_api19.default.UserEmpty || !user.accessHash) {
+        if (!user || user instanceof import_api16.default.UserEmpty || !user.accessHash) {
           await sendToMainBot(`** GET USERS: USER ERROR **
 ACCOUNT_ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-EMPTY_USER: ${user instanceof import_api19.default.UserEmpty} 
-USER_ACCESS_HASH: ${user instanceof import_api19.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
+EMPTY_USER: ${user instanceof import_api16.default.UserEmpty} 
+USER_ACCESS_HASH: ${user instanceof import_api16.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
           return [];
         }
         dialogs.push({
@@ -79302,13 +79209,13 @@ USER_ACCESS_HASH: ${user instanceof import_api19.default.UserEmpty ? "false" : B
           message,
           chat: null
         });
-      } else if (dialog.peer instanceof import_api19.default.PeerChat) {
+      } else if (dialog.peer instanceof import_api16.default.PeerChat) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api19.default.ChannelForbidden || chat instanceof import_api19.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHAT ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api19.default.ChannelForbidden || chat instanceof import_api19.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79319,13 +79226,13 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           message,
           user: null
         });
-      } else if (dialog.peer instanceof import_api19.default.PeerChannel) {
+      } else if (dialog.peer instanceof import_api16.default.PeerChannel) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api19.default.ChannelForbidden || chat instanceof import_api19.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHANNEL ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api19.default.ChannelForbidden || chat instanceof import_api19.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79345,11 +79252,11 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
       const lastMessage = d.messages.find(
         (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
       );
-      if (!lastMessage || lastMessage instanceof import_api19.default.MessageEmpty) {
+      if (!lastMessage || lastMessage instanceof import_api16.default.MessageEmpty) {
         await sendToMainBot(`** LAST MESSAGE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
-MESSAGE_EMPTY: ${lastMessage instanceof import_api19.default.MessageEmpty}
+MESSAGE_EMPTY: ${lastMessage instanceof import_api16.default.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
         return [];
       }
@@ -79372,14 +79279,14 @@ var automaticCheck = async (client, account) => {
       if (dialog.pinned) {
         await togglePin(
           client,
-          new import_api20.default.InputDialogPeer({
+          new import_api17.default.InputDialogPeer({
             peer
           }),
           void 0
         );
       }
       folderPeers.push(
-        new import_api20.default.InputFolderPeer({
+        new import_api17.default.InputFolderPeer({
           peer,
           folderId: 0
         })
@@ -79399,11 +79306,11 @@ var automaticCheck = async (client, account) => {
         await leaveChannel(client, peer);
       } else if (type === "chat") {
         const { chat } = dialog;
-        if (chat instanceof import_api20.default.Chat || chat instanceof import_api20.default.ChatForbidden || chat instanceof import_api20.default.ChatEmpty) {
+        if (chat instanceof import_api17.default.Chat || chat instanceof import_api17.default.ChatForbidden || chat instanceof import_api17.default.ChatEmpty) {
           await deleteChatUser(
             client,
             String(chat.id),
-            new import_api20.default.InputUserSelf()
+            new import_api17.default.InputUserSelf()
           );
           await deleteHistory(client, peer, false);
         } else {
@@ -79411,7 +79318,7 @@ var automaticCheck = async (client, account) => {
         }
       } else if (type === "user") {
         const { user } = dialog;
-        if (user instanceof import_api20.default.User && user.bot) {
+        if (user instanceof import_api17.default.User && user.bot) {
           await deleteHistory(client, peer, false);
           await blockContact(client, peer);
         } else {
@@ -79423,9 +79330,9 @@ var automaticCheck = async (client, account) => {
     if (contacts && contacts.users.length > 0) {
       const users = [];
       for (const user of contacts.users) {
-        if (user instanceof import_api20.default.User && user.accessHash) {
+        if (user instanceof import_api17.default.User && user.accessHash) {
           users.push(
-            new import_api20.default.InputPeerUser({
+            new import_api17.default.InputPeerUser({
               userId: user.id,
               accessHash: user.accessHash
             })
@@ -79440,6 +79347,99 @@ var automaticCheck = async (client, account) => {
     await sendToMainBot(`** AUTOMATIC CHECK ERROR **
 ACCOUNT ID: ${accountId}
 ERROR: ${e.message}`);
+  }
+};
+
+// src/support/modules/client.ts
+var import_TelegramClient = __toESM(require_TelegramClient());
+var import_CallbackSession = __toESM(require_CallbackSession());
+var import_api20 = __toESM(require_api());
+async function init(account, onUpdate, onError) {
+  const startTime = performance.now();
+  const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
+  const keys = {};
+  if (dc1)
+    keys["1"] = dc1;
+  if (dc2)
+    keys["2"] = dc2;
+  if (dc3)
+    keys["3"] = dc3;
+  if (dc4)
+    keys["4"] = dc4;
+  if (dc5)
+    keys["5"] = dc5;
+  const sessionData = {
+    mainDcId: Number(dcId),
+    keys,
+    hashes: {}
+  };
+  const session = empty ? new import_CallbackSession.default(void 0, () => {
+  }) : new import_CallbackSession.default(sessionData, () => {
+  }, true);
+  const client = new import_TelegramClient.default(
+    session,
+    2040,
+    "Desktop",
+    "Windows 11",
+    "5.4.1 x64",
+    "en",
+    "tdesktop",
+    "en",
+    account.accountId,
+    dcId,
+    onError
+  );
+  if (!client) {
+    throw new Error("CLIENT_NOT_INITED");
+  }
+  await client.start();
+  client._initTime = Number(performance.now() - startTime).toFixed(0);
+  console.warn({
+    accountId: account.accountId,
+    message: `[CLIENT_STARTED]`,
+    payload: {
+      initTime: `${client._initTime}ms`
+    }
+  });
+  client.addEventHandler(
+    (update) => {
+      if (!(update instanceof import_api20.default.UpdatesTooLong)) {
+        const updates = "updates" in update ? update.updates : [update];
+        updates.forEach(async (update2) => {
+          onUpdate(update2);
+        });
+      }
+    },
+    {
+      build: (update) => update
+    }
+  );
+  return client;
+}
+var initClient = async (account, onUpdate, onError) => {
+  try {
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => {
+        reject(new Error("TIMEOUT_ERROR"));
+      }, 9e4);
+    });
+    const client = await Promise.race([
+      init(account, onUpdate, onError),
+      timeoutPromise
+    ]);
+    if (!client) {
+      throw new Error("GLOBAL_ERROR");
+    }
+    return client;
+  } catch (e) {
+    if (e.message === "TIMEOUT_ERROR") {
+      console.warn({
+        accountId: account.accountId,
+        message: "[CLIENT_TIMEOUT_RECONNECT]"
+      });
+      return await initClient(account, onUpdate, onError);
+    }
+    throw new Error(e.message);
   }
 };
 
@@ -79537,14 +79537,14 @@ var checker = async (ID, accountsInWork) => {
       });
       await sendToMainBot(
         `** BAN ACCOUNT **
-  ID: ${ID};
-  Error: ${e.message}`
+ID: ${ID};
+Error: ${e.message}`
       );
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
-  ID: ${ID};
-  Error: ${e.message}`
+ID: ${ID};
+Error: ${e.message}`
       );
     }
   }

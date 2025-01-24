@@ -70,8 +70,6 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     if (
       err.message !== 'PEER_FLOOD' &&
       err.message !== 'PASSWORD_EMPTY' &&
-      request.className !== 'contacts.Block' &&
-      request.className !== 'contacts.Unblock' &&
       request.className !== 'messages.DeleteChatUser'
     ) {
       await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀

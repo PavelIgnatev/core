@@ -1,6 +1,5 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import { Account } from '../@types/Account';
-import { initClient } from './client';
 import { getAccountById, updateAccountById } from '../db/accounts';
 import { getTimeString, sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
@@ -10,6 +9,7 @@ import { updateStatus } from '../methods/account/updateStatus';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { accountSetup } from './accountSetup';
 import { automaticCheck } from './automaticCheck';
+import { initClient } from './client';
 
 export const checker = async (
   ID: string,
@@ -133,14 +133,14 @@ export const checker = async (
       });
       await sendToMainBot(
         `** BAN ACCOUNT **
-  ID: ${ID};
-  Error: ${e.message}`
+ID: ${ID};
+Error: ${e.message}`
       );
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
-  ID: ${ID};
-  Error: ${e.message}`
+ID: ${ID};
+Error: ${e.message}`
       );
     }
   }
