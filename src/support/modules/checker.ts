@@ -133,13 +133,13 @@ export const checker = async (
       });
       await sendToMainBot(
         `** BAN ACCOUNT **
-ID: ${ID};
+ID: ${ID}
 Error: ${e.message}`
       );
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
-ID: ${ID};
+ID: ${ID}
 Error: ${e.message}`
       );
     }

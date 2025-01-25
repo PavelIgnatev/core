@@ -68171,8 +68171,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api18.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api18.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api19.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api19.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -68184,7 +68184,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api18.default.PQInnerData({
+  const pqInnerData = new import_api19.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -68252,7 +68252,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api18.default.ReqDHParams({
+    new import_api19.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -68261,7 +68261,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api18.default.ServerDHParamsOk || serverDhParams instanceof import_api18.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api19.default.ServerDHParamsOk || serverDhParams instanceof import_api19.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -68270,7 +68270,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api18.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api19.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -68279,7 +68279,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api18.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api19.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -68294,7 +68294,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api18.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api19.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -68344,7 +68344,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api18.default.ClientDHInnerData({
+  const clientDhInner = new import_api19.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -68357,13 +68357,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api18.default.SetClientDHParams({
+    new import_api19.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api18.default.DhGenOk, import_api18.default.DhGenRetry, import_api18.default.DhGenFail];
+  const nonceTypes = [import_api19.default.DhGenOk, import_api19.default.DhGenRetry, import_api19.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -68383,18 +68383,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api18.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api19.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api18, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api19, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors5());
-    import_api18 = __toESM(require_api());
+    import_api19 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -74529,12 +74529,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api19.default.upload.SaveBigFilePart({
+              isLarge ? new import_api20.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api19.default.upload.SaveFilePart({
+              }) : new import_api20.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -74558,23 +74558,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api19.default.InputFileBig({
+  return isLarge ? new import_api20.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api19.default.InputFile({
+  }) : new import_api20.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api19, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api20, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api19 = __toESM(require_api());
+    import_api20 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors5());
@@ -78858,6 +78858,7 @@ var updateStatus = async (client, offline) => {
 };
 
 // src/support/methods/update/handleUpdate.ts
+var import_api4 = __toESM(require_api());
 var handleUpdate = async (accountId, update) => {
   if (!update) {
     return;
@@ -78872,10 +78873,24 @@ var handleUpdate = async (accountId, update) => {
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
+  if (update instanceof import_api4.default.UpdateShortMessage) {
+    if (String(update.userId) === "777000") {
+      console.warn({
+        accountId,
+        message: "[TELEGRAM_SERVICE_NOTIFICATION]",
+        payload: JSON.parse(JSON.stringify(update))
+      });
+    }
+    await sendToMainBot(
+      `[TELEGRAM_SERVICE_NOTIFICATION]
+ID: ${accountId}
+MESSAGE: ${update.message}`
+    );
+  }
 };
 
 // src/support/modules/accountSetup.ts
-var import_api4 = __toESM(require_api());
+var import_api5 = __toESM(require_api());
 var settings = {
   muteUntil: 2147483647,
   showPreviews: false,
@@ -78888,15 +78903,15 @@ var accountSetup = async (client, account, setuped) => {
   }
   const dialogFilters = await invokeRequest(
     client,
-    new import_api4.default.messages.GetDialogFilters()
+    new import_api5.default.messages.GetDialogFilters()
   );
   for (const filter2 of (dialogFilters == null ? void 0 : dialogFilters.filters) || []) {
-    if (filter2 instanceof import_api4.default.DialogFilterDefault) {
+    if (filter2 instanceof import_api5.default.DialogFilterDefault) {
       continue;
     }
     const isDeleted = await invokeRequest(
       client,
-      new import_api4.default.messages.UpdateDialogFilter({
+      new import_api5.default.messages.UpdateDialogFilter({
         id: filter2.id,
         filter: void 0
       })
@@ -78910,23 +78925,23 @@ FID: ${filter2.id}`);
   }
   const isNC = await invokeRequest(
     client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyChats(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
+    new import_api5.default.account.UpdateNotifySettings({
+      peer: new import_api5.default.InputNotifyChats(),
+      settings: new import_api5.default.InputPeerNotifySettings(settings)
     })
   );
   const isNB = await invokeRequest(
     client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyBroadcasts(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
+    new import_api5.default.account.UpdateNotifySettings({
+      peer: new import_api5.default.InputNotifyBroadcasts(),
+      settings: new import_api5.default.InputPeerNotifySettings(settings)
     })
   );
   const isNU = await invokeRequest(
     client,
-    new import_api4.default.account.UpdateNotifySettings({
-      peer: new import_api4.default.InputNotifyUsers(),
-      settings: new import_api4.default.InputPeerNotifySettings(settings)
+    new import_api5.default.account.UpdateNotifySettings({
+      peer: new import_api5.default.InputNotifyUsers(),
+      settings: new import_api5.default.InputPeerNotifySettings(settings)
     })
   );
   if (!isNC || !isNB || !isNU) {
@@ -78939,7 +78954,7 @@ USERS: ${isNU}`);
   }
   const isSN = await invokeRequest(
     client,
-    new import_api4.default.account.SetContactSignUpNotification({ silent: true })
+    new import_api5.default.account.SetContactSignUpNotification({ silent: true })
   );
   if (!isSN) {
     await sendToMainBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
@@ -78948,58 +78963,58 @@ ID: ${accountId}`);
   }
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyAbout(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyAbout(),
+      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyStatusTimestamp(),
+      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api4.default.InputPrivacyValueAllowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyProfilePhoto(),
+      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyPhoneNumber(),
+      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyPhoneP2P(),
+      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyChatInvite(),
+      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyForwards(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyForwards(),
+      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
     })
   );
   await invokeRequest(
     client,
-    new import_api4.default.account.SetPrivacy({
-      key: new import_api4.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api4.default.InputPrivacyValueDisallowAll()]
+    new import_api5.default.account.SetPrivacy({
+      key: new import_api5.default.InputPrivacyKeyPhoneCall(),
+      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
     })
   );
   await updateAccountById(accountId, {
@@ -79009,67 +79024,67 @@ ID: ${accountId}`);
 };
 
 // src/support/modules/automaticCheck.ts
-var import_api17 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
-var import_api5 = __toESM(require_api());
+var import_api6 = __toESM(require_api());
 var leaveChannel = async (client, channel) => {
-  await invokeRequest(client, new import_api5.default.channels.LeaveChannel({ channel }));
+  await invokeRequest(client, new import_api6.default.channels.LeaveChannel({ channel }));
 };
 
 // src/support/methods/contacts/blockContact.ts
-var import_api6 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 var blockContact = async (client, peer) => {
-  await invokeRequest(client, new import_api6.default.contacts.Block({ id: peer }), {
+  await invokeRequest(client, new import_api7.default.contacts.Block({ id: peer }), {
     shouldIgnoreErrors: true
   });
 };
 
 // src/support/methods/contacts/deleteContacts.ts
-var import_api7 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 var deleteContacts = async (client, users) => {
   await invokeRequest(
     client,
-    new import_api7.default.contacts.DeleteContacts({ id: users })
+    new import_api8.default.contacts.DeleteContacts({ id: users })
   );
 };
 
 // src/support/methods/contacts/getContacts.ts
 var import_big_integer = __toESM(require_BigInteger());
-var import_api8 = __toESM(require_api());
+var import_api9 = __toESM(require_api());
 var getContacts = async (client) => {
   const contacts = await invokeRequest(
     client,
-    new import_api8.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
+    new import_api9.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
   );
-  if (!contacts || contacts instanceof import_api8.default.contacts.ContactsNotModified) {
+  if (!contacts || contacts instanceof import_api9.default.contacts.ContactsNotModified) {
     return null;
   }
   return contacts;
 };
 
 // src/support/methods/folders/editFolders.ts
-var import_api9 = __toESM(require_api());
+var import_api10 = __toESM(require_api());
 var editFolders = async (client, folderPeers) => {
   await invokeRequest(
     client,
-    new import_api9.default.folders.EditPeerFolders({ folderPeers })
+    new import_api10.default.folders.EditPeerFolders({ folderPeers })
   );
 };
 
 // src/support/methods/messages/clearAllDrafts.ts
-var import_api10 = __toESM(require_api());
+var import_api11 = __toESM(require_api());
 var clearAllDrafts = async (client) => {
-  await invokeRequest(client, new import_api10.default.messages.ClearAllDrafts());
+  await invokeRequest(client, new import_api11.default.messages.ClearAllDrafts());
 };
 
 // src/support/methods/messages/deleteChatUser.ts
 var import_big_integer2 = __toESM(require_BigInteger());
-var import_api11 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 var deleteChatUser = async (client, chatId, userId) => {
   await invokeRequest(
     client,
-    new import_api11.default.messages.DeleteChatUser({
+    new import_api12.default.messages.DeleteChatUser({
       chatId: (0, import_big_integer2.default)(chatId),
       userId
     })
@@ -79077,11 +79092,11 @@ var deleteChatUser = async (client, chatId, userId) => {
 };
 
 // src/support/methods/messages/deleteHistory.ts
-var import_api12 = __toESM(require_api());
+var import_api13 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
     client,
-    new import_api12.default.messages.DeleteHistory({
+    new import_api13.default.messages.DeleteHistory({
       peer,
       ...shouldDeleteForAll && { revoke: true },
       ...!shouldDeleteForAll && { just_clear: true }
@@ -79097,54 +79112,54 @@ async function deleteHistory(client, peer, shouldDeleteForAll) {
 }
 
 // src/support/methods/messages/togglePin.ts
-var import_api13 = __toESM(require_api());
+var import_api14 = __toESM(require_api());
 var togglePin = async (client, peer, pinned) => {
   await invokeRequest(
     client,
-    new import_api13.default.messages.ToggleDialogPin({ peer, pinned })
+    new import_api14.default.messages.ToggleDialogPin({ peer, pinned })
   );
 };
 
 // src/support/methods/peer/buildInputPeer.ts
 var import_big_integer3 = __toESM(require_BigInteger());
-var import_api14 = __toESM(require_api());
+var import_api15 = __toESM(require_api());
 function buildInputPeer(dialog) {
   const { type } = dialog;
   if (type === "user") {
     const { user } = dialog;
-    return new import_api14.default.InputPeerUser({
+    return new import_api15.default.InputPeerUser({
       userId: user.id,
       accessHash: (0, import_big_integer3.default)(user.accessHash)
     });
   } else if (type === "channel") {
     const { chat } = dialog;
-    if (chat instanceof import_api14.default.ChatEmpty || chat instanceof import_api14.default.Chat || chat instanceof import_api14.default.ChatForbidden) {
-      return new import_api14.default.InputPeerChat({
+    if (chat instanceof import_api15.default.ChatEmpty || chat instanceof import_api15.default.Chat || chat instanceof import_api15.default.ChatForbidden) {
+      return new import_api15.default.InputPeerChat({
         chatId: chat.id
       });
     }
-    return new import_api14.default.InputPeerChannel({
+    return new import_api15.default.InputPeerChannel({
       channelId: chat.id,
       accessHash: (0, import_big_integer3.default)(chat.accessHash)
     });
   }
-  return new import_api14.default.InputPeerChat({
+  return new import_api15.default.InputPeerChat({
     chatId: dialog.chat.id
   });
 }
 
 // src/support/methods/users/getDialogs.ts
-var import_api16 = __toESM(require_api());
+var import_api17 = __toESM(require_api());
 
 // src/support/methods/peer/getIdByPeer.ts
-var import_api15 = __toESM(require_api());
+var import_api16 = __toESM(require_api());
 var getIdByPeer = (peer) => {
   if (!peer) {
     return "-1";
   }
-  if (peer instanceof import_api15.default.PeerUser) {
+  if (peer instanceof import_api16.default.PeerUser) {
     return String(peer.userId);
-  } else if (peer instanceof import_api15.default.PeerChannel) {
+  } else if (peer instanceof import_api16.default.PeerChannel) {
     return String(peer.channelId);
   }
   return String(peer.chatId);
@@ -79157,18 +79172,18 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
   while (true) {
     const d = await invokeRequest(
       client,
-      new import_api16.default.messages.GetDialogs({
-        offsetPeer: new import_api16.default.InputPeerEmpty(),
+      new import_api17.default.messages.GetDialogs({
+        offsetPeer: new import_api17.default.InputPeerEmpty(),
         folderId,
         limit: 100,
         offsetDate
       })
     );
-    if (!d || d instanceof import_api16.default.messages.DialogsNotModified) {
+    if (!d || d instanceof import_api17.default.messages.DialogsNotModified) {
       return [];
     }
     for (const dialog of d.dialogs) {
-      if (!(dialog instanceof import_api16.default.Dialog) || dialogs.find(
+      if (!(dialog instanceof import_api17.default.Dialog) || dialogs.find(
         ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
       )) {
         continue;
@@ -79192,14 +79207,14 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
         return [];
       }
-      if (dialog.peer instanceof import_api16.default.PeerUser) {
+      if (dialog.peer instanceof import_api17.default.PeerUser) {
         const user = d.users.find((m) => String(m.id) === id);
-        if (!user || user instanceof import_api16.default.UserEmpty || !user.accessHash) {
+        if (!user || user instanceof import_api17.default.UserEmpty || !user.accessHash) {
           await sendToMainBot(`** GET USERS: USER ERROR **
 ACCOUNT_ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-EMPTY_USER: ${user instanceof import_api16.default.UserEmpty} 
-USER_ACCESS_HASH: ${user instanceof import_api16.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
+EMPTY_USER: ${user instanceof import_api17.default.UserEmpty} 
+USER_ACCESS_HASH: ${user instanceof import_api17.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
           return [];
         }
         dialogs.push({
@@ -79209,13 +79224,13 @@ USER_ACCESS_HASH: ${user instanceof import_api16.default.UserEmpty ? "false" : B
           message,
           chat: null
         });
-      } else if (dialog.peer instanceof import_api16.default.PeerChat) {
+      } else if (dialog.peer instanceof import_api17.default.PeerChat) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHAT ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79226,13 +79241,13 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           message,
           user: null
         });
-      } else if (dialog.peer instanceof import_api16.default.PeerChannel) {
+      } else if (dialog.peer instanceof import_api17.default.PeerChannel) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHANNEL ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api16.default.ChannelForbidden || chat instanceof import_api16.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79252,11 +79267,11 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
       const lastMessage = d.messages.find(
         (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
       );
-      if (!lastMessage || lastMessage instanceof import_api16.default.MessageEmpty) {
+      if (!lastMessage || lastMessage instanceof import_api17.default.MessageEmpty) {
         await sendToMainBot(`** LAST MESSAGE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
-MESSAGE_EMPTY: ${lastMessage instanceof import_api16.default.MessageEmpty}
+MESSAGE_EMPTY: ${lastMessage instanceof import_api17.default.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
         return [];
       }
@@ -79279,14 +79294,14 @@ var automaticCheck = async (client, account) => {
       if (dialog.pinned) {
         await togglePin(
           client,
-          new import_api17.default.InputDialogPeer({
+          new import_api18.default.InputDialogPeer({
             peer
           }),
           void 0
         );
       }
       folderPeers.push(
-        new import_api17.default.InputFolderPeer({
+        new import_api18.default.InputFolderPeer({
           peer,
           folderId: 0
         })
@@ -79306,11 +79321,11 @@ var automaticCheck = async (client, account) => {
         await leaveChannel(client, peer);
       } else if (type === "chat") {
         const { chat } = dialog;
-        if (chat instanceof import_api17.default.Chat || chat instanceof import_api17.default.ChatForbidden || chat instanceof import_api17.default.ChatEmpty) {
+        if (chat instanceof import_api18.default.Chat || chat instanceof import_api18.default.ChatForbidden || chat instanceof import_api18.default.ChatEmpty) {
           await deleteChatUser(
             client,
             String(chat.id),
-            new import_api17.default.InputUserSelf()
+            new import_api18.default.InputUserSelf()
           );
           await deleteHistory(client, peer, false);
         } else {
@@ -79318,7 +79333,7 @@ var automaticCheck = async (client, account) => {
         }
       } else if (type === "user") {
         const { user } = dialog;
-        if (user instanceof import_api17.default.User && user.bot) {
+        if (user instanceof import_api18.default.User && user.bot) {
           await deleteHistory(client, peer, false);
           await blockContact(client, peer);
         } else {
@@ -79330,9 +79345,9 @@ var automaticCheck = async (client, account) => {
     if (contacts && contacts.users.length > 0) {
       const users = [];
       for (const user of contacts.users) {
-        if (user instanceof import_api17.default.User && user.accessHash) {
+        if (user instanceof import_api18.default.User && user.accessHash) {
           users.push(
-            new import_api17.default.InputPeerUser({
+            new import_api18.default.InputPeerUser({
               userId: user.id,
               accessHash: user.accessHash
             })
@@ -79353,7 +79368,7 @@ ERROR: ${e.message}`);
 // src/support/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api20 = __toESM(require_api());
+var import_api21 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
@@ -79403,7 +79418,7 @@ async function init(account, onUpdate, onError) {
   });
   client.addEventHandler(
     (update) => {
-      if (!(update instanceof import_api20.default.UpdatesTooLong)) {
+      if (!(update instanceof import_api21.default.UpdatesTooLong)) {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update2) => {
           onUpdate(update2);
@@ -79537,13 +79552,13 @@ var checker = async (ID, accountsInWork) => {
       });
       await sendToMainBot(
         `** BAN ACCOUNT **
-ID: ${ID};
+ID: ${ID}
 Error: ${e.message}`
       );
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
-ID: ${ID};
+ID: ${ID}
 Error: ${e.message}`
       );
     }
@@ -79557,10 +79572,10 @@ Error: ${e.message}`
 };
 
 // src/support/modules/relogin.ts
-var import_api22 = __toESM(require_api());
+var import_api23 = __toESM(require_api());
 
 // src/support/methods/users/getMe.ts
-var import_api21 = __toESM(require_api());
+var import_api22 = __toESM(require_api());
 
 // src/support/index.ts
 var reChecker = async () => {

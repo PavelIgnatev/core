@@ -69,7 +69,7 @@ export const handleUpdate = async (
       if (String(userId) === '777000') {
         console.warn({
           accountId,
-          message: 'TELEGRAM_SERVICE_NOTIFICATION',
+          message: '[TELEGRAM_SERVICE_NOTIFICATION]',
           payload: JSON.parse(JSON.stringify(update)),
         });
       }
