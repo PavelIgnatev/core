@@ -78880,12 +78880,12 @@ var handleUpdate = async (accountId, update) => {
         message: "[TELEGRAM_SERVICE_NOTIFICATION]",
         payload: JSON.parse(JSON.stringify(update))
       });
-    }
-    await sendToMainBot(
-      `[TELEGRAM_SERVICE_NOTIFICATION]
+      await sendToMainBot(
+        `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
 MESSAGE: ${update.message}`
-    );
+      );
+    }
   }
 };
 
