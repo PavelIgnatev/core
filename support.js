@@ -79211,17 +79211,6 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
         continue;
       }
       const id = getIdByPeer(dialog.peer);
-      if ([
-        "178220800",
-        "1271266957",
-        "1087968824",
-        "136817688",
-        "5434988373",
-        "777000",
-        "2282583322"
-      ].includes(id)) {
-        continue;
-      }
       const message = d.messages.find((m) => getIdByPeer(m.peerId) === id);
       if (!message) {
         await sendToMainBot(`** GET USERS: MESSAGE ERROR **
