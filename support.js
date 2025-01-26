@@ -64207,6 +64207,15 @@ var require_api = __commonJS({
   }
 });
 
+// node_modules/emoji-regex/index.js
+var require_emoji_regex = __commonJS({
+  "node_modules/emoji-regex/index.js"(exports2, module2) {
+    module2.exports = () => {
+      return /[#*0-9]\uFE0F?\u20E3|[\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23ED-\u23EF\u23F1\u23F2\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB\u25FC\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692\u2694-\u2697\u2699\u269B\u269C\u26A0\u26A7\u26AA\u26B0\u26B1\u26BD\u26BE\u26C4\u26C8\u26CF\u26D1\u26E9\u26F0-\u26F5\u26F7\u26F8\u26FA\u2702\u2708\u2709\u270F\u2712\u2714\u2716\u271D\u2721\u2733\u2734\u2744\u2747\u2757\u2763\u27A1\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B55\u3030\u303D\u3297\u3299]\uFE0F?|[\u261D\u270C\u270D](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\u270A\u270B](?:\uD83C[\uDFFB-\uDFFF])?|[\u23E9-\u23EC\u23F0\u23F3\u25FD\u2693\u26A1\u26AB\u26C5\u26CE\u26D4\u26EA\u26FD\u2705\u2728\u274C\u274E\u2753-\u2755\u2795-\u2797\u27B0\u27BF\u2B50]|\u26D3\uFE0F?(?:\u200D\uD83D\uDCA5)?|\u26F9(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\u2764\uFE0F?(?:\u200D(?:\uD83D\uDD25|\uD83E\uDE79))?|\uD83C(?:[\uDC04\uDD70\uDD71\uDD7E\uDD7F\uDE02\uDE37\uDF21\uDF24-\uDF2C\uDF36\uDF7D\uDF96\uDF97\uDF99-\uDF9B\uDF9E\uDF9F\uDFCD\uDFCE\uDFD4-\uDFDF\uDFF5\uDFF7]\uFE0F?|[\uDF85\uDFC2\uDFC7](?:\uD83C[\uDFFB-\uDFFF])?|[\uDFC4\uDFCA](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDFCB\uDFCC](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDCCF\uDD8E\uDD91-\uDD9A\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF43\uDF45-\uDF4A\uDF4C-\uDF7C\uDF7E-\uDF84\uDF86-\uDF93\uDFA0-\uDFC1\uDFC5\uDFC6\uDFC8\uDFC9\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF8-\uDFFF]|\uDDE6\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF]|\uDDE7\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF]|\uDDE8\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF7\uDDFA-\uDDFF]|\uDDE9\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF]|\uDDEA\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA]|\uDDEB\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7]|\uDDEC\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE]|\uDDED\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA]|\uDDEE\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9]|\uDDEF\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5]|\uDDF0\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF]|\uDDF1\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE]|\uDDF2\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF]|\uDDF3\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF]|\uDDF4\uD83C\uDDF2|\uDDF5\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE]|\uDDF6\uD83C\uDDE6|\uDDF7\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC]|\uDDF8\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF]|\uDDF9\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF]|\uDDFA\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF]|\uDDFB\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA]|\uDDFC\uD83C[\uDDEB\uDDF8]|\uDDFD\uD83C\uDDF0|\uDDFE\uD83C[\uDDEA\uDDF9]|\uDDFF\uD83C[\uDDE6\uDDF2\uDDFC]|\uDF44(?:\u200D\uD83D\uDFEB)?|\uDF4B(?:\u200D\uD83D\uDFE9)?|\uDFC3(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDFF3\uFE0F?(?:\u200D(?:\u26A7\uFE0F?|\uD83C\uDF08))?|\uDFF4(?:\u200D\u2620\uFE0F?|\uDB40\uDC67\uDB40\uDC62\uDB40(?:\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDC73\uDB40\uDC63\uDB40\uDC74|\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F)?)|\uD83D(?:[\uDC3F\uDCFD\uDD49\uDD4A\uDD6F\uDD70\uDD73\uDD76-\uDD79\uDD87\uDD8A-\uDD8D\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA\uDECB\uDECD-\uDECF\uDEE0-\uDEE5\uDEE9\uDEF0\uDEF3]\uFE0F?|[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDC8F\uDC91\uDCAA\uDD7A\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC](?:\uD83C[\uDFFB-\uDFFF])?|[\uDC6E\uDC70\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4\uDEB5](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD74\uDD90](?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?|[\uDC00-\uDC07\uDC09-\uDC14\uDC16-\uDC25\uDC27-\uDC3A\uDC3C-\uDC3E\uDC40\uDC44\uDC45\uDC51-\uDC65\uDC6A\uDC79-\uDC7B\uDC7D-\uDC80\uDC84\uDC88-\uDC8E\uDC90\uDC92-\uDCA9\uDCAB-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDDA4\uDDFB-\uDE2D\uDE2F-\uDE34\uDE37-\uDE41\uDE43\uDE44\uDE48-\uDE4A\uDE80-\uDEA2\uDEA4-\uDEB3\uDEB7-\uDEBF\uDEC1-\uDEC5\uDED0-\uDED2\uDED5-\uDED7\uDEDC-\uDEDF\uDEEB\uDEEC\uDEF4-\uDEFC\uDFE0-\uDFEB\uDFF0]|\uDC08(?:\u200D\u2B1B)?|\uDC15(?:\u200D\uD83E\uDDBA)?|\uDC26(?:\u200D(?:\u2B1B|\uD83D\uDD25))?|\uDC3B(?:\u200D\u2744\uFE0F?)?|\uDC41\uFE0F?(?:\u200D\uD83D\uDDE8\uFE0F?)?|\uDC68(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDC68\uDC69]\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?)|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?\uDC68\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D\uDC68\uD83C[\uDFFB-\uDFFE])))?))?|\uDC69(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:\uDC8B\u200D\uD83D)?[\uDC68\uDC69]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D(?:[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?|\uDC69\u200D\uD83D(?:\uDC66(?:\u200D\uD83D\uDC66)?|\uDC67(?:\u200D\uD83D[\uDC66\uDC67])?))|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFC-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFD-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFD\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D\uD83D(?:[\uDC68\uDC69]|\uDC8B\u200D\uD83D[\uDC68\uDC69])\uD83C[\uDFFB-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83D[\uDC68\uDC69]\uD83C[\uDFFB-\uDFFE])))?))?|\uDC6F(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDD75(?:\uD83C[\uDFFB-\uDFFF]|\uFE0F)?(?:\u200D[\u2640\u2642]\uFE0F?)?|\uDE2E(?:\u200D\uD83D\uDCA8)?|\uDE35(?:\u200D\uD83D\uDCAB)?|\uDE36(?:\u200D\uD83C\uDF2B\uFE0F?)?|\uDE42(?:\u200D[\u2194\u2195]\uFE0F?)?|\uDEB6(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?)|\uD83E(?:[\uDD0C\uDD0F\uDD18-\uDD1F\uDD30-\uDD34\uDD36\uDD77\uDDB5\uDDB6\uDDBB\uDDD2\uDDD3\uDDD5\uDEC3-\uDEC5\uDEF0\uDEF2-\uDEF8](?:\uD83C[\uDFFB-\uDFFF])?|[\uDD26\uDD35\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD\uDDCF\uDDD4\uDDD6-\uDDDD](?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDDDE\uDDDF](?:\u200D[\u2640\u2642]\uFE0F?)?|[\uDD0D\uDD0E\uDD10-\uDD17\uDD20-\uDD25\uDD27-\uDD2F\uDD3A\uDD3F-\uDD45\uDD47-\uDD76\uDD78-\uDDB4\uDDB7\uDDBA\uDDBC-\uDDCC\uDDD0\uDDE0-\uDDFF\uDE70-\uDE7C\uDE80-\uDE89\uDE8F-\uDEC2\uDEC6\uDECE-\uDEDC\uDEDF-\uDEE9]|\uDD3C(?:\u200D[\u2640\u2642]\uFE0F?|\uD83C[\uDFFB-\uDFFF])?|\uDDCE(?:\uD83C[\uDFFB-\uDFFF])?(?:\u200D(?:[\u2640\u2642]\uFE0F?(?:\u200D\u27A1\uFE0F?)?|\u27A1\uFE0F?))?|\uDDD1(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1|\uDDD1\u200D\uD83E\uDDD2(?:\u200D\uD83E\uDDD2)?|\uDDD2(?:\u200D\uD83E\uDDD2)?))|\uD83C(?:\uDFFB(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFC-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFC(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFD-\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFD(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFE(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFD\uDFFF]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?|\uDFFF(?:\u200D(?:[\u2695\u2696\u2708]\uFE0F?|\u2764\uFE0F?\u200D(?:\uD83D\uDC8B\u200D)?\uD83E\uDDD1\uD83C[\uDFFB-\uDFFE]|\uD83C[\uDF3E\uDF73\uDF7C\uDF84\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E(?:[\uDDAF\uDDBC\uDDBD](?:\u200D\u27A1\uFE0F?)?|[\uDDB0-\uDDB3]|\uDD1D\u200D\uD83E\uDDD1\uD83C[\uDFFB-\uDFFF])))?))?|\uDEF1(?:\uD83C(?:\uDFFB(?:\u200D\uD83E\uDEF2\uD83C[\uDFFC-\uDFFF])?|\uDFFC(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFD-\uDFFF])?|\uDFFD(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])?|\uDFFE(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFD\uDFFF])?|\uDFFF(?:\u200D\uD83E\uDEF2\uD83C[\uDFFB-\uDFFE])?))?)/g;
+    };
+  }
+});
+
 // src/gramjs/errors/RPCBaseErrors.js
 var require_RPCBaseErrors = __commonJS({
   "src/gramjs/errors/RPCBaseErrors.js"(exports2, module2) {
@@ -68171,8 +68180,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api24.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api24.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api21.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api21.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -68184,7 +68193,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api24.default.PQInnerData({
+  const pqInnerData = new import_api21.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -68252,7 +68261,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api24.default.ReqDHParams({
+    new import_api21.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -68261,7 +68270,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api24.default.ServerDHParamsOk || serverDhParams instanceof import_api24.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api21.default.ServerDHParamsOk || serverDhParams instanceof import_api21.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -68270,7 +68279,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api24.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api21.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -68279,7 +68288,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api24.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api21.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -68294,7 +68303,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api24.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api21.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -68344,7 +68353,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api24.default.ClientDHInnerData({
+  const clientDhInner = new import_api21.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -68357,13 +68366,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api24.default.SetClientDHParams({
+    new import_api21.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api24.default.DhGenOk, import_api24.default.DhGenRetry, import_api24.default.DhGenFail];
+  const nonceTypes = [import_api21.default.DhGenOk, import_api21.default.DhGenRetry, import_api21.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -68383,18 +68392,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api24.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api21.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api24, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api21, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors5());
-    import_api24 = __toESM(require_api());
+    import_api21 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -74529,12 +74538,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api25.default.upload.SaveBigFilePart({
+              isLarge ? new import_api22.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api25.default.upload.SaveFilePart({
+              }) : new import_api22.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -74558,23 +74567,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api25.default.InputFileBig({
+  return isLarge ? new import_api22.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api25.default.InputFile({
+  }) : new import_api22.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api25, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api22, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api25 = __toESM(require_api());
+    import_api22 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors5());
@@ -78732,7 +78741,7 @@ DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDis
 NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})`);
 };
 
-// src/support/methods/account/clearAuthorizations.ts
+// src/support/methods/account/updateStatus.ts
 var import_api = __toESM(require_api());
 
 // src/support/modules/invokeRequest.ts
@@ -78794,76 +78803,11 @@ REQUEST: ${JSON.stringify(request)}`);
   }
 }
 
-// src/support/methods/account/clearAuthorizations.ts
-async function clearAuthorizations(client) {
-  const invokedAuthorizations = await invokeRequest(
-    client,
-    new import_api.default.account.GetAuthorizations()
-  );
-  const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
-  await sleep(100);
-  console.warn({
-    accountId: client._accountId,
-    message: "[AUTHORIZATION_SESSIONS]",
-    payload: authorizations
-  });
-  for (const authorization of authorizations) {
-    try {
-      if (!authorization.current) {
-        await invokeRequest(
-          client,
-          new import_api.default.account.ResetAuthorization({
-            hash: authorization.hash
-          }),
-          { shouldIgnoreErrors: true }
-        );
-      }
-    } catch {
-    }
-  }
-}
-
-// src/support/methods/account/setup2FA.ts
-var import_api2 = __toESM(require_api());
-var setup2FA = async (client, account) => {
-  try {
-    const { twoFa } = account;
-    const resetPassword = await invokeRequest(
-      client,
-      new import_api2.default.account.ResetPassword()
-    );
-    if (resetPassword instanceof import_api2.default.account.ResetPasswordOk) {
-      throw new Error("PASSWORD_EMPTY");
-    }
-    if (!twoFa) {
-      await updateAccountById(client._accountId, {
-        twoFa: true
-      });
-    }
-    return true;
-  } catch (e) {
-    if (e.message === "PASSWORD_EMPTY") {
-      await updateAccountById(client._accountId, {
-        twoFa: false
-      });
-      return false;
-    } else {
-      await sendToMainBot(
-        `\u{1F480} DELETED_2FA_ERROR \u{1F480}
-ID: ${client._accountId}
-ERROR: ${e.message}`
-      );
-      return true;
-    }
-  }
-};
-
 // src/support/methods/account/updateStatus.ts
-var import_api3 = __toESM(require_api());
 var updateStatus = async (client, offline) => {
   const result = await invokeRequest(
     client,
-    new import_api3.default.account.UpdateStatus({
+    new import_api.default.account.UpdateStatus({
       offline
     })
   );
@@ -78871,7 +78815,7 @@ var updateStatus = async (client, offline) => {
 };
 
 // src/support/methods/update/handleUpdate.ts
-var import_api4 = __toESM(require_api());
+var import_api2 = __toESM(require_api());
 var handleUpdate = async (accountId, update) => {
   if (!update) {
     return;
@@ -78886,7 +78830,7 @@ var handleUpdate = async (accountId, update) => {
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
-  if (update instanceof import_api4.default.UpdateShortMessage) {
+  if (update instanceof import_api2.default.UpdateShortMessage) {
     if (String(update.userId) === "777000") {
       console.warn({
         accountId,
@@ -78902,202 +78846,68 @@ MESSAGE: ${update.message}`
   }
 };
 
-// src/support/modules/accountSetup.ts
-var import_api5 = __toESM(require_api());
-var settings = {
-  muteUntil: 2147483647,
-  showPreviews: false,
-  silent: true
-};
-var accountSetup = async (client, account, setuped) => {
-  const { accountId } = account;
-  if (setuped) {
-    return;
-  }
-  const dialogFilters = await invokeRequest(
-    client,
-    new import_api5.default.messages.GetDialogFilters()
-  );
-  for (const filter2 of (dialogFilters == null ? void 0 : dialogFilters.filters) || []) {
-    if (filter2 instanceof import_api5.default.DialogFilterDefault) {
-      continue;
-    }
-    const isDeleted = await invokeRequest(
-      client,
-      new import_api5.default.messages.UpdateDialogFilter({
-        id: filter2.id,
-        filter: void 0
-      })
-    );
-    if (!isDeleted) {
-      await sendToMainBot(`** ACCOUNT SETUP: DELETE DIALOG FILTER ERROR **
-ID: ${accountId}
-FID: ${filter2.id}`);
-      throw new Error("GLOBAL_ERROR");
-    }
-  }
-  const isNC = await invokeRequest(
-    client,
-    new import_api5.default.account.UpdateNotifySettings({
-      peer: new import_api5.default.InputNotifyChats(),
-      settings: new import_api5.default.InputPeerNotifySettings(settings)
-    })
-  );
-  const isNB = await invokeRequest(
-    client,
-    new import_api5.default.account.UpdateNotifySettings({
-      peer: new import_api5.default.InputNotifyBroadcasts(),
-      settings: new import_api5.default.InputPeerNotifySettings(settings)
-    })
-  );
-  const isNU = await invokeRequest(
-    client,
-    new import_api5.default.account.UpdateNotifySettings({
-      peer: new import_api5.default.InputNotifyUsers(),
-      settings: new import_api5.default.InputPeerNotifySettings(settings)
-    })
-  );
-  if (!isNC || !isNB || !isNU) {
-    await sendToMainBot(`** ACCOUNT SETUP: UPDATE NOTIFY SETTINGS ERROR **
-ID: ${accountId}
-CHATS: ${isNC}
-BROADCASTS: ${isNB}
-USERS: ${isNU}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  const isSN = await invokeRequest(
-    client,
-    new import_api5.default.account.SetContactSignUpNotification({ silent: true })
-  );
-  if (!isSN) {
-    await sendToMainBot(`** ACCOUNT SETUP: SIGN UP NOTIFICATION ERROR **
-ID: ${accountId}`);
-    throw new Error("GLOBAL_ERROR");
-  }
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyAbout(),
-      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyStatusTimestamp(),
-      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyProfilePhoto(),
-      rules: [new import_api5.default.InputPrivacyValueAllowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyPhoneNumber(),
-      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyPhoneP2P(),
-      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyChatInvite(),
-      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyForwards(),
-      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await invokeRequest(
-    client,
-    new import_api5.default.account.SetPrivacy({
-      key: new import_api5.default.InputPrivacyKeyPhoneCall(),
-      rules: [new import_api5.default.InputPrivacyValueDisallowAll()]
-    })
-  );
-  await updateAccountById(accountId, {
-    setuped: true,
-    banned: false
-  });
-};
-
 // src/support/modules/automaticCheck.ts
-var import_api23 = __toESM(require_api());
+var import_api20 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
-var import_api6 = __toESM(require_api());
+var import_api3 = __toESM(require_api());
 var leaveChannel = async (client, channel) => {
-  await invokeRequest(client, new import_api6.default.channels.LeaveChannel({ channel }));
+  await invokeRequest(client, new import_api3.default.channels.LeaveChannel({ channel }));
 };
 
 // src/support/methods/contacts/blockContact.ts
-var import_api7 = __toESM(require_api());
+var import_api4 = __toESM(require_api());
 var blockContact = async (client, peer) => {
-  await invokeRequest(client, new import_api7.default.contacts.Block({ id: peer }), {
+  await invokeRequest(client, new import_api4.default.contacts.Block({ id: peer }), {
     shouldIgnoreErrors: true
   });
 };
 
 // src/support/methods/contacts/deleteContacts.ts
-var import_api8 = __toESM(require_api());
+var import_api5 = __toESM(require_api());
 var deleteContacts = async (client, users) => {
   await invokeRequest(
     client,
-    new import_api8.default.contacts.DeleteContacts({ id: users })
+    new import_api5.default.contacts.DeleteContacts({ id: users })
   );
 };
 
 // src/support/methods/contacts/getContacts.ts
 var import_big_integer = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
+var import_api6 = __toESM(require_api());
 var getContacts = async (client) => {
   const contacts = await invokeRequest(
     client,
-    new import_api9.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
+    new import_api6.default.contacts.GetContacts({ hash: (0, import_big_integer.default)("0") })
   );
-  if (!contacts || contacts instanceof import_api9.default.contacts.ContactsNotModified) {
+  if (!contacts || contacts instanceof import_api6.default.contacts.ContactsNotModified) {
     return null;
   }
   return contacts;
 };
 
 // src/support/methods/folders/editFolders.ts
-var import_api10 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 var editFolders = async (client, folderPeers) => {
   await invokeRequest(
     client,
-    new import_api10.default.folders.EditPeerFolders({ folderPeers })
+    new import_api7.default.folders.EditPeerFolders({ folderPeers })
   );
 };
 
 // src/support/methods/messages/clearAllDrafts.ts
-var import_api11 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 var clearAllDrafts = async (client) => {
-  await invokeRequest(client, new import_api11.default.messages.ClearAllDrafts());
+  await invokeRequest(client, new import_api8.default.messages.ClearAllDrafts());
 };
 
 // src/support/methods/messages/deleteChatUser.ts
 var import_big_integer2 = __toESM(require_BigInteger());
-var import_api12 = __toESM(require_api());
+var import_api9 = __toESM(require_api());
 var deleteChatUser = async (client, chatId, userId) => {
   await invokeRequest(
     client,
-    new import_api12.default.messages.DeleteChatUser({
+    new import_api9.default.messages.DeleteChatUser({
       chatId: (0, import_big_integer2.default)(chatId),
       userId
     })
@@ -79105,11 +78915,11 @@ var deleteChatUser = async (client, chatId, userId) => {
 };
 
 // src/support/methods/messages/deleteHistory.ts
-var import_api13 = __toESM(require_api());
+var import_api10 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
     client,
-    new import_api13.default.messages.DeleteHistory({
+    new import_api10.default.messages.DeleteHistory({
       peer,
       ...shouldDeleteForAll && { revoke: true },
       ...!shouldDeleteForAll && { just_clear: true }
@@ -79125,54 +78935,54 @@ async function deleteHistory(client, peer, shouldDeleteForAll) {
 }
 
 // src/support/methods/messages/togglePin.ts
-var import_api14 = __toESM(require_api());
+var import_api11 = __toESM(require_api());
 var togglePin = async (client, peer, pinned) => {
   await invokeRequest(
     client,
-    new import_api14.default.messages.ToggleDialogPin({ peer, pinned })
+    new import_api11.default.messages.ToggleDialogPin({ peer, pinned })
   );
 };
 
 // src/support/methods/peer/buildInputPeer.ts
 var import_big_integer3 = __toESM(require_BigInteger());
-var import_api15 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 function buildInputPeer(dialog) {
   const { type } = dialog;
   if (type === "user") {
     const { user } = dialog;
-    return new import_api15.default.InputPeerUser({
+    return new import_api12.default.InputPeerUser({
       userId: user.id,
       accessHash: (0, import_big_integer3.default)(user.accessHash)
     });
   } else if (type === "channel") {
     const { chat } = dialog;
-    if (chat instanceof import_api15.default.ChatEmpty || chat instanceof import_api15.default.Chat || chat instanceof import_api15.default.ChatForbidden) {
-      return new import_api15.default.InputPeerChat({
+    if (chat instanceof import_api12.default.ChatEmpty || chat instanceof import_api12.default.Chat || chat instanceof import_api12.default.ChatForbidden) {
+      return new import_api12.default.InputPeerChat({
         chatId: chat.id
       });
     }
-    return new import_api15.default.InputPeerChannel({
+    return new import_api12.default.InputPeerChannel({
       channelId: chat.id,
       accessHash: (0, import_big_integer3.default)(chat.accessHash)
     });
   }
-  return new import_api15.default.InputPeerChat({
+  return new import_api12.default.InputPeerChat({
     chatId: dialog.chat.id
   });
 }
 
 // src/support/methods/users/getDialogs.ts
-var import_api17 = __toESM(require_api());
+var import_api14 = __toESM(require_api());
 
 // src/support/methods/peer/getIdByPeer.ts
-var import_api16 = __toESM(require_api());
+var import_api13 = __toESM(require_api());
 var getIdByPeer = (peer) => {
   if (!peer) {
     return "-1";
   }
-  if (peer instanceof import_api16.default.PeerUser) {
+  if (peer instanceof import_api13.default.PeerUser) {
     return String(peer.userId);
-  } else if (peer instanceof import_api16.default.PeerChannel) {
+  } else if (peer instanceof import_api13.default.PeerChannel) {
     return String(peer.channelId);
   }
   return String(peer.chatId);
@@ -79185,18 +78995,18 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
   while (true) {
     const d = await invokeRequest(
       client,
-      new import_api17.default.messages.GetDialogs({
-        offsetPeer: new import_api17.default.InputPeerEmpty(),
+      new import_api14.default.messages.GetDialogs({
+        offsetPeer: new import_api14.default.InputPeerEmpty(),
         folderId,
         limit: 100,
         offsetDate
       })
     );
-    if (!d || d instanceof import_api17.default.messages.DialogsNotModified) {
+    if (!d || d instanceof import_api14.default.messages.DialogsNotModified) {
       return [];
     }
     for (const dialog of d.dialogs) {
-      if (!(dialog instanceof import_api17.default.Dialog) || dialogs.find(
+      if (!(dialog instanceof import_api14.default.Dialog) || dialogs.find(
         ({ dialog: dl }) => getIdByPeer(dl.peer) === getIdByPeer(dialog.peer)
       )) {
         continue;
@@ -79220,14 +79030,14 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
         return [];
       }
-      if (dialog.peer instanceof import_api17.default.PeerUser) {
+      if (dialog.peer instanceof import_api14.default.PeerUser) {
         const user = d.users.find((m) => String(m.id) === id);
-        if (!user || user instanceof import_api17.default.UserEmpty || !user.accessHash) {
+        if (!user || user instanceof import_api14.default.UserEmpty || !user.accessHash) {
           await sendToMainBot(`** GET USERS: USER ERROR **
 ACCOUNT_ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-EMPTY_USER: ${user instanceof import_api17.default.UserEmpty} 
-USER_ACCESS_HASH: ${user instanceof import_api17.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
+EMPTY_USER: ${user instanceof import_api14.default.UserEmpty} 
+USER_ACCESS_HASH: ${user instanceof import_api14.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
           return [];
         }
         dialogs.push({
@@ -79237,13 +79047,13 @@ USER_ACCESS_HASH: ${user instanceof import_api17.default.UserEmpty ? "false" : B
           message,
           chat: null
         });
-      } else if (dialog.peer instanceof import_api17.default.PeerChat) {
+      } else if (dialog.peer instanceof import_api14.default.PeerChat) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api14.default.ChannelForbidden || chat instanceof import_api14.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHAT ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api14.default.ChannelForbidden || chat instanceof import_api14.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79254,13 +79064,13 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           message,
           user: null
         });
-      } else if (dialog.peer instanceof import_api17.default.PeerChannel) {
+      } else if (dialog.peer instanceof import_api14.default.PeerChannel) {
         const chat = d.chats.find((d2) => String(d2.id) === id);
-        if (!chat || (chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel) && !chat.accessHash) {
+        if (!chat || (chat instanceof import_api14.default.ChannelForbidden || chat instanceof import_api14.default.Channel) && !chat.accessHash) {
           await sendToMainBot(`** GET USERS: CHANNEL ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
-IS_CHANNEL: ${chat instanceof import_api17.default.ChannelForbidden || chat instanceof import_api17.default.Channel}
+IS_CHANNEL: ${chat instanceof import_api14.default.ChannelForbidden || chat instanceof import_api14.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
           return [];
         }
@@ -79280,11 +79090,11 @@ ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
       const lastMessage = d.messages.find(
         (m) => getIdByPeer(m.peerId) === getIdByPeer(lastDialog.peer)
       );
-      if (!lastMessage || lastMessage instanceof import_api17.default.MessageEmpty) {
+      if (!lastMessage || lastMessage instanceof import_api14.default.MessageEmpty) {
         await sendToMainBot(`** LAST MESSAGE NOT DEFINED **
 ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
-MESSAGE_EMPTY: ${lastMessage instanceof import_api17.default.MessageEmpty}
+MESSAGE_EMPTY: ${lastMessage instanceof import_api14.default.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
         return [];
       }
@@ -79295,14 +79105,387 @@ OFFSET DATE: ${offsetDate}`);
 };
 
 // src/support/modules/checkSpamBlock.ts
-var import_api22 = __toESM(require_api());
+var import_api19 = __toESM(require_api());
+
+// src/support/helpers/makeRequestGpt.ts
+var import_emoji_regex = __toESM(require_emoji_regex());
+function trimmer(str) {
+  if (str.endsWith(".") || str.endsWith(",") || str.endsWith("!") || str.endsWith("?")) {
+    return str.slice(0, -1);
+  }
+  return str;
+}
+function hasConsecutiveQuestionSentences(text) {
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  let previousWasQuestion = false;
+  for (const sentence of sentences) {
+    const trimmedSentence = sentence.trim();
+    if (trimmedSentence.endsWith("?")) {
+      if (previousWasQuestion) {
+        return true;
+      }
+      previousWasQuestion = true;
+    } else {
+      previousWasQuestion = false;
+    }
+  }
+  return false;
+}
+function containsIdeographicOrArabic(str) {
+  const ideographicAndArabicRegex = /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  return ideographicAndArabicRegex.test(str);
+}
+var validateText = (companyData, inputString, language) => {
+  if (language === "ANY") {
+    return false;
+  }
+  const companyDataLowerCase = companyData.toLowerCase();
+  const words = inputString.replace(/[.,!?;:'`"()@«»…—\-/]/g, " ").split(/\s+/);
+  const russianUkrainianRegex = /^[а-яёіїєґ]+$/i;
+  const englishRegex = /^[a-z]+$/i;
+  const pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+  const links = inputString.match(pattern);
+  if (links) {
+    for (const link of links) {
+      if (!companyDataLowerCase.includes(trimmer(link.trim().toLowerCase()))) {
+        return link.toLocaleLowerCase();
+      }
+    }
+  }
+  const isProperNoun = (word) => word[0] === word[0].toUpperCase();
+  const cleanWord = (word) => trimmer(word.trim());
+  for (let word of words) {
+    word = cleanWord(word);
+    if (word.length === 0)
+      continue;
+    if (word === "mainlink")
+      continue;
+    if (language === "RUSSIAN" || language === "UKRAINIAN") {
+      if (!russianUkrainianRegex.test(word) && !isProperNoun(word)) {
+        if (!companyDataLowerCase.includes(word.toLowerCase())) {
+          return word.toLowerCase();
+        }
+      }
+    } else if (language === "ENGLISH") {
+      if (!englishRegex.test(word) && !isProperNoun(word)) {
+        if (!companyDataLowerCase.includes(word.toLowerCase())) {
+          return word.toLowerCase();
+        }
+      }
+    } else {
+      return word.toLowerCase();
+    }
+  }
+  return false;
+};
+function filterString(str, part, replaceValue) {
+  if (!part) {
+    return str;
+  }
+  const escapedPart = part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replace(new RegExp(escapedPart, "gi"), replaceValue);
+}
+function capitalizeFirstLetter2(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+function addSpaceAfterPunctuation(str) {
+  const urlRegex = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\?\=\-\_\+\%\'\~\#]*)*/g;
+  let match;
+  let urls = [];
+  while ((match = urlRegex.exec(str)) !== null) {
+    urls.push({ start: match.index, end: match.index + match[0].length });
+  }
+  let result = "";
+  for (let i = 0; i < str.length; i++) {
+    const inUrl = urls.some((url2) => i >= url2.start && i < url2.end);
+    if (!inUrl && /[,.?!;:]/.test(str[i]) && i + 1 < str.length && /\S/.test(str[i + 1])) {
+      result += str[i] + " ";
+    } else {
+      result += str[i];
+    }
+  }
+  return result;
+}
+function countSentences(paragraph) {
+  const sentenceEnders = [".", "!", "?"];
+  let sentenceCount = 0;
+  for (let i = 0; i < paragraph.length; i++) {
+    if (sentenceEnders.includes(paragraph[i])) {
+      sentenceCount++;
+    }
+  }
+  return sentenceCount;
+}
+function removeGreetings(text) {
+  const greetings = [
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445 \u0443\u0447\u0430\u0441\u0442\u043D\u0438\u043A\u043E\u0432",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445 \u0432\u0430\u0441",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E \u0432\u0441\u0435\u0445",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E, \u043A\u043E\u043B\u043B\u0435\u0433\u0438",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E, \u0434\u0440\u0443\u0437\u044C\u044F",
+    "\u0420\u0430\u0434 \u043F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u043E\u0432\u0430\u0442\u044C",
+    "\u0420\u0430\u0434 \u0432\u0441\u0435\u0445 \u0432\u0438\u0434\u0435\u0442\u044C",
+    "\u0420\u0430\u0434 \u0432\u0438\u0434\u0435\u0442\u044C \u0432\u0441\u0435\u0445",
+    "\u0420\u0430\u0434 \u0432\u0430\u0441 \u0432\u0438\u0434\u0435\u0442\u044C",
+    "\u0420\u0430\u0434 \u0432\u0438\u0434\u0435\u0442\u044C",
+    "\u0420\u0430\u0434\u0430 \u0432\u0438\u0434\u0435\u0442\u044C",
+    "\u041F\u0440\u0438\u0432\u0435\u0442-\u043F\u0440\u0438\u0432\u0435\u0442",
+    "\u0414\u043E\u0431\u0440\u043E\u0435 \u0432\u0440\u0435\u043C\u044F \u0441\u0443\u0442\u043E\u043A",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438 \u0441\u0443\u0442\u043E\u043A",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0440\u0435\u043C\u0435\u043D\u0438",
+    "\u0414\u043E\u0431\u0440\u0435\u0439\u0448\u0435\u0433\u043E \u0434\u043D\u044F",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0441\u0442\u0432\u0443\u044E",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0438\u043A\u0438",
+    "\u0414\u043E\u0431\u0440\u043E\u0435 \u0443\u0442\u0440\u043E",
+    "\u0414\u043E\u0431\u0440\u044B\u0439 \u0432\u0435\u0447\u0435\u0440",
+    "\u0414\u043E\u0431\u0440\u044B\u0439 \u0434\u0435\u043D\u044C",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0443\u0442\u0440\u0430",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0432\u0435\u0447\u0435\u0440\u0430",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E \u0434\u043D\u044F",
+    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0443\u0442\u0440\u0435\u0447\u043A\u043E\u043C",
+    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0443\u0442\u0440\u043E\u043C",
+    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0434\u043D\u0435\u043C",
+    "\u0421 \u0434\u043E\u0431\u0440\u044B\u043C \u0432\u0435\u0447\u0435\u0440\u043E\u043C",
+    "\u0414\u043E\u0431\u0440\u044B\u0439 \u043F\u043E\u043B\u0434\u0435\u043D\u044C",
+    "\u041F\u0440\u0438\u0432\u0435\u0442\u0438\u043A",
+    "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439\u0442\u0435",
+    "\u0417\u0434\u0440\u0430\u0432\u0441\u0442\u0432\u0443\u0439",
+    "\u041F\u0440\u0438\u0432\u0435\u0442",
+    "\u0425\u044D\u0439",
+    "\u0425\u0430\u0439",
+    "\u0414\u043E\u0431\u0440\u043E\u0433\u043E"
+  ];
+  const followUpWords = [
+    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435 \u043A\u043E\u043B\u043B\u0435\u0433\u0438",
+    "\u0434\u043E\u0440\u043E\u0433\u0438\u0435 \u0434\u0440\u0443\u0437\u044C\u044F",
+    "\u0433\u043E\u0441\u043F\u043E\u0434\u0430 \u0438 \u0434\u0430\u043C\u044B",
+    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435 \u043F\u0430\u0440\u0442\u043D\u0435\u0440\u044B",
+    "\u043A\u043E\u043B\u043B\u0435\u0433\u0438 \u043C\u043E\u0438",
+    "\u0434\u0440\u0443\u0437\u044C\u044F \u043C\u043E\u0438",
+    "\u0432\u0441\u0435\u0445 \u0432\u0430\u0441",
+    "\u043C\u043E\u0438\u0445 \u043A\u043E\u043B\u043B\u0435\u0433",
+    "\u043D\u0430\u0448\u0438\u0445 \u0433\u043E\u0441\u0442\u0435\u0439",
+    "\u0434\u043E\u0440\u043E\u0433\u0438\u0435",
+    "\u0443\u0432\u0430\u0436\u0430\u0435\u043C\u044B\u0435",
+    "\u0433\u043E\u0441\u043F\u043E\u0434\u0430",
+    "\u0442\u043E\u0432\u0430\u0440\u0438\u0449\u0438",
+    "\u043A\u043E\u043B\u043B\u0435\u0433\u0438",
+    "\u0434\u0440\u0443\u0437\u044C\u044F",
+    "\u0434\u0440\u0443\u0433",
+    "\u0442\u0435\u0431\u044F",
+    "\u0432\u0430\u0441",
+    "\u0432\u0430\u043C",
+    "\u0442\u0435\u0431\u0435",
+    "\u043D\u0430\u0448\u0438",
+    "\u0434\u043D\u044F",
+    "\u0432\u0435\u0447\u0435\u0440\u0430",
+    "\u0443\u0442\u0440\u0430",
+    "\u0432\u0440\u0435\u043C\u0435\u043D\u0438",
+    "\u0441\u0443\u0442\u043E\u043A",
+    "\u0431\u043B\u0430\u0433\u043E\u0434\u0430\u0440\u044E"
+  ];
+  greetings.forEach((greeting) => {
+    followUpWords.forEach((followUp) => {
+      const regex = new RegExp(`${greeting}\\s${followUp}[\\.,!]?`, "gi");
+      text = text.replace(regex, "");
+    });
+    const regexSingleGreeting = new RegExp(`${greeting}[\\.,!]?`, "gi");
+    text = text.replace(regexSingleGreeting, "");
+  });
+  return text.trim();
+}
+async function makeRequestGpt(accountId, messages, part, language, disableLink, mandatoryQuestion, minimalProposalLength, isRemoveGreetings, groupId, aiParams) {
+  var _a, _b, _c;
+  const generations = [];
+  const errors3 = [];
+  console.log({
+    accountId,
+    message: `[AI_REQUEST]`,
+    payload: {
+      groupId,
+      part,
+      language,
+      disableLink,
+      mandatoryQuestion,
+      minimalProposalLength,
+      isRemoveGreetings,
+      aiParams,
+      messages
+    }
+  });
+  let i = 0;
+  while (i !== 5) {
+    try {
+      const fixedMessages = messages.map((message2) => {
+        if (message2.role !== "system" || errors3.length === 0)
+          return message2;
+        return {
+          ...message2,
+          content: `${message2.content}
+## MANDATORY REQUIREMENTS FOR REPLY
+${errors3.map((error) => `- **${error}**`).join("\n")}`
+        };
+      });
+      const { data: resultData } = await axios_default.post(
+        "http://91.198.220.234/chatv2",
+        {
+          ...aiParams,
+          model: "command-r-plus-08-2024",
+          messages: fixedMessages
+        }
+      );
+      const data = ((_c = (_b = (_a = resultData == null ? void 0 : resultData.message) == null ? void 0 : _a.content) == null ? void 0 : _b[0]) == null ? void 0 : _c.text) || "";
+      if (!data.trim()) {
+        throw new Error("Empty message");
+      }
+      let message = filterString(
+        data.replace(/\n/g, "").replace(/\*/g, "").replace(/!/g, ".").replace((0, import_emoji_regex.default)(), "").replace("<ASSISTANT>:", "").replace("<ASSISTANT>", "").replaceAll(/[«»„“”‘’'"`『』「」]/g, "").replace("\u0442.me", "t.me").replace("\u0442 .me", "t.me").replace("\u0442. me", "t.me").trim(),
+        (part || "").trim(),
+        "mainlink"
+      );
+      const pattern = /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+      const hasTextLink = message.match(pattern);
+      message = isRemoveGreetings ? removeGreetings(message) : message;
+      if (message.includes("[") || message.includes("]") || message.includes("{") || message.includes("}") || message.includes("<") || message.includes(">") || message.includes("section") || message.includes("sign")) {
+        throw new Error(
+          'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"'
+        );
+      }
+      if (containsIdeographicOrArabic(message)) {
+        throw new Error(
+          "The answer must not contain Arabic characters or any hieroglyphics"
+        );
+      }
+      const text = validateText(JSON.stringify(messages), message, language);
+      if (text) {
+        throw new Error(
+          `The word ${text} is not allowed in reply, its use is prohibited`
+        );
+      }
+      generations.push(message);
+      if (hasTextLink && disableLink) {
+        throw new Error(
+          "The reply should not contain any references at this stage"
+        );
+      }
+      if (mandatoryQuestion && hasConsecutiveQuestionSentences(message)) {
+        throw new Error(
+          "An answer should contain no more than one question. The use of multiple or consecutive questions in a single answer is strictly prohibited."
+        );
+      }
+      const varMessage = capitalizeFirstLetter2(
+        addSpaceAfterPunctuation(message)
+      );
+      if (mandatoryQuestion && !varMessage.includes("?")) {
+        throw new Error(
+          "The question in the reply is mandatory. Add a question at the end of the line."
+        );
+      }
+      if (mandatoryQuestion && varMessage.length < 200) {
+        throw new Error(
+          "Minimum reply length 200 characters. Make a reply of at least 3 sentences."
+        );
+      }
+      if (minimalProposalLength > countSentences(varMessage)) {
+        throw new Error(
+          `The minimum number of sentences is ${minimalProposalLength}`
+        );
+      }
+      if (part && !varMessage.includes("mainlink")) {
+        throw new Error(
+          `The response does not contain the unique \u201C${part}\u201D part, even though it should contain`
+        );
+      }
+      console.log({
+        accountId,
+        message: `[AI_RESPONSE]`,
+        payload: { message }
+      });
+      return filterString(
+        varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ""),
+        "mainlink",
+        (part || "").trim()
+      );
+    } catch (error) {
+      await sleep(2500);
+      if (error.message !== "The answer must not contain Arabic characters or any hieroglyphics" && error.message !== 'The response should not contain suspicious characters [],{},<>, the word "section" or "sign"' && !error.message.includes("is not allowed in reply")) {
+        i += 1;
+      }
+      errors3.push(error.message);
+    }
+  }
+  await sendToMainBot(`** GENERATION_ERROR **
+GROUP ID: ${groupId}
+ACCOUNT ID: ${accountId}
+_____________
+GENERATIONS:
+${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
+ERRORS:
+${errors3.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
+  if (generations[0]) {
+    console.log({
+      accountId,
+      message: `[AI_RESPONSE]`,
+      variantMessage: generations[0]
+    });
+    return filterString(
+      generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ""),
+      "mainlink",
+      (part || "").trim()
+    );
+  }
+  throw new Error("STOPPED_ERROR");
+}
+
+// src/support/helpers/getSpamBotReason.ts
+var randomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+var getSpamBotReason = async (accountId) => {
+  const reasons = [
+    "but not all my contacts know about my account, and I urgently need to reach them",
+    "even though I haven't engaged in spam or committed any violations",
+    "because I need to access communication with important contacts, but I can't do it",
+    "because I need to urgently send a message for work",
+    "since this is the only way to reach some important people"
+  ];
+  return await makeRequestGpt(
+    accountId,
+    [
+      {
+        role: "system",
+        content: `## CONTEXT
+You help to draft an appeal to Telegram support.
+
+## STYLE GUIDE  
+- The appeal must be as simple and concise as possible;
+- Sentence limit: no more than 3;
+- Character limit: no more than 300;
+- Do not directly address support in the appeal;
+- Do not include a greeting;
+- Use an informal tone, avoid formal language;
+- Do not use questions or exclamation marks, as they are not appropriate here.`
+      },
+      {
+        role: "user",
+        content: `Write a short but effective appeal to Telegram support requesting the restoration of my ability to send messages for my account (currently, I can only send messages to mutual contacts, ${randomElement(reasons)}). I believe the restriction on my ability to send messages was imposed in error and insist that I have not engaged in any negative or suspicious activities; this should be considered when drafting the appeal. Account suspension \u2260 restriction on the ability to send messages, keep this in mind. My account is restricted from sending messages, not suspended! Do not use the phrase that I was restricted from sending messages, as it is implied when writing the appeal. Character limit: no more than 300. Sentence limit: no more than 3. The appeal must be as simple and concise as possible. Do not use formal language.`
+      }
+    ],
+    "",
+    "ENGLISH",
+    true,
+    false,
+    2,
+    false,
+    "SPAMBOT-REASON",
+    { temperature: 1, presence_penalty: 0.8, p: 0.85 }
+  );
+};
 
 // src/support/methods/contacts/resolveUsername.ts
-var import_api18 = __toESM(require_api());
+var import_api15 = __toESM(require_api());
 var resolveUsername = async (client, username) => {
   const userByUsername = await invokeRequest(
     client,
-    new import_api18.default.contacts.ResolveUsername({
+    new import_api15.default.contacts.ResolveUsername({
       username
     }),
     { shouldIgnoreErrors: true }
@@ -79311,11 +79494,11 @@ var resolveUsername = async (client, username) => {
 };
 
 // src/support/methods/contacts/unBlockContact.ts
-var import_api19 = __toESM(require_api());
+var import_api16 = __toESM(require_api());
 var unBlockContact = async (client, peer) => {
   return await invokeRequest(
     client,
-    new import_api19.default.contacts.Unblock({ id: peer }),
+    new import_api16.default.contacts.Unblock({ id: peer }),
     {
       shouldIgnoreErrors: true
     }
@@ -79324,27 +79507,27 @@ var unBlockContact = async (client, peer) => {
 
 // src/support/methods/messages/getHistory.ts
 var import_big_integer4 = __toESM(require_BigInteger());
-var import_api20 = __toESM(require_api());
+var import_api17 = __toESM(require_api());
 var getHistory = async (client, userId, accessHash, minId) => {
   const history = await invokeRequest(
     client,
-    new import_api20.default.messages.GetHistory({
-      peer: new import_api20.default.InputPeerUser({
+    new import_api17.default.messages.GetHistory({
+      peer: new import_api17.default.InputPeerUser({
         userId: (0, import_big_integer4.default)(userId),
         accessHash: (0, import_big_integer4.default)(accessHash)
       }),
       minId
     })
   );
-  if (!history || history instanceof import_api20.default.messages.MessagesNotModified) {
+  if (!history || history instanceof import_api17.default.messages.MessagesNotModified) {
     return [];
   }
-  return history.messages.filter((m) => m instanceof import_api20.default.Message);
+  return history.messages.filter((m) => m instanceof import_api17.default.Message);
 };
 
 // src/support/methods/messages/sendMessage.ts
 var import_big_integer5 = __toESM(require_BigInteger());
-var import_api21 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 var sendMessage = async (client, userId, accessHash, message, accountId, withTyping, withReadHistory) => {
   let messageUpdate;
   try {
@@ -79353,12 +79536,12 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
       for (let i = 0; i < iterations; i++) {
         await invokeRequest(
           client,
-          new import_api21.default.messages.SetTyping({
-            peer: new import_api21.default.InputPeerUser({
+          new import_api18.default.messages.SetTyping({
+            peer: new import_api18.default.InputPeerUser({
               userId: (0, import_big_integer5.default)(userId),
               accessHash: (0, import_big_integer5.default)(accessHash)
             }),
-            action: new import_api21.default.SendMessageTypingAction()
+            action: new import_api18.default.SendMessageTypingAction()
           })
         );
         await sleep(5e3);
@@ -79366,12 +79549,12 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     }
     const update = await invokeRequest(
       client,
-      new import_api21.default.messages.SendMessage({
+      new import_api18.default.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))
         ),
         clearDraft: true,
-        peer: new import_api21.default.InputPeerUser({
+        peer: new import_api18.default.InputPeerUser({
           userId: (0, import_big_integer5.default)(userId),
           accessHash: (0, import_big_integer5.default)(accessHash)
         }),
@@ -79380,11 +79563,11 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     );
     if (!update) {
       messageUpdate = null;
-    } else if (update instanceof import_api21.default.UpdateShortSentMessage || update instanceof import_api21.default.UpdateMessageID) {
+    } else if (update instanceof import_api18.default.UpdateShortSentMessage || update instanceof import_api18.default.UpdateMessageID) {
       messageUpdate = update;
     } else if ("updates" in update) {
       messageUpdate = update.updates.find(
-        (u) => u instanceof import_api21.default.UpdateMessageID
+        (u) => u instanceof import_api18.default.UpdateMessageID
       );
     }
     if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
@@ -79393,8 +79576,8 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     if (withReadHistory) {
       await invokeRequest(
         client,
-        new import_api21.default.messages.ReadHistory({
-          peer: new import_api21.default.InputPeerUser({
+        new import_api18.default.messages.ReadHistory({
+          peer: new import_api18.default.InputPeerUser({
             userId: (0, import_big_integer5.default)(userId),
             accessHash: (0, import_big_integer5.default)(accessHash)
           }),
@@ -79409,10 +79592,141 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
 };
 
 // src/support/modules/checkSpamBlock.ts
+var fileComplaint = async (client, userId, accessHash, accountId, replyMarkup) => {
+  var _a, _b, _c, _d, _e, _f, _g;
+  if (!replyMarkup || !(replyMarkup instanceof import_api19.default.ReplyKeyboardMarkup)) {
+    await sendToMainBot(`** SPAMBOT REPLY MARKUP **
+${JSON.stringify(replyMarkup)}`);
+    return;
+  }
+  let buttons = [];
+  replyMarkup.rows.forEach(
+    (row) => row.buttons.forEach((button) => buttons.push(button.text))
+  );
+  if (buttons.includes("Submit a complaint")) {
+    const s1 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      "Submit a complaint",
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h1 = await getHistory(client, userId, accessHash, s1.id);
+    const m1 = (_a = h1[0]) == null ? void 0 : _a.message;
+    if (m1 == null ? void 0 : m1.includes("already submitted")) {
+      return;
+    }
+    if (!m1 || !m1.includes("you going to do anything like that?")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+    const s2 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      "No, I\u2019ll never do any of this!",
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h2 = await getHistory(client, userId, accessHash, s2.id);
+    const m2 = (_b = h2[0]) == null ? void 0 : _b.message;
+    if (!m2 || !m2.includes("think your account was limited")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+    const reason = await getSpamBotReason(accountId);
+    const s3 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      reason,
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h3 = await getHistory(client, userId, accessHash, s3.id);
+    const m3 = (_c = h3[0]) == null ? void 0 : _c.message;
+    if (!m3 || !m3.includes("successfully submitted")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+  } else if (buttons.includes("This is a mistake")) {
+    const s1 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      "This is a mistake",
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h1 = await getHistory(client, userId, accessHash, s1.id);
+    const m1 = (_d = h1[0]) == null ? void 0 : _d.message;
+    if (m1 == null ? void 0 : m1.includes("already submitted")) {
+      return;
+    }
+    if (!m1 || !m1.includes("you like to submit a complaint")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+    const s2 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      "Yes",
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h2 = await getHistory(client, userId, accessHash, s2.id);
+    const m2 = (_e = h2[0]) == null ? void 0 : _e.message;
+    if (!m2 || !m2.includes("you ever do any of this")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+    const s3 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      "No! Never did that!",
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h3 = await getHistory(client, userId, accessHash, s3.id);
+    const m3 = (_f = h3[0]) == null ? void 0 : _f.message;
+    if (!m3 || !m3.includes("what went wrong")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+    const reason = await getSpamBotReason(accountId);
+    const s4 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      reason,
+      accountId,
+      false,
+      false
+    );
+    await sleep(5e3);
+    const h4 = await getHistory(client, userId, accessHash, s4.id);
+    const m4 = (_g = h4[0]) == null ? void 0 : _g.message;
+    if (!m4 || !m4.includes("successfully submitted")) {
+      throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
+    }
+  } else {
+    await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
+BUTTONS: ${buttons.join(", ")}`);
+  }
+};
 var checkSpamBlock = async (client, account) => {
   const { accountId, spamBlockDate: dbSpamBlockDate } = account;
   const result = await resolveUsername(client, "spambot");
-  if (!result || !result.users.length || !(result.users[0] instanceof import_api22.default.User)) {
+  if (!result || !result.users.length || !(result.users[0] instanceof import_api19.default.User)) {
     throw new Error("SPAMBOT_NOT_USER");
   }
   const { id: userId, accessHash, username } = result.users[0];
@@ -79421,7 +79735,7 @@ var checkSpamBlock = async (client, account) => {
   }
   await unBlockContact(
     client,
-    new import_api22.default.InputPeerUser({
+    new import_api19.default.InputPeerUser({
       userId,
       accessHash
     })
@@ -79445,13 +79759,20 @@ var checkSpamBlock = async (client, account) => {
   if (!messages[0]) {
     throw new Error("SPAMBOT_MESSAGES_NOT_FOUND");
   }
-  const { message } = messages[0];
+  const { message, replyMarkup } = messages[0];
   if (message.includes("no limits are currently applied")) {
     await updateAccountById(accountId, {
       spamBlockDate: null
     });
     return false;
   }
+  await fileComplaint(
+    client,
+    String(userId),
+    String(accessHash),
+    accountId,
+    replyMarkup
+  );
   const match = message.match(/until\s(.*)\./);
   const spamBlockDate = match ? match[1].replace("UTC", "").trim() : "INFINITY";
   const spamBlockDateUTC = /* @__PURE__ */ new Date(spamBlockDate + "Z");
@@ -79476,14 +79797,14 @@ var automaticCheck = async (client, account) => {
       if (dialog.pinned) {
         await togglePin(
           client,
-          new import_api23.default.InputDialogPeer({
+          new import_api20.default.InputDialogPeer({
             peer
           }),
           void 0
         );
       }
       folderPeers.push(
-        new import_api23.default.InputFolderPeer({
+        new import_api20.default.InputFolderPeer({
           peer,
           folderId: 0
         })
@@ -79503,11 +79824,11 @@ var automaticCheck = async (client, account) => {
         await leaveChannel(client, peer);
       } else if (type === "chat") {
         const { chat } = dialog;
-        if (chat instanceof import_api23.default.Chat || chat instanceof import_api23.default.ChatForbidden || chat instanceof import_api23.default.ChatEmpty) {
+        if (chat instanceof import_api20.default.Chat || chat instanceof import_api20.default.ChatForbidden || chat instanceof import_api20.default.ChatEmpty) {
           await deleteChatUser(
             client,
             String(chat.id),
-            new import_api23.default.InputUserSelf()
+            new import_api20.default.InputUserSelf()
           );
           await deleteHistory(client, peer, false);
         } else {
@@ -79515,7 +79836,7 @@ var automaticCheck = async (client, account) => {
         }
       } else if (type === "user") {
         const { user } = dialog;
-        if (user instanceof import_api23.default.User && user.bot) {
+        if (user instanceof import_api20.default.User && user.bot) {
           await deleteHistory(client, peer, false);
           await blockContact(client, peer);
         } else {
@@ -79527,9 +79848,9 @@ var automaticCheck = async (client, account) => {
     if (contacts && contacts.users.length > 0) {
       const users = [];
       for (const user of contacts.users) {
-        if (user instanceof import_api23.default.User && user.accessHash) {
+        if (user instanceof import_api20.default.User && user.accessHash) {
           users.push(
-            new import_api23.default.InputPeerUser({
+            new import_api20.default.InputPeerUser({
               userId: user.id,
               accessHash: user.accessHash
             })
@@ -79551,7 +79872,7 @@ ERROR: ${e.message}`);
 // src/support/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api26 = __toESM(require_api());
+var import_api23 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
@@ -79601,7 +79922,7 @@ async function init(account, onUpdate, onError) {
   });
   client.addEventHandler(
     (update) => {
-      if (!(update instanceof import_api26.default.UpdatesTooLong)) {
+      if (!(update instanceof import_api23.default.UpdatesTooLong)) {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update2) => {
           onUpdate(update2);
@@ -79678,10 +79999,6 @@ var checker = async (ID, accountsInWork) => {
         errored = error.message;
       }
     }, 1e4);
-    await updateStatus(client, false);
-    await clearAuthorizations(client);
-    await setup2FA(client, account);
-    await accountSetup(client, account, setuped);
     let i = -1;
     while (true) {
       if (errored) {
@@ -79704,9 +80021,7 @@ var checker = async (ID, accountsInWork) => {
       );
       await Promise.race([
         (async () => {
-          if (i === randomI) {
-            await automaticCheck(client, account);
-          }
+          await automaticCheck(client, account);
           await sleep(6e4);
         })(),
         timeout
@@ -79755,10 +80070,16 @@ Error: ${e.message}`
 };
 
 // src/support/modules/relogin.ts
-var import_api28 = __toESM(require_api());
+var import_api27 = __toESM(require_api());
+
+// src/support/methods/account/clearAuthorizations.ts
+var import_api24 = __toESM(require_api());
+
+// src/support/methods/account/setup2FA.ts
+var import_api25 = __toESM(require_api());
 
 // src/support/methods/users/getMe.ts
-var import_api27 = __toESM(require_api());
+var import_api26 = __toESM(require_api());
 
 // src/support/index.ts
 var reChecker = async () => {

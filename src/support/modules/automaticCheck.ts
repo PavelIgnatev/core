@@ -109,7 +109,7 @@ export const automaticCheck = async (
       }
     }
 
-    await checkSpamBlock(client, account)
+    await checkSpamBlock(client, account);
   } catch (e: any) {
     await sendToMainBot(`** AUTOMATIC CHECK ERROR **
 ACCOUNT ID: ${accountId}

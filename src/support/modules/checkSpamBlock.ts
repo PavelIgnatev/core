@@ -2,11 +2,164 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
+import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
+
+const fileComplaint = async (
+  client: TelegramClient,
+  userId: string,
+  accessHash: string,
+  accountId: string,
+  replyMarkup: GramJs.TypeReplyMarkup | undefined
+) => {
+  if (!replyMarkup || !(replyMarkup instanceof GramJs.ReplyKeyboardMarkup)) {
+    await sendToMainBot(`** SPAMBOT REPLY MARKUP **
+${JSON.stringify(replyMarkup)}`);
+    return;
+  }
+
+  let buttons: string[] = [];
+  replyMarkup.rows.forEach((row) =>
+    row.buttons.forEach((button) => buttons.push(button.text))
+  );
+
+  if (buttons.includes('Submit a complaint')) {
+    const s1 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'Submit a complaint',
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h1 = await getHistory(client, userId, accessHash, s1.id);
+    const m1 = h1[0]?.message;
+
+    if (m1?.includes('already submitted')) {
+      return;
+    }
+    if (!m1 || !m1.includes('you going to do anything like that?')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    const s2 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'No, I’ll never do any of this!',
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h2 = await getHistory(client, userId, accessHash, s2.id);
+    const m2 = h2[0]?.message;
+
+    if (!m2 || !m2.includes('think your account was limited')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    const reason = await getSpamBotReason(accountId);
+    const s3 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      reason,
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h3 = await getHistory(client, userId, accessHash, s3.id);
+    const m3 = h3[0]?.message;
+
+    if (!m3 || !m3.includes('successfully submitted')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+  } else if (buttons.includes('This is a mistake')) {
+    const s1 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'This is a mistake',
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h1 = await getHistory(client, userId, accessHash, s1.id);
+    const m1 = h1[0]?.message;
+
+    if (m1?.includes('already submitted')) {
+      return;
+    }
+    if (!m1 || !m1.includes('you like to submit a complaint')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    const s2 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'Yes',
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h2 = await getHistory(client, userId, accessHash, s2.id);
+    const m2 = h2[0]?.message;
+
+    if (!m2 || !m2.includes('you ever do any of this')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    const s3 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'No! Never did that!',
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h3 = await getHistory(client, userId, accessHash, s3.id);
+    const m3 = h3[0]?.message;
+
+    if (!m3 || !m3.includes('what went wrong')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    const reason = await getSpamBotReason(accountId);
+    const s4 = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      reason,
+      accountId,
+      false,
+      false
+    );
+    await sleep(5000);
+    const h4 = await getHistory(client, userId, accessHash, s4.id);
+    const m4 = h4[0]?.message;
+
+    if (!m4 || !m4.includes('successfully submitted')) {
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+  } else {
+    await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
+BUTTONS: ${buttons.join(', ')}`);
+  }
+};
 
 export const checkSpamBlock = async (
   client: TelegramClient,
@@ -59,8 +212,7 @@ export const checkSpamBlock = async (
     throw new Error('SPAMBOT_MESSAGES_NOT_FOUND');
   }
 
-  const { message } = messages[0];
-
+  const { message, replyMarkup } = messages[0];
   if (message.includes('no limits are currently applied')) {
     await updateAccountById(accountId, {
       spamBlockDate: null,
@@ -68,7 +220,13 @@ export const checkSpamBlock = async (
     return false;
   }
 
-  // await fileComplaint(client, String(userId), String(accessHash), accountId);
+  await fileComplaint(
+    client,
+    String(userId),
+    String(accessHash),
+    accountId,
+    replyMarkup
+  );
 
   const match = message.match(/until\s(.*)\./);
   const spamBlockDate = match ? match[1].replace('UTC', '').trim() : 'INFINITY';
