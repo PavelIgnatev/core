@@ -18,7 +18,7 @@ const fileComplaint = async (
   replyMarkup: GramJs.TypeReplyMarkup | undefined
 ) => {
   if (!replyMarkup || !(replyMarkup instanceof GramJs.ReplyKeyboardMarkup)) {
-    await sendToMainBot(`** SPAMBOT REPLY MARKUP **
+    await sendToMainBot(`** SPAMBOT_REPLY_MARKUP_ERROR **
 ${JSON.stringify(replyMarkup)}`);
     return;
   }
@@ -156,8 +156,10 @@ ${JSON.stringify(replyMarkup)}`);
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
   } else {
-    await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
+    if (!buttons.includes('I was wrong, please release me now')) {
+      await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
 BUTTONS: ${buttons.join(', ')}`);
+    }
   }
 };
 

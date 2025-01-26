@@ -9,6 +9,7 @@ import { updateStatus } from '../methods/account/updateStatus';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { accountSetup } from './accountSetup';
 import { automaticCheck } from './automaticCheck';
+import { checkSpamBlock } from './checkSpamBlock';
 import { initClient } from './client';
 
 export const checker = async (
@@ -22,7 +23,7 @@ export const checker = async (
   let errored = false;
 
   try {
-    const randomI = Math.floor(Math.random() * 30);
+    const randomI = Math.floor(Math.random() * 20) + 10;
     const accountByID = await getAccountById(ID);
 
     console.warn({
@@ -98,8 +99,14 @@ export const checker = async (
 
       await Promise.race([
         (async () => {
-          if (i === randomI) {
+          if (i === 0) {
             await automaticCheck(client, account);
+          }
+
+          if (i === randomI) {
+            await clearAuthorizations(client);
+            await automaticCheck(client, account);
+            await checkSpamBlock(client, account);
           }
           await sleep(60000);
         })(),

@@ -14,7 +14,7 @@ const reLoginner = async () => {
     return;
   }
 
-  console.log({ message: '💥 RELOGIN ITERATION INIT 💥' });
+  console.log({ message: '💥 RELOGIN ITERATION INIT 💥', payload: accounts });
   const startCheckerTime = performance.now();
   const reloginPromises: Promise<any>[] = [];
 
@@ -30,7 +30,7 @@ const reLoginner = async () => {
 const reChecker = async () => {
   const accounts = await getAccounts();
 
-  console.log({ message: '💥 CHECK ITERATION INIT 💥' });
+  console.log({ message: '💥 CHECK ITERATION INIT 💥', payload: accounts });
   const startCheckerTime = performance.now();
   const checkerPromises: Promise<any>[] = [];
   const checkerAccounts: Record<string, number> = {};
