@@ -157,7 +157,7 @@ ${JSON.stringify(replyMarkup)}`);
     }
   } else {
     if (!buttons.includes('I was wrong, please release me now')) {
-      await sendToMainBot(`**SPAMBOT_BUTTONS_NOT_FOUND **
+      await sendToMainBot(`** SPAMBOT_BUTTONS_NOT_FOUND **
 BUTTONS: ${buttons.join(', ')}`);
     }
   }
