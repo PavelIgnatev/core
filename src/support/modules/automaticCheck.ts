@@ -13,6 +13,7 @@ import { deleteHistory } from '../methods/messages/deleteHistory';
 import { togglePin } from '../methods/messages/togglePin';
 import { buildInputPeer } from '../methods/peer/buildInputPeer';
 import { getDialogs } from '../methods/users/getDialogs';
+import { checkSpamBlock } from './checkSpamBlock';
 
 export const automaticCheck = async (
   client: TelegramClient,
@@ -107,6 +108,8 @@ export const automaticCheck = async (
         await deleteContacts(client, users);
       }
     }
+
+    await checkSpamBlock(client, account)
   } catch (e: any) {
     await sendToMainBot(`** AUTOMATIC CHECK ERROR **
 ACCOUNT ID: ${accountId}

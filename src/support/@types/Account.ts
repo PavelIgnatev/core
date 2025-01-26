@@ -19,5 +19,7 @@ export interface Account {
   twoFa?: boolean;
   unknownTwoFa?: boolean;
 
+  spamBlockDate?: Date | 'INFINITY';
+
   remainingTime?: string;
 }
