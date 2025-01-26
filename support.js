@@ -79292,7 +79292,7 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
         await sendToMainBot(`** GET USERS: MESSAGE ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
-        return [];
+        continue;
       }
       if (dialog.peer instanceof import_api18.default.PeerUser) {
         const user = d.users.find((m) => String(m.id) === id);
@@ -79302,7 +79302,7 @@ ACCOUNT_ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
 EMPTY_USER: ${user instanceof import_api18.default.UserEmpty} 
 USER_ACCESS_HASH: ${user instanceof import_api18.default.UserEmpty ? "false" : Boolean(user == null ? void 0 : user.accessHash)}`);
-          return [];
+          continue;
         }
         dialogs.push({
           type: "user",
@@ -79319,7 +79319,7 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
 IS_CHANNEL: ${chat instanceof import_api18.default.ChannelForbidden || chat instanceof import_api18.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
-          return [];
+          continue;
         }
         dialogs.push({
           type: "chat",
@@ -79336,7 +79336,7 @@ ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}
 IS_CHANNEL: ${chat instanceof import_api18.default.ChannelForbidden || chat instanceof import_api18.default.Channel}
 ACCESS_HASH: ${Boolean(chat == null ? void 0 : chat.accessHash)}`);
-          return [];
+          continue;
         }
         dialogs.push({
           type: "channel",

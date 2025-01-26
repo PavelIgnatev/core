@@ -44,7 +44,7 @@ export const getDialogs = async (
         await sendToMainBot(`** GET USERS: MESSAGE ERROR **
 ACCOUNT ID: ${accountId}
 DIALOG: ${JSON.stringify(dialog)}`);
-        return [];
+        continue;
       }
 
       if (dialog.peer instanceof GramJs.PeerUser) {
@@ -59,7 +59,7 @@ USER_ACCESS_HASH: ${
               ? 'false'
               : Boolean(user?.accessHash)
           }`);
-          return [];
+          continue;
         }
 
         dialogs.push({
@@ -85,7 +85,7 @@ IS_CHANNEL: ${
             chat instanceof GramJs.Channel
           }
 ACCESS_HASH: ${Boolean(chat?.accessHash)}`);
-          return [];
+          continue;
         }
 
         dialogs.push({
@@ -111,7 +111,7 @@ IS_CHANNEL: ${
             chat instanceof GramJs.Channel
           }
 ACCESS_HASH: ${Boolean(chat?.accessHash)}`);
-          return [];
+          continue;
         }
 
         dialogs.push({
