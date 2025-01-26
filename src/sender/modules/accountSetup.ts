@@ -69,6 +69,8 @@ export const accountSetup = async (
     return firstName!;
   }
 
+  await invokeRequest(client, new GramJs.account.ResetWebAuthorizations());
+
   const dialogFilters = await invokeRequest(
     client,
     new GramJs.messages.GetDialogFilters()

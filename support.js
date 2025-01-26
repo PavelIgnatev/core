@@ -78923,6 +78923,7 @@ var accountSetup = async (client, account, setuped) => {
   if (setuped) {
     return;
   }
+  await invokeRequest(client, new import_api5.default.account.ResetWebAuthorizations());
   const dialogFilters = await invokeRequest(
     client,
     new import_api5.default.messages.GetDialogFilters()
