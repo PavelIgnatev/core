@@ -84,7 +84,11 @@ export const automaticCheck = async (
 
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
-      const { type } = dialog;
+      const { type, message } = dialog;
+
+      if (message instanceof GramJs.Message && !Boolean(message.noforwards)) {
+        continue;
+      }
 
       const peer = buildInputPeer(dialog);
       if (type === 'channel') {
