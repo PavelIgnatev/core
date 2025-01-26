@@ -137,7 +137,7 @@ ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
 MESSAGE_EMPTY: ${lastMessage instanceof GramJs.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
-        return [];
+        return dialogs;
       }
 
       offsetDate = lastMessage.date;

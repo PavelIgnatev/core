@@ -79360,7 +79360,7 @@ ACCOUNT ID: ${accountId}
 MESSAGE: ${JSON.stringify(lastMessage)}
 MESSAGE_EMPTY: ${lastMessage instanceof import_api18.default.MessageEmpty}
 OFFSET DATE: ${offsetDate}`);
-        return [];
+        return dialogs;
       }
       offsetDate = lastMessage.date;
     }
