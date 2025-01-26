@@ -44,6 +44,9 @@ ${JSON.stringify(replyMarkup)}`);
     const m1 = h1[0]?.message;
 
     if (m1?.includes('already submitted')) {
+      await updateAccountById(accountId, {
+        isProblemSpamBlock: false,
+      });
       return;
     }
     if (!m1 || !m1.includes('you going to do anything like that?')) {
@@ -99,6 +102,9 @@ ${JSON.stringify(replyMarkup)}`);
     const m1 = h1[0]?.message;
 
     if (m1?.includes('already submitted')) {
+      await updateAccountById(accountId, {
+        isProblemSpamBlock: false,
+      });
       return;
     }
     if (!m1 || !m1.includes('you like to submit a complaint')) {
@@ -157,8 +163,12 @@ ${JSON.stringify(replyMarkup)}`);
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
   } else {
+    await updateAccountById(accountId, {
+      isProblemSpamBlock: true,
+    });
     if (!buttons.includes('I was wrong, please release me now')) {
       await sendToMainBot(`** SPAMBOT_BUTTONS_NOT_FOUND **
+ID: ${accountId}
 BUTTONS: ${buttons.join(', ')}`);
     }
   }

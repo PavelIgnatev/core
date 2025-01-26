@@ -7,7 +7,6 @@ import { blockContact } from '../methods/contacts/blockContact';
 import { deleteContacts } from '../methods/contacts/deleteContacts';
 import { getContacts } from '../methods/contacts/getContacts';
 import { editFolders } from '../methods/folders/editFolders';
-import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
 import { deleteChatUser } from '../methods/messages/deleteChatUser';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { togglePin } from '../methods/messages/togglePin';
@@ -20,8 +19,6 @@ export const automaticCheck = async (
 ) => {
   const { accountId } = account;
   try {
-    await clearAllDrafts(client);
-
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {

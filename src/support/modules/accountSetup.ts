@@ -1,8 +1,12 @@
+import BigInt from 'big-integer';
+
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { sendToMainBot } from '../helpers/sendToMainBot';
+import { updateProfile } from '../methods/account/updateProfile';
+import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
 import { invokeRequest } from './invokeRequest';
 
 const settings = {
@@ -21,6 +25,8 @@ export const accountSetup = async (
   if (setuped) {
     return;
   }
+
+  await clearAllDrafts(client);
 
   await invokeRequest(client, new GramJs.account.ResetWebAuthorizations());
 
@@ -154,6 +160,54 @@ ID: ${accountId}`);
       rules: [new GramJs.InputPrivacyValueDisallowAll()],
     })
   );
+
+  const photos = await invokeRequest(
+    client,
+    new GramJs.photos.GetUserPhotos({
+      userId: new GramJs.InputUserSelf(),
+      limit: 40,
+      offset: 0,
+      maxId: BigInt('0'),
+    })
+  );
+  if (!photos) {
+    throw new Error('USER_PHOTOS_ERROR');
+  }
+  const photoIds = [];
+  for (const photo of photos.photos) {
+    if (photo instanceof GramJs.PhotoEmpty) {
+      continue;
+    }
+
+    photoIds.push(
+      new GramJs.InputPhoto({
+        id: photo.id,
+        accessHash: photo.accessHash,
+        fileReference: Buffer.alloc(0),
+      })
+    );
+  }
+
+  if (photoIds.length) {
+    await invokeRequest(
+      client,
+      new GramJs.photos.DeletePhotos({
+        id: photoIds,
+      })
+    );
+  }
+
+  await invokeRequest(
+    client,
+    new GramJs.account.UpdateUsername({
+      username: '',
+    }),
+    { shouldIgnoreErrors: true }
+  );
+
+  await updateProfile(client, {
+    firstName: 'Telegram',
+  });
 
   await updateAccountById(accountId, {
     setuped: true,
