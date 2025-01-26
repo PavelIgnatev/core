@@ -80049,6 +80049,14 @@ var checkSpamBlock = async (client, account) => {
     await updateAccountById(accountId, {
       spamBlockDate: null
     });
+    await deleteHistory(
+      client,
+      new import_api23.default.InputPeerUser({
+        userId,
+        accessHash
+      }),
+      true
+    );
     return false;
   }
   await fileComplaint(
@@ -80066,6 +80074,14 @@ var checkSpamBlock = async (client, account) => {
       spamBlockDate: match ? spamBlockDateUTC : "INFINITY"
     });
   }
+  await deleteHistory(
+    client,
+    new import_api23.default.InputPeerUser({
+      userId,
+      accessHash
+    }),
+    true
+  );
   return true;
 };
 
