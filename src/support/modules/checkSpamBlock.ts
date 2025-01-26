@@ -228,6 +228,7 @@ export const checkSpamBlock = async (
   const { message, replyMarkup } = messages[0];
   if (message.includes('no limits are currently applied')) {
     await updateAccountById(accountId, {
+      isProblemSpamBlock: false,
       spamBlockDate: null,
     });
     await deleteHistory(
