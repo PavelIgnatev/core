@@ -79218,8 +79218,7 @@ var getDialogs = async (client, accountId, folderId, notAll = false) => {
         "136817688",
         "5434988373",
         "777000",
-        "2282583322",
-        "1055955575"
+        "2282583322"
       ].includes(id)) {
         continue;
       }
@@ -79312,7 +79311,10 @@ var automaticCheck = async (client, account) => {
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
+      const { dialog, message } = archiveDialog;
+      if (message instanceof import_api18.default.Message && !Boolean(message.noforwards)) {
+        continue;
+      }
       const peer = buildInputPeer(archiveDialog);
       if (dialog.pinned) {
         await togglePin(

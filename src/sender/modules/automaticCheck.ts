@@ -1,7 +1,7 @@
-import { Account } from '../@types/Account';
-import { Dialogue } from '../@types/Dialogue';
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
+import { Account } from '../@types/Account';
+import { Dialogue } from '../@types/Dialogue';
 import {
   getAccountDialogs,
   updateAutomaticDialogue,
@@ -50,7 +50,11 @@ export const automaticCheck = async (
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
+      const { dialog, message } = archiveDialog;
+
+      if (message instanceof GramJs.Message && !Boolean(message.noforwards)) {
+        continue;
+      }
 
       const peer = buildInputPeer(archiveDialog);
       if (dialog.pinned) {
