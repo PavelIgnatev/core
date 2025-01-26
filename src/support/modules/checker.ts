@@ -65,10 +65,10 @@ export const checker = async (
       }
     }, 10000);
 
-    // await updateStatus(client, false);
-    // await clearAuthorizations(client);
-    // await setup2FA(client, account);
-    // await accountSetup(client, account, setuped);
+    await updateStatus(client, false);
+    await clearAuthorizations(client);
+    await setup2FA(client, account);
+    await accountSetup(client, account, setuped);
 
     let i = -1;
     while (true) {
@@ -98,9 +98,9 @@ export const checker = async (
 
       await Promise.race([
         (async () => {
-          // if (i === randomI) {
+          if (i === randomI) {
             await automaticCheck(client, account);
-          // }
+          }
           await sleep(60000);
         })(),
         timeout,
