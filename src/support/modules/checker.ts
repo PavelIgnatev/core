@@ -139,9 +139,8 @@ export const checker = async (
         reason: e.message,
       });
       await sendToMainBot(
-        `** BAN ACCOUNT **
-ID: ${ID}
-Error: ${e.message}`
+        `💀 BAN: ${e.message} 💀
+ID: ${ID}`
       );
     } else {
       await sendToMainBot(

@@ -80015,8 +80015,6 @@ var sendMessage = async (client, userId, accessHash, message, accountId, withTyp
 var fileComplaint = async (client, userId, accessHash, accountId, replyMarkup) => {
   var _a, _b, _c, _d, _e, _f, _g;
   if (!replyMarkup || !(replyMarkup instanceof import_api23.default.ReplyKeyboardMarkup)) {
-    await sendToMainBot(`** SPAMBOT_REPLY_MARKUP_ERROR **
-${JSON.stringify(replyMarkup)}`);
     return;
   }
   let buttons = [];
@@ -80424,9 +80422,8 @@ var checker = async (ID, accountsInWork) => {
         reason: e.message
       });
       await sendToMainBot(
-        `** BAN ACCOUNT **
-ID: ${ID}
-Error: ${e.message}`
+        `\u{1F480} BAN: ${e.message} \u{1F480}
+ID: ${ID}`
       );
     } else {
       await sendToMainBot(

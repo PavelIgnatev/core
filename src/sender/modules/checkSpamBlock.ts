@@ -18,8 +18,6 @@ const fileComplaint = async (
   replyMarkup: GramJs.TypeReplyMarkup | undefined
 ) => {
   if (!replyMarkup || !(replyMarkup instanceof GramJs.ReplyKeyboardMarkup)) {
-    await sendToMainBot(`** SPAMBOT_REPLY_MARKUP_ERROR **
-${JSON.stringify(replyMarkup)}`);
     return;
   }
 
