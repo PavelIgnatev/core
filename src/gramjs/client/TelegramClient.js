@@ -160,18 +160,18 @@ ID: ${this._accountId}`);
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
         ) {
-          if (
-            request.className === 'contacts.Block' ||
-            request.className === 'contacts.Unblock' ||
-            request.className === 'messages.DeleteChatUser'
-          ) {
-            state.finished.resolve();
-            throw e;
-          }
-
           if (e.seconds <= 60) {
             await sleep(e.seconds * 1000);
           } else {
+            if (
+              request.className === 'contacts.Block' ||
+              request.className === 'contacts.Unblock' ||
+              request.className === 'messages.DeleteChatUser'
+            ) {
+              state.finished.resolve();
+              throw e;
+            }
+
             this._onError(
               `💀 FLOOD_WAIT_ERROR 💀
 ACCOUNT ID: ${this._accountId}

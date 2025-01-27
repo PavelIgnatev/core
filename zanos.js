@@ -57,11 +57,11 @@ const zanos = async () => {
       const data = {
         accountId: username,
         dcId: Number(account.dcId),
-        prefix: 'test-mass-govna',
+        prefix: 'test-ru',
       };
 
       data[`dc${account.dcId}`] = account.authKey;
-      // await insertAccount(data);
+      await insertAccount(data);
     }
     console.log('VSE');
   } catch (error) {

