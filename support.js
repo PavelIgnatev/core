@@ -78912,7 +78912,7 @@ var extractLoginCode = (message) => {
   if (russianLoginMatch) {
     return russianLoginMatch[1];
   }
-  const russianLoginMatch2 = message.match(/Код для входа в Telegram:: (\d+)/);
+  const russianLoginMatch2 = message.match(/Код для входа в Telegram: (\d+)/);
   if (russianLoginMatch2) {
     return russianLoginMatch2[1];
   }
