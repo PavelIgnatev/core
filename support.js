@@ -74761,9 +74761,6 @@ REQUEST: ${request.className}`);
               }
               await this._sender.reconnect();
             } else if (e instanceof errors3.TimedOutError) {
-              this._onError(`\u{1F480} TIMED_OUT_ERROR \u{1F480}
-ID: ${this._accountId}
-REQUEST: ${request.className}`);
             } else {
               state.finished.resolve();
               throw e;
