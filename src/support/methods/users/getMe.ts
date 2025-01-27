@@ -15,8 +15,6 @@ export const getMe = async (client: TelegramClient, accountId: string) => {
     throw new Error('GET_ME_ERROR');
   }
 
-  console.log({ accountId, message: '[GET_ME]', payload: me });
-
   await updateAccountById(accountId, {
     id: String(me.fullUser.id),
     phone: me.users[0].phone,

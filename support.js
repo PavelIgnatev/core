@@ -79013,7 +79013,6 @@ var getMe = async (client, accountId) => {
   if (!me || me.users[0] instanceof import_api8.default.UserEmpty || !me.users[0].phone) {
     throw new Error("GET_ME_ERROR");
   }
-  console.log({ accountId, message: "[GET_ME]", payload: me });
   await updateAccountById(accountId, {
     id: String(me.fullUser.id),
     phone: me.users[0].phone
