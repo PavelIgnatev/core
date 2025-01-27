@@ -24,7 +24,7 @@ export const accountSetup = async (
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
 
-  if (me.username !== undefined || me.username !== '') {
+  if (me.username !== undefined && me.username !== '') {
     await invokeRequest(
       client,
       new GramJs.account.UpdateUsername({
