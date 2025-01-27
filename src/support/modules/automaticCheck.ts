@@ -6,10 +6,8 @@ import { leaveChannel } from '../methods/channels/leaveChannel';
 import { blockContact } from '../methods/contacts/blockContact';
 import { deleteContacts } from '../methods/contacts/deleteContacts';
 import { getContacts } from '../methods/contacts/getContacts';
-import { editFolders } from '../methods/folders/editFolders';
 import { deleteChatUser } from '../methods/messages/deleteChatUser';
 import { deleteHistory } from '../methods/messages/deleteHistory';
-import { togglePin } from '../methods/messages/togglePin';
 import { buildInputPeer } from '../methods/peer/buildInputPeer';
 import { getDialogs } from '../methods/users/getDialogs';
 
