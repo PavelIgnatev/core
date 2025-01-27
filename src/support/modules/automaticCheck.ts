@@ -19,37 +19,6 @@ export const automaticCheck = async (
 ) => {
   const { accountId } = account;
   try {
-    const folderPeers = [];
-    const archiveDialogs = await getDialogs(client, accountId, 1);
-    for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
-
-      const peer = buildInputPeer(archiveDialog);
-      if (dialog.pinned) {
-        await togglePin(
-          client,
-          new GramJs.InputDialogPeer({
-            peer,
-          }),
-          undefined
-        );
-      }
-
-      folderPeers.push(
-        new GramJs.InputFolderPeer({
-          peer,
-          folderId: 0,
-        })
-      );
-    }
-
-    if (folderPeers.length) {
-      for (let i = 0; i < folderPeers.length; i += 100) {
-        const chunk = folderPeers.slice(i, i + 100);
-        await editFolders(client, chunk);
-      }
-    }
-
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
       const { type } = dialog;
@@ -76,6 +45,42 @@ export const automaticCheck = async (
         }
       } else if (type === 'user') {
         const { user } = dialog;
+
+        if (user instanceof GramJs.User && user.bot) {
+          await deleteHistory(client, peer, false);
+          await blockContact(client, peer);
+        } else {
+          await deleteHistory(client, peer, true);
+        }
+      }
+    }
+
+    const archiveDialogs = await getDialogs(client, accountId, 1);
+    for (const archiveDialog of archiveDialogs) {
+      const { type } = archiveDialog;
+
+      const peer = buildInputPeer(archiveDialog);
+      if (type === 'channel') {
+        await leaveChannel(client, peer);
+      } else if (type === 'chat') {
+        const { chat } = archiveDialog;
+
+        if (
+          chat instanceof GramJs.Chat ||
+          chat instanceof GramJs.ChatForbidden ||
+          chat instanceof GramJs.ChatEmpty
+        ) {
+          await deleteChatUser(
+            client,
+            String(chat.id),
+            new GramJs.InputUserSelf()
+          );
+          await deleteHistory(client, peer, false);
+        } else {
+          await leaveChannel(client, peer);
+        }
+      } else if (type === 'user') {
+        const { user } = archiveDialog;
 
         if (user instanceof GramJs.User && user.bot) {
           await deleteHistory(client, peer, false);
