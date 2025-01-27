@@ -4,7 +4,10 @@ import { invokeRequest } from '../../modules/invokeRequest';
 
 export const leaveChannel = async (
   client: TelegramClient,
-  channel: GramJs.TypeInputChannel
+  channel: GramJs.TypeInputChannel,
+  shouldIgnoreErrors: boolean = false
 ) => {
-  await invokeRequest(client, new GramJs.channels.LeaveChannel({ channel }));
+  await invokeRequest(client, new GramJs.channels.LeaveChannel({ channel }), {
+    shouldIgnoreErrors,
+  });
 };

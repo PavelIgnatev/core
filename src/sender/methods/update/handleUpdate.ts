@@ -93,11 +93,13 @@ export const handleUpdate = async (
           );
         }
 
-        [0.5, 1.5, 2.5, 3.5, 4.5].forEach((minutes) => {
+        [0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
           setTimeout(
             async () => {
               if (client) {
-                await clearAuthorizations(client);
+                try {
+                  await clearAuthorizations(client);
+                } catch {}
               }
             },
             minutes * 60 * 1000

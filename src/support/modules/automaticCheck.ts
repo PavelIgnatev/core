@@ -59,7 +59,7 @@ export const automaticCheck = async (
 
       const peer = buildInputPeer(archiveDialog);
       if (type === 'channel') {
-        await leaveChannel(client, peer);
+        await leaveChannel(client, peer, true);
       } else if (type === 'chat') {
         const { chat } = archiveDialog;
 
@@ -75,7 +75,7 @@ export const automaticCheck = async (
           );
           await deleteHistory(client, peer, false);
         } else {
-          await leaveChannel(client, peer);
+          await leaveChannel(client, peer, true);
         }
       } else if (type === 'user') {
         const { user } = archiveDialog;

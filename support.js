@@ -78961,11 +78961,14 @@ MESSAGE: ${messageText}`;
         );
       }
       if (forceClearAuth) {
-        [0.5, 1.5, 2.5, 3.5, 4.5].forEach((minutes) => {
+        [0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
           setTimeout(
             async () => {
               if (client) {
-                await clearAuthorizations(client);
+                try {
+                  await clearAuthorizations(client);
+                } catch {
+                }
               }
             },
             minutes * 60 * 1e3
@@ -79211,8 +79214,10 @@ var import_api18 = __toESM(require_api());
 
 // src/support/methods/channels/leaveChannel.ts
 var import_api10 = __toESM(require_api());
-var leaveChannel = async (client, channel) => {
-  await invokeRequest(client, new import_api10.default.channels.LeaveChannel({ channel }));
+var leaveChannel = async (client, channel, shouldIgnoreErrors = false) => {
+  await invokeRequest(client, new import_api10.default.channels.LeaveChannel({ channel }), {
+    shouldIgnoreErrors
+  });
 };
 
 // src/support/methods/contacts/blockContact.ts
@@ -79446,7 +79451,7 @@ var automaticCheck = async (client, account) => {
       const { type } = archiveDialog;
       const peer = buildInputPeer(archiveDialog);
       if (type === "channel") {
-        await leaveChannel(client, peer);
+        await leaveChannel(client, peer, true);
       } else if (type === "chat") {
         const { chat } = archiveDialog;
         if (chat instanceof import_api18.default.Chat || chat instanceof import_api18.default.ChatForbidden || chat instanceof import_api18.default.ChatEmpty) {
@@ -79457,7 +79462,7 @@ var automaticCheck = async (client, account) => {
           );
           await deleteHistory(client, peer, false);
         } else {
-          await leaveChannel(client, peer);
+          await leaveChannel(client, peer, true);
         }
       } else if (type === "user") {
         const { user } = archiveDialog;
