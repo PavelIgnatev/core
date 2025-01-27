@@ -79033,7 +79033,7 @@ var settings = {
 var accountSetup = async (client, account, setuped) => {
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
-  if (me.username) {
+  if (me.username !== void 0 || me.username !== "") {
     await invokeRequest(
       client,
       new import_api9.default.account.UpdateUsername({
