@@ -79375,8 +79375,8 @@ var automaticCheck = async (client, account) => {
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { dialog, message } = archiveDialog;
-      if (message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
+      const { type, dialog, message } = archiveDialog;
+      if (type === "channel" && message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
         continue;
       }
       const peer = buildInputPeer(archiveDialog);
@@ -79405,7 +79405,7 @@ var automaticCheck = async (client, account) => {
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
       const { type, message } = dialog;
-      if (message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
+      if (type === "channel" && message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
         continue;
       }
       const peer = buildInputPeer(dialog);

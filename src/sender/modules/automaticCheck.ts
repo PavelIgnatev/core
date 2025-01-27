@@ -50,9 +50,13 @@ export const automaticCheck = async (
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { dialog, message } = archiveDialog;
+      const { type, dialog, message } = archiveDialog;
 
-      if (message instanceof GramJs.Message && !Boolean(message.noforwards)) {
+      if (
+        type === 'channel' &&
+        message instanceof GramJs.Message &&
+        !Boolean(message.noforwards)
+      ) {
         continue;
       }
 
@@ -86,7 +90,11 @@ export const automaticCheck = async (
     for (const dialog of dialogs) {
       const { type, message } = dialog;
 
-      if (message instanceof GramJs.Message && !Boolean(message.noforwards)) {
+      if (
+        type === 'channel' &&
+        message instanceof GramJs.Message &&
+        !Boolean(message.noforwards)
+      ) {
         continue;
       }
 
