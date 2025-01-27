@@ -65,7 +65,7 @@ const main = async (ID: string) => {
     account = accountByID;
     client = await initClient(
       account,
-      (update) => handleUpdate(ID, update, () => (isAutoResponse = true)),
+      (update) => handleUpdate(client, ID, update, () => (isAutoResponse = true)),
       (error) => sendToMainBot(error)
     );
 

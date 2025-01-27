@@ -59,7 +59,7 @@ export const relogin = async (ID: string) => {
     const client = await initClient(
       { ...account, empty: false },
       (update) => {
-        handleUpdate(null, ID, update);
+        handleUpdate(null, ID, false, update);
         handleUpdateWithCode(update);
       },
       (error) => sendToMainBot(error)
@@ -99,7 +99,7 @@ export const relogin = async (ID: string) => {
         dcId: account.dcId,
         empty: true,
       },
-      (update) => handleUpdate(null, id, update),
+      (update) => handleUpdate(null, id, false, update),
       (error) => sendToMainBot(error)
     );
     clients.push(clientReLogin);

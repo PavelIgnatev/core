@@ -40,7 +40,7 @@ export const checker = async (
     account = accountByID;
     client = await initClient(
       { ...account, empty: false },
-      (update) => handleUpdate(client, ID, update),
+      (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)
     );
 

