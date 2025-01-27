@@ -91,7 +91,7 @@ export const relogin = async (ID: string) => {
       return [client];
     }
 
-    const [id, phoneNumber] = await getMe(client, ID);
+    const { id, phone: phoneNumber } = await getMe(client, ID);
 
     const clientReLogin = await initClient(
       {

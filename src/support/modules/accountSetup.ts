@@ -7,6 +7,7 @@ import { updateAccountById } from '../db/accounts';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
 import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
+import { getMe } from '../methods/users/getMe';
 import { invokeRequest } from './invokeRequest';
 
 const settings = {
@@ -21,6 +22,22 @@ export const accountSetup = async (
   setuped: boolean
 ) => {
   const { accountId } = account;
+  const { me } = await getMe(client, account.accountId);
+
+  if (me.username) {
+    await invokeRequest(
+      client,
+      new GramJs.account.UpdateUsername({
+        username: '',
+      })
+    );
+  }
+
+  if (me.firstName !== 'Telegram') {
+    await updateProfile(client, {
+      firstName: 'Telegram',
+    });
+  }
 
   if (setuped) {
     return;
@@ -196,18 +213,6 @@ ID: ${accountId}`);
       })
     );
   }
-
-  await invokeRequest(
-    client,
-    new GramJs.account.UpdateUsername({
-      username: '',
-    }),
-    { shouldIgnoreErrors: true }
-  );
-
-  await updateProfile(client, {
-    firstName: 'Telegram',
-  });
 
   await updateAccountById(accountId, {
     setuped: true,
