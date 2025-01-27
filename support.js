@@ -79423,7 +79423,7 @@ var automaticCheck = async (client, account) => {
       const { type } = dialog;
       const peer = buildInputPeer(dialog);
       if (type === "channel") {
-        await leaveChannel(client, peer);
+        await leaveChannel(client, peer, true);
       } else if (type === "chat") {
         const { chat } = dialog;
         if (chat instanceof import_api18.default.Chat || chat instanceof import_api18.default.ChatForbidden || chat instanceof import_api18.default.ChatEmpty) {
@@ -79434,7 +79434,7 @@ var automaticCheck = async (client, account) => {
           );
           await deleteHistory(client, peer, false);
         } else {
-          await leaveChannel(client, peer);
+          await leaveChannel(client, peer, true);
         }
       } else if (type === "user") {
         const { user } = dialog;
