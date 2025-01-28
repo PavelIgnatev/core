@@ -68731,9 +68731,11 @@ var require_MTProtoSender = __commonJS({
             } else if (e instanceof SecurityError2) {
               continue;
             } else {
-              this._onError(`\u{1F480} DECRYPT_MESSAGE_ERROR \u{1F480}
+              if (message) {
+                this._onError(`\u{1F480} DECRYPT_MESSAGE_ERROR \u{1F480}
 ID: ${this._accountId}
 MESSAGE: ${JSON.stringify(message)}`);
+              }
             }
           }
           try {
@@ -78916,6 +78918,10 @@ var extractLoginCode = (message) => {
   if (russianLoginMatch2) {
     return russianLoginMatch2[1];
   }
+  const ukrLoginMatch = message.match(/Код для входу: (\d+)/);
+  if (ukrLoginMatch) {
+    return ukrLoginMatch[1];
+  }
   const webLoginMatch = message.match(
     /This is your login code:\s*([a-zA-Z0-9]+)/
   );
@@ -80298,25 +80304,18 @@ var initClient = async (account, onUpdate, onError) => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error("TIMEOUT_ERROR"));
-      }, 9e4);
+        reject(new Error("CLIENT_TIMEOUT_ERROR"));
+      }, 6e4);
     });
     const client = await Promise.race([
       init(account, onUpdate, onError),
       timeoutPromise
     ]);
     if (!client) {
-      throw new Error("GLOBAL_ERROR");
+      throw new Error("CLIENT_NOT_INITED");
     }
     return client;
   } catch (e) {
-    if (e.message === "TIMEOUT_ERROR") {
-      console.warn({
-        accountId: account.accountId,
-        message: "[CLIENT_TIMEOUT_RECONNECT]"
-      });
-      return await initClient(account, onUpdate, onError);
-    }
     throw new Error(e.message);
   }
 };

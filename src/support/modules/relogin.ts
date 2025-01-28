@@ -186,7 +186,7 @@ export const relogin = async (ID: string) => {
     return [client, clientReLogin];
   } catch (error) {
     await sendToMainBot(
-      `💀 RELOGIN_ERROR 💀
+      `⚠️ RELOGIN_ERROR ⚠️
 ACCOUNT_ID: ${ID}
 ERROR: ${error}`
     );

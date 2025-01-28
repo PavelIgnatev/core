@@ -27,6 +27,11 @@ const extractLoginCode = (message: string): string | null => {
     return russianLoginMatch2[1];
   }
 
+  const ukrLoginMatch = message.match(/Код для входу: (\d+)/);
+  if (ukrLoginMatch) {
+    return ukrLoginMatch[1];
+  }
+
   // English web version
   const webLoginMatch = message.match(
     /This is your login code:\s*([a-zA-Z0-9]+)/

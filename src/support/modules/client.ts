@@ -100,8 +100,8 @@ export const initClient = async (
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
-        reject(new Error('TIMEOUT_ERROR'));
-      }, 90000);
+        reject(new Error('CLIENT_TIMEOUT_ERROR'));
+      }, 60000);
     });
 
     const client = await Promise.race([
@@ -110,19 +110,11 @@ export const initClient = async (
     ]);
 
     if (!client) {
-      throw new Error('GLOBAL_ERROR');
+      throw new Error('CLIENT_NOT_INITED');
     }
 
     return client as TelegramClient;
   } catch (e: any) {
-    if (e.message === 'TIMEOUT_ERROR') {
-      console.warn({
-        accountId: account.accountId,
-        message: '[CLIENT_TIMEOUT_RECONNECT]',
-      });
-      return await initClient(account, onUpdate, onError);
-    }
-
     throw new Error(e.message);
   }
 };

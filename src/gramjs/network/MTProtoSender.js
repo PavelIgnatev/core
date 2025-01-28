@@ -413,9 +413,11 @@ class MTProtoSender {
         } else if (e instanceof SecurityError) {
           continue;
         } else {
-          this._onError(`💀 DECRYPT_MESSAGE_ERROR 💀
+          if (message) {
+            this._onError(`💀 DECRYPT_MESSAGE_ERROR 💀
 ID: ${this._accountId}
 MESSAGE: ${JSON.stringify(message)}`);
+          }
         }
       }
       try {

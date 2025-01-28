@@ -12,7 +12,7 @@ export const getAccountsReLogin = async () => {
     banned: { $ne: true },
     parentAccountId: null,
     workedOut: { $ne: true },
-    prefix: { $nin: ['test', 'support'] },
+    // prefix: { $nin: ['test', 'support'] },
   });
 
   return accounts;
