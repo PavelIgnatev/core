@@ -1,35 +1,108 @@
-import winston from 'winston';
-import winstonMongoDB from 'winston-mongodb';
+import { Db, MongoClient } from 'mongodb';
+const { log } = require('console');
 
-const { combine, timestamp, json, errors } = winston.format;
-const logger = winston.createLogger({
-  level: 'http',
-  format: combine(
-    errors(),
-    timestamp({
-      format: () => new Date().toISOString(),
-    }),
-    json()
-  ),
-  transports: [
-    new winston.transports.Console(),
-    new winstonMongoDB.MongoDB({
-      db: 'mongodb://gen_user:%5C%7Dc%3C%24q%3C3j8O_%26g@193.108.115.154:27017/winston?authSource=admin&directConnection=true',
-      collection: 'fucker',
-    }),
-  ],
-});
+import { sleep } from './helpers';
+import { sendToMainBot } from './sendToMainBot';
+
+let db: Db;
+let lastLogTime = Date.now();
+const activePromises: Promise<any>[] = [];
+
+const DB = async () => {
+  while (!db) {
+    try {
+      const client = new MongoClient(
+        'mongodb://gen_user:%5C%7Dc%3C%24q%3C3j8O_%26g@193.108.115.154:27017/winston?authSource=admin&directConnection=true'
+      );
+      const connect = await client.connect();
+      db = connect.db('winston');
+      break;
+    } catch {
+      await sendToMainBot('🚨 DB_NOT_CONNECTED 🚨');
+      await sleep(1000);
+    }
+  }
+  return db;
+};
+
+const getNextLogTime = () => {
+  const now = new Date();
+
+  if (now.getTime() <= lastLogTime) {
+    now.setMilliseconds(new Date(lastLogTime).getMilliseconds() + 1);
+  }
+
+  lastLogTime = now.getTime();
+  return now.toISOString();
+};
+
+const insertLog = async (data: any) => {
+  for (let i = 0; i < 5; i++) {
+    try {
+      const database = await DB();
+      log(JSON.stringify(data))
+      await database.collection('fucker').insertOne(data);
+      return;
+    } catch {
+      if (i === 4) throw new Error('SAVE_LOG_CRITICAL_ERROR');
+
+      await sleep(1000 * (i + 1));
+    }
+  }
+};
+
+const mongoLog = async (level: string, ...args: any[]) => {
+  const promise = (async () => {
+    try {
+      if (typeof args[0] !== 'object') {
+        throw new Error('LOG_NOT_OBJECT');
+      }
+
+      if (!args[0].message) {
+        throw new Error('LOG_NOT_HAVE_MESSAGE');
+      }
+
+      const timestamp = getNextLogTime();
+      const metadata = { ...args[0], timestamp: new Date(timestamp) };
+      const message = metadata.message;
+      delete metadata.message;
+
+      await insertLog({
+        timestamp: new Date(timestamp),
+        level,
+        message,
+        metadata,
+      });
+    } catch (e: any) {
+      await sendToMainBot(`🚨 ${e.message} 🚨
+ERROR: ${JSON.stringify(args[0])}`);
+    }
+  })();
+
+  activePromises.push(promise);
+  promise.finally(() => {
+    const index = activePromises.indexOf(promise);
+    if (index > -1) {
+      activePromises.splice(index, 1);
+    }
+  });
+
+  return promise;
+};
+
+export const waitConsole = () => Promise.all(activePromises);
 
 if (process.env.DEV !== 'true') {
-  console.log = (...args) => {
-    logger.info(...args);
+  console.log = async (...args: any[]) => {
+    await mongoLog('info', ...args);
   };
 
-  console.error = (...args) => {
-    logger.error(...args);
+  console.error = async (...args: any[]) => {
+    await mongoLog('error', ...args);
   };
 
-  console.warn = (...args) => {
-    logger.warn(...args);
+  console.warn = async (...args: any[]) => {
+    await mongoLog('warn', ...args);
   };
 }
+

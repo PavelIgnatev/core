@@ -189,7 +189,6 @@ class MTProtoSender {
           accountId: this._accountId,
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
-        await Helpers.sleep(100);
       }
     }
     this.isConnecting = false;
@@ -295,8 +294,6 @@ class MTProtoSender {
         connection.toString()
       ),
     });
-
-    await Helpers.sleep(100);
   }
 
   async _disconnect(connection) {
@@ -315,7 +312,6 @@ class MTProtoSender {
     });
     this._user_connected = false;
     await connection.disconnect();
-    await Helpers.sleep(100);
   }
 
   async _sendLoop() {

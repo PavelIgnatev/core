@@ -1,10 +1,9 @@
 import 'dotenv/config';
-import './helpers/setConsole.log';
 import './helpers/errors';
 
 import { getAccounts, getAccountsReLogin } from './db/accounts';
-import { sleep } from './helpers/helpers';
 import { makeMetrics } from './helpers/makeMetrics';
+import { waitConsole } from './helpers/setConsole.log';
 import { checker } from './modules/checker';
 import { relogin } from './modules/relogin';
 
@@ -54,7 +53,7 @@ const main = async () => {
   // await reLoginner();
   await reChecker();
 
-  await sleep(20000);
+  await waitConsole();
   process.exit(1);
 };
 

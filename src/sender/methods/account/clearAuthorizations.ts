@@ -10,7 +10,6 @@ export async function clearAuthorizations(client: TelegramClient) {
   );
   const authorizations = invokedAuthorizations?.authorizations || [];
 
-  await sleep(100);
   console.warn({
     accountId: client._accountId,
     message: '[AUTHORIZATION_SESSIONS]',

@@ -24,6 +24,7 @@ import {
   withoutRecipientError,
 } from './helpers/helpers';
 import { sendToMainBot } from './helpers/sendToMainBot';
+import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { setup2FA } from './methods/account/setup2FA';
 import { updateStatus } from './methods/account/updateStatus';
@@ -65,7 +66,8 @@ const main = async (ID: string) => {
     account = accountByID;
     client = await initClient(
       account,
-      (update) => handleUpdate(client, ID, update, () => (isAutoResponse = true)),
+      (update) =>
+        handleUpdate(client, ID, update, () => (isAutoResponse = true)),
       (error) => sendToMainBot(error)
     );
 
@@ -347,18 +349,20 @@ ${Object.keys(aiReqest)
     }
 `);
     clearInterval(interval);
-    await sleep(10000);
+    await waitConsole();
     process.exit(1);
   });
 });
 
 process.on('uncaughtException', async (err) => {
+  await waitConsole();
   await sendToMainBot(`**** UNCAUGHT_EXCEPTION ****
 Error: ${err.message}`);
   process.exit(1);
 });
 
 process.on('unhandledRejection', async (reason, promise) => {
+  await waitConsole();
   await sendToMainBot(`**** UNHANDLED_REJECTION ****
 Reason: ${reason}
 Promise: ${JSON.stringify(promise)}`);
