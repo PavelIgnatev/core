@@ -57,11 +57,13 @@ export const relogin = async (ID: string) => {
 
     console.warn({
       accountId: ID,
+      prefix,
       message: `💥 LOG IN FOR RELOGIN ${ID} 💥`,
     });
 
     const client = await initClient(
-      { ...account, empty: false },
+      { ...account, prefix, empty: false },
+      false,
       (update) => {
         handleUpdate(null, ID, false, update);
         handleUpdateWithCode(update);
@@ -74,6 +76,7 @@ export const relogin = async (ID: string) => {
     if (twoFa) {
       console.error({
         accountId: ID,
+        prefix,
         message: `[ACCOUNT_HAVE_2FA]`,
       });
       return [client];
@@ -84,9 +87,11 @@ export const relogin = async (ID: string) => {
     const clientReLogin = await initClient(
       {
         accountId: id,
+        prefix,
         dcId: account.dcId,
         empty: true,
       },
+      false,
       (update) => handleUpdate(null, id, false, update),
       (error) => sendToMainBot(error)
     );
@@ -114,6 +119,7 @@ export const relogin = async (ID: string) => {
     ) {
       console.error({
         accountId: id,
+        prefix,
         message: `[SENT_CODE_ERROR]`,
         payload: sendCode,
       });
@@ -133,6 +139,7 @@ export const relogin = async (ID: string) => {
     } catch (error) {
       console.error({
         accountId: id,
+        prefix,
         message: `[CODE_TIMEOUT]`,
         payload: error,
       });
@@ -151,6 +158,7 @@ export const relogin = async (ID: string) => {
     if (!signIn || signIn instanceof GramJs.auth.AuthorizationSignUpRequired) {
       console.error({
         accountId: id,
+        prefix,
         message: `[SIGN_IN_ERROR]`,
         payload: signIn,
       });
@@ -162,6 +170,7 @@ export const relogin = async (ID: string) => {
     if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
       console.error({
         accountId: id,
+        prefix,
         message: `[KEYS_EMPTY_ERROR]`,
         payload: sessionData,
       });
@@ -183,6 +192,12 @@ export const relogin = async (ID: string) => {
 
     await sleep(2000);
     await clearAuthorizations(clientReLogin);
+
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `💥 RELOGIN ${ID} SUCCESS, NEXT ID FOR WORK: ${id} 💥`,
+    });
 
     return [client, clientReLogin];
   } catch (error) {

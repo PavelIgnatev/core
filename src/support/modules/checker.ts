@@ -22,12 +22,20 @@ export const checker = async (
   let client: TelegramClient | null = null;
   let errored = false;
 
+  const accountByID = await getAccountById(ID);
+  const { prefix } = accountByID;
+
+  if (!prefix) {
+    await sendToMainBot(`PREFIX_NOT_DEFINED: ${ID}`);
+    return;
+  }
+
   try {
     const randomI = Math.floor(Math.random() * 20) + 10;
-    const accountByID = await getAccountById(ID);
 
     console.warn({
       accountId: ID,
+      prefix,
       message: `💥 LOG IN ${ID} 💥`,
       paylod: { count: randomI },
     });
@@ -39,7 +47,8 @@ export const checker = async (
 
     account = accountByID;
     client = await initClient(
-      { ...account, empty: false },
+      { ...account, prefix, empty: false },
+      true,
       (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)
     );
@@ -114,6 +123,7 @@ export const checker = async (
   } catch (e: any) {
     console.error({
       accountId: ID,
+      prefix,
       message: `MAIN_ERROR (${e.message})`,
     });
 
@@ -151,6 +161,7 @@ Error: ${e.message}`
 
   console.warn({
     accountId: ID,
+    prefix,
     message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
   });
 

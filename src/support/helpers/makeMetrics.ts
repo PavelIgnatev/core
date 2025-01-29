@@ -22,7 +22,7 @@ export const makeMetrics = async (
     });
 
     await sendToMainBot(`💥 ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
-  
+
 * АККАУНТЫ * 
 В РАБОТЕ: 0
 СРЕДНЕЕ ВРЕМЯ ЗАПУСКА: 0s (max: 0s)

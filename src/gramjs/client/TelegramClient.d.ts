@@ -18,6 +18,7 @@ declare class TelegramClient {
     langPack: string,
     systemLangCode: string,
     acountId: string,
+    prefix: string,
     specialDcId: number | null,
     onError: (error: any) => void)
   async start();

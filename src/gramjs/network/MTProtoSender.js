@@ -63,6 +63,7 @@ class MTProtoSender {
     this._delay = args.delay;
     this._updateCallback = args.updateCallback;
     this._accountId = args.accountId;
+    this._prefix = args.prefix;
     this._onError = args.onError;
     this._connectCounts = 0;
     this._reconnectCounts = 0;
@@ -187,6 +188,7 @@ class MTProtoSender {
 
         console.warn({
           accountId: this._accountId,
+          prefix: this._prefix,
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
       }
@@ -289,6 +291,7 @@ class MTProtoSender {
 
     console.warn({
       accountId: this._accountId,
+      prefix: this._prefix,
       message: 'Connection to %s complete!'.replace(
         '%s',
         connection.toString()
@@ -308,6 +311,7 @@ class MTProtoSender {
 
     console.warn({
       accountId: this._accountId,
+      prefix: this._prefix,
       message: 'Disconnecting from %s...'.replace('%s', connection.toString()),
     });
     this._user_connected = false;

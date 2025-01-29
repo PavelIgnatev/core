@@ -253,22 +253,6 @@ export async function makeRequestGpt(
   const generations = [];
   const errors: string[] = [];
 
-  console.log({
-    accountId,
-    message: `[AI_REQUEST]`,
-    payload: {
-      groupId,
-      part,
-      language,
-      disableLink,
-      mandatoryQuestion,
-      minimalProposalLength,
-      isRemoveGreetings,
-      aiParams,
-      messages,
-    },
-  });
-
   let i = 0;
   while (i !== 5) {
     try {
@@ -390,12 +374,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
-      console.log({
-        accountId,
-        message: `[AI_RESPONSE]`,
-        payload: { message },
-      });
-
       return filterString(
         varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ''),
         'mainlink',
@@ -428,12 +406,6 @@ ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}`);
 
   if (generations[0]) {
-    console.log({
-      accountId,
-      message: `[AI_RESPONSE]`,
-      variantMessage: generations[0],
-    });
-
     return filterString(
       generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ''),
       'mainlink',

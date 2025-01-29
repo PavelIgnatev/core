@@ -62,6 +62,11 @@ const mongoLog = async (level: string, ...args: any[]) => {
         throw new Error('LOG_NOT_HAVE_MESSAGE');
       }
 
+      if (!args[0].prefix) {
+        throw new Error('LOG_NOT_HAVE_PREFIX');
+      }
+
+
       const timestamp = getNextLogTime();
       const metadata = { ...args[0], timestamp: new Date(timestamp) };
       const message = metadata.message;

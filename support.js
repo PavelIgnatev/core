@@ -56998,6 +56998,7 @@ var require_MTProtoSender = __commonJS({
         this._delay = args.delay;
         this._updateCallback = args.updateCallback;
         this._accountId = args.accountId;
+        this._prefix = args.prefix;
         this._onError = args.onError;
         this._connectCounts = 0;
         this._reconnectCounts = 0;
@@ -57070,6 +57071,7 @@ var require_MTProtoSender = __commonJS({
             }
             console.warn({
               accountId: this._accountId,
+              prefix: this._prefix,
               message: `${err.message} [${attempt + 1} attempt(s)]`
             });
           }
@@ -57160,6 +57162,7 @@ var require_MTProtoSender = __commonJS({
         }
         console.warn({
           accountId: this._accountId,
+          prefix: this._prefix,
           message: "Connection to %s complete!".replace(
             "%s",
             connection.toString()
@@ -57178,6 +57181,7 @@ var require_MTProtoSender = __commonJS({
         }
         console.warn({
           accountId: this._accountId,
+          prefix: this._prefix,
           message: "Disconnecting from %s...".replace("%s", connection.toString())
         });
         this._user_connected = false;
@@ -63256,7 +63260,7 @@ var require_TelegramClient = __commonJS({
     var RequestState = require_RequestState();
     var utils = require_Utils();
     var TelegramClient2 = class {
-      constructor(session, apiId, deviceModel, systemVersion, appVersion, langCode, langPack, systemLangCode, acountId, specialdcId, onError) {
+      constructor(session, apiId, deviceModel, systemVersion, appVersion, langCode, langPack, systemLangCode, acountId, prefix, specialdcId, onError) {
         if (typeof acountId !== "string" || typeof onError !== "function") {
           throw new Error("Account Id or onError not defined");
         }
@@ -63265,6 +63269,7 @@ var require_TelegramClient = __commonJS({
         this.specialDcId = specialdcId;
         this.session = session;
         this._accountId = acountId;
+        this._prefix = prefix;
         this._eventBuilders = [];
         this._phoneCodeHash = {};
         this._requestRetries = 5;
@@ -63301,6 +63306,7 @@ var require_TelegramClient = __commonJS({
             updateCallback: this._handleUpdate.bind(this),
             authKeyCallback: this._authKeyCallback.bind(this),
             accountId: this._accountId,
+            prefix: this._prefix,
             onError: this._onError,
             working: this.session._working
           });
@@ -67219,6 +67225,9 @@ var mongoLog = async (level, ...args) => {
       if (!args[0].message) {
         throw new Error("LOG_NOT_HAVE_MESSAGE");
       }
+      if (!args[0].prefix) {
+        throw new Error("LOG_NOT_HAVE_PREFIX");
+      }
       const timestamp = getNextLogTime();
       const metadata = { ...args[0], timestamp: new Date(timestamp) };
       const message = metadata.message;
@@ -67331,7 +67340,7 @@ var makeMetrics = async (clients, startCheckerTime, prefix) => {
       connectErrorCounts: []
     });
     await sendToMainBot(`\u{1F4A5} ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}
-  
+
 * \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
 \u0412 \u0420\u0410\u0411\u041E\u0422\u0415: 0
 \u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0417\u0410\u041F\u0423\u0421\u041A\u0410: 0s (max: 0s)
@@ -67458,6 +67467,7 @@ async function invokeRequest(client, request, params = {}) {
     if (request.className !== "account.UpdateStatus") {
       console.log({
         accountId: client._accountId,
+        prefix: client._prefix,
         message: `[${request.className}]`,
         payload: {
           request: JSON.parse(JSON.stringify(request))
@@ -67470,6 +67480,7 @@ async function invokeRequest(client, request, params = {}) {
     if (request.className !== "account.ResetPassword") {
       console.error({
         accountId: client._accountId,
+        prefix: client._prefix,
         message: `[${request.className}]`,
         payload: {
           request: JSON.parse(JSON.stringify(request)),
@@ -67521,6 +67532,7 @@ async function clearAuthorizations(client) {
       if (authorization.current) {
         console.log({
           accountId: client._accountId,
+          prefix: client._prefix,
           message: "[CURRENT_SESSION]",
           payload: authorization
         });
@@ -67528,6 +67540,7 @@ async function clearAuthorizations(client) {
       if (!authorization.current) {
         console.error({
           accountId: client._accountId,
+          prefix: client._prefix,
           message: "[UNKNOWN_SESSION]",
           payload: authorization
         });
@@ -67660,7 +67673,7 @@ var isInclompleteLogin = (message) => {
   return message.includes("Incomplete login attempt");
 };
 var handleUpdate = async (client, accountId, forceClearAuth, update) => {
-  if (!update) {
+  if (!update || !client) {
     return;
   }
   if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping") {
@@ -67671,6 +67684,7 @@ var handleUpdate = async (client, accountId, forceClearAuth, update) => {
   if (update instanceof import_api5.default.UpdateShortMessage && String(update.userId) === "777000") {
     console.warn({
       accountId,
+      prefix: client._prefix,
       message: "[TELEGRAM_SERVICE_NOTIFICATION]",
       payload: JSON.parse(JSON.stringify(update))
     });
@@ -67719,6 +67733,7 @@ ${messageText}`;
   }
   console.log({
     accountId,
+    prefix: client._prefix,
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
@@ -68437,21 +68452,6 @@ async function makeRequestGpt(accountId, messages, part, language, disableLink, 
   var _a, _b, _c;
   const generations = [];
   const errors2 = [];
-  console.log({
-    accountId,
-    message: `[AI_REQUEST]`,
-    payload: {
-      groupId,
-      part,
-      language,
-      disableLink,
-      mandatoryQuestion,
-      minimalProposalLength,
-      isRemoveGreetings,
-      aiParams,
-      messages
-    }
-  });
   let i = 0;
   while (i !== 5) {
     try {
@@ -68535,11 +68535,6 @@ ${errors2.map((error) => `- **${error}**`).join("\n")}`
           `The response does not contain the unique \u201C${part}\u201D part, even though it should contain`
         );
       }
-      console.log({
-        accountId,
-        message: `[AI_RESPONSE]`,
-        payload: { message }
-      });
       return filterString(
         varMessage.replace(/^[^a-zA-Zа-яА-Я]+/, ""),
         "mainlink",
@@ -68562,11 +68557,6 @@ ${generations.map((g, i2) => `${i2 + 1}: ${g}`).join("\n")}
 ERRORS:
 ${errors2.map((e, i2) => `${i2 + 1}: ${e}`).join("\n")}`);
   if (generations[0]) {
-    console.log({
-      accountId,
-      message: `[AI_RESPONSE]`,
-      variantMessage: generations[0]
-    });
     return filterString(
       generations[0].replace(/^[^a-zA-Zа-яА-Я]+/, ""),
       "mainlink",
@@ -68956,7 +68946,7 @@ var import_CallbackSession = __toESM(require_CallbackSession());
 var import_api26 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, empty, prefix } = account;
   const keys = {};
   if (dc1)
     keys["1"] = dc1;
@@ -68986,6 +68976,7 @@ async function init(account, onUpdate, onError) {
     "tdesktop",
     "en",
     account.accountId,
+    account.prefix,
     dcId,
     onError
   );
@@ -68996,6 +68987,7 @@ async function init(account, onUpdate, onError) {
   client._initTime = Number(performance.now() - startTime).toFixed(0);
   console.log({
     accountId: account.accountId,
+    prefix: account.prefix,
     message: `[CLIENT_STARTED]`,
     payload: {
       initTime: `${client._initTime}ms`
@@ -69016,7 +69008,7 @@ async function init(account, onUpdate, onError) {
   );
   return client;
 }
-var initClient = async (account, onUpdate, onError) => {
+var initClient = async (account, autoReconnect, onUpdate, onError) => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
@@ -69028,10 +69020,18 @@ var initClient = async (account, onUpdate, onError) => {
       timeoutPromise
     ]);
     if (!client) {
-      throw new Error("CLIENT_NOT_INITED");
+      throw new Error("CLIENT_TIMEOUT_ERROR");
     }
     return client;
   } catch (e) {
+    if (autoReconnect && e.message === "CLIENT_TIMEOUT_ERROR") {
+      console.warn({
+        accountId: account.accountId,
+        prefix: account.prefix,
+        message: "[CLIENT_TIMEOUT_RECONNECT]"
+      });
+      return await initClient(account, true, onUpdate, onError);
+    }
     throw new Error(e.message);
   }
 };
@@ -69042,11 +69042,17 @@ var checker = async (ID, accountsInWork) => {
   let account = null;
   let client = null;
   let errored = false;
+  const accountByID = await getAccountById(ID);
+  const { prefix } = accountByID;
+  if (!prefix) {
+    await sendToMainBot(`PREFIX_NOT_DEFINED: ${ID}`);
+    return;
+  }
   try {
     const randomI = Math.floor(Math.random() * 20) + 10;
-    const accountByID = await getAccountById(ID);
     console.warn({
       accountId: ID,
+      prefix,
       message: `\u{1F4A5} LOG IN ${ID} \u{1F4A5}`,
       paylod: { count: randomI }
     });
@@ -69056,7 +69062,8 @@ var checker = async (ID, accountsInWork) => {
     }
     account = accountByID;
     client = await initClient(
-      { ...account, empty: false },
+      { ...account, prefix, empty: false },
+      true,
       (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)
     );
@@ -69113,6 +69120,7 @@ var checker = async (ID, accountsInWork) => {
   } catch (e) {
     console.error({
       accountId: ID,
+      prefix,
       message: `MAIN_ERROR (${e.message})`
     });
     if ([
@@ -69145,6 +69153,7 @@ Error: ${e.message}`
   delete accountsInWork[ID];
   console.warn({
     accountId: ID,
+    prefix,
     message: `\u{1F4A5} EXIT FROM ${ID} (${getTimeString(startTime)}) \u{1F4A5}`
   });
   return client;

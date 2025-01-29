@@ -6,6 +6,7 @@ async function init(
   account: {
     accountId: string;
     empty: boolean;
+    prefix: string;
 
     dcId: number;
     dc1?: string;
@@ -18,7 +19,7 @@ async function init(
   onError: (error: any) => void
 ) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, empty, prefix } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -46,6 +47,7 @@ async function init(
     'tdesktop',
     'en',
     account.accountId,
+    account.prefix,
     dcId,
     onError
   );
@@ -59,6 +61,7 @@ async function init(
 
   console.log({
     accountId: account.accountId,
+    prefix: account.prefix,
     message: `[CLIENT_STARTED]`,
     payload: {
       initTime: `${client._initTime}ms`,
@@ -86,6 +89,7 @@ export const initClient = async (
   account: {
     accountId: string;
     empty: boolean;
+    prefix: string;
 
     dcId: number;
     dc1?: string;
@@ -94,6 +98,7 @@ export const initClient = async (
     dc4?: string;
     dc5?: string;
   },
+  autoReconnect: boolean,
   onUpdate: (update: any) => void,
   onError: (update: any) => void
 ): Promise<TelegramClient> => {
@@ -110,11 +115,20 @@ export const initClient = async (
     ]);
 
     if (!client) {
-      throw new Error('CLIENT_NOT_INITED');
+      throw new Error('CLIENT_TIMEOUT_ERROR');
     }
 
     return client as TelegramClient;
   } catch (e: any) {
+    if (autoReconnect && e.message === 'CLIENT_TIMEOUT_ERROR') {
+      console.warn({
+        accountId: account.accountId,
+        prefix: account.prefix,
+        message: '[CLIENT_TIMEOUT_RECONNECT]',
+      });
+      return await initClient(account, true, onUpdate, onError);
+    }
+
     throw new Error(e.message);
   }
 };

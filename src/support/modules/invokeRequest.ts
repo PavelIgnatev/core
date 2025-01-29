@@ -23,6 +23,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     if (request.className !== 'account.UpdateStatus') {
       console.log({
         accountId: client._accountId,
+        prefix: client._prefix,
         message: `[${request.className}]`,
         payload: {
           request: JSON.parse(JSON.stringify(request)),
@@ -36,6 +37,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     if (request.className !== 'account.ResetPassword') {
       console.error({
         accountId: client._accountId,
+        prefix: client._prefix,
         message: `[${request.className}]`,
         payload: {
           request: JSON.parse(JSON.stringify(request)),

@@ -73,7 +73,7 @@ export const handleUpdate = async (
   forceClearAuth: boolean,
   update: any
 ) => {
-  if (!update) {
+  if (!update || !client) {
     return;
   }
 
@@ -93,6 +93,7 @@ export const handleUpdate = async (
   ) {
     console.warn({
       accountId,
+      prefix: client._prefix,
       message: '[TELEGRAM_SERVICE_NOTIFICATION]',
       payload: JSON.parse(JSON.stringify(update)),
     });
@@ -151,6 +152,7 @@ ${messageText}`;
 
   console.log({
     accountId,
+    prefix: client._prefix,
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update)),
   });

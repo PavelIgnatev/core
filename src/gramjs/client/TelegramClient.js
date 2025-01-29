@@ -19,6 +19,7 @@ class TelegramClient {
     langPack,
     systemLangCode,
     acountId,
+    prefix,
     specialdcId,
     onError
   ) {
@@ -31,6 +32,7 @@ class TelegramClient {
     this.specialDcId = specialdcId;
     this.session = session;
     this._accountId = acountId;
+    this._prefix = prefix;
     this._eventBuilders = [];
     this._phoneCodeHash = {};
     this._requestRetries = 5;
@@ -70,6 +72,7 @@ class TelegramClient {
         updateCallback: this._handleUpdate.bind(this),
         authKeyCallback: this._authKeyCallback.bind(this),
         accountId: this._accountId,
+        prefix: this._prefix,
         onError: this._onError,
         working: this.session._working,
       });
