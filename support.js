@@ -67467,14 +67467,16 @@ async function invokeRequest(client, request, params = {}) {
     return response;
   } catch (err) {
     allTimings.push(Number((performance.now() - startTime).toFixed(4)));
-    console.error({
-      accountId: client._accountId,
-      message: `[${request.className}]`,
-      payload: {
-        request: JSON.parse(JSON.stringify(request)),
-        error: err.message
-      }
-    });
+    if (request.className !== "account.ResetPassword") {
+      console.error({
+        accountId: client._accountId,
+        message: `[${request.className}]`,
+        payload: {
+          request: JSON.parse(JSON.stringify(request)),
+          error: err.message
+        }
+      });
+    }
     if (err.message === "No workers running") {
       throw new Error(err.message);
     }
@@ -68992,7 +68994,7 @@ async function init(account, onUpdate, onError) {
   }
   await client.start();
   client._initTime = Number(performance.now() - startTime).toFixed(0);
-  console.warn({
+  console.log({
     accountId: account.accountId,
     message: `[CLIENT_STARTED]`,
     payload: {

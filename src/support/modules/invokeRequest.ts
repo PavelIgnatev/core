@@ -33,14 +33,16 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     return response;
   } catch (err: any) {
     allTimings.push(Number((performance.now() - startTime).toFixed(4)));
-    console.error({
-      accountId: client._accountId,
-      message: `[${request.className}]`,
-      payload: {
-        request: JSON.parse(JSON.stringify(request)),
-        error: err.message,
-      },
-    });
+    if (request.className !== 'account.ResetPassword') {
+      console.error({
+        accountId: client._accountId,
+        message: `[${request.className}]`,
+        payload: {
+          request: JSON.parse(JSON.stringify(request)),
+          error: err.message,
+        },
+      });
+    }
 
     if (err.message === 'No workers running') {
       throw new Error(err.message);
