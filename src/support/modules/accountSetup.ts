@@ -24,6 +24,12 @@ export const accountSetup = async (
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
 
+  console.warn({
+    accountId: client._accountId,
+    message: '[SELF_FULL_USER]',
+    payload: me,
+  });
+
   if (me.username !== undefined && me.username !== '') {
     await invokeRequest(
       client,
@@ -44,7 +50,6 @@ export const accountSetup = async (
   }
 
   await clearAllDrafts(client);
-
   await invokeRequest(client, new GramJs.account.ResetWebAuthorizations());
 
   const dialogFilters = await invokeRequest(

@@ -9,15 +9,23 @@ export async function clearAuthorizations(client: TelegramClient) {
   );
   const authorizations = invokedAuthorizations?.authorizations || [];
 
-  console.warn({
-    accountId: client._accountId,
-    message: '[AUTHORIZATION_SESSIONS]',
-    payload: authorizations,
-  });
-
   for (const authorization of authorizations) {
     try {
+      if (authorization.current) {
+        console.warn({
+          accountId: client._accountId,
+          message: '[SELF_SESSION]',
+          payload: authorization,
+        });
+      }
+
       if (!authorization.current) {
+        console.warn({
+          accountId: client._accountId,
+          message: '[UNKNOWN_SESSION]',
+          payload: authorizations,
+        });
+
         await invokeRequest(
           client,
           new GramJs.account.ResetAuthorization({

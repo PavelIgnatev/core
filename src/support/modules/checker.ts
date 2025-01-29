@@ -64,7 +64,7 @@ export const checker = async (
       } catch (error: any) {
         errored = error.message;
       }
-    }, 10000);
+    }, 30000);
 
     await updateStatus(client, false);
     await clearAuthorizations(client);
@@ -99,10 +99,6 @@ export const checker = async (
 
       await Promise.race([
         (async () => {
-          if (i === 0) {
-            await automaticCheck(client, account);
-          }
-
           if (i === randomI) {
             await clearAuthorizations(client);
             await automaticCheck(client, account);

