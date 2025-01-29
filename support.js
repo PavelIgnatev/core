@@ -69185,7 +69185,7 @@ var import_api27 = __toESM(require_api());
 var reChecker = async () => {
   const accounts = await getAccounts();
   console.log({
-    message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}",
+    message: "\u{1F4A5} CHECKER ITERATION INIT \u{1F4A5}",
     prefix: "GLOBAL_METRICS",
     accountId: "GLOBAL_METRICS_CHECKER",
     payload: accounts

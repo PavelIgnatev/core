@@ -35,7 +35,7 @@ const reChecker = async () => {
   const accounts = await getAccounts();
 
   console.log({
-    message: '💥 CHECK ITERATION INIT 💥',
+    message: '💥 CHECKER ITERATION INIT 💥',
     prefix: 'GLOBAL_METRICS',
     accountId: 'GLOBAL_METRICS_CHECKER',
     payload: accounts,
