@@ -114,9 +114,6 @@ export const handleUpdate = async (
 ID: ${accountId}
 ${messageText}`;
 
-    await updateAccountById(accountId, {
-      lastServiceNotification: new Date(),
-    });
     await sendToMainBot(notificationMessage);
 
     if (client) {
@@ -142,6 +139,10 @@ ${messageText}`;
           },
           minutes * 60 * 1000
         );
+      });
+
+      await updateAccountById(accountId, {
+        lastServiceNotification: new Date(),
       });
     }
 

@@ -67686,9 +67686,6 @@ var handleUpdate = async (client, accountId, forceClearAuth, update) => {
     const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
 ID: ${accountId}
 ${messageText}`;
-    await updateAccountById(accountId, {
-      lastServiceNotification: /* @__PURE__ */ new Date()
-    });
     await sendToMainBot(notificationMessage);
     if (client) {
       await deleteHistory(
@@ -67713,6 +67710,9 @@ ${messageText}`;
           },
           minutes * 60 * 1e3
         );
+      });
+      await updateAccountById(accountId, {
+        lastServiceNotification: /* @__PURE__ */ new Date()
       });
     }
     return;
