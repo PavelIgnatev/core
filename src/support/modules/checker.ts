@@ -108,6 +108,10 @@ export const checker = async (
 
       await Promise.race([
         (async () => {
+          if (i === 0) {
+            await automaticCheck(client, account);
+          }
+          
           if (i === randomI) {
             await clearAuthorizations(client);
             await automaticCheck(client, account);
