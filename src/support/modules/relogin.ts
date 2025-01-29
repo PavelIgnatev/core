@@ -33,10 +33,11 @@ export const relogin = async (ID: string) => {
       String(update.userId) === '777000' &&
       (update.message?.includes('Login code:') ||
         update.message?.includes('Код для входа в Telegram:') ||
-        update.message?.includes('Код для входу'))
+        update.message?.includes('Код для входу') ||
+        update.message?.includes('Codice di accesso'))
     ) {
       const code = update.message.match(
-        /(?:Login code: |Код для входа в Telegram: |Код для входу[^:]*: )(\d+)/
+        /(?:Login code: |Codice di accesso: |Код для входа в Telegram: |Код для входу[^:]*: )(\d+)/
       )?.[1];
       if (code) {
         codePromise.resolve(code);

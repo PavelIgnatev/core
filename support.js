@@ -78908,6 +78908,10 @@ var extractLoginCode = (message) => {
   if (loginCodeMatch) {
     return loginCodeMatch[1];
   }
+  const unknownLoginMatch = message.match(/Codice di accesso: (\d+)/);
+  if (unknownLoginMatch) {
+    return unknownLoginMatch[1];
+  }
   const russianLoginMatch = message.match(
     /Код для входа в Ваш аккаунт Telegram: (\d+)/
   );
@@ -78990,7 +78994,7 @@ ${messageText}`;
         );
       }
       if (forceClearAuth) {
-        [0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
+        [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
           setTimeout(
             async () => {
               if (client) {
