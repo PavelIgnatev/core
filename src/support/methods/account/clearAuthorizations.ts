@@ -20,7 +20,7 @@ export async function clearAuthorizations(client: TelegramClient) {
       }
 
       if (!authorization.current) {
-        console.warn({
+        console.error({
           accountId: client._accountId,
           message: '[UNKNOWN_SESSION]',
           payload: authorizations,

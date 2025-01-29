@@ -67524,7 +67524,7 @@ async function clearAuthorizations(client) {
         });
       }
       if (!authorization.current) {
-        console.warn({
+        console.error({
           accountId: client._accountId,
           message: "[UNKNOWN_SESSION]",
           payload: authorizations
