@@ -67519,7 +67519,7 @@ async function clearAuthorizations(client) {
       if (authorization.current) {
         console.warn({
           accountId: client._accountId,
-          message: "[SELF_SESSION]",
+          message: "[CURRENT_SESSION]",
           payload: authorization
         });
       }
@@ -67527,7 +67527,7 @@ async function clearAuthorizations(client) {
         console.error({
           accountId: client._accountId,
           message: "[UNKNOWN_SESSION]",
-          payload: authorizations
+          payload: authorization
         });
         await invokeRequest(
           client,
@@ -67781,7 +67781,7 @@ var accountSetup = async (client, account, setuped) => {
   const { me } = await getMe(client, account.accountId);
   console.warn({
     accountId: client._accountId,
-    message: "[SELF_FULL_USER]",
+    message: "[CURRENT_USER]",
     payload: me
   });
   if (me.username !== void 0 && me.username !== "") {

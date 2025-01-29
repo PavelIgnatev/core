@@ -26,7 +26,7 @@ export const accountSetup = async (
 
   console.warn({
     accountId: client._accountId,
-    message: '[SELF_FULL_USER]',
+    message: '[CURRENT_USER]',
     payload: me,
   });
 
