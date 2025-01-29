@@ -12,7 +12,7 @@ export async function clearAuthorizations(client: TelegramClient) {
   for (const authorization of authorizations) {
     try {
       if (authorization.current) {
-        console.warn({
+        console.log({
           accountId: client._accountId,
           message: '[CURRENT_SESSION]',
           payload: authorization,

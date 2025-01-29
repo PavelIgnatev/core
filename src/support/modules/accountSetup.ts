@@ -24,12 +24,6 @@ export const accountSetup = async (
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
 
-  console.warn({
-    accountId: client._accountId,
-    message: '[CURRENT_USER]',
-    payload: me,
-  });
-
   if (me.username !== undefined && me.username !== '') {
     await invokeRequest(
       client,

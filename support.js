@@ -67517,7 +67517,7 @@ async function clearAuthorizations(client) {
   for (const authorization of authorizations) {
     try {
       if (authorization.current) {
-        console.warn({
+        console.log({
           accountId: client._accountId,
           message: "[CURRENT_SESSION]",
           payload: authorization
@@ -67779,11 +67779,6 @@ var settings = {
 var accountSetup = async (client, account, setuped) => {
   const { accountId } = account;
   const { me } = await getMe(client, account.accountId);
-  console.warn({
-    accountId: client._accountId,
-    message: "[CURRENT_USER]",
-    payload: me
-  });
   if (me.username !== void 0 && me.username !== "") {
     await invokeRequest(
       client,
