@@ -53,12 +53,12 @@ const zanos = async () => {
   try {
     for (const account of accounts) {
       const username = account.authKey.slice(0, 32);
-      console.log(username)
+      console.log(username);
 
       const data = {
         accountId: username,
         dcId: Number(account.dcId),
-        prefix: 'test-ru'
+        prefix: 'test-ru',
       };
 
       data[`dc${account.dcId}`] = account.authKey;

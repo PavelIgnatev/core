@@ -67228,6 +67228,9 @@ var mongoLog = async (level, ...args) => {
       if (!args[0].prefix) {
         throw new Error("LOG_NOT_HAVE_PREFIX");
       }
+      if (!args[0].accountId) {
+        throw new Error("LOG_NOT_HAVE_ACCOUNT_ID");
+      }
       const timestamp = getNextLogTime();
       const metadata = { ...args[0], timestamp: new Date(timestamp) };
       const message = metadata.message;
@@ -67332,7 +67335,8 @@ var makeMetrics = async (clients, startCheckerTime, prefix) => {
   if (!clients.filter(Boolean).length) {
     console.log({
       message: `\u{1F4A5} ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
-      prefix: "CHECK_MAIN",
+      prefix: "GLOBAL_METRICS",
+      accountId: `GLOBAL_METRICS_${prefix}`,
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -67430,7 +67434,8 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
   );
   console.log({
     message: `\u{1F4A5} ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
-    prefix: `${prefix}_MAIN`.toUpperCase(),
+    prefix: "GLOBAL_METRICS",
+    accountId: `GLOBAL_METRICS_${prefix}`,
     initTimings,
     endTimings,
     connectCounts,
@@ -69178,7 +69183,8 @@ var reChecker = async () => {
   const accounts = await getAccounts();
   console.log({
     message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}",
-    prefix: "CHECK_MAIN",
+    prefix: "GLOBAL_METRICS",
+    accountId: "GLOBAL_METRICS_CHECKER",
     payload: accounts
   });
   const startCheckerTime = performance.now();
@@ -69190,12 +69196,13 @@ var reChecker = async () => {
   setInterval(() => {
     console.log({
       message: `CHECK ITERATION IN PROGRESS (${Object.keys(checkerAccounts).length})`,
-      prefix: "CHECK_MAIN",
+      prefix: "GLOBAL_METRICS",
+      accountId: "GLOBAL_METRICS_CHECKER",
       checkerAccounts
     });
   }, 6e4);
   await Promise.all(checkerPromises).then(async (clients) => {
-    await makeMetrics(clients, startCheckerTime, "CHECK");
+    await makeMetrics(clients, startCheckerTime, "CHECKER");
   });
 };
 var main = async () => {

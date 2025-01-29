@@ -13,7 +13,8 @@ export const makeMetrics = async (
   if (!clients.filter(Boolean).length) {
     console.log({
       message: `💥 ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
-      prefix: 'CHECK_MAIN',
+      prefix: 'GLOBAL_METRICS',
+      accountId: `GLOBAL_METRICS_${prefix}`,
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -125,7 +126,8 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
 
   console.log({
     message: `💥 ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
-    prefix: `${prefix}_MAIN`.toUpperCase(),
+    prefix: 'GLOBAL_METRICS',
+    accountId: `GLOBAL_METRICS_${prefix}`,
     initTimings,
     endTimings,
     connectCounts,

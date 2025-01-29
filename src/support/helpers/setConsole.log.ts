@@ -1,8 +1,9 @@
 import { Db, MongoClient } from 'mongodb';
-const { log } = require('console');
 
 import { sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
+
+const { log } = require('console');
 
 let db: Db;
 let lastLogTime = Date.now();
@@ -40,7 +41,7 @@ const insertLog = async (data: any) => {
   for (let i = 0; i < 5; i++) {
     try {
       const database = await DB();
-      log(JSON.stringify(data))
+      log(JSON.stringify(data));
       await database.collection('fucker').insertOne(data);
       return;
     } catch {
@@ -66,6 +67,9 @@ const mongoLog = async (level: string, ...args: any[]) => {
         throw new Error('LOG_NOT_HAVE_PREFIX');
       }
 
+      if (!args[0].accountId) {
+        throw new Error('LOG_NOT_HAVE_ACCOUNT_ID');
+      }
 
       const timestamp = getNextLogTime();
       const metadata = { ...args[0], timestamp: new Date(timestamp) };
@@ -110,4 +114,3 @@ if (process.env.DEV !== 'true') {
     await mongoLog('warn', ...args);
   };
 }
-

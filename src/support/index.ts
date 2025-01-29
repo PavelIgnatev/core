@@ -15,7 +15,8 @@ const reLoginner = async () => {
 
   console.log({
     message: '💥 RELOGIN ITERATION INIT 💥',
-    prefix: 'RELOGIN_MAIN',
+    prefix: 'GLOBAL_METRICS',
+    accountId: 'GLOBAL_METRICS_RELOGIN',
     payload: accounts,
   });
   const startCheckerTime = performance.now();
@@ -35,7 +36,8 @@ const reChecker = async () => {
 
   console.log({
     message: '💥 CHECK ITERATION INIT 💥',
-    prefix: 'CHECK_MAIN',
+    prefix: 'GLOBAL_METRICS',
+    accountId: 'GLOBAL_METRICS_CHECKER',
     payload: accounts,
   });
   const startCheckerTime = performance.now();
@@ -48,13 +50,14 @@ const reChecker = async () => {
   setInterval(() => {
     console.log({
       message: `CHECK ITERATION IN PROGRESS (${Object.keys(checkerAccounts).length})`,
-      prefix: 'CHECK_MAIN',
+      prefix: 'GLOBAL_METRICS',
+      accountId: 'GLOBAL_METRICS_CHECKER',
       checkerAccounts,
     });
   }, 60000);
 
   await Promise.all(checkerPromises).then(async (clients) => {
-    await makeMetrics(clients, startCheckerTime, 'CHECK');
+    await makeMetrics(clients, startCheckerTime, 'CHECKER');
   });
 };
 
