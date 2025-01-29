@@ -54,7 +54,7 @@ const main = async () => {
   // await reLoginner();
   await reChecker();
 
-  await sleep(10000);
+  await sleep(20000);
   process.exit(1);
 };
 

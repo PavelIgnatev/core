@@ -80466,7 +80466,7 @@ var reChecker = async () => {
 };
 var main = async () => {
   await reChecker();
-  await sleep(1e4);
+  await sleep(2e4);
   process.exit(1);
 };
 main();
