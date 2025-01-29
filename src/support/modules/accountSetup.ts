@@ -6,7 +6,6 @@ import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
-import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
 import { getMe } from '../methods/users/getMe';
 import { invokeRequest } from './invokeRequest';
 
@@ -33,18 +32,15 @@ export const accountSetup = async (
     );
   }
 
-  if (me.firstName !== 'Telegram') {
+  if (me.firstName !== '🥷🏻') {
     await updateProfile(client, {
-      firstName: 'Telegram',
+      firstName: '🥷🏻',
     });
   }
 
   if (setuped) {
     return;
   }
-
-  await clearAllDrafts(client);
-  await invokeRequest(client, new GramJs.account.ResetWebAuthorizations());
 
   const dialogFilters = await invokeRequest(
     client,

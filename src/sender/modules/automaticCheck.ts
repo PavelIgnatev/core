@@ -14,7 +14,7 @@ import { blockContact } from '../methods/contacts/blockContact';
 import { deleteContacts } from '../methods/contacts/deleteContacts';
 import { getContacts } from '../methods/contacts/getContacts';
 import { editFolders } from '../methods/folders/editFolders';
-import { clearAllDrafts } from '../methods/messages/clearAllDrafts';
+import { clearAllTrash } from '../methods/messages/clearAllTrash';
 import { deleteChatUser } from '../methods/messages/deleteChatUser';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { deleteMessages } from '../methods/messages/deleteMessages';
@@ -45,7 +45,7 @@ export const automaticCheck = async (
       .filter((d) => d.read)
       .map((d) => d.recipientId);
 
-    await clearAllDrafts(client);
+    await clearAllTrash(client);
 
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);

@@ -6,6 +6,7 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { setup2FA } from '../methods/account/setup2FA';
 import { updateStatus } from '../methods/account/updateStatus';
+import { clearAllTrash } from '../methods/messages/clearAllTrash';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { accountSetup } from './accountSetup';
 import { automaticCheck } from './automaticCheck';
@@ -75,11 +76,6 @@ export const checker = async (
       }
     }, 10000);
 
-    await updateStatus(client, false);
-    await clearAuthorizations(client);
-    await setup2FA(client, account);
-    await accountSetup(client, account, setuped);
-
     let i = -1;
     while (true) {
       if (errored) {
@@ -109,11 +105,14 @@ export const checker = async (
       await Promise.race([
         (async () => {
           if (i === 0) {
-            await automaticCheck(client, account);
-          }
-          
-          if (i === randomI) {
+            await updateStatus(client, false);
             await clearAuthorizations(client);
+            await setup2FA(client, account);
+            await accountSetup(client, account, setuped);
+            await clearAllTrash(client);
+          }
+
+          if (i === randomI) {
             await automaticCheck(client, account);
             await checkSpamBlock(client, account);
           }
