@@ -10,9 +10,10 @@ export const makeMetrics = async (
   startCheckerTime: number,
   prefix: string
 ) => {
-  if (!clients.length) {
+  if (!clients.filter(Boolean).length) {
     console.log({
       message: `💥 ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+      prefix: 'CHECK_MAIN',
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -124,6 +125,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
 
   console.log({
     message: `💥 ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+    prefix: `${prefix}_MAIN`.toUpperCase(),
     initTimings,
     endTimings,
     connectCounts,

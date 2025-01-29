@@ -13,7 +13,11 @@ const reLoginner = async () => {
     return;
   }
 
-  console.log({ message: '💥 RELOGIN ITERATION INIT 💥', payload: accounts });
+  console.log({
+    message: '💥 RELOGIN ITERATION INIT 💥',
+    prefix: 'RELOGIN_MAIN',
+    payload: accounts,
+  });
   const startCheckerTime = performance.now();
   const reloginPromises: Promise<any>[] = [];
 
@@ -29,7 +33,11 @@ const reLoginner = async () => {
 const reChecker = async () => {
   const accounts = await getAccounts();
 
-  console.log({ message: '💥 CHECK ITERATION INIT 💥', payload: accounts });
+  console.log({
+    message: '💥 CHECK ITERATION INIT 💥',
+    prefix: 'CHECK_MAIN',
+    payload: accounts,
+  });
   const startCheckerTime = performance.now();
   const checkerPromises: Promise<any>[] = [];
   const checkerAccounts: Record<string, number> = {};
@@ -40,6 +48,7 @@ const reChecker = async () => {
   setInterval(() => {
     console.log({
       message: `CHECK ITERATION IN PROGRESS (${Object.keys(checkerAccounts).length})`,
+      prefix: 'CHECK_MAIN',
       checkerAccounts,
     });
   }, 60000);

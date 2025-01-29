@@ -100,13 +100,14 @@ export const initClient = async (
   },
   autoReconnect: boolean,
   onUpdate: (update: any) => void,
-  onError: (update: any) => void
+  onError: (update: any) => void,
+  attempt: number = 1
 ): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('CLIENT_TIMEOUT_ERROR'));
-      }, 60000);
+      }, 30000);
     });
 
     const client = await Promise.race([
@@ -124,9 +125,15 @@ export const initClient = async (
       console.warn({
         accountId: account.accountId,
         prefix: account.prefix,
-        message: '[CLIENT_TIMEOUT_RECONNECT]',
+        message: `[CLIENT_TIMEOUT_RECONNECT (${attempt}/3)]`,
       });
-      return await initClient(account, true, onUpdate, onError);
+      return await initClient(
+        account,
+        attempt < 3,
+        onUpdate,
+        onError,
+        attempt + 1
+      );
     }
 
     throw new Error(e.message);

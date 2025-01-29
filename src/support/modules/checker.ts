@@ -73,7 +73,7 @@ export const checker = async (
       } catch (error: any) {
         errored = error.message;
       }
-    }, 30000);
+    }, 10000);
 
     await updateStatus(client, false);
     await clearAuthorizations(client);

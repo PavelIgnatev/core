@@ -67329,9 +67329,10 @@ var updateAccountById = async (accountId, accountData) => {
 
 // src/support/helpers/makeMetrics.ts
 var makeMetrics = async (clients, startCheckerTime, prefix) => {
-  if (!clients.length) {
+  if (!clients.filter(Boolean).length) {
     console.log({
       message: `\u{1F4A5} ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
+      prefix: "CHECK_MAIN",
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -67429,6 +67430,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
   );
   console.log({
     message: `\u{1F4A5} ${prefix} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
+    prefix: `${prefix}_MAIN`.toUpperCase(),
     initTimings,
     endTimings,
     connectCounts,
@@ -69008,12 +69010,12 @@ async function init(account, onUpdate, onError) {
   );
   return client;
 }
-var initClient = async (account, autoReconnect, onUpdate, onError) => {
+var initClient = async (account, autoReconnect, onUpdate, onError, attempt = 1) => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error("CLIENT_TIMEOUT_ERROR"));
-      }, 6e4);
+      }, 3e4);
     });
     const client = await Promise.race([
       init(account, onUpdate, onError),
@@ -69028,9 +69030,15 @@ var initClient = async (account, autoReconnect, onUpdate, onError) => {
       console.warn({
         accountId: account.accountId,
         prefix: account.prefix,
-        message: "[CLIENT_TIMEOUT_RECONNECT]"
+        message: `[CLIENT_TIMEOUT_RECONNECT (${attempt}/3)]`
       });
-      return await initClient(account, true, onUpdate, onError);
+      return await initClient(
+        account,
+        attempt < 3,
+        onUpdate,
+        onError,
+        attempt + 1
+      );
     }
     throw new Error(e.message);
   }
@@ -69079,7 +69087,7 @@ var checker = async (ID, accountsInWork) => {
       } catch (error) {
         errored = error.message;
       }
-    }, 3e4);
+    }, 1e4);
     await updateStatus(client, false);
     await clearAuthorizations(client);
     await setup2FA(client, account);
@@ -69165,7 +69173,11 @@ var import_api27 = __toESM(require_api());
 // src/support/index.ts
 var reChecker = async () => {
   const accounts = await getAccounts();
-  console.log({ message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}", payload: accounts });
+  console.log({
+    message: "\u{1F4A5} CHECK ITERATION INIT \u{1F4A5}",
+    prefix: "CHECK_MAIN",
+    payload: accounts
+  });
   const startCheckerTime = performance.now();
   const checkerPromises = [];
   const checkerAccounts = {};
@@ -69175,6 +69187,7 @@ var reChecker = async () => {
   setInterval(() => {
     console.log({
       message: `CHECK ITERATION IN PROGRESS (${Object.keys(checkerAccounts).length})`,
+      prefix: "CHECK_MAIN",
       checkerAccounts
     });
   }, 6e4);
