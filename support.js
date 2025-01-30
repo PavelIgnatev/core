@@ -69119,6 +69119,7 @@ var checker = async (ID, accountsInWork) => {
             await setup2FA(client, account);
             await accountSetup(client, account, setuped);
             await clearAllTrash(client);
+            await automaticCheck(client, account);
           }
           if (i === randomI) {
             await automaticCheck(client, account);
