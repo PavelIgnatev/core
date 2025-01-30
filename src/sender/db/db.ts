@@ -8,7 +8,6 @@ let logsDb: Db;
 export const coreDB = async () => {
   while (!coreDb) {
     try {
-      console.log(process.env.DATABASE_SENDER_URI)
       const client = new MongoClient(process.env.DATABASE_SENDER_URI || '');
       const connect = await client.connect();
       coreDb = connect.db('core');
