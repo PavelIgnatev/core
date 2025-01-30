@@ -1,8 +1,8 @@
 import { GroupId } from '../@types/GroupId';
-import { DB } from './db';
+import { coreDB } from './db';
 
 const getGroupIdCollection = async () => {
-  return (await DB()).collection('groupId');
+  return (await coreDB()).collection('groupId');
 };
 
 export const getGroupId = async (groupId: string) => {

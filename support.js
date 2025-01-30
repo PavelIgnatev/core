@@ -9204,7 +9204,7 @@ var require_mime_db = __commonJS({
 var require_mime_types = __commonJS({
   "../node_modules/mime-types/index.js"(exports2) {
     "use strict";
-    var db3 = require_mime_db();
+    var db = require_mime_db();
     var extname = require("path").extname;
     var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
     var TEXT_TYPE_REGEXP = /^text\//i;
@@ -9221,7 +9221,7 @@ var require_mime_types = __commonJS({
         return false;
       }
       var match = EXTRACT_TYPE_REGEXP.exec(type);
-      var mime = match && db3[match[1].toLowerCase()];
+      var mime = match && db[match[1].toLowerCase()];
       if (mime && mime.charset) {
         return mime.charset;
       }
@@ -9268,8 +9268,8 @@ var require_mime_types = __commonJS({
     }
     function populateMaps(extensions, types) {
       var preference = ["nginx", "apache", void 0, "iana"];
-      Object.keys(db3).forEach(function forEachMimeType(type) {
-        var mime = db3[type];
+      Object.keys(db).forEach(function forEachMimeType(type) {
+        var mime = db[type];
         var exts = mime.extensions;
         if (!exts || !exts.length) {
           return;
@@ -9278,7 +9278,7 @@ var require_mime_types = __commonJS({
         for (var i = 0; i < exts.length; i++) {
           var extension2 = exts[i];
           if (types[extension2]) {
-            var from = preference.indexOf(db3[types[extension2]].source);
+            var from = preference.indexOf(db[types[extension2]].source);
             var to = preference.indexOf(mime.source);
             if (types[extension2] !== "application/octet-stream" && (from > to || from === to && types[extension2].substr(0, 12) === "application/")) {
               continue;
@@ -12095,16 +12095,16 @@ var require_bson = __commonJS({
       get _bsontype() {
         return "DBRef";
       }
-      constructor(collection, oid, db3, fields) {
+      constructor(collection, oid, db, fields) {
         super();
         const parts = collection.split(".");
         if (parts.length === 2) {
-          db3 = parts.shift();
+          db = parts.shift();
           collection = parts.shift();
         }
         this.collection = collection;
         this.oid = oid;
-        this.db = db3;
+        this.db = db;
         this.fields = fields || {};
       }
       get namespace() {
@@ -17841,9 +17841,9 @@ var require_utils = __commonJS({
       }
       return filterOptions2;
     }
-    function applyRetryableWrites(target, db3) {
+    function applyRetryableWrites(target, db) {
       var _a;
-      if (db3 && ((_a = db3.s.options) == null ? void 0 : _a.retryWrites)) {
+      if (db && ((_a = db.s.options) == null ? void 0 : _a.retryWrites)) {
         target.retryWrites = true;
       }
       return target;
@@ -17891,8 +17891,8 @@ var require_utils = __commonJS({
        * @param db - database name
        * @param collection - collection name
        */
-      constructor(db3, collection) {
-        this.db = db3;
+      constructor(db, collection) {
+        this.db = db;
         this.collection = collection;
         this.collection = collection === "" ? void 0 : collection;
       }
@@ -17906,15 +17906,15 @@ var require_utils = __commonJS({
         if (typeof namespace !== "string" || namespace === "") {
           throw new error_1.MongoRuntimeError(`Cannot parse namespace from "${namespace}"`);
         }
-        const [db3, ...collectionParts] = namespace.split(".");
+        const [db, ...collectionParts] = namespace.split(".");
         const collection = collectionParts.join(".");
-        return new _MongoDBNamespace(db3, collection === "" ? void 0 : collection);
+        return new _MongoDBNamespace(db, collection === "" ? void 0 : collection);
       }
     };
     exports2.MongoDBNamespace = MongoDBNamespace;
     var MongoDBCollectionNamespace = class extends MongoDBNamespace {
-      constructor(db3, collection) {
-        super(db3, collection);
+      constructor(db, collection) {
+        super(db, collection);
         this.collection = collection;
       }
       static fromString(namespace) {
@@ -22270,9 +22270,9 @@ var require_drop = __commonJS({
     var command_1 = require_command();
     var operation_1 = require_operation();
     var DropCollectionOperation = class _DropCollectionOperation extends command_1.CommandOperation {
-      constructor(db3, name, options = {}) {
-        super(db3, options);
-        this.db = db3;
+      constructor(db, name, options = {}) {
+        super(db, options);
+        this.db = db;
         this.options = options;
         this.name = name;
       }
@@ -22281,20 +22281,20 @@ var require_drop = __commonJS({
       }
       async execute(server, session, timeoutContext) {
         var _a, _b, _c;
-        const db3 = this.db;
+        const db = this.db;
         const options = this.options;
         const name = this.name;
-        const encryptedFieldsMap = (_a = db3.client.s.options.autoEncryption) == null ? void 0 : _a.encryptedFieldsMap;
-        let encryptedFields = options.encryptedFields ?? (encryptedFieldsMap == null ? void 0 : encryptedFieldsMap[`${db3.databaseName}.${name}`]);
+        const encryptedFieldsMap = (_a = db.client.s.options.autoEncryption) == null ? void 0 : _a.encryptedFieldsMap;
+        let encryptedFields = options.encryptedFields ?? (encryptedFieldsMap == null ? void 0 : encryptedFieldsMap[`${db.databaseName}.${name}`]);
         if (!encryptedFields && encryptedFieldsMap) {
-          const listCollectionsResult = await db3.listCollections({ name }, { nameOnly: false }).toArray();
+          const listCollectionsResult = await db.listCollections({ name }, { nameOnly: false }).toArray();
           encryptedFields = (_c = (_b = listCollectionsResult == null ? void 0 : listCollectionsResult[0]) == null ? void 0 : _b.options) == null ? void 0 : _c.encryptedFields;
         }
         if (encryptedFields) {
           const escCollection = encryptedFields.escCollection || `enxcol_.${name}.esc`;
           const ecocCollection = encryptedFields.ecocCollection || `enxcol_.${name}.ecoc`;
           for (const collectionName of [escCollection, ecocCollection]) {
-            const dropOp = new _DropCollectionOperation(db3, collectionName);
+            const dropOp = new _DropCollectionOperation(db, collectionName);
             try {
               await dropOp.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
             } catch (err) {
@@ -22313,8 +22313,8 @@ var require_drop = __commonJS({
     };
     exports2.DropCollectionOperation = DropCollectionOperation;
     var DropDatabaseOperation = class extends command_1.CommandOperation {
-      constructor(db3, options) {
-        super(db3, options);
+      constructor(db, options) {
+        super(db, options);
         this.options = options;
       }
       get commandName() {
@@ -22753,19 +22753,19 @@ var require_collection = __commonJS({
        * Create a new Collection instance
        * @internal
        */
-      constructor(db3, name, options) {
+      constructor(db, name, options) {
         var _a;
         this.s = {
-          db: db3,
+          db,
           options,
-          namespace: new utils_1.MongoDBCollectionNamespace(db3.databaseName, name),
-          pkFactory: ((_a = db3.options) == null ? void 0 : _a.pkFactory) ?? utils_1.DEFAULT_PK_FACTORY,
+          namespace: new utils_1.MongoDBCollectionNamespace(db.databaseName, name),
+          pkFactory: ((_a = db.options) == null ? void 0 : _a.pkFactory) ?? utils_1.DEFAULT_PK_FACTORY,
           readPreference: read_preference_1.ReadPreference.fromOptions(options),
-          bsonOptions: (0, bson_1.resolveBSONOptions)(options, db3),
+          bsonOptions: (0, bson_1.resolveBSONOptions)(options, db),
           readConcern: read_concern_1.ReadConcern.fromOptions(options),
           writeConcern: write_concern_1.WriteConcern.fromOptions(options)
         };
-        this.client = db3.client;
+        this.client = db.client;
       }
       /**
        * The name of the database this collection belongs to
@@ -23500,11 +23500,11 @@ var require_list_collections = __commonJS({
     var command_1 = require_command();
     var operation_1 = require_operation();
     var ListCollectionsOperation = class extends command_1.CommandOperation {
-      constructor(db3, filter2, options) {
-        super(db3, options);
+      constructor(db, filter2, options) {
+        super(db, options);
         this.options = { ...options };
         delete this.options.writeConcern;
-        this.db = db3;
+        this.db = db;
         this.filter = filter2;
         this.nameOnly = !!this.options.nameOnly;
         this.authorizedCollections = !!this.options.authorizedCollections;
@@ -23552,9 +23552,9 @@ var require_list_collections_cursor = __commonJS({
     var list_collections_1 = require_list_collections();
     var abstract_cursor_1 = require_abstract_cursor();
     var ListCollectionsCursor = class _ListCollectionsCursor extends abstract_cursor_1.AbstractCursor {
-      constructor(db3, filter2, options) {
-        super(db3.client, db3.s.namespace, options);
-        this.parent = db3;
+      constructor(db, filter2, options) {
+        super(db.client, db.s.namespace, options);
+        this.parent = db;
         this.filter = filter2;
         this.options = options;
       }
@@ -23695,10 +23695,10 @@ var require_run_command_cursor = __commonJS({
         throw new error_1.MongoAPIError("batchSize must be configured on the command document directly, to configure getMore.batchSize use cursor.setBatchSize()");
       }
       /** @internal */
-      constructor(db3, command, options = {}) {
-        super(db3.client, (0, utils_1.ns)(db3.namespace), options);
+      constructor(db, command, options = {}) {
+        super(db.client, (0, utils_1.ns)(db.namespace), options);
         this.getMoreOptions = {};
-        this.db = db3;
+        this.db = db;
         this.command = Object.freeze({ ...command });
       }
       /** @internal */
@@ -23739,10 +23739,10 @@ var require_collections = __commonJS({
     var collection_1 = require_collection();
     var operation_1 = require_operation();
     var CollectionsOperation = class extends operation_1.AbstractOperation {
-      constructor(db3, options) {
+      constructor(db, options) {
         super(options);
         this.options = options;
-        this.db = db3;
+        this.db = db;
       }
       get commandName() {
         return "listCollections";
@@ -23800,10 +23800,10 @@ var require_create_collection = __commonJS({
     ]);
     var INVALID_QE_VERSION = "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.";
     var CreateCollectionOperation = class _CreateCollectionOperation extends command_1.CommandOperation {
-      constructor(db3, name, options = {}) {
-        super(db3, options);
+      constructor(db, name, options = {}) {
+        super(db, options);
         this.options = options;
-        this.db = db3;
+        this.db = db;
         this.name = name;
       }
       get commandName() {
@@ -23811,10 +23811,10 @@ var require_create_collection = __commonJS({
       }
       async execute(server, session, timeoutContext) {
         var _a, _b;
-        const db3 = this.db;
+        const db = this.db;
         const name = this.name;
         const options = this.options;
-        const encryptedFields = options.encryptedFields ?? ((_b = (_a = db3.client.s.options.autoEncryption) == null ? void 0 : _a.encryptedFieldsMap) == null ? void 0 : _b[`${db3.databaseName}.${name}`]);
+        const encryptedFields = options.encryptedFields ?? ((_b = (_a = db.client.s.options.autoEncryption) == null ? void 0 : _a.encryptedFieldsMap) == null ? void 0 : _b[`${db.databaseName}.${name}`]);
         if (encryptedFields) {
           if (!server.loadBalanced && server.description.maxWireVersion < constants_1.MIN_SUPPORTED_QE_WIRE_VERSION) {
             throw new error_1.MongoCompatibilityError(`${INVALID_QE_VERSION} The minimum server version required is ${constants_1.MIN_SUPPORTED_QE_SERVER_VERSION}`);
@@ -23822,7 +23822,7 @@ var require_create_collection = __commonJS({
           const escCollection = encryptedFields.escCollection ?? `enxcol_.${name}.esc`;
           const ecocCollection = encryptedFields.ecocCollection ?? `enxcol_.${name}.ecoc`;
           for (const collectionName of [escCollection, ecocCollection]) {
-            const createOp = new _CreateCollectionOperation(db3, collectionName, {
+            const createOp = new _CreateCollectionOperation(db, collectionName, {
               clusteredIndex: {
                 key: { _id: 1 },
                 unique: true
@@ -23836,13 +23836,13 @@ var require_create_collection = __commonJS({
         }
         const coll = await this.executeWithoutEncryptedFieldsCheck(server, session, timeoutContext);
         if (encryptedFields) {
-          const createIndexOp = indexes_1.CreateIndexesOperation.fromIndexSpecification(db3, name, { __safeContent__: 1 }, {});
+          const createIndexOp = indexes_1.CreateIndexesOperation.fromIndexSpecification(db, name, { __safeContent__: 1 }, {});
           await createIndexOp.execute(server, session, timeoutContext);
         }
         return coll;
       }
       async executeWithoutEncryptedFieldsCheck(server, session, timeoutContext) {
-        const db3 = this.db;
+        const db = this.db;
         const name = this.name;
         const options = this.options;
         const cmd = { create: name };
@@ -23852,7 +23852,7 @@ var require_create_collection = __commonJS({
           }
         }
         await super.executeCommand(server, session, cmd, timeoutContext);
-        return new collection_1.Collection(db3, name, options);
+        return new collection_1.Collection(db, name, options);
       }
     };
     exports2.CreateCollectionOperation = CreateCollectionOperation;
@@ -23869,8 +23869,8 @@ var require_profiling_level = __commonJS({
     var error_1 = require_error();
     var command_1 = require_command();
     var ProfilingLevelOperation = class extends command_1.CommandOperation {
-      constructor(db3, options) {
-        super(db3, options);
+      constructor(db, options) {
+        super(db, options);
         this.options = options;
       }
       get commandName() {
@@ -23905,8 +23905,8 @@ var require_remove_user = __commonJS({
     var command_1 = require_command();
     var operation_1 = require_operation();
     var RemoveUserOperation = class extends command_1.CommandOperation {
-      constructor(db3, username, options) {
-        super(db3, options);
+      constructor(db, username, options) {
+        super(db, options);
         this.options = options;
         this.username = username;
       }
@@ -23939,8 +23939,8 @@ var require_set_profiling_level = __commonJS({
       all: "all"
     });
     var SetProfilingLevelOperation = class extends command_1.CommandOperation {
-      constructor(db3, level, options) {
-        super(db3, options);
+      constructor(db, level, options) {
+        super(db, options);
         this.options = options;
         switch (level) {
           case exports2.ProfilingLevel.off:
@@ -23983,8 +23983,8 @@ var require_stats = __commonJS({
     var command_1 = require_command();
     var operation_1 = require_operation();
     var DbStatsOperation = class extends command_1.CommandOperation {
-      constructor(db3, options) {
-        super(db3, options);
+      constructor(db, options) {
+        super(db, options);
         this.options = options;
       }
       get commandName() {
@@ -24057,7 +24057,7 @@ var require_db2 = __commonJS({
       "retryWrites",
       "timeoutMS"
     ];
-    var Db3 = class {
+    var Db2 = class {
       /**
        * Creates a new Db instance.
        *
@@ -24383,13 +24383,13 @@ var require_db2 = __commonJS({
         return new run_command_cursor_1.RunCommandCursor(this, command, options);
       }
     };
-    exports2.Db = Db3;
-    Db3.SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
-    Db3.SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
-    Db3.SYSTEM_PROFILE_COLLECTION = CONSTANTS.SYSTEM_PROFILE_COLLECTION;
-    Db3.SYSTEM_USER_COLLECTION = CONSTANTS.SYSTEM_USER_COLLECTION;
-    Db3.SYSTEM_COMMAND_COLLECTION = CONSTANTS.SYSTEM_COMMAND_COLLECTION;
-    Db3.SYSTEM_JS_COLLECTION = CONSTANTS.SYSTEM_JS_COLLECTION;
+    exports2.Db = Db2;
+    Db2.SYSTEM_NAMESPACE_COLLECTION = CONSTANTS.SYSTEM_NAMESPACE_COLLECTION;
+    Db2.SYSTEM_INDEX_COLLECTION = CONSTANTS.SYSTEM_INDEX_COLLECTION;
+    Db2.SYSTEM_PROFILE_COLLECTION = CONSTANTS.SYSTEM_PROFILE_COLLECTION;
+    Db2.SYSTEM_USER_COLLECTION = CONSTANTS.SYSTEM_USER_COLLECTION;
+    Db2.SYSTEM_COMMAND_COLLECTION = CONSTANTS.SYSTEM_COMMAND_COLLECTION;
+    Db2.SYSTEM_JS_COLLECTION = CONSTANTS.SYSTEM_JS_COLLECTION;
   }
 });
 
@@ -36260,8 +36260,8 @@ var require_state_machine = __commonJS({
        * @param callback - Invoked with the info of the requested collection, or with an error
        */
       async fetchCollectionInfo(client, ns, filter2, timeoutContext) {
-        const { db: db3 } = utils_1.MongoDBCollectionNamespace.fromString(ns);
-        const cursor = client.db(db3).listCollections(filter2, {
+        const { db } = utils_1.MongoDBCollectionNamespace.fromString(ns);
+        const cursor = client.db(db).listCollections(filter2, {
           promoteLongs: false,
           promoteValues: false,
           timeoutContext: timeoutContext && new abstract_cursor_1.CursorTimeoutContext(timeoutContext, Symbol())
@@ -36279,10 +36279,10 @@ var require_state_machine = __commonJS({
        * @param callback - Invoked with the serialized and marked bson command, or with an error
        */
       async markCommand(client, ns, command, timeoutContext) {
-        const { db: db3 } = utils_1.MongoDBCollectionNamespace.fromString(ns);
+        const { db } = utils_1.MongoDBCollectionNamespace.fromString(ns);
         const bsonOptions = { promoteLongs: false, promoteValues: false };
         const rawCommand = (0, bson_1.deserialize)(command, bsonOptions);
-        const response = await client.db(db3).command(rawCommand, {
+        const response = await client.db(db).command(rawCommand, {
           ...bsonOptions,
           ...(timeoutContext == null ? void 0 : timeoutContext.csotEnabled()) ? { timeoutMS: timeoutContext == null ? void 0 : timeoutContext.remainingTimeMS } : void 0
         });
@@ -36681,7 +36681,7 @@ var require_client_encryption = __commonJS({
        * @throws MongoCryptCreateDataKeyError - If part way through the process a createDataKey invocation fails, an error will be rejected that has the partial `encryptedFields` that were created.
        * @throws MongoCryptCreateEncryptedCollectionError - If creating the collection fails, an error will be rejected that has the entire `encryptedFields` that were created.
        */
-      async createEncryptedCollection(db3, name, options) {
+      async createEncryptedCollection(db, name, options) {
         const { provider, masterKey, createCollectionOptions: { encryptedFields: { ...encryptedFields }, ...createCollectionOptions } } = options;
         const timeoutContext = this._timeoutMS != null ? timeout_1.TimeoutContext.create((0, utils_1.resolveTimeoutOptions)(this._client, { timeoutMS: this._timeoutMS })) : void 0;
         if (Array.isArray(encryptedFields.fields)) {
@@ -36702,7 +36702,7 @@ var require_client_encryption = __commonJS({
           }
         }
         try {
-          const collection = await db3.createCollection(name, {
+          const collection = await db.createCollection(name, {
             ...createCollectionOptions,
             encryptedFields,
             timeoutMS: (timeoutContext == null ? void 0 : timeoutContext.csotEnabled()) ? timeoutContext == null ? void 0 : timeoutContext.getRemainingTimeMSOrThrow() : void 0
@@ -39224,7 +39224,7 @@ var require_connection = __commonJS({
         this.closed = true;
         this.emit(_Connection.CLOSE);
       }
-      prepareCommand(db3, command, options) {
+      prepareCommand(db, command, options) {
         var _a;
         let cmd = { ...command };
         const readPreference = (0, shared_1.getReadPreference)(options);
@@ -39272,7 +39272,7 @@ var require_connection = __commonJS({
           ...options
         };
         (_a = options.timeoutContext) == null ? void 0 : _a.addMaxTimeMSToCommand(cmd, options);
-        const message = this.supportsOpMsg ? new commands_1.OpMsgRequest(db3, cmd, commandOptions) : new commands_1.OpQueryRequest(db3, cmd, commandOptions);
+        const message = this.supportsOpMsg ? new commands_1.OpMsgRequest(db, cmd, commandOptions) : new commands_1.OpQueryRequest(db, cmd, commandOptions);
         return message;
       }
       async *sendWire(message, options, responseType) {
@@ -42615,14 +42615,14 @@ var require_mongodb_aws = __commonJS({
         const secretAccessKey = credentials.password;
         const sessionToken = credentials.mechanismProperties.AWS_SESSION_TOKEN;
         const awsCredentials = accessKeyId && secretAccessKey && sessionToken ? { accessKeyId, secretAccessKey, sessionToken } : accessKeyId && secretAccessKey ? { accessKeyId, secretAccessKey } : void 0;
-        const db3 = credentials.source;
+        const db = credentials.source;
         const nonce = await (0, utils_1.randomBytes)(32);
         const saslStart = {
           saslStart: 1,
           mechanism: "MONGODB-AWS",
           payload: BSON.serialize({ r: nonce, p: ASCII_N }, bsonOptions)
         };
-        const saslStartResponse = await connection.command((0, utils_1.ns)(`${db3}.$cmd`), saslStart, void 0);
+        const saslStartResponse = await connection.command((0, utils_1.ns)(`${db}.$cmd`), saslStart, void 0);
         const serverResponse = BSON.deserialize(saslStartResponse.payload.buffer, bsonOptions);
         const host = serverResponse.h;
         const serverNonce = serverResponse.s.buffer;
@@ -42662,7 +42662,7 @@ var require_mongodb_aws = __commonJS({
           conversationId: 1,
           payload: BSON.serialize(payload, bsonOptions)
         };
-        await connection.command((0, utils_1.ns)(`${db3}.$cmd`), saslContinue, void 0);
+        await connection.command((0, utils_1.ns)(`${db}.$cmd`), saslContinue, void 0);
       }
     };
     exports2.MongoDBAWS = MongoDBAWS;
@@ -43874,9 +43874,9 @@ var require_scram = __commonJS({
         throw new error_1.MongoInvalidArgumentError("AuthContext must contain a valid nonce property");
       }
       const nonce = authContext.nonce;
-      const db3 = credentials.source;
+      const db = credentials.source;
       const saslStartCmd = makeFirstMessage(cryptoMethod, credentials, nonce);
-      const response = await connection.command((0, utils_1.ns)(`${db3}.$cmd`), saslStartCmd, void 0);
+      const response = await connection.command((0, utils_1.ns)(`${db}.$cmd`), saslStartCmd, void 0);
       await continueScramConversation(cryptoMethod, response, authContext);
     }
     async function continueScramConversation(cryptoMethod, response, authContext) {
@@ -43889,7 +43889,7 @@ var require_scram = __commonJS({
         throw new error_1.MongoInvalidArgumentError("Unable to continue SCRAM without valid nonce");
       }
       const nonce = authContext.nonce;
-      const db3 = credentials.source;
+      const db = credentials.source;
       const username = cleanUsername(credentials.username);
       const password = credentials.password;
       const processedPassword = cryptoMethod === "sha256" ? (0, saslprep_1.saslprep)(password) : passwordDigest(username, password);
@@ -43923,7 +43923,7 @@ var require_scram = __commonJS({
         conversationId: response.conversationId,
         payload: new bson_1.Binary(Buffer.from(clientFinal))
       };
-      const r = await connection.command((0, utils_1.ns)(`${db3}.$cmd`), saslContinueCmd, void 0);
+      const r = await connection.command((0, utils_1.ns)(`${db}.$cmd`), saslContinueCmd, void 0);
       const parsedResponse = parsePayload(r.payload);
       if (!compareDigest(Buffer.from(parsedResponse.v, "base64"), serverSignature)) {
         throw new error_1.MongoRuntimeError("Server returned an invalid signature");
@@ -43936,7 +43936,7 @@ var require_scram = __commonJS({
         conversationId: r.conversationId,
         payload: Buffer.alloc(0)
       };
-      await connection.command((0, utils_1.ns)(`${db3}.$cmd`), retrySaslContinueCmd, void 0);
+      await connection.command((0, utils_1.ns)(`${db}.$cmd`), retrySaslContinueCmd, void 0);
     }
     function parsePayload(payload) {
       const payloadStr = payload.toString("utf8");
@@ -45650,7 +45650,7 @@ var require_mongo_client = __commonJS({
       v1: "1"
     });
     var kOptions = Symbol("options");
-    var MongoClient3 = class extends mongo_types_1.TypedEventEmitter {
+    var MongoClient2 = class extends mongo_types_1.TypedEventEmitter {
       constructor(url2, options) {
         super();
         this[kOptions] = (0, connection_string_1.parseOptions)(url2, this, options);
@@ -45899,8 +45899,8 @@ var require_mongo_client = __commonJS({
           dbName = this.s.options.dbName;
         }
         const finalOptions = Object.assign({}, this[kOptions], options);
-        const db3 = new db_1.Db(this, dbName, finalOptions);
-        return db3;
+        const db = new db_1.Db(this, dbName, finalOptions);
+        return db;
       }
       /**
        * Connect to MongoDB using a url
@@ -46034,8 +46034,8 @@ var require_mongo_client = __commonJS({
         return new change_stream_1.ChangeStream(this, pipeline, (0, utils_1.resolveOptions)(this, options));
       }
     };
-    exports2.MongoClient = MongoClient3;
-    (0, resource_management_1.configureResourceManagement)(MongoClient3.prototype);
+    exports2.MongoClient = MongoClient2;
+    (0, resource_management_1.configureResourceManagement)(MongoClient2.prototype);
   }
 });
 
@@ -46057,11 +46057,11 @@ var require_resource_management = __commonJS({
       });
     }
     function configureExplicitResourceManagement() {
-      const { MongoClient: MongoClient3 } = require_mongo_client();
+      const { MongoClient: MongoClient2 } = require_mongo_client();
       const { ClientSession } = require_sessions();
       const { AbstractCursor } = require_abstract_cursor();
       const { ChangeStream } = require_change_stream();
-      configureResourceManagement(MongoClient3.prototype);
+      configureResourceManagement(MongoClient2.prototype);
       configureResourceManagement(ClientSession.prototype);
       configureResourceManagement(AbstractCursor.prototype);
       configureResourceManagement(ChangeStream.prototype);
@@ -47005,8 +47005,8 @@ var require_list_databases = __commonJS({
     var command_1 = require_command();
     var operation_1 = require_operation();
     var ListDatabasesOperation = class extends command_1.CommandOperation {
-      constructor(db3, options) {
-        super(db3, options);
+      constructor(db, options) {
+        super(db, options);
         this.options = options ?? {};
         this.ns = new utils_1.MongoDBNamespace("admin", "$cmd");
       }
@@ -47093,8 +47093,8 @@ var require_admin = __commonJS({
        * Create a new Admin instance
        * @internal
        */
-      constructor(db3) {
-        this.s = { db: db3 };
+      constructor(db) {
+        this.s = { db };
       }
       /**
        * Execute a command
@@ -47826,19 +47826,19 @@ var require_gridfs = __commonJS({
       chunkSizeBytes: 255 * 1024
     };
     var GridFSBucket = class extends mongo_types_1.TypedEventEmitter {
-      constructor(db3, options) {
+      constructor(db, options) {
         super();
         this.setMaxListeners(0);
-        const privateOptions = (0, utils_1.resolveOptions)(db3, {
+        const privateOptions = (0, utils_1.resolveOptions)(db, {
           ...DEFAULT_GRIDFS_BUCKET_OPTIONS,
           ...options,
           writeConcern: write_concern_1.WriteConcern.fromOptions(options)
         });
         this.s = {
-          db: db3,
+          db,
           options: privateOptions,
-          _chunksCollection: db3.collection(privateOptions.bucketName + ".chunks"),
-          _filesCollection: db3.collection(privateOptions.bucketName + ".files"),
+          _chunksCollection: db.collection(privateOptions.bucketName + ".chunks"),
+          _filesCollection: db.collection(privateOptions.bucketName + ".files"),
           checkedIndexes: false,
           calledOpenUploadStream: false
         };
@@ -67127,8 +67127,36 @@ var sendToMainBot = async (text) => {
   }
 };
 
-// src/support/helpers/setConsole.log.ts
+// src/support/db/db.ts
 var import_mongodb = __toESM(require_lib3());
+var coreDb;
+var logsDb;
+var coreDB = async () => {
+  while (!coreDb) {
+    try {
+      const client = new import_mongodb.MongoClient(process.env.DATABASE_FUCKER_URI || "");
+      const connect = await client.connect();
+      coreDb = connect.db("core");
+      break;
+    } catch {
+      await sendToMainBot("DB not inited. Dangerous mistake. Retry.");
+    }
+  }
+  return coreDb;
+};
+var logsDB = async () => {
+  while (!logsDb) {
+    try {
+      const client = new import_mongodb.MongoClient(process.env.DATABASE_FUCKER_URI || "");
+      const connect = await client.connect();
+      logsDb = connect.db("logs");
+      break;
+    } catch {
+      await sendToMainBot("DB not inited. Dangerous mistake. Retry.");
+    }
+  }
+  return logsDb;
+};
 
 // src/support/helpers/helpers.ts
 var allTimings = [];
@@ -67176,25 +67204,8 @@ var getTimeStringByTime = (timeDate) => {
 
 // src/support/helpers/setConsole.log.ts
 var { log } = require("console");
-var db;
 var lastLogTime = Date.now();
 var activePromises = [];
-var DB = async () => {
-  while (!db) {
-    try {
-      const client = new import_mongodb.MongoClient(
-        "mongodb://gen_user:%5C%7Dc%3C%24q%3C3j8O_%26g@193.108.115.154:27017/winston?authSource=admin&directConnection=true"
-      );
-      const connect = await client.connect();
-      db = connect.db("winston");
-      break;
-    } catch {
-      await sendToMainBot("\u{1F6A8} DB_NOT_CONNECTED \u{1F6A8}");
-      await sleep(1e3);
-    }
-  }
-  return db;
-};
 var getNextLogTime = () => {
   const now = /* @__PURE__ */ new Date();
   if (now.getTime() <= lastLogTime) {
@@ -67206,9 +67217,9 @@ var getNextLogTime = () => {
 var insertLog = async (data) => {
   for (let i = 0; i < 5; i++) {
     try {
-      const database = await DB();
+      const database = await logsDB();
       log(JSON.stringify(data));
-      await database.collection("fucker").insertOne(data);
+      await database.collection("logs").insertOne(data);
       return;
     } catch {
       if (i === 4)
@@ -67284,26 +67295,9 @@ Promise: ${JSON.stringify(promise)}`);
   process.exit(1);
 });
 
-// src/support/db/db.ts
-var import_mongodb2 = __toESM(require_lib3());
-var db2;
-var DB2 = async () => {
-  while (!db2) {
-    try {
-      const client = new import_mongodb2.MongoClient(process.env.DATABASE_URI || "");
-      const connect = await client.connect();
-      db2 = connect.db("fucker");
-      break;
-    } catch {
-      await sendToMainBot("DB not inited. Dangerous mistake. Retry.");
-    }
-  }
-  return db2;
-};
-
 // src/support/db/accounts.ts
 var getAccountCollection = async () => {
-  return (await DB2()).collection("accounts");
+  return (await coreDB()).collection("accounts");
 };
 var getAccounts = async () => {
   const accountCollection = await getAccountCollection();

@@ -1,8 +1,8 @@
 import { Account } from '../@types/Account';
-import { DB } from './db';
+import { coreDB } from './db';
 
 const getAccountCollection = async () => {
-  return (await DB()).collection('accounts');
+  return (await coreDB()).collection('accounts');
 };
 
 export const getAccounts = async () => {

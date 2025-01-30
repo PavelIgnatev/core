@@ -2,19 +2,36 @@ import { Db, MongoClient } from 'mongodb';
 
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
-let db: Db;
+let coreDb: Db;
+let logsDb: Db;
 
-export const DB = async () => {
-  while (!db) {
+export const coreDB = async () => {
+  while (!coreDb) {
     try {
-      const client = new MongoClient(process.env.DATABASE_URI || '');
+      console.log(process.env.DATABASE_SENDER_URI)
+      const client = new MongoClient(process.env.DATABASE_SENDER_URI || '');
       const connect = await client.connect();
-      db = connect.db('core');
+      coreDb = connect.db('core');
       break;
     } catch {
       await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
     }
   }
 
-  return db;
+  return coreDb;
+};
+
+export const logsDB = async () => {
+  while (!logsDb) {
+    try {
+      const client = new MongoClient(process.env.DATABASE_SENDER_URI || '');
+      const connect = await client.connect();
+      logsDb = connect.db('logs');
+      break;
+    } catch {
+      await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
+    }
+  }
+
+  return logsDb;
 };

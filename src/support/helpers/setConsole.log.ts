@@ -1,30 +1,11 @@
-import { Db, MongoClient } from 'mongodb';
-
+import { logsDB } from '../db/db';
 import { sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
 
 const { log } = require('console');
 
-let db: Db;
 let lastLogTime = Date.now();
 const activePromises: Promise<any>[] = [];
-
-const DB = async () => {
-  while (!db) {
-    try {
-      const client = new MongoClient(
-        'mongodb://gen_user:%5C%7Dc%3C%24q%3C3j8O_%26g@193.108.115.154:27017/winston?authSource=admin&directConnection=true'
-      );
-      const connect = await client.connect();
-      db = connect.db('winston');
-      break;
-    } catch {
-      await sendToMainBot('🚨 DB_NOT_CONNECTED 🚨');
-      await sleep(1000);
-    }
-  }
-  return db;
-};
 
 const getNextLogTime = () => {
   const now = new Date();
@@ -40,9 +21,9 @@ const getNextLogTime = () => {
 const insertLog = async (data: any) => {
   for (let i = 0; i < 5; i++) {
     try {
-      const database = await DB();
+      const database = await logsDB();
       log(JSON.stringify(data));
-      await database.collection('fucker').insertOne(data);
+      await database.collection('logs').insertOne(data);
       return;
     } catch {
       if (i === 4) throw new Error('SAVE_LOG_CRITICAL_ERROR');
