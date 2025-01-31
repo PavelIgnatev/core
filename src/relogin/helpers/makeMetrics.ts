@@ -8,9 +8,9 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 export const makeMetrics = async (clients: any[], startCheckerTime: number) => {
   if (!clients.filter(Boolean).length) {
     console.log({
-      message: `💥 CHECKER ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+      message: `💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
       prefix: 'GLOBAL_METRICS',
-      accountId: `GLOBAL_METRICS_CHECKER`,
+      accountId: `GLOBAL_METRICS_RELOGIN`,
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -19,7 +19,7 @@ export const makeMetrics = async (clients: any[], startCheckerTime: number) => {
       connectErrorCounts: [],
     });
 
-    await sendToMainBot(`💥 CHECKER ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
+    await sendToMainBot(`💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
 
 * АККАУНТЫ * 
 В РАБОТЕ: 0
@@ -121,9 +121,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
   );
 
   console.log({
-    message: `💥 CHECKER ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+    message: `💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
     prefix: 'GLOBAL_METRICS',
-    accountId: `GLOBAL_METRICS_CHECKER`,
+    accountId: `GLOBAL_METRICS_RELOGIN`,
     initTimings,
     endTimings,
     connectCounts,
@@ -132,7 +132,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     connectErrorCounts,
   });
 
-  await sendToMainBot(`💥 CHECKER ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
+  await sendToMainBot(`💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
   
 * АККАУНТЫ * 
 В РАБОТЕ: ${clients.length}

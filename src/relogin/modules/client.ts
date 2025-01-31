@@ -5,6 +5,7 @@ import GramJs from '../../gramjs/tl/api';
 async function init(
   account: {
     accountId: string;
+    empty: boolean;
     prefix: string;
 
     dcId: number;
@@ -18,7 +19,7 @@ async function init(
   onError: (error: any) => void
 ) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5 } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -32,7 +33,9 @@ async function init(
     keys,
     hashes: {},
   };
-  const session = new CallbackSession(sessionData, () => {}, true);
+  const session = empty
+    ? new CallbackSession(undefined, () => {})
+    : new CallbackSession(sessionData, () => {}, true);
 
   const client = new TelegramClient(
     session,
@@ -85,6 +88,7 @@ async function init(
 export const initClient = async (
   account: {
     accountId: string;
+    empty: boolean;
     prefix: string;
 
     dcId: number;
@@ -94,10 +98,8 @@ export const initClient = async (
     dc4?: string;
     dc5?: string;
   },
-  autoReconnect: boolean,
   onUpdate: (update: any) => void,
-  onError: (update: any) => void,
-  attempt: number = 1
+  onError: (update: any) => void
 ): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
@@ -117,21 +119,6 @@ export const initClient = async (
 
     return client as TelegramClient;
   } catch (e: any) {
-    if (autoReconnect && e.message === 'CLIENT_TIMEOUT_ERROR') {
-      console.warn({
-        accountId: account.accountId,
-        prefix: account.prefix,
-        message: `[CLIENT_TIMEOUT_RECONNECT (${attempt}/3)]`,
-      });
-      return await initClient(
-        account,
-        attempt < 3,
-        onUpdate,
-        onError,
-        attempt + 1
-      );
-    }
-
     throw new Error(e.message);
   }
 };
