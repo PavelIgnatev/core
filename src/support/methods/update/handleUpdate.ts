@@ -118,7 +118,6 @@ ${messageText}`;
     await sendToMainBot(notificationMessage);
 
     if (client) {
-      
       await deleteHistory(
         client,
         new GramJs.InputPeerUser({
