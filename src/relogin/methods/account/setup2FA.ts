@@ -2,7 +2,6 @@ import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
 import { updateAccountById } from '../../db/accounts';
-import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { invokeRequest } from '../../modules/invokeRequest';
 
 export const setup2FA = async (client: TelegramClient, account: Account) => {
@@ -20,6 +19,8 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
     if (!twoFa) {
       await updateAccountById(client._accountId, {
         twoFa: true,
+        banned: true,
+        reason: '2FA',
       });
     }
 

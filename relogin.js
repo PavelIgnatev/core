@@ -67297,7 +67297,6 @@ var getAccountsReLogin = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.distinct("accountId", {
     banned: { $ne: true },
-    prefix: "web2",
     parentAccountId: null,
     workedOut: { $ne: true }
   });
@@ -67966,7 +67965,9 @@ var setup2FA = async (client, account) => {
     }
     if (!twoFa) {
       await updateAccountById(client._accountId, {
-        twoFa: true
+        twoFa: true,
+        banned: true,
+        reason: "2FA"
       });
     }
     throw new Error("ACCOUNT_HAVE_2FA");

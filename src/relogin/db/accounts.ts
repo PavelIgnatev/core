@@ -10,7 +10,6 @@ export const getAccountsReLogin = async () => {
 
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
-    prefix: 'web2',
     parentAccountId: null,
     workedOut: { $ne: true },
   });
