@@ -69203,7 +69203,7 @@ var reChecker = async () => {
   });
 };
 var main = async () => {
-  await reChecker();
+  await Promise.all([reChecker(), sleep(6e4)]);
   await waitConsole();
   process.exit(1);
 };

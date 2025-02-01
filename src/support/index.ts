@@ -2,6 +2,7 @@ import 'dotenv/config';
 import './helpers/errors';
 
 import { getAccounts } from './db/accounts';
+import { sleep } from './helpers/helpers';
 import { makeMetrics } from './helpers/makeMetrics';
 import { waitConsole } from './helpers/setConsole.log';
 import { checker } from './modules/checker';
@@ -37,7 +38,7 @@ const reChecker = async () => {
 };
 
 const main = async () => {
-  await reChecker();
+  await Promise.all([reChecker(), sleep(60000)]);
 
   await waitConsole();
   process.exit(1);

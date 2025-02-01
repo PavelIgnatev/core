@@ -5,6 +5,7 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateStatus } from '../methods/account/updateStatus';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { initClient } from '../modules/client';
+import { checkSpamBlock } from './checkSpamBlock';
 
 export const recheck = async (ID: string) => {
   const clients: TelegramClient[] = [];
@@ -47,6 +48,8 @@ export const recheck = async (ID: string) => {
         errored = error.message;
       }
     }, 10000);
+
+    await checkSpamBlock(client, account);
 
     await sleep(180000);
 

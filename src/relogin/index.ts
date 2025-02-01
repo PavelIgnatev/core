@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import './helpers/errors';
 
+import { sleep } from '../gramjs/Helpers';
 import { getAccountsReCheck, getAccountsReLogin } from './db/accounts';
 import { makeMetrics } from './helpers/makeMetrics';
 import { waitConsole } from './helpers/setConsole.log';
@@ -58,7 +59,7 @@ const reCheck = async () => {
 };
 
 const main = async () => {
-  await Promise.all([reLogin(), reCheck()]);
+  await Promise.all([reLogin(), reCheck(), sleep(60000)]);
 
   await waitConsole();
   process.exit(1);

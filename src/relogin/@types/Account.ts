@@ -18,6 +18,8 @@ export interface Account {
   unknownTwoFa?: boolean;
   remainingTime?: string;
 
+  spamBlockDate?: Date | 'INFINITY';
+
   recheckDates?: Date[];
   stable?: boolean;
 }

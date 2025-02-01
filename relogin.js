@@ -48418,293 +48418,6 @@ var require_lib3 = __commonJS({
   }
 });
 
-// src/gramjs/tl/generationHelpers.js
-var require_generationHelpers = __commonJS({
-  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
-    "use strict";
-    var snakeToCamelCase = (name) => {
-      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
-      return result.replace(/_/g, "");
-    };
-    var variableSnakeToCamelCase = (str) => str.replace(
-      /([-_][a-z])/g,
-      (group) => group.toUpperCase().replace("-", "").replace("_", "")
-    );
-    var CORE_TYPES = /* @__PURE__ */ new Set([
-      3162085175,
-      // boolFalse#bc799737 = Bool;
-      2574415285,
-      // boolTrue#997275b5 = Bool;
-      1072550713,
-      // true#3fedd339 = True;
-      3300522427,
-      // error#c4b9f9bb code:int text:string = Error;
-      1450380236
-      // null#56730bcc = Null;
-    ]);
-    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
-      85337187,
-      // resPQ,
-      2211011308,
-      // p_q_inner_data
-      2851430293,
-      // p_q_inner_data_dc
-      1013613780,
-      // p_q_inner_data_temp
-      1459478408,
-      // p_q_inner_data_temp_dc
-      3504867164,
-      // server_DH_params_ok
-      3045658042,
-      // server_DH_inner_data
-      1715713620,
-      // client_DH_inner_data
-      3608339646,
-      // req_DH_params
-      4110704415,
-      // set_client_DH_params
-      812830625
-      // gzip_packed
-    ]);
-    function makeCRCTable() {
-      let c;
-      const crcTable2 = [];
-      for (let n = 0; n < 256; n++) {
-        c = n;
-        for (let k = 0; k < 8; k++) {
-          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
-        }
-        crcTable2[n] = c;
-      }
-      return crcTable2;
-    }
-    var crcTable;
-    function crc32(buf) {
-      if (!crcTable) {
-        crcTable = makeCRCTable();
-      }
-      if (!Buffer.isBuffer(buf)) {
-        buf = Buffer.from(buf);
-      }
-      let crc = -1;
-      for (let index = 0; index < buf.length; index++) {
-        const byte = buf[index];
-        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
-      }
-      return (crc ^ -1) >>> 0;
-    }
-    var findAll = (regex, str, matches = []) => {
-      if (!regex.flags.includes("g")) {
-        regex = new RegExp(regex.source, "g");
-      }
-      const res = regex.exec(str);
-      if (res) {
-        matches.push(res.slice(1));
-        findAll(regex, str, matches);
-      }
-      return matches;
-    };
-    var fromLine = (line, isFunction2) => {
-      const match = line.match(
-        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
-      );
-      if (!match) {
-        throw new Error(`Cannot parse TLObject ${line}`);
-      }
-      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
-      const currentConfig = {
-        name: match[1],
-        constructorId: parseInt(match[2], 16),
-        argsConfig: {},
-        subclassOfId: crc32(match[3]),
-        result: match[3],
-        isFunction: isFunction2,
-        namespace: void 0
-      };
-      if (!currentConfig.constructorId) {
-        const hexId = "";
-        let args;
-        if (Object.values(currentConfig.argsConfig).length) {
-          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
-        } else {
-          args = "";
-        }
-        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
-        if (currentConfig.name === "inputMediaInvoice") {
-          if (currentConfig.name === "inputMediaInvoice") {
-          }
-        }
-        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
-      }
-      for (const [brace, name, argType] of argsMatch) {
-        if (brace === void 0) {
-          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
-            name,
-            argType
-          );
-        }
-      }
-      if (currentConfig.name.includes(".")) {
-        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
-      }
-      currentConfig.name = snakeToCamelCase(currentConfig.name);
-      return currentConfig;
-    };
-    function buildArgConfig(name, argType) {
-      name = name === "self" ? "is_self" : name;
-      const currentConfig = {
-        isVector: false,
-        isFlag: false,
-        skipConstructorId: false,
-        flagGroup: 0,
-        flagIndex: -1,
-        flagIndicator: true,
-        type: void 0,
-        useVectorId: void 0
-      };
-      if (argType !== "#") {
-        currentConfig.flagIndicator = false;
-        currentConfig.type = argType.replace(/^!+/, "");
-        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
-        if (flagMatch) {
-          currentConfig.isFlag = true;
-          currentConfig.flagGroup = Number(flagMatch[1] || 1);
-          currentConfig.flagIndex = Number(flagMatch[2]);
-          [, , , currentConfig.type] = flagMatch;
-        }
-        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
-        if (vectorMatch) {
-          currentConfig.isVector = true;
-          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
-          [, currentConfig.type] = vectorMatch;
-        }
-        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
-          currentConfig.skipConstructorId = true;
-        }
-      }
-      return currentConfig;
-    }
-    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
-      (methods || []).reduce(
-        (o, m) => ({
-          ...o,
-          [m.name]: m
-        }),
-        {}
-      );
-      const objAll = [];
-      const objByName = {};
-      const objByType = {};
-      const file = content;
-      let isFunction2 = false;
-      for (let line of file.split("\n")) {
-        const commentIndex = line.indexOf("//");
-        if (commentIndex !== -1) {
-          line = line.slice(0, commentIndex);
-        }
-        line = line.trim();
-        if (!line) {
-          continue;
-        }
-        const match = line.match(/---(\w+)---/);
-        if (match) {
-          const [, followingTypes] = match;
-          isFunction2 = followingTypes === "functions";
-          continue;
-        }
-        try {
-          const result = fromLine(line, isFunction2);
-          if (ignoreIds.has(result.constructorId)) {
-            continue;
-          }
-          objAll.push(result);
-          if (!result.isFunction) {
-            if (!objByType[result.result]) {
-              objByType[result.result] = [];
-            }
-            objByName[result.name] = result;
-            objByType[result.result].push(result);
-          }
-        } catch (e) {
-          if (!e.toString().includes("vector#1cb5c415")) {
-            throw e;
-          }
-        }
-      }
-      for (const obj of objAll) {
-        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
-          for (const arg in obj.argsConfig) {
-            if (obj.argsConfig[arg].type === "string") {
-              obj.argsConfig[arg].type = "bytes";
-            }
-          }
-        }
-      }
-      for (const obj of objAll) {
-        yield obj;
-      }
-    }
-    function serializeBytes(data) {
-      if (!(data instanceof Buffer)) {
-        if (typeof data === "string") {
-          data = Buffer.from(data);
-        }
-      }
-      const r = [];
-      let padding;
-      if (data.length < 254) {
-        padding = (data.length + 1) % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(Buffer.from([data.length]));
-        r.push(data);
-      } else {
-        padding = data.length % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(
-          Buffer.from([
-            254,
-            data.length % 256,
-            (data.length >> 8) % 256,
-            (data.length >> 16) % 256
-          ])
-        );
-        r.push(data);
-      }
-      r.push(Buffer.alloc(padding).fill(0));
-      return Buffer.concat(r);
-    }
-    function serializeDate(dt) {
-      if (!dt) {
-        return Buffer.alloc(4).fill(0);
-      }
-      if (dt instanceof Date) {
-        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
-      }
-      if (typeof dt === "number") {
-        const t = Buffer.alloc(4);
-        t.writeInt32LE(dt, 0);
-        return t;
-      }
-      throw Error(`Cannot interpret "${dt}" as a date`);
-    }
-    module2.exports = {
-      findAll,
-      parseTl,
-      buildArgConfig,
-      fromLine,
-      CORE_TYPES,
-      serializeDate,
-      serializeBytes,
-      snakeToCamelCase,
-      variableSnakeToCamelCase
-    };
-  }
-});
-
 // node_modules/big-integer/BigInteger.js
 var require_BigInteger = __commonJS({
   "node_modules/big-integer/BigInteger.js"(exports2, module2) {
@@ -50398,7 +50111,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt3 = require_BigInteger();
+    var BigInt6 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer3(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -50406,14 +50119,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt3 = BigInt3(randBuffer.toString("hex"), 16);
+      let bigInt3 = BigInt6(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt3.toString(2).length / 8) >= bytesNumber) {
-        bigInt3 = bigInt3.subtract(BigInt3(2).pow(BigInt3(bytesNumber * 8)));
+        bigInt3 = bigInt3.subtract(BigInt6(2).pow(BigInt6(bytesNumber * 8)));
       }
       return bigInt3;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt3(big);
+      const bigNumber = BigInt6(big);
       const byteArray = [];
       for (let i = 0; i < number; i++) {
         byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
@@ -50421,17 +50134,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt2(bigInt3, bytesNumber, little = true, signed = false) {
-      bigInt3 = BigInt3(bigInt3);
+      bigInt3 = BigInt6(bigInt3);
       const bitLength = bigInt3.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt3.lesser(BigInt3(0))) {
+      if (!signed && bigInt3.lesser(BigInt6(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt3.lesser(BigInt3(0))) {
+      if (bigInt3.lesser(BigInt6(0))) {
         below = true;
         bigInt3 = bigInt3.abs();
       }
@@ -50498,12 +50211,12 @@ var require_Helpers = __commonJS({
     }
     function modExp2(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt3.one;
+      let result = BigInt6.one;
       let x = a;
-      while (b.greater(BigInt3.zero)) {
-        const leastSignificantBit = b.remainder(BigInt3(2));
-        b = b.divide(BigInt3(2));
-        if (leastSignificantBit.eq(BigInt3.one)) {
+      while (b.greater(BigInt6.zero)) {
+        const leastSignificantBit = b.remainder(BigInt6(2));
+        b = b.divide(BigInt6(2));
+        if (leastSignificantBit.eq(BigInt6.one)) {
           result = result.multiply(x);
           result = result.remainder(n);
         }
@@ -50515,14 +50228,14 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt2(BigInt3(integer), byteLength, false, signed);
+      return readBufferFromBigInt2(BigInt6(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    var sleep3 = (ms) => new Promise((resolve) => {
+    var sleep5 = (ms) => new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
     function bufferXor(a, b) {
@@ -50573,12 +50286,299 @@ var require_Helpers = __commonJS({
       bigIntMod,
       modExp: modExp2,
       getRandomInt,
-      sleep: sleep3,
+      sleep: sleep5,
       getByteArray,
       // isArrayLike,
       toSignedLittleBuffer,
       convertToLittle,
       bufferXor
+    };
+  }
+});
+
+// src/gramjs/tl/generationHelpers.js
+var require_generationHelpers = __commonJS({
+  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
+    "use strict";
+    var snakeToCamelCase = (name) => {
+      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
+      return result.replace(/_/g, "");
+    };
+    var variableSnakeToCamelCase = (str) => str.replace(
+      /([-_][a-z])/g,
+      (group) => group.toUpperCase().replace("-", "").replace("_", "")
+    );
+    var CORE_TYPES = /* @__PURE__ */ new Set([
+      3162085175,
+      // boolFalse#bc799737 = Bool;
+      2574415285,
+      // boolTrue#997275b5 = Bool;
+      1072550713,
+      // true#3fedd339 = True;
+      3300522427,
+      // error#c4b9f9bb code:int text:string = Error;
+      1450380236
+      // null#56730bcc = Null;
+    ]);
+    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
+      85337187,
+      // resPQ,
+      2211011308,
+      // p_q_inner_data
+      2851430293,
+      // p_q_inner_data_dc
+      1013613780,
+      // p_q_inner_data_temp
+      1459478408,
+      // p_q_inner_data_temp_dc
+      3504867164,
+      // server_DH_params_ok
+      3045658042,
+      // server_DH_inner_data
+      1715713620,
+      // client_DH_inner_data
+      3608339646,
+      // req_DH_params
+      4110704415,
+      // set_client_DH_params
+      812830625
+      // gzip_packed
+    ]);
+    function makeCRCTable() {
+      let c;
+      const crcTable2 = [];
+      for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
+        }
+        crcTable2[n] = c;
+      }
+      return crcTable2;
+    }
+    var crcTable;
+    function crc32(buf) {
+      if (!crcTable) {
+        crcTable = makeCRCTable();
+      }
+      if (!Buffer.isBuffer(buf)) {
+        buf = Buffer.from(buf);
+      }
+      let crc = -1;
+      for (let index = 0; index < buf.length; index++) {
+        const byte = buf[index];
+        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
+      }
+      return (crc ^ -1) >>> 0;
+    }
+    var findAll = (regex, str, matches = []) => {
+      if (!regex.flags.includes("g")) {
+        regex = new RegExp(regex.source, "g");
+      }
+      const res = regex.exec(str);
+      if (res) {
+        matches.push(res.slice(1));
+        findAll(regex, str, matches);
+      }
+      return matches;
+    };
+    var fromLine = (line, isFunction2) => {
+      const match = line.match(
+        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
+      );
+      if (!match) {
+        throw new Error(`Cannot parse TLObject ${line}`);
+      }
+      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
+      const currentConfig = {
+        name: match[1],
+        constructorId: parseInt(match[2], 16),
+        argsConfig: {},
+        subclassOfId: crc32(match[3]),
+        result: match[3],
+        isFunction: isFunction2,
+        namespace: void 0
+      };
+      if (!currentConfig.constructorId) {
+        const hexId = "";
+        let args;
+        if (Object.values(currentConfig.argsConfig).length) {
+          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
+        } else {
+          args = "";
+        }
+        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
+        if (currentConfig.name === "inputMediaInvoice") {
+          if (currentConfig.name === "inputMediaInvoice") {
+          }
+        }
+        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
+      }
+      for (const [brace, name, argType] of argsMatch) {
+        if (brace === void 0) {
+          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
+            name,
+            argType
+          );
+        }
+      }
+      if (currentConfig.name.includes(".")) {
+        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
+      }
+      currentConfig.name = snakeToCamelCase(currentConfig.name);
+      return currentConfig;
+    };
+    function buildArgConfig(name, argType) {
+      name = name === "self" ? "is_self" : name;
+      const currentConfig = {
+        isVector: false,
+        isFlag: false,
+        skipConstructorId: false,
+        flagGroup: 0,
+        flagIndex: -1,
+        flagIndicator: true,
+        type: void 0,
+        useVectorId: void 0
+      };
+      if (argType !== "#") {
+        currentConfig.flagIndicator = false;
+        currentConfig.type = argType.replace(/^!+/, "");
+        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
+        if (flagMatch) {
+          currentConfig.isFlag = true;
+          currentConfig.flagGroup = Number(flagMatch[1] || 1);
+          currentConfig.flagIndex = Number(flagMatch[2]);
+          [, , , currentConfig.type] = flagMatch;
+        }
+        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
+        if (vectorMatch) {
+          currentConfig.isVector = true;
+          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
+          [, currentConfig.type] = vectorMatch;
+        }
+        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
+          currentConfig.skipConstructorId = true;
+        }
+      }
+      return currentConfig;
+    }
+    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
+      (methods || []).reduce(
+        (o, m) => ({
+          ...o,
+          [m.name]: m
+        }),
+        {}
+      );
+      const objAll = [];
+      const objByName = {};
+      const objByType = {};
+      const file = content;
+      let isFunction2 = false;
+      for (let line of file.split("\n")) {
+        const commentIndex = line.indexOf("//");
+        if (commentIndex !== -1) {
+          line = line.slice(0, commentIndex);
+        }
+        line = line.trim();
+        if (!line) {
+          continue;
+        }
+        const match = line.match(/---(\w+)---/);
+        if (match) {
+          const [, followingTypes] = match;
+          isFunction2 = followingTypes === "functions";
+          continue;
+        }
+        try {
+          const result = fromLine(line, isFunction2);
+          if (ignoreIds.has(result.constructorId)) {
+            continue;
+          }
+          objAll.push(result);
+          if (!result.isFunction) {
+            if (!objByType[result.result]) {
+              objByType[result.result] = [];
+            }
+            objByName[result.name] = result;
+            objByType[result.result].push(result);
+          }
+        } catch (e) {
+          if (!e.toString().includes("vector#1cb5c415")) {
+            throw e;
+          }
+        }
+      }
+      for (const obj of objAll) {
+        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
+          for (const arg in obj.argsConfig) {
+            if (obj.argsConfig[arg].type === "string") {
+              obj.argsConfig[arg].type = "bytes";
+            }
+          }
+        }
+      }
+      for (const obj of objAll) {
+        yield obj;
+      }
+    }
+    function serializeBytes(data) {
+      if (!(data instanceof Buffer)) {
+        if (typeof data === "string") {
+          data = Buffer.from(data);
+        }
+      }
+      const r = [];
+      let padding;
+      if (data.length < 254) {
+        padding = (data.length + 1) % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(Buffer.from([data.length]));
+        r.push(data);
+      } else {
+        padding = data.length % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(
+          Buffer.from([
+            254,
+            data.length % 256,
+            (data.length >> 8) % 256,
+            (data.length >> 16) % 256
+          ])
+        );
+        r.push(data);
+      }
+      r.push(Buffer.alloc(padding).fill(0));
+      return Buffer.concat(r);
+    }
+    function serializeDate(dt) {
+      if (!dt) {
+        return Buffer.alloc(4).fill(0);
+      }
+      if (dt instanceof Date) {
+        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
+      }
+      if (typeof dt === "number") {
+        const t = Buffer.alloc(4);
+        t.writeInt32LE(dt, 0);
+        return t;
+      }
+      throw Error(`Cannot interpret "${dt}" as a date`);
+    }
+    module2.exports = {
+      findAll,
+      parseTl,
+      buildArgConfig,
+      fromLine,
+      CORE_TYPES,
+      serializeDate,
+      serializeBytes,
+      snakeToCamelCase,
+      variableSnakeToCamelCase
     };
   }
 });
@@ -55801,7 +55801,7 @@ var require_BinaryReader = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt3 = require_BigInteger();
+    var BigInt6 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers2 = require_Helpers();
     var IGE2 = require_IGE();
@@ -55847,7 +55847,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers2.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt3(0);
+        this._lastMsgId = BigInt6(0);
         this.msgIds = [];
       }
       /**
@@ -56086,9 +56086,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt3(Math.floor(now)).shiftLeft(BigInt3(32)).or(BigInt3(nanoseconds).shiftLeft(BigInt3(2)));
+        let newMsgId = BigInt6(Math.floor(now)).shiftLeft(BigInt6(32)).or(BigInt6(nanoseconds).shiftLeft(BigInt6(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt3(4));
+          newMsgId = this._lastMsgId.add(BigInt6(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -56100,7 +56100,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt3(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt6(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -56111,10 +56111,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt3(32));
+        const correct = correctMsgId.shiftRight(BigInt6(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt3(0);
+          this._lastMsgId = BigInt6(0);
         }
         return this.timeOffset;
       }
@@ -56148,7 +56148,7 @@ var require_AuthKey = __commonJS({
       readBigIntFromBuffer: readBigIntFromBuffer3
     } = require_Helpers();
     var BinaryReader2 = require_BinaryReader();
-    var { sleep: sleep3 } = require_Helpers();
+    var { sleep: sleep5 } = require_Helpers();
     var AuthKey2 = class _AuthKey {
       constructor(value, hash) {
         if (!hash || !value) {
@@ -56185,7 +56185,7 @@ var require_AuthKey = __commonJS({
       }
       async waitForKey() {
         while (!this.keyId) {
-          await sleep3(20);
+          await sleep5(20);
         }
       }
       getKey() {
@@ -56284,7 +56284,7 @@ var require_RequestState = __commonJS({
 var require_MTProtoPlainSender = __commonJS({
   "src/gramjs/network/MTProtoPlainSender.js"(exports2, module2) {
     "use strict";
-    var BigInt3 = require_BigInteger();
+    var BigInt6 = require_BigInteger();
     var MTProtoState = require_MTProtoState();
     var BinaryReader2 = require_BinaryReader();
     var { InvalidBufferError } = require_Common();
@@ -56316,11 +56316,11 @@ var require_MTProtoPlainSender = __commonJS({
         }
         const reader = new BinaryReader2(body);
         const authKeyId = reader.readLong();
-        if (authKeyId.neq(BigInt3(0))) {
+        if (authKeyId.neq(BigInt6(0))) {
           throw new Error("Bad authKeyId");
         }
         msgId = reader.readLong();
-        if (msgId.eq(BigInt3(0))) {
+        if (msgId.eq(BigInt6(0))) {
           throw new Error("Bad msgId");
         }
         const length = reader.readInt();
@@ -56583,23 +56583,23 @@ var require_updates = __commonJS({
 });
 
 // src/gramjs/crypto/RSA.ts
-var import_big_integer, import_Helpers, SERVER_KEYS;
+var import_big_integer2, import_Helpers, SERVER_KEYS;
 var init_RSA = __esm({
   "src/gramjs/crypto/RSA.ts"() {
     "use strict";
-    import_big_integer = __toESM(require_BigInteger());
+    import_big_integer2 = __toESM(require_BigInteger());
     import_Helpers = __toESM(require_Helpers());
     SERVER_KEYS = [
       {
-        fingerprint: (0, import_big_integer.default)("-3414540481677951611"),
-        n: (0, import_big_integer.default)(
+        fingerprint: (0, import_big_integer2.default)("-3414540481677951611"),
+        n: (0, import_big_integer2.default)(
           "29379598170669337022986177149456128565388431120058863768162556424047512191330847455146576344487764408661701890505066208632169112269581063774293102577308490531282748465986139880977280302242772832972539403531316010870401287642763009136156734339538042419388722777357134487746169093539093850251243897188928735903389451772730245253062963384108812842079887538976360465290946139638691491496062099570836476454855996319192747663615955633778034897140982517446405334423701359108810182097749467210509584293428076654573384828809574217079944388301239431309115013843331317877374435868468779972014486325557807783825502498215169806323"
         ),
         e: 65537
       },
       {
-        fingerprint: (0, import_big_integer.default)("-5595554452916591101"),
-        n: (0, import_big_integer.default)(
+        fingerprint: (0, import_big_integer2.default)("-5595554452916591101"),
+        n: (0, import_big_integer2.default)(
           "25342889448840415564971689590713473206898847759084779052582026594546022463853940585885215951168491965708222649399180603818074200620463776135424884632162512403163793083921641631564740959529419359595852941166848940585952337613333022396096584117954892216031229237302943701877588456738335398602461675225081791820393153757504952636234951323237820036543581047826906120927972487366805292115792231423684261262330394324750785450942589751755390156647751460719351439969059949569615302809050721500330239005077889855323917509948255722081644689442127297605422579707142646660768825302832201908302295573257427896031830742328565032949"
         ),
         e: 65537
@@ -56615,7 +56615,7 @@ var init_RSA = __esm({
 var require_Factorizator = __commonJS({
   "src/gramjs/crypto/Factorizator.js"(exports2, module2) {
     "use strict";
-    var BigInt3 = require_BigInteger();
+    var BigInt6 = require_BigInteger();
     var { modExp: modExp2 } = require_Helpers();
     var Factorizator2 = class _Factorizator {
       /**
@@ -56625,7 +56625,7 @@ var require_Factorizator = __commonJS({
        * @returns {BigInteger}
        */
       static gcd(a, b) {
-        while (b.neq(BigInt3.zero)) {
+        while (b.neq(BigInt6.zero)) {
           const temp = b;
           b = a.remainder(b);
           a = temp;
@@ -56638,32 +56638,32 @@ var require_Factorizator = __commonJS({
        * @returns {{p: *, q: *}}
        */
       static factorize(pq) {
-        if (pq.remainder(2).equals(BigInt3.zero)) {
+        if (pq.remainder(2).equals(BigInt6.zero)) {
           return {
-            p: BigInt3(2),
-            q: pq.divide(BigInt3(2))
+            p: BigInt6(2),
+            q: pq.divide(BigInt6(2))
           };
         }
-        let y = BigInt3.randBetween(BigInt3(1), pq.minus(1));
-        const c = BigInt3.randBetween(BigInt3(1), pq.minus(1));
-        const m = BigInt3.randBetween(BigInt3(1), pq.minus(1));
-        let g = BigInt3.one;
-        let r = BigInt3.one;
-        let q = BigInt3.one;
-        let x = BigInt3.zero;
-        let ys = BigInt3.zero;
+        let y = BigInt6.randBetween(BigInt6(1), pq.minus(1));
+        const c = BigInt6.randBetween(BigInt6(1), pq.minus(1));
+        const m = BigInt6.randBetween(BigInt6(1), pq.minus(1));
+        let g = BigInt6.one;
+        let r = BigInt6.one;
+        let q = BigInt6.one;
+        let x = BigInt6.zero;
+        let ys = BigInt6.zero;
         let k;
-        while (g.eq(BigInt3.one)) {
+        while (g.eq(BigInt6.one)) {
           x = y;
-          for (let i = 0; BigInt3(i).lesser(r); i++) {
-            y = modExp2(y, BigInt3(2), pq).add(c).remainder(pq);
+          for (let i = 0; BigInt6(i).lesser(r); i++) {
+            y = modExp2(y, BigInt6(2), pq).add(c).remainder(pq);
           }
-          k = BigInt3.zero;
-          while (k.lesser(r) && g.eq(BigInt3.one)) {
+          k = BigInt6.zero;
+          while (k.lesser(r) && g.eq(BigInt6.one)) {
             ys = y;
-            const condition = BigInt3.min(m, r.minus(k));
-            for (let i = 0; BigInt3(i).lesser(condition); i++) {
-              y = modExp2(y, BigInt3(2), pq).add(c).remainder(pq);
+            const condition = BigInt6.min(m, r.minus(k));
+            for (let i = 0; BigInt6(i).lesser(condition); i++) {
+              y = modExp2(y, BigInt6(2), pq).add(c).remainder(pq);
               q = q.multiply(x.minus(y).abs()).remainder(pq);
             }
             g = _Factorizator.gcd(q, pq);
@@ -56673,7 +56673,7 @@ var require_Factorizator = __commonJS({
         }
         if (g.eq(pq)) {
           while (true) {
-            ys = modExp2(ys, BigInt3(2), pq).add(c).remainder(pq);
+            ys = modExp2(ys, BigInt6(2), pq).add(c).remainder(pq);
             g = _Factorizator.gcd(x.minus(ys).abs(), pq);
             if (g.greater(1)) {
               break;
@@ -56703,8 +56703,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api2.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api2.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api4.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api4.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -56716,7 +56716,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api2.default.PQInnerData({
+  const pqInnerData = new import_api4.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -56784,7 +56784,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api2.default.ReqDHParams({
+    new import_api4.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -56793,7 +56793,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api2.default.ServerDHParamsOk || serverDhParams instanceof import_api2.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api4.default.ServerDHParamsOk || serverDhParams instanceof import_api4.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -56802,7 +56802,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api2.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api4.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -56811,7 +56811,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api2.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api4.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -56826,7 +56826,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api2.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api4.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -56876,7 +56876,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api2.default.ClientDHInnerData({
+  const clientDhInner = new import_api4.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -56889,13 +56889,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api2.default.SetClientDHParams({
+    new import_api4.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api2.default.DhGenOk, import_api2.default.DhGenRetry, import_api2.default.DhGenFail];
+  const nonceTypes = [import_api4.default.DhGenOk, import_api4.default.DhGenRetry, import_api4.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -56915,18 +56915,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api2.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api4.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api2, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api4, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors3());
-    import_api2 = __toESM(require_api());
+    import_api4 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -62729,7 +62729,7 @@ Error: ${e.message}`);
 var require_TCPAbridged = __commonJS({
   "src/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt3 = require_BigInteger();
+    var BigInt6 = require_BigInteger();
     var { readBufferFromBigInt: readBufferFromBigInt2 } = require_Helpers();
     var { Connection, PacketCodec } = require_Connection();
     var AbridgedPacketCodec = class _AbridgedPacketCodec extends PacketCodec {
@@ -62749,7 +62749,7 @@ var require_TCPAbridged = __commonJS({
         } else {
           length = Buffer.concat([
             Buffer.from("7f", "hex"),
-            readBufferFromBigInt2(BigInt3(length), 3)
+            readBufferFromBigInt2(BigInt6(length), 3)
           ]);
         }
         return Buffer.concat([length, data]);
@@ -63180,12 +63180,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api3.default.upload.SaveBigFilePart({
+              isLarge ? new import_api5.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api3.default.upload.SaveFilePart({
+              }) : new import_api5.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -63209,23 +63209,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api3.default.InputFileBig({
+  return isLarge ? new import_api5.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api3.default.InputFile({
+  }) : new import_api5.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api3, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api5, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api3 = __toESM(require_api());
+    import_api5 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors3());
@@ -63243,7 +63243,7 @@ var init_uploadFile = __esm({
 var require_TelegramClient = __commonJS({
   "src/gramjs/client/TelegramClient.js"(exports2, module2) {
     "use strict";
-    var { sleep: sleep3 } = require_Helpers();
+    var { sleep: sleep5 } = require_Helpers();
     var errors2 = require_errors3();
     var { LAYER } = require_AllTLObjects();
     var { constructors, requests } = require_tl();
@@ -63369,7 +63369,7 @@ ID: ${this._accountId}`);
             if (e instanceof errors2.ServerError || e.message === "RPC_CALL_FAIL" || e.message === "RPC_MCGET_FAIL") {
             } else if (e instanceof errors2.FloodWaitError || e instanceof errors2.FloodTestPhoneWaitError) {
               if (e.seconds <= 60) {
-                await sleep3(e.seconds * 1e3);
+                await sleep5(e.seconds * 1e3);
               } else {
                 if (request.className === "contacts.Block" || request.className === "contacts.Unblock" || request.className === "messages.DeleteChatUser") {
                   state.finished.resolve();
@@ -63395,7 +63395,7 @@ ERROR: ${e.message}`
               state.after = void 0;
             } else if (e.message === "CONNECTION_NOT_INITED") {
               await this.disconnect();
-              await sleep3(2e3);
+              await sleep5(2e3);
               await this.connect();
             } else if (e.message === "TIMEOUT_ERROR") {
               if (request.className !== "account.UpdateStatus") {
@@ -67151,6 +67151,18 @@ var logsDB = async () => {
 
 // src/relogin/helpers/helpers.ts
 var allTimings = [];
+function reduceSpaces(string) {
+  return string.replace(/\s+/g, " ").trim();
+}
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function removeNonAlphaPrefix(string) {
+  if (string === "/start") {
+    return string;
+  }
+  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
+}
 var sleep = (delay) => {
   return new Promise((res) => {
     setTimeout(res, delay);
@@ -67273,6 +67285,9 @@ Reason: ${reason}
 Promise: ${JSON.stringify(promise)}`);
   process.exit(1);
 });
+
+// src/relogin/index.ts
+var import_Helpers3 = __toESM(require_Helpers());
 
 // src/relogin/db/accounts.ts
 var getAccountCollection = async () => {
@@ -67522,6 +67537,30 @@ var updateStatus = async (client, offline) => {
 };
 
 // src/relogin/methods/update/handleUpdate.ts
+var import_big_integer = __toESM(require_BigInteger());
+var import_api3 = __toESM(require_api());
+
+// src/relogin/methods/messages/deleteHistory.ts
+var import_api2 = __toESM(require_api());
+async function deleteHistory(client, peer, shouldDeleteForAll) {
+  const result = await invokeRequest(
+    client,
+    new import_api2.default.messages.DeleteHistory({
+      peer,
+      ...shouldDeleteForAll && { revoke: true },
+      ...!shouldDeleteForAll && { just_clear: true }
+    })
+  );
+  if (!result) {
+    return;
+  }
+  if (result.offset) {
+    await deleteHistory(client, peer, shouldDeleteForAll);
+    return;
+  }
+}
+
+// src/relogin/methods/update/handleUpdate.ts
 var handleUpdate = async (client, accountId, update) => {
   if (!update || !client) {
     return;
@@ -67530,6 +67569,28 @@ var handleUpdate = async (client, accountId, update) => {
     if (process.env.DEV !== "true") {
       return;
     }
+  }
+  if (update instanceof import_api3.default.UpdateShortMessage && String(update.userId) === "777000") {
+    console.warn({
+      accountId,
+      prefix: client._prefix,
+      message: "[TELEGRAM_SERVICE_NOTIFICATION]",
+      payload: JSON.parse(JSON.stringify(update))
+    });
+    if (client) {
+      await deleteHistory(
+        client,
+        new import_api3.default.InputPeerUser({
+          userId: update.userId,
+          accessHash: (0, import_big_integer.default)(0)
+        }),
+        true
+      );
+    }
+    await updateAccountById(accountId, {
+      lastServiceNotification: /* @__PURE__ */ new Date()
+    });
+    return;
   }
   console.log({
     accountId,
@@ -67542,7 +67603,7 @@ var handleUpdate = async (client, accountId, update) => {
 // src/relogin/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api4 = __toESM(require_api());
+var import_api6 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
@@ -67594,7 +67655,7 @@ async function init(account, onUpdate, onError) {
   });
   client.addEventHandler(
     (update) => {
-      if (!(update instanceof import_api4.default.UpdatesTooLong)) {
+      if (!(update instanceof import_api6.default.UpdatesTooLong)) {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update2) => {
           onUpdate(update2);
@@ -67625,6 +67686,161 @@ var initClient = async (account, onUpdate, onError) => {
   } catch (e) {
     throw new Error(e.message);
   }
+};
+
+// src/relogin/modules/checkSpamBlock.ts
+var import_api11 = __toESM(require_api());
+
+// src/relogin/methods/contacts/resolveUsername.ts
+var import_api7 = __toESM(require_api());
+var resolveUsername = async (client, username) => {
+  const userByUsername = await invokeRequest(
+    client,
+    new import_api7.default.contacts.ResolveUsername({
+      username
+    }),
+    { shouldIgnoreErrors: true }
+  );
+  return userByUsername;
+};
+
+// src/relogin/methods/contacts/unBlockContact.ts
+var import_api8 = __toESM(require_api());
+var unBlockContact = async (client, peer) => {
+  return await invokeRequest(
+    client,
+    new import_api8.default.contacts.Unblock({ id: peer }),
+    {
+      shouldIgnoreErrors: true
+    }
+  );
+};
+
+// src/relogin/methods/messages/getHistory.ts
+var import_big_integer3 = __toESM(require_BigInteger());
+var import_api9 = __toESM(require_api());
+var getHistory = async (client, userId, accessHash, minId) => {
+  const history = await invokeRequest(
+    client,
+    new import_api9.default.messages.GetHistory({
+      peer: new import_api9.default.InputPeerUser({
+        userId: (0, import_big_integer3.default)(userId),
+        accessHash: (0, import_big_integer3.default)(accessHash)
+      }),
+      minId
+    })
+  );
+  if (!history || history instanceof import_api9.default.messages.MessagesNotModified) {
+    return [];
+  }
+  return history.messages.filter((m) => m instanceof import_api9.default.Message);
+};
+
+// src/relogin/methods/messages/sendMessage.ts
+var import_big_integer4 = __toESM(require_BigInteger());
+var import_api10 = __toESM(require_api());
+var sendMessage = async (client, userId, accessHash, message) => {
+  let messageUpdate;
+  try {
+    const update = await invokeRequest(
+      client,
+      new import_api10.default.messages.SendMessage({
+        message: removeNonAlphaPrefix(
+          capitalizeFirstLetter(reduceSpaces(message))
+        ),
+        clearDraft: true,
+        peer: new import_api10.default.InputPeerUser({
+          userId: (0, import_big_integer4.default)(userId),
+          accessHash: (0, import_big_integer4.default)(accessHash)
+        }),
+        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+      })
+    );
+    if (!update) {
+      messageUpdate = null;
+    } else if (update instanceof import_api10.default.UpdateShortSentMessage || update instanceof import_api10.default.UpdateMessageID) {
+      messageUpdate = update;
+    } else if ("updates" in update) {
+      messageUpdate = update.updates.find(
+        (u) => u instanceof import_api10.default.UpdateMessageID
+      );
+    }
+    if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
+      throw new Error("MESSAGE_NOT_SENT");
+    }
+    return messageUpdate;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// src/relogin/modules/checkSpamBlock.ts
+var checkSpamBlock = async (client, account) => {
+  const { accountId, spamBlockDate: dbSpamBlockDate } = account;
+  const result = await resolveUsername(client, "spambot");
+  if (!result || !result.users.length || !(result.users[0] instanceof import_api11.default.User)) {
+    throw new Error("SPAMBOT_NOT_USER");
+  }
+  const { id: userId, accessHash, username } = result.users[0];
+  if (!accessHash || !username || username !== "SpamBot") {
+    throw new Error("SPAMBOT_NOT_FOUND");
+  }
+  await unBlockContact(
+    client,
+    new import_api11.default.InputPeerUser({
+      userId,
+      accessHash
+    })
+  );
+  const sentMessage = await sendMessage(
+    client,
+    String(userId),
+    String(accessHash),
+    "/start"
+  );
+  await sleep(5e3);
+  const messages = await getHistory(
+    client,
+    String(userId),
+    String(accessHash),
+    sentMessage.id
+  );
+  if (!messages[0]) {
+    throw new Error("SPAMBOT_MESSAGES_NOT_FOUND");
+  }
+  const { message, replyMarkup } = messages[0];
+  if (message.includes("no limits are currently applied")) {
+    await updateAccountById(accountId, {
+      isProblemSpamBlock: false,
+      spamBlockDate: null
+    });
+    await deleteHistory(
+      client,
+      new import_api11.default.InputPeerUser({
+        userId,
+        accessHash
+      }),
+      true
+    );
+    return false;
+  }
+  const match = message.match(/until\s(.*)\./);
+  const spamBlockDate = match ? match[1].replace("UTC", "").trim() : "INFINITY";
+  const spamBlockDateUTC = /* @__PURE__ */ new Date(spamBlockDate + "Z");
+  if (!dbSpamBlockDate || dbSpamBlockDate === "INFINITY" && spamBlockDate !== "INFINITY" || dbSpamBlockDate !== "INFINITY" && spamBlockDate === "INFINITY" || dbSpamBlockDate !== "INFINITY" && dbSpamBlockDate.getTime() !== spamBlockDateUTC.getTime()) {
+    await updateAccountById(accountId, {
+      spamBlockDate: match ? spamBlockDateUTC : "INFINITY"
+    });
+  }
+  await deleteHistory(
+    client,
+    new import_api11.default.InputPeerUser({
+      userId,
+      accessHash
+    }),
+    true
+  );
+  return true;
 };
 
 // src/relogin/modules/recheck.ts
@@ -67659,6 +67875,7 @@ var recheck = async (ID) => {
         errored = error.message;
       }
     }, 1e4);
+    await checkSpamBlock(client, account);
     await sleep(18e4);
     if (errored) {
       throw new Error(errored);
@@ -67691,15 +67908,15 @@ ERROR: ${error.message}`
 };
 
 // src/relogin/modules/relogin.ts
-var import_big_integer2 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
+var import_big_integer5 = __toESM(require_BigInteger());
+var import_api15 = __toESM(require_api());
 
 // src/relogin/methods/account/clearAuthorizations.ts
-var import_api5 = __toESM(require_api());
+var import_api12 = __toESM(require_api());
 async function clearAuthorizations(client) {
   const invokedAuthorizations = await invokeRequest(
     client,
-    new import_api5.default.account.GetAuthorizations()
+    new import_api12.default.account.GetAuthorizations()
   );
   const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
   let currentApiId;
@@ -67723,7 +67940,7 @@ async function clearAuthorizations(client) {
         });
         await invokeRequest(
           client,
-          new import_api5.default.account.ResetAuthorization({
+          new import_api12.default.account.ResetAuthorization({
             hash: authorization.hash
           }),
           { shouldIgnoreErrors: true }
@@ -67736,15 +67953,15 @@ async function clearAuthorizations(client) {
 }
 
 // src/relogin/methods/account/setup2FA.ts
-var import_api6 = __toESM(require_api());
+var import_api13 = __toESM(require_api());
 var setup2FA = async (client, account) => {
   try {
     const { twoFa } = account;
     const resetPassword = await invokeRequest(
       client,
-      new import_api6.default.account.ResetPassword()
+      new import_api13.default.account.ResetPassword()
     );
-    if (resetPassword instanceof import_api6.default.account.ResetPasswordOk) {
+    if (resetPassword instanceof import_api13.default.account.ResetPasswordOk) {
       throw new Error("PASSWORD_EMPTY");
     }
     if (!twoFa) {
@@ -67764,36 +67981,16 @@ var setup2FA = async (client, account) => {
   }
 };
 
-// src/relogin/methods/messages/deleteHistory.ts
-var import_api7 = __toESM(require_api());
-async function deleteHistory(client, peer, shouldDeleteForAll) {
-  const result = await invokeRequest(
-    client,
-    new import_api7.default.messages.DeleteHistory({
-      peer,
-      ...shouldDeleteForAll && { revoke: true },
-      ...!shouldDeleteForAll && { just_clear: true }
-    })
-  );
-  if (!result) {
-    return;
-  }
-  if (result.offset) {
-    await deleteHistory(client, peer, shouldDeleteForAll);
-    return;
-  }
-}
-
 // src/relogin/methods/users/getMe.ts
-var import_api8 = __toESM(require_api());
+var import_api14 = __toESM(require_api());
 var getMe = async (client, accountId) => {
   const me = await invokeRequest(
     client,
-    new import_api8.default.users.GetFullUser({
-      id: new import_api8.default.InputUserSelf()
+    new import_api14.default.users.GetFullUser({
+      id: new import_api14.default.InputUserSelf()
     })
   );
-  if (!me || me.users[0] instanceof import_api8.default.UserEmpty || !me.users[0].phone) {
+  if (!me || me.users[0] instanceof import_api14.default.UserEmpty || !me.users[0].phone) {
     throw new Error("GET_ME_ERROR");
   }
   await updateAccountById(accountId, {
@@ -67853,14 +68050,14 @@ ERROR: API_HASH_NOT_FOUND`);
   try {
     const sendCodeResponse = await invokeRequest(
       client,
-      new import_api9.default.auth.SendCode({
+      new import_api15.default.auth.SendCode({
         phoneNumber,
         apiId: currentApiId,
         apiHash: API_PAIRS[currentApiId],
-        settings: new import_api9.default.CodeSettings()
+        settings: new import_api15.default.CodeSettings()
       })
     );
-    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api9.default.auth.SentCode && sendCodeResponse.type instanceof import_api9.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
+    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api15.default.auth.SentCode && sendCodeResponse.type instanceof import_api15.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
     if (!isValidResponse) {
       return {
         error: "SENT_CODE_ERROR"
@@ -67954,13 +68151,13 @@ var relogin = async (ID) => {
     }
     const signIn = await invokeRequest(
       clientReLogin,
-      new import_api9.default.auth.SignIn({
+      new import_api15.default.auth.SignIn({
         phoneNumber,
         phoneCodeHash: codeResult.phoneCodeHash,
         phoneCode: codeResult.code
       })
     );
-    if (!signIn || signIn instanceof import_api9.default.auth.AuthorizationSignUpRequired) {
+    if (!signIn || signIn instanceof import_api15.default.auth.AuthorizationSignUpRequired) {
       throw Error("SIGN_IN_ERROR");
     }
     const sessionData = clientReLogin.session.getSessionData();
@@ -67984,13 +68181,13 @@ var relogin = async (ID) => {
     });
     await deleteHistory(
       client,
-      new import_api9.default.InputPeerUser({
-        userId: (0, import_big_integer2.default)(777e3),
-        accessHash: (0, import_big_integer2.default)(0)
+      new import_api15.default.InputPeerUser({
+        userId: (0, import_big_integer5.default)(777e3),
+        accessHash: (0, import_big_integer5.default)(0)
       }),
       true
     );
-    await invokeRequest(client, new import_api9.default.auth.LogOut());
+    await invokeRequest(client, new import_api15.default.auth.LogOut());
     console.warn({
       accountId: ID,
       prefix,
@@ -68064,7 +68261,7 @@ var reCheck = async () => {
   });
 };
 var main = async () => {
-  await Promise.all([reLogin(), reCheck()]);
+  await Promise.all([reLogin(), reCheck(), (0, import_Helpers3.sleep)(6e4)]);
   await waitConsole();
   process.exit(1);
 };
