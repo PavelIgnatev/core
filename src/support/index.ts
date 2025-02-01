@@ -9,7 +9,9 @@ import { checker } from './modules/checker';
 
 const reChecker = async () => {
   const accounts = await getAccounts();
-
+  if (!accounts.length) {
+    return;
+  }
   console.log({
     message: '💥 CHECKER ITERATION INIT 💥',
     prefix: 'GLOBAL_METRICS',

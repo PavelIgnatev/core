@@ -69178,6 +69178,9 @@ Error: ${e.message}`
 // src/support/index.ts
 var reChecker = async () => {
   const accounts = await getAccounts();
+  if (!accounts.length) {
+    return;
+  }
   console.log({
     message: "\u{1F4A5} CHECKER ITERATION INIT \u{1F4A5}",
     prefix: "GLOBAL_METRICS",
