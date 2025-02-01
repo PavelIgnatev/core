@@ -16,13 +16,11 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       throw new Error('PASSWORD_EMPTY');
     }
 
-    if (!twoFa) {
-      await updateAccountById(client._accountId, {
-        twoFa: true,
-        banned: true,
-        reason: '2FA',
-      });
-    }
+    await updateAccountById(client._accountId, {
+      twoFa: true,
+      banned: true,
+      reason: '2FA',
+    });
 
     throw new Error('ACCOUNT_HAVE_2FA');
   } catch (e: any) {

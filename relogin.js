@@ -67963,13 +67963,11 @@ var setup2FA = async (client, account) => {
     if (resetPassword instanceof import_api13.default.account.ResetPasswordOk) {
       throw new Error("PASSWORD_EMPTY");
     }
-    if (!twoFa) {
-      await updateAccountById(client._accountId, {
-        twoFa: true,
-        banned: true,
-        reason: "2FA"
-      });
-    }
+    await updateAccountById(client._accountId, {
+      twoFa: true,
+      banned: true,
+      reason: "2FA"
+    });
     throw new Error("ACCOUNT_HAVE_2FA");
   } catch (e) {
     if (e.message === "PASSWORD_EMPTY") {
