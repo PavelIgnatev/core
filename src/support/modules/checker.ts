@@ -147,6 +147,7 @@ export const checker = async (
       await updateAccountById(ID, {
         banned: true,
         reason: e.message,
+        bannedDate: new Date(),
       });
       await sendToMainBot(
         `💀 BAN: ${e.message} 💀

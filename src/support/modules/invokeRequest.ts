@@ -65,6 +65,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       await updateAccountById(client._accountId, {
         banned: true,
         reason: err.message,
+        bannedDate: new Date(),
       });
       throw new Error(err.message);
     }
