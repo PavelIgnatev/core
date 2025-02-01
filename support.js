@@ -67507,7 +67507,8 @@ async function invokeRequest(client, request, params = {}) {
     ].includes(err.message)) {
       await updateAccountById(client._accountId, {
         banned: true,
-        reason: err.message
+        reason: err.message,
+        bannedDate: /* @__PURE__ */ new Date()
       });
       throw new Error(err.message);
     }
@@ -69150,7 +69151,8 @@ var checker = async (ID, accountsInWork) => {
     ].includes(e.message)) {
       await updateAccountById(ID, {
         banned: true,
-        reason: e.message
+        reason: e.message,
+        bannedDate: /* @__PURE__ */ new Date()
       });
       await sendToMainBot(
         `\u{1F480} BAN: ${e.message} \u{1F480}

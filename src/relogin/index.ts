@@ -1,9 +1,10 @@
 import 'dotenv/config';
 import './helpers/errors';
 
-import { getAccountsReLogin } from './db/accounts';
+import { getAccountsReCheck, getAccountsReLogin } from './db/accounts';
 import { makeMetrics } from './helpers/makeMetrics';
 import { waitConsole } from './helpers/setConsole.log';
+import { recheck } from './modules/recheck';
 import { relogin } from './modules/relogin';
 
 const reLogin = async () => {
@@ -13,7 +14,7 @@ const reLogin = async () => {
   }
 
   console.log({
-    message: '💥 RELOGIN ITERATION INIT 💥',
+    message: '💥 RE-LOGIN ITERATION INIT 💥',
     prefix: 'GLOBAL_METRICS',
     accountId: 'GLOBAL_METRICS_RELOGIN',
     payload: accounts,
@@ -27,11 +28,40 @@ const reLogin = async () => {
   });
 
   await Promise.all(reloginPromises).then(async (clients) => {
-    await makeMetrics(clients.flat(1), startCheckerTime);
+    await makeMetrics(clients.flat(1), startCheckerTime, 'RELOGIN');
   });
+};
+
+const reCheck = async () => {
+  const accounts = await getAccountsReCheck();
+  if (!accounts.length) {
+    return;
+  }
+
+  console.log({
+    message: '💥 RE-CHECK ITERATION INIT 💥',
+    prefix: 'GLOBAL_METRICS',
+    accountId: 'GLOBAL_METRICS_RECHECK',
+    payload: accounts,
+  });
+
+  const startCheckerTime = performance.now();
+  const reloginPromises: Promise<any>[] = [];
+
+  accounts.forEach((accountId: string) => {
+    reloginPromises.push(recheck(accountId));
+  });
+
+  await Promise.all(reloginPromises).then(async (clients) => {
+    await makeMetrics(clients.flat(1), startCheckerTime, 'RECHECK');
+  });
+};
+
+const main = async () => {
+  await Promise.all([reLogin(), reCheck()]);
 
   await waitConsole();
   process.exit(1);
 };
 
-reLogin();
+main();

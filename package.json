@@ -19,6 +19,7 @@
     "idb-keyval": "^6.2.1",
     "input": "^1.0.1",
     "mongodb": "^6.7.0",
+    "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "pako": "^2.1.0",
     "socket.io": "^4.8.1",

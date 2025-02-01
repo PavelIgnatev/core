@@ -126,158 +126,150 @@ ERROR: API_HASH_NOT_FOUND`);
 
 export const relogin = async (ID: string) => {
   const clients: TelegramClient[] = [];
+  const account = await getAccountById(ID);
+  if (!account) {
+    await sendToMainBot(`⚠️ ACCOUNT_NOT_FOUND (ID: ${ID}) ⚠️`);
+    return [];
+  }
+
+  const { prefix } = account;
 
   try {
-    const account = await getAccountById(ID);
-    if (!account) {
-      throw new Error('ACCOUNT_NOT_FOUND');
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `💥 RE-LOGIN ${ID} INIT 💥`,
+    });
+
+    const loginCodeHandler = createLoginCodeHandler();
+    const client = await initClient(
+      { ...account, prefix, empty: false },
+      (update) => {
+        loginCodeHandler.handleUpdate(update);
+      },
+      (error) => sendToMainBot(error)
+    );
+    clients.push(client);
+
+    const currentApiId = await clearAuthorizations(client);
+    if (!currentApiId) {
+      throw Error('CURRENT_API_ID_NOT_FOUND');
     }
 
-    const { prefix } = account;
+    await setup2FA(client, account);
 
-    try {
-      console.warn({
-        accountId: ID,
-        prefix,
-        message: `💥 RE-LOGIN ${ID} INIT 💥`,
+    const { id, phone: phoneNumber } = await getMe(client, ID);
+
+    const isExists = await getAccountById(id);
+    if (isExists) {
+      await updateAccountById(ID, {
+        banned: true,
+        reason: 'ACCOUNT_ALREADY_EXISTS',
+        bannedDate: new Date(),
       });
+      throw new Error('ACCOUNT_ALREADY_EXISTS');
+    }
 
-      const loginCodeHandler = createLoginCodeHandler();
-      const client = await initClient(
-        { ...account, prefix, empty: false },
-        (update) => {
-          loginCodeHandler.handleUpdate(update);
-        },
-        (error) => sendToMainBot(error)
-      );
-      clients.push(client);
-
-      const currentApiId = await clearAuthorizations(client);
-      if (!currentApiId) {
-        throw Error('CURRENT_API_ID_NOT_FOUND');
-      }
-
-      await setup2FA(client, account);
-
-      const { id, phone: phoneNumber } = await getMe(client, ID);
-
-      const isExists = await getAccountById(id);
-      if (isExists) {
-        await updateAccountById(ID, {
-          banned: true,
-          reason: 'ACCOUNT_ALREADY_EXISTS',
-        });
-        throw new Error('ACCOUNT_ALREADY_EXISTS');
-      }
-
-      const clientReLogin = await initClient(
-        {
-          accountId: id,
-          prefix,
-          dcId: account.dcId,
-          empty: true,
-        },
-        () => {},
-        (error) => sendToMainBot(error)
-      );
-      clients.push(clientReLogin);
-
-      const codeResult = await requestLoginCode(
-        clientReLogin,
-        phoneNumber,
-        loginCodeHandler.promise,
-        currentApiId
-      );
-
-      if (codeResult.error) {
-        throw Error(codeResult.error);
-      }
-      if (!codeResult.code || !codeResult.phoneCodeHash) {
-        throw Error('CODE_ERROR');
-      }
-
-      const signIn = await invokeRequest(
-        clientReLogin,
-        new GramJs.auth.SignIn({
-          phoneNumber,
-          phoneCodeHash: codeResult.phoneCodeHash,
-          phoneCode: codeResult.code,
-        })
-      );
-
-      if (
-        !signIn ||
-        signIn instanceof GramJs.auth.AuthorizationSignUpRequired
-      ) {
-        throw Error('SIGN_IN_ERROR');
-      }
-
-      const sessionData = clientReLogin.session.getSessionData();
-      const { keys, mainDcId } = sessionData;
-      if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
-        throw Error('SESSION_DATA_ERROR');
-      }
-
-      const data: Record<string, any> = {
+    const clientReLogin = await initClient(
+      {
         accountId: id,
-        parentAccountId: ID,
-        phone: phoneNumber,
-        dcId: Number(mainDcId),
         prefix,
-      };
-      data[`dc${mainDcId}`] = keys[mainDcId];
+        dcId: account.dcId,
+        empty: true,
+      },
+      () => {},
+      (error) => sendToMainBot(error)
+    );
+    clients.push(clientReLogin);
 
-      await updateAccountById(id, data);
-      await updateAccountById(ID, {
-        workedOut: true,
-        error: null,
-        reloginDate: new Date(),
-      });
-      await deleteHistory(
-        client,
-        new GramJs.InputPeerUser({
-          userId: BigInt(777000),
-          accessHash: BigInt(0),
-        }),
-        true
-      );
-      await invokeRequest(client, new GramJs.auth.LogOut());
+    const codeResult = await requestLoginCode(
+      clientReLogin,
+      phoneNumber,
+      loginCodeHandler.promise,
+      currentApiId
+    );
 
-      console.warn({
-        accountId: ID,
-        prefix,
-        message: `💥 RE-LOGIN ${ID} EXIT 💥`,
-        payload: { nextId: id },
-      });
+    if (codeResult.error) {
+      throw Error(codeResult.error);
+    }
+    if (!codeResult.code || !codeResult.phoneCodeHash) {
+      throw Error('CODE_ERROR');
+    }
 
-      return clients;
-    } catch (error: any) {
-      console.error({
-        accountId: ID,
-        prefix,
-        message: `[${error.message}]`,
-      });
-      console.warn({
-        accountId: ID,
-        prefix,
-        message: `💥 RE-LOGIN ${ID} EXIT 💥`,
-      });
+    const signIn = await invokeRequest(
+      clientReLogin,
+      new GramJs.auth.SignIn({
+        phoneNumber,
+        phoneCodeHash: codeResult.phoneCodeHash,
+        phoneCode: codeResult.code,
+      })
+    );
 
-      await updateAccountById(ID, {
-        error: error.message,
-        reloginAttemptDate: new Date(),
-      });
-      await sendToMainBot(
-        `⚠️ RELOGIN_ERROR ⚠️
+    if (!signIn || signIn instanceof GramJs.auth.AuthorizationSignUpRequired) {
+      throw Error('SIGN_IN_ERROR');
+    }
+
+    const sessionData = clientReLogin.session.getSessionData();
+    const { keys, mainDcId } = sessionData;
+    if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
+      throw Error('SESSION_DATA_ERROR');
+    }
+
+    const data: Record<string, any> = {
+      accountId: id,
+      parentAccountId: ID,
+      phone: phoneNumber,
+      dcId: Number(mainDcId),
+      prefix,
+    };
+    data[`dc${mainDcId}`] = keys[mainDcId];
+
+    await updateAccountById(id, data);
+    await updateAccountById(ID, {
+      workedOut: true,
+      error: null,
+      reloginDate: new Date(),
+    });
+    await deleteHistory(
+      client,
+      new GramJs.InputPeerUser({
+        userId: BigInt(777000),
+        accessHash: BigInt(0),
+      }),
+      true
+    );
+    await invokeRequest(client, new GramJs.auth.LogOut());
+
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `💥 RE-LOGIN ${ID} EXIT 💥`,
+      payload: { nextId: id },
+    });
+
+    return clients;
+  } catch (error: any) {
+    console.error({
+      accountId: ID,
+      prefix,
+      message: `[${error.message}]`,
+    });
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `💥 RE-LOGIN ${ID} EXIT 💥`,
+    });
+
+    await updateAccountById(ID, {
+      error: error.message,
+      reloginAttemptDate: new Date(),
+    });
+    await sendToMainBot(
+      `⚠️ RELOGIN_ERROR ⚠️
 ACCOUNT_ID: ${ID}
 ERROR: ${error.message}`
-      );
+    );
 
-      return clients;
-    }
-  } catch {
-    await sendToMainBot(`⚠️ RELOGIN_GLOBAL_ERROR ⚠️
-ACCOUNT_ID: ${ID}
-ERROR: ACCOUNT_NOT_FOUND`);
+    return clients;
   }
 };

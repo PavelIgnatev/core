@@ -18,6 +18,19 @@ export const getAccountsReLogin = async () => {
   return accounts;
 };
 
+export const getAccountsReCheck = async () => {
+  const accountCollection = await getAccountCollection();
+
+  const accounts = await accountCollection.distinct('accountId', {
+    stable: { $ne: true },
+    banned: { $ne: true },
+    stopped: { $ne: true },
+    parentAccountId: { $ne: null },
+  });
+
+  return accounts;
+};
+
 export const getAccountById = async (accountId: string) => {
   const accountCollection = await getAccountCollection();
 

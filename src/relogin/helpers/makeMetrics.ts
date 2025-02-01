@@ -5,12 +5,16 @@ import {
 } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
-export const makeMetrics = async (clients: any[], startCheckerTime: number) => {
+export const makeMetrics = async (
+  clients: any[],
+  startCheckerTime: number,
+  type: 'RELOGIN' | 'RECHECK'
+) => {
   if (!clients.filter(Boolean).length) {
     console.log({
-      message: `💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+      message: `💥 ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
       prefix: 'GLOBAL_METRICS',
-      accountId: `GLOBAL_METRICS_RELOGIN`,
+      accountId: `GLOBAL_METRICS_${type}`,
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -19,7 +23,7 @@ export const makeMetrics = async (clients: any[], startCheckerTime: number) => {
       connectErrorCounts: [],
     });
 
-    await sendToMainBot(`💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
+    await sendToMainBot(`💥 ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
 
 * АККАУНТЫ * 
 В РАБОТЕ: 0
@@ -121,9 +125,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
   );
 
   console.log({
-    message: `💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
+    message: `💥 ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥`,
     prefix: 'GLOBAL_METRICS',
-    accountId: `GLOBAL_METRICS_RELOGIN`,
+    accountId: `GLOBAL_METRICS_${type}`,
     initTimings,
     endTimings,
     connectCounts,
@@ -132,7 +136,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     connectErrorCounts,
   });
 
-  await sendToMainBot(`💥 RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
+  await sendToMainBot(`💥 ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) 💥
   
 * АККАУНТЫ * 
 В РАБОТЕ: ${clients.length}

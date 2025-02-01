@@ -17,4 +17,7 @@ export interface Account {
   twoFa?: boolean;
   unknownTwoFa?: boolean;
   remainingTime?: string;
+
+  recheckDates?: Date[];
+  stable?: boolean;
 }

@@ -48418,6 +48418,293 @@ var require_lib3 = __commonJS({
   }
 });
 
+// src/gramjs/tl/generationHelpers.js
+var require_generationHelpers = __commonJS({
+  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
+    "use strict";
+    var snakeToCamelCase = (name) => {
+      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
+      return result.replace(/_/g, "");
+    };
+    var variableSnakeToCamelCase = (str) => str.replace(
+      /([-_][a-z])/g,
+      (group) => group.toUpperCase().replace("-", "").replace("_", "")
+    );
+    var CORE_TYPES = /* @__PURE__ */ new Set([
+      3162085175,
+      // boolFalse#bc799737 = Bool;
+      2574415285,
+      // boolTrue#997275b5 = Bool;
+      1072550713,
+      // true#3fedd339 = True;
+      3300522427,
+      // error#c4b9f9bb code:int text:string = Error;
+      1450380236
+      // null#56730bcc = Null;
+    ]);
+    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
+      85337187,
+      // resPQ,
+      2211011308,
+      // p_q_inner_data
+      2851430293,
+      // p_q_inner_data_dc
+      1013613780,
+      // p_q_inner_data_temp
+      1459478408,
+      // p_q_inner_data_temp_dc
+      3504867164,
+      // server_DH_params_ok
+      3045658042,
+      // server_DH_inner_data
+      1715713620,
+      // client_DH_inner_data
+      3608339646,
+      // req_DH_params
+      4110704415,
+      // set_client_DH_params
+      812830625
+      // gzip_packed
+    ]);
+    function makeCRCTable() {
+      let c;
+      const crcTable2 = [];
+      for (let n = 0; n < 256; n++) {
+        c = n;
+        for (let k = 0; k < 8; k++) {
+          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
+        }
+        crcTable2[n] = c;
+      }
+      return crcTable2;
+    }
+    var crcTable;
+    function crc32(buf) {
+      if (!crcTable) {
+        crcTable = makeCRCTable();
+      }
+      if (!Buffer.isBuffer(buf)) {
+        buf = Buffer.from(buf);
+      }
+      let crc = -1;
+      for (let index = 0; index < buf.length; index++) {
+        const byte = buf[index];
+        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
+      }
+      return (crc ^ -1) >>> 0;
+    }
+    var findAll = (regex, str, matches = []) => {
+      if (!regex.flags.includes("g")) {
+        regex = new RegExp(regex.source, "g");
+      }
+      const res = regex.exec(str);
+      if (res) {
+        matches.push(res.slice(1));
+        findAll(regex, str, matches);
+      }
+      return matches;
+    };
+    var fromLine = (line, isFunction2) => {
+      const match = line.match(
+        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
+      );
+      if (!match) {
+        throw new Error(`Cannot parse TLObject ${line}`);
+      }
+      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
+      const currentConfig = {
+        name: match[1],
+        constructorId: parseInt(match[2], 16),
+        argsConfig: {},
+        subclassOfId: crc32(match[3]),
+        result: match[3],
+        isFunction: isFunction2,
+        namespace: void 0
+      };
+      if (!currentConfig.constructorId) {
+        const hexId = "";
+        let args;
+        if (Object.values(currentConfig.argsConfig).length) {
+          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
+        } else {
+          args = "";
+        }
+        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
+        if (currentConfig.name === "inputMediaInvoice") {
+          if (currentConfig.name === "inputMediaInvoice") {
+          }
+        }
+        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
+      }
+      for (const [brace, name, argType] of argsMatch) {
+        if (brace === void 0) {
+          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
+            name,
+            argType
+          );
+        }
+      }
+      if (currentConfig.name.includes(".")) {
+        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
+      }
+      currentConfig.name = snakeToCamelCase(currentConfig.name);
+      return currentConfig;
+    };
+    function buildArgConfig(name, argType) {
+      name = name === "self" ? "is_self" : name;
+      const currentConfig = {
+        isVector: false,
+        isFlag: false,
+        skipConstructorId: false,
+        flagGroup: 0,
+        flagIndex: -1,
+        flagIndicator: true,
+        type: void 0,
+        useVectorId: void 0
+      };
+      if (argType !== "#") {
+        currentConfig.flagIndicator = false;
+        currentConfig.type = argType.replace(/^!+/, "");
+        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
+        if (flagMatch) {
+          currentConfig.isFlag = true;
+          currentConfig.flagGroup = Number(flagMatch[1] || 1);
+          currentConfig.flagIndex = Number(flagMatch[2]);
+          [, , , currentConfig.type] = flagMatch;
+        }
+        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
+        if (vectorMatch) {
+          currentConfig.isVector = true;
+          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
+          [, currentConfig.type] = vectorMatch;
+        }
+        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
+          currentConfig.skipConstructorId = true;
+        }
+      }
+      return currentConfig;
+    }
+    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
+      (methods || []).reduce(
+        (o, m) => ({
+          ...o,
+          [m.name]: m
+        }),
+        {}
+      );
+      const objAll = [];
+      const objByName = {};
+      const objByType = {};
+      const file = content;
+      let isFunction2 = false;
+      for (let line of file.split("\n")) {
+        const commentIndex = line.indexOf("//");
+        if (commentIndex !== -1) {
+          line = line.slice(0, commentIndex);
+        }
+        line = line.trim();
+        if (!line) {
+          continue;
+        }
+        const match = line.match(/---(\w+)---/);
+        if (match) {
+          const [, followingTypes] = match;
+          isFunction2 = followingTypes === "functions";
+          continue;
+        }
+        try {
+          const result = fromLine(line, isFunction2);
+          if (ignoreIds.has(result.constructorId)) {
+            continue;
+          }
+          objAll.push(result);
+          if (!result.isFunction) {
+            if (!objByType[result.result]) {
+              objByType[result.result] = [];
+            }
+            objByName[result.name] = result;
+            objByType[result.result].push(result);
+          }
+        } catch (e) {
+          if (!e.toString().includes("vector#1cb5c415")) {
+            throw e;
+          }
+        }
+      }
+      for (const obj of objAll) {
+        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
+          for (const arg in obj.argsConfig) {
+            if (obj.argsConfig[arg].type === "string") {
+              obj.argsConfig[arg].type = "bytes";
+            }
+          }
+        }
+      }
+      for (const obj of objAll) {
+        yield obj;
+      }
+    }
+    function serializeBytes(data) {
+      if (!(data instanceof Buffer)) {
+        if (typeof data === "string") {
+          data = Buffer.from(data);
+        }
+      }
+      const r = [];
+      let padding;
+      if (data.length < 254) {
+        padding = (data.length + 1) % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(Buffer.from([data.length]));
+        r.push(data);
+      } else {
+        padding = data.length % 4;
+        if (padding !== 0) {
+          padding = 4 - padding;
+        }
+        r.push(
+          Buffer.from([
+            254,
+            data.length % 256,
+            (data.length >> 8) % 256,
+            (data.length >> 16) % 256
+          ])
+        );
+        r.push(data);
+      }
+      r.push(Buffer.alloc(padding).fill(0));
+      return Buffer.concat(r);
+    }
+    function serializeDate(dt) {
+      if (!dt) {
+        return Buffer.alloc(4).fill(0);
+      }
+      if (dt instanceof Date) {
+        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
+      }
+      if (typeof dt === "number") {
+        const t = Buffer.alloc(4);
+        t.writeInt32LE(dt, 0);
+        return t;
+      }
+      throw Error(`Cannot interpret "${dt}" as a date`);
+    }
+    module2.exports = {
+      findAll,
+      parseTl,
+      buildArgConfig,
+      fromLine,
+      CORE_TYPES,
+      serializeDate,
+      serializeBytes,
+      snakeToCamelCase,
+      variableSnakeToCamelCase
+    };
+  }
+});
+
 // node_modules/big-integer/BigInteger.js
 var require_BigInteger = __commonJS({
   "node_modules/big-integer/BigInteger.js"(exports2, module2) {
@@ -49770,293 +50057,6 @@ var require_BigInteger = __commonJS({
         return bigInt3;
       });
     }
-  }
-});
-
-// src/gramjs/tl/generationHelpers.js
-var require_generationHelpers = __commonJS({
-  "src/gramjs/tl/generationHelpers.js"(exports2, module2) {
-    "use strict";
-    var snakeToCamelCase = (name) => {
-      const result = name.replace(/(?:^|_)([a-z])/g, (_, g) => g.toUpperCase());
-      return result.replace(/_/g, "");
-    };
-    var variableSnakeToCamelCase = (str) => str.replace(
-      /([-_][a-z])/g,
-      (group) => group.toUpperCase().replace("-", "").replace("_", "")
-    );
-    var CORE_TYPES = /* @__PURE__ */ new Set([
-      3162085175,
-      // boolFalse#bc799737 = Bool;
-      2574415285,
-      // boolTrue#997275b5 = Bool;
-      1072550713,
-      // true#3fedd339 = True;
-      3300522427,
-      // error#c4b9f9bb code:int text:string = Error;
-      1450380236
-      // null#56730bcc = Null;
-    ]);
-    var AUTH_KEY_TYPES = /* @__PURE__ */ new Set([
-      85337187,
-      // resPQ,
-      2211011308,
-      // p_q_inner_data
-      2851430293,
-      // p_q_inner_data_dc
-      1013613780,
-      // p_q_inner_data_temp
-      1459478408,
-      // p_q_inner_data_temp_dc
-      3504867164,
-      // server_DH_params_ok
-      3045658042,
-      // server_DH_inner_data
-      1715713620,
-      // client_DH_inner_data
-      3608339646,
-      // req_DH_params
-      4110704415,
-      // set_client_DH_params
-      812830625
-      // gzip_packed
-    ]);
-    function makeCRCTable() {
-      let c;
-      const crcTable2 = [];
-      for (let n = 0; n < 256; n++) {
-        c = n;
-        for (let k = 0; k < 8; k++) {
-          c = c & 1 ? 3988292384 ^ c >>> 1 : c >>> 1;
-        }
-        crcTable2[n] = c;
-      }
-      return crcTable2;
-    }
-    var crcTable;
-    function crc32(buf) {
-      if (!crcTable) {
-        crcTable = makeCRCTable();
-      }
-      if (!Buffer.isBuffer(buf)) {
-        buf = Buffer.from(buf);
-      }
-      let crc = -1;
-      for (let index = 0; index < buf.length; index++) {
-        const byte = buf[index];
-        crc = crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
-      }
-      return (crc ^ -1) >>> 0;
-    }
-    var findAll = (regex, str, matches = []) => {
-      if (!regex.flags.includes("g")) {
-        regex = new RegExp(regex.source, "g");
-      }
-      const res = regex.exec(str);
-      if (res) {
-        matches.push(res.slice(1));
-        findAll(regex, str, matches);
-      }
-      return matches;
-    };
-    var fromLine = (line, isFunction2) => {
-      const match = line.match(
-        /([\w.]+)(?:#([0-9a-fA-F]+))?(?:\s{?\w+:[\w\d<>#.?!]+}?)*\s=\s([\w\d<>#.?]+);$/
-      );
-      if (!match) {
-        throw new Error(`Cannot parse TLObject ${line}`);
-      }
-      const argsMatch = findAll(/({)?(\w+):([\w\d<>#.?!]+)}?/, line);
-      const currentConfig = {
-        name: match[1],
-        constructorId: parseInt(match[2], 16),
-        argsConfig: {},
-        subclassOfId: crc32(match[3]),
-        result: match[3],
-        isFunction: isFunction2,
-        namespace: void 0
-      };
-      if (!currentConfig.constructorId) {
-        const hexId = "";
-        let args;
-        if (Object.values(currentConfig.argsConfig).length) {
-          args = ` ${Object.keys(currentConfig.argsConfig).map((arg) => arg.toString()).join(" ")}`;
-        } else {
-          args = "";
-        }
-        const representation = `${currentConfig.name}${hexId}${args} = ${currentConfig.result}`.replace(/(:|\?)bytes /g, "$1string ").replace(/</g, " ").replace(/>|{|}/g, "").replace(/ \w+:flags\d*\.\d+\?true/g, "");
-        if (currentConfig.name === "inputMediaInvoice") {
-          if (currentConfig.name === "inputMediaInvoice") {
-          }
-        }
-        currentConfig.constructorId = crc32(Buffer.from(representation, "utf8"));
-      }
-      for (const [brace, name, argType] of argsMatch) {
-        if (brace === void 0) {
-          currentConfig.argsConfig[variableSnakeToCamelCase(name)] = buildArgConfig(
-            name,
-            argType
-          );
-        }
-      }
-      if (currentConfig.name.includes(".")) {
-        [currentConfig.namespace, currentConfig.name] = currentConfig.name.split(/\.(.+)/);
-      }
-      currentConfig.name = snakeToCamelCase(currentConfig.name);
-      return currentConfig;
-    };
-    function buildArgConfig(name, argType) {
-      name = name === "self" ? "is_self" : name;
-      const currentConfig = {
-        isVector: false,
-        isFlag: false,
-        skipConstructorId: false,
-        flagGroup: 0,
-        flagIndex: -1,
-        flagIndicator: true,
-        type: void 0,
-        useVectorId: void 0
-      };
-      if (argType !== "#") {
-        currentConfig.flagIndicator = false;
-        currentConfig.type = argType.replace(/^!+/, "");
-        const flagMatch = currentConfig.type.match(/flags(\d*)\.(\d+)\?([\w<>.]+)/);
-        if (flagMatch) {
-          currentConfig.isFlag = true;
-          currentConfig.flagGroup = Number(flagMatch[1] || 1);
-          currentConfig.flagIndex = Number(flagMatch[2]);
-          [, , , currentConfig.type] = flagMatch;
-        }
-        const vectorMatch = currentConfig.type.match(/[Vv]ector<([\w\d.]+)>/);
-        if (vectorMatch) {
-          currentConfig.isVector = true;
-          currentConfig.useVectorId = currentConfig.type.charAt(0) === "V";
-          [, currentConfig.type] = vectorMatch;
-        }
-        if (/^[a-z]$/.test(currentConfig.type.split(".").pop().charAt(0))) {
-          currentConfig.skipConstructorId = true;
-        }
-      }
-      return currentConfig;
-    }
-    function* parseTl(content, methods = [], ignoreIds = CORE_TYPES) {
-      (methods || []).reduce(
-        (o, m) => ({
-          ...o,
-          [m.name]: m
-        }),
-        {}
-      );
-      const objAll = [];
-      const objByName = {};
-      const objByType = {};
-      const file = content;
-      let isFunction2 = false;
-      for (let line of file.split("\n")) {
-        const commentIndex = line.indexOf("//");
-        if (commentIndex !== -1) {
-          line = line.slice(0, commentIndex);
-        }
-        line = line.trim();
-        if (!line) {
-          continue;
-        }
-        const match = line.match(/---(\w+)---/);
-        if (match) {
-          const [, followingTypes] = match;
-          isFunction2 = followingTypes === "functions";
-          continue;
-        }
-        try {
-          const result = fromLine(line, isFunction2);
-          if (ignoreIds.has(result.constructorId)) {
-            continue;
-          }
-          objAll.push(result);
-          if (!result.isFunction) {
-            if (!objByType[result.result]) {
-              objByType[result.result] = [];
-            }
-            objByName[result.name] = result;
-            objByType[result.result].push(result);
-          }
-        } catch (e) {
-          if (!e.toString().includes("vector#1cb5c415")) {
-            throw e;
-          }
-        }
-      }
-      for (const obj of objAll) {
-        if (AUTH_KEY_TYPES.has(obj.constructorId)) {
-          for (const arg in obj.argsConfig) {
-            if (obj.argsConfig[arg].type === "string") {
-              obj.argsConfig[arg].type = "bytes";
-            }
-          }
-        }
-      }
-      for (const obj of objAll) {
-        yield obj;
-      }
-    }
-    function serializeBytes(data) {
-      if (!(data instanceof Buffer)) {
-        if (typeof data === "string") {
-          data = Buffer.from(data);
-        }
-      }
-      const r = [];
-      let padding;
-      if (data.length < 254) {
-        padding = (data.length + 1) % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(Buffer.from([data.length]));
-        r.push(data);
-      } else {
-        padding = data.length % 4;
-        if (padding !== 0) {
-          padding = 4 - padding;
-        }
-        r.push(
-          Buffer.from([
-            254,
-            data.length % 256,
-            (data.length >> 8) % 256,
-            (data.length >> 16) % 256
-          ])
-        );
-        r.push(data);
-      }
-      r.push(Buffer.alloc(padding).fill(0));
-      return Buffer.concat(r);
-    }
-    function serializeDate(dt) {
-      if (!dt) {
-        return Buffer.alloc(4).fill(0);
-      }
-      if (dt instanceof Date) {
-        dt = Math.floor((Date.now() - dt.getTime()) / 1e3);
-      }
-      if (typeof dt === "number") {
-        const t = Buffer.alloc(4);
-        t.writeInt32LE(dt, 0);
-        return t;
-      }
-      throw Error(`Cannot interpret "${dt}" as a date`);
-    }
-    module2.exports = {
-      findAll,
-      parseTl,
-      buildArgConfig,
-      fromLine,
-      CORE_TYPES,
-      serializeDate,
-      serializeBytes,
-      snakeToCamelCase,
-      variableSnakeToCamelCase
-    };
   }
 });
 
@@ -56703,8 +56703,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api5.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api5.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api2.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api2.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -56716,7 +56716,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api5.default.PQInnerData({
+  const pqInnerData = new import_api2.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -56784,7 +56784,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api5.default.ReqDHParams({
+    new import_api2.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -56793,7 +56793,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api5.default.ServerDHParamsOk || serverDhParams instanceof import_api5.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api2.default.ServerDHParamsOk || serverDhParams instanceof import_api2.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -56802,7 +56802,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api5.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api2.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -56811,7 +56811,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api5.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api2.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -56826,7 +56826,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api5.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api2.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -56876,7 +56876,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api5.default.ClientDHInnerData({
+  const clientDhInner = new import_api2.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -56889,13 +56889,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api5.default.SetClientDHParams({
+    new import_api2.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api5.default.DhGenOk, import_api5.default.DhGenRetry, import_api5.default.DhGenFail];
+  const nonceTypes = [import_api2.default.DhGenOk, import_api2.default.DhGenRetry, import_api2.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -56915,18 +56915,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api5.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api2.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api5, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api2, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors3());
-    import_api5 = __toESM(require_api());
+    import_api2 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -63180,12 +63180,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api6.default.upload.SaveBigFilePart({
+              isLarge ? new import_api3.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api6.default.upload.SaveFilePart({
+              }) : new import_api3.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -63209,23 +63209,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api6.default.InputFileBig({
+  return isLarge ? new import_api3.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api6.default.InputFile({
+  }) : new import_api3.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api6, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api3, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api6 = __toESM(require_api());
+    import_api3 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors3());
@@ -67288,6 +67288,16 @@ var getAccountsReLogin = async () => {
   });
   return accounts;
 };
+var getAccountsReCheck = async () => {
+  const accountCollection = await getAccountCollection();
+  const accounts = await accountCollection.distinct("accountId", {
+    stable: { $ne: true },
+    banned: { $ne: true },
+    stopped: { $ne: true },
+    parentAccountId: { $ne: null }
+  });
+  return accounts;
+};
 var getAccountById = async (accountId) => {
   const accountCollection = await getAccountCollection();
   const account = await accountCollection.findOne({ accountId });
@@ -67303,12 +67313,12 @@ var updateAccountById = async (accountId, accountData) => {
 };
 
 // src/relogin/helpers/makeMetrics.ts
-var makeMetrics = async (clients, startCheckerTime) => {
+var makeMetrics = async (clients, startCheckerTime, type) => {
   if (!clients.filter(Boolean).length) {
     console.log({
-      message: `\u{1F4A5} RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
+      message: `\u{1F4A5} ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
       prefix: "GLOBAL_METRICS",
-      accountId: `GLOBAL_METRICS_RELOGIN`,
+      accountId: `GLOBAL_METRICS_${type}`,
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -67316,7 +67326,7 @@ var makeMetrics = async (clients, startCheckerTime) => {
       disconnectCounts: [],
       connectErrorCounts: []
     });
-    await sendToMainBot(`\u{1F4A5} RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}
+    await sendToMainBot(`\u{1F4A5} ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}
 
 * \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
 \u0412 \u0420\u0410\u0411\u041E\u0422\u0415: 0
@@ -67405,9 +67415,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     (max, current) => current.value > max.value ? current : max
   );
   console.log({
-    message: `\u{1F4A5} RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
+    message: `\u{1F4A5} ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}`,
     prefix: "GLOBAL_METRICS",
-    accountId: `GLOBAL_METRICS_RELOGIN`,
+    accountId: `GLOBAL_METRICS_${type}`,
     initTimings,
     endTimings,
     connectCounts,
@@ -67415,7 +67425,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     disconnectCounts,
     connectErrorCounts
   });
-  await sendToMainBot(`\u{1F4A5} RELOGIN ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}
+  await sendToMainBot(`\u{1F4A5} ${type} ITERATION DONE (${getTimeString(startCheckerTime)}) \u{1F4A5}
   
 * \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
 \u0412 \u0420\u0410\u0411\u041E\u0422\u0415: ${clients.length}
@@ -67433,11 +67443,7 @@ DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDis
 NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})`);
 };
 
-// src/relogin/modules/relogin.ts
-var import_big_integer2 = __toESM(require_BigInteger());
-var import_api8 = __toESM(require_api());
-
-// src/relogin/methods/account/clearAuthorizations.ts
+// src/relogin/methods/account/updateStatus.ts
 var import_api = __toESM(require_api());
 
 // src/relogin/modules/invokeRequest.ts
@@ -67487,7 +67493,8 @@ async function invokeRequest(client, request, params = {}) {
     ].includes(err.message)) {
       await updateAccountById(client._accountId, {
         banned: true,
-        reason: err.message
+        reason: err.message,
+        bannedDate: /* @__PURE__ */ new Date()
       });
       throw new Error(err.message);
     }
@@ -67503,122 +67510,39 @@ REQUEST: ${JSON.stringify(request)}`);
   }
 }
 
-// src/relogin/methods/account/clearAuthorizations.ts
-async function clearAuthorizations(client) {
-  const invokedAuthorizations = await invokeRequest(
-    client,
-    new import_api.default.account.GetAuthorizations()
-  );
-  const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
-  let currentApiId;
-  for (const authorization of authorizations) {
-    try {
-      if (authorization.current) {
-        console.log({
-          accountId: client._accountId,
-          prefix: client._prefix,
-          message: "[CURRENT_SESSION]",
-          payload: authorization
-        });
-        currentApiId = authorization.apiId;
-      }
-      if (!authorization.current) {
-        console.error({
-          accountId: client._accountId,
-          prefix: client._prefix,
-          message: "[UNKNOWN_SESSION]",
-          payload: authorization
-        });
-        await invokeRequest(
-          client,
-          new import_api.default.account.ResetAuthorization({
-            hash: authorization.hash
-          }),
-          { shouldIgnoreErrors: true }
-        );
-      }
-    } catch {
-    }
-  }
-  return currentApiId;
-}
-
-// src/relogin/methods/account/setup2FA.ts
-var import_api2 = __toESM(require_api());
-var setup2FA = async (client, account) => {
-  try {
-    const { twoFa } = account;
-    const resetPassword = await invokeRequest(
-      client,
-      new import_api2.default.account.ResetPassword()
-    );
-    if (resetPassword instanceof import_api2.default.account.ResetPasswordOk) {
-      throw new Error("PASSWORD_EMPTY");
-    }
-    if (!twoFa) {
-      await updateAccountById(client._accountId, {
-        twoFa: true
-      });
-    }
-    throw new Error("ACCOUNT_HAVE_2FA");
-  } catch (e) {
-    if (e.message === "PASSWORD_EMPTY") {
-      await updateAccountById(client._accountId, {
-        twoFa: false
-      });
-      return;
-    }
-    throw new Error(e.message);
-  }
-};
-
-// src/relogin/methods/messages/deleteHistory.ts
-var import_api3 = __toESM(require_api());
-async function deleteHistory(client, peer, shouldDeleteForAll) {
+// src/relogin/methods/account/updateStatus.ts
+var updateStatus = async (client, offline) => {
   const result = await invokeRequest(
     client,
-    new import_api3.default.messages.DeleteHistory({
-      peer,
-      ...shouldDeleteForAll && { revoke: true },
-      ...!shouldDeleteForAll && { just_clear: true }
+    new import_api.default.account.UpdateStatus({
+      offline
     })
   );
-  if (!result) {
-    return;
-  }
-  if (result.offset) {
-    await deleteHistory(client, peer, shouldDeleteForAll);
-    return;
-  }
-}
+  return result;
+};
 
-// src/relogin/methods/users/getMe.ts
-var import_api4 = __toESM(require_api());
-var getMe = async (client, accountId) => {
-  const me = await invokeRequest(
-    client,
-    new import_api4.default.users.GetFullUser({
-      id: new import_api4.default.InputUserSelf()
-    })
-  );
-  if (!me || me.users[0] instanceof import_api4.default.UserEmpty || !me.users[0].phone) {
-    throw new Error("GET_ME_ERROR");
+// src/relogin/methods/update/handleUpdate.ts
+var handleUpdate = async (client, accountId, update) => {
+  if (!update || !client) {
+    return;
   }
-  await updateAccountById(accountId, {
-    id: String(me.fullUser.id),
-    phone: me.users[0].phone
+  if (update.className === "UpdateConnectionState" || update.className === "UpdateUserStatus" || update.className === "UpdateUserTyping") {
+    if (process.env.DEV !== "true") {
+      return;
+    }
+  }
+  console.log({
+    accountId,
+    prefix: client._prefix,
+    message: `<${update.className}>`,
+    payload: JSON.parse(JSON.stringify(update))
   });
-  return {
-    me: me.users[0],
-    id: String(me.fullUser.id),
-    phone: me.users[0].phone
-  };
 };
 
 // src/relogin/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api7 = __toESM(require_api());
+var import_api4 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
@@ -67670,7 +67594,7 @@ async function init(account, onUpdate, onError) {
   });
   client.addEventHandler(
     (update) => {
-      if (!(update instanceof import_api7.default.UpdatesTooLong)) {
+      if (!(update instanceof import_api4.default.UpdatesTooLong)) {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update2) => {
           onUpdate(update2);
@@ -67703,6 +67627,186 @@ var initClient = async (account, onUpdate, onError) => {
   }
 };
 
+// src/relogin/modules/recheck.ts
+var recheck = async (ID) => {
+  const clients = [];
+  const account = await getAccountById(ID);
+  if (!account) {
+    await sendToMainBot(`\u26A0\uFE0F ACCOUNT_NOT_FOUND (ID: ${ID}) \u26A0\uFE0F`);
+    return [];
+  }
+  const { prefix } = account;
+  try {
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `\u{1F4A5} RE-CHECK ${ID} INIT \u{1F4A5}`
+    });
+    const client = await initClient(
+      { ...account, prefix, empty: false },
+      (update) => handleUpdate(client, ID, update),
+      (error) => sendToMainBot(error)
+    );
+    clients.push(client);
+    let errored = null;
+    setInterval(async () => {
+      try {
+        if (!(client == null ? void 0 : client._sender) || !client._sender._user_connected || client._sender.isReconnecting || client._sender.userDisconnected || errored) {
+          return;
+        }
+        await updateStatus(client, false);
+      } catch (error) {
+        errored = error.message;
+      }
+    }, 1e4);
+    await sleep(18e4);
+    if (errored) {
+      throw new Error(errored);
+    }
+    const currentRecheckDates = account.recheckDates || [];
+    const newRecheckDates = [...currentRecheckDates, /* @__PURE__ */ new Date()];
+    await updateAccountById(ID, {
+      recheckDates: newRecheckDates,
+      ...newRecheckDates.length >= 3 ? { stable: true } : {}
+    });
+    return clients;
+  } catch (error) {
+    console.error({
+      accountId: ID,
+      prefix,
+      message: `[${error.message}]`
+    });
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `\u{1F4A5} RE-CHECK ${ID} EXIT \u{1F4A5}`
+    });
+    await sendToMainBot(
+      `\u26A0\uFE0F RECHECK_ERROR \u26A0\uFE0F
+ACCOUNT_ID: ${ID}
+ERROR: ${error.message}`
+    );
+    return clients;
+  }
+};
+
+// src/relogin/modules/relogin.ts
+var import_big_integer2 = __toESM(require_BigInteger());
+var import_api9 = __toESM(require_api());
+
+// src/relogin/methods/account/clearAuthorizations.ts
+var import_api5 = __toESM(require_api());
+async function clearAuthorizations(client) {
+  const invokedAuthorizations = await invokeRequest(
+    client,
+    new import_api5.default.account.GetAuthorizations()
+  );
+  const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
+  let currentApiId;
+  for (const authorization of authorizations) {
+    try {
+      if (authorization.current) {
+        console.log({
+          accountId: client._accountId,
+          prefix: client._prefix,
+          message: "[CURRENT_SESSION]",
+          payload: authorization
+        });
+        currentApiId = authorization.apiId;
+      }
+      if (!authorization.current) {
+        console.error({
+          accountId: client._accountId,
+          prefix: client._prefix,
+          message: "[UNKNOWN_SESSION]",
+          payload: authorization
+        });
+        await invokeRequest(
+          client,
+          new import_api5.default.account.ResetAuthorization({
+            hash: authorization.hash
+          }),
+          { shouldIgnoreErrors: true }
+        );
+      }
+    } catch {
+    }
+  }
+  return currentApiId;
+}
+
+// src/relogin/methods/account/setup2FA.ts
+var import_api6 = __toESM(require_api());
+var setup2FA = async (client, account) => {
+  try {
+    const { twoFa } = account;
+    const resetPassword = await invokeRequest(
+      client,
+      new import_api6.default.account.ResetPassword()
+    );
+    if (resetPassword instanceof import_api6.default.account.ResetPasswordOk) {
+      throw new Error("PASSWORD_EMPTY");
+    }
+    if (!twoFa) {
+      await updateAccountById(client._accountId, {
+        twoFa: true
+      });
+    }
+    throw new Error("ACCOUNT_HAVE_2FA");
+  } catch (e) {
+    if (e.message === "PASSWORD_EMPTY") {
+      await updateAccountById(client._accountId, {
+        twoFa: false
+      });
+      return;
+    }
+    throw new Error(e.message);
+  }
+};
+
+// src/relogin/methods/messages/deleteHistory.ts
+var import_api7 = __toESM(require_api());
+async function deleteHistory(client, peer, shouldDeleteForAll) {
+  const result = await invokeRequest(
+    client,
+    new import_api7.default.messages.DeleteHistory({
+      peer,
+      ...shouldDeleteForAll && { revoke: true },
+      ...!shouldDeleteForAll && { just_clear: true }
+    })
+  );
+  if (!result) {
+    return;
+  }
+  if (result.offset) {
+    await deleteHistory(client, peer, shouldDeleteForAll);
+    return;
+  }
+}
+
+// src/relogin/methods/users/getMe.ts
+var import_api8 = __toESM(require_api());
+var getMe = async (client, accountId) => {
+  const me = await invokeRequest(
+    client,
+    new import_api8.default.users.GetFullUser({
+      id: new import_api8.default.InputUserSelf()
+    })
+  );
+  if (!me || me.users[0] instanceof import_api8.default.UserEmpty || !me.users[0].phone) {
+    throw new Error("GET_ME_ERROR");
+  }
+  await updateAccountById(accountId, {
+    id: String(me.fullUser.id),
+    phone: me.users[0].phone
+  });
+  return {
+    me: me.users[0],
+    id: String(me.fullUser.id),
+    phone: me.users[0].phone
+  };
+};
+
 // src/relogin/modules/relogin.ts
 var API_PAIRS = {
   4: "014b35b6184100b085b0d0572f9b5103",
@@ -67726,7 +67830,7 @@ var createLoginCodeHandler = () => {
   const promise = new Promise((resolve) => {
     resolveRef = resolve;
   });
-  const handleUpdate = (update) => {
+  const handleUpdate2 = (update) => {
     const isServiceMessage = (update.className === "UpdateShortMessage" || update.className === "UpdateNewMessage") && String(update.userId) === "777000";
     if (!isServiceMessage || !update.message)
       return;
@@ -67736,7 +67840,7 @@ var createLoginCodeHandler = () => {
       resolveRef(code);
     }
   };
-  return { promise, handleUpdate };
+  return { promise, handleUpdate: handleUpdate2 };
 };
 var requestLoginCode = async (client, phoneNumber, codePromise, currentApiId) => {
   const apiHash = API_PAIRS[currentApiId];
@@ -67749,14 +67853,14 @@ ERROR: API_HASH_NOT_FOUND`);
   try {
     const sendCodeResponse = await invokeRequest(
       client,
-      new import_api8.default.auth.SendCode({
+      new import_api9.default.auth.SendCode({
         phoneNumber,
         apiId: currentApiId,
         apiHash: API_PAIRS[currentApiId],
-        settings: new import_api8.default.CodeSettings()
+        settings: new import_api9.default.CodeSettings()
       })
     );
-    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api8.default.auth.SentCode && sendCodeResponse.type instanceof import_api8.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
+    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api9.default.auth.SentCode && sendCodeResponse.type instanceof import_api9.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
     if (!isValidResponse) {
       return {
         error: "SENT_CODE_ERROR"
@@ -67788,137 +67892,133 @@ ERROR: API_HASH_NOT_FOUND`);
 };
 var relogin = async (ID) => {
   const clients = [];
+  const account = await getAccountById(ID);
+  if (!account) {
+    await sendToMainBot(`\u26A0\uFE0F ACCOUNT_NOT_FOUND (ID: ${ID}) \u26A0\uFE0F`);
+    return [];
+  }
+  const { prefix } = account;
   try {
-    const account = await getAccountById(ID);
-    if (!account) {
-      throw new Error("ACCOUNT_NOT_FOUND");
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `\u{1F4A5} RE-LOGIN ${ID} INIT \u{1F4A5}`
+    });
+    const loginCodeHandler = createLoginCodeHandler();
+    const client = await initClient(
+      { ...account, prefix, empty: false },
+      (update) => {
+        loginCodeHandler.handleUpdate(update);
+      },
+      (error) => sendToMainBot(error)
+    );
+    clients.push(client);
+    const currentApiId = await clearAuthorizations(client);
+    if (!currentApiId) {
+      throw Error("CURRENT_API_ID_NOT_FOUND");
     }
-    const { prefix } = account;
-    try {
-      console.warn({
-        accountId: ID,
-        prefix,
-        message: `\u{1F4A5} RE-LOGIN ${ID} INIT \u{1F4A5}`
+    await setup2FA(client, account);
+    const { id, phone: phoneNumber } = await getMe(client, ID);
+    const isExists = await getAccountById(id);
+    if (isExists) {
+      await updateAccountById(ID, {
+        banned: true,
+        reason: "ACCOUNT_ALREADY_EXISTS",
+        bannedDate: /* @__PURE__ */ new Date()
       });
-      const loginCodeHandler = createLoginCodeHandler();
-      const client = await initClient(
-        { ...account, prefix, empty: false },
-        (update) => {
-          loginCodeHandler.handleUpdate(update);
-        },
-        (error) => sendToMainBot(error)
-      );
-      clients.push(client);
-      const currentApiId = await clearAuthorizations(client);
-      if (!currentApiId) {
-        throw Error("CURRENT_API_ID_NOT_FOUND");
-      }
-      await setup2FA(client, account);
-      const { id, phone: phoneNumber } = await getMe(client, ID);
-      const isExists = await getAccountById(id);
-      if (isExists) {
-        await updateAccountById(ID, {
-          banned: true,
-          reason: "ACCOUNT_ALREADY_EXISTS"
-        });
-        throw new Error("ACCOUNT_ALREADY_EXISTS");
-      }
-      const clientReLogin = await initClient(
-        {
-          accountId: id,
-          prefix,
-          dcId: account.dcId,
-          empty: true
-        },
-        () => {
-        },
-        (error) => sendToMainBot(error)
-      );
-      clients.push(clientReLogin);
-      const codeResult = await requestLoginCode(
-        clientReLogin,
-        phoneNumber,
-        loginCodeHandler.promise,
-        currentApiId
-      );
-      if (codeResult.error) {
-        throw Error(codeResult.error);
-      }
-      if (!codeResult.code || !codeResult.phoneCodeHash) {
-        throw Error("CODE_ERROR");
-      }
-      const signIn = await invokeRequest(
-        clientReLogin,
-        new import_api8.default.auth.SignIn({
-          phoneNumber,
-          phoneCodeHash: codeResult.phoneCodeHash,
-          phoneCode: codeResult.code
-        })
-      );
-      if (!signIn || signIn instanceof import_api8.default.auth.AuthorizationSignUpRequired) {
-        throw Error("SIGN_IN_ERROR");
-      }
-      const sessionData = clientReLogin.session.getSessionData();
-      const { keys, mainDcId } = sessionData;
-      if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
-        throw Error("SESSION_DATA_ERROR");
-      }
-      const data = {
+      throw new Error("ACCOUNT_ALREADY_EXISTS");
+    }
+    const clientReLogin = await initClient(
+      {
         accountId: id,
-        parentAccountId: ID,
-        phone: phoneNumber,
-        dcId: Number(mainDcId),
-        prefix
-      };
-      data[`dc${mainDcId}`] = keys[mainDcId];
-      await updateAccountById(id, data);
-      await updateAccountById(ID, {
-        workedOut: true,
-        error: null,
-        reloginDate: /* @__PURE__ */ new Date()
-      });
-      await deleteHistory(
-        client,
-        new import_api8.default.InputPeerUser({
-          userId: (0, import_big_integer2.default)(777e3),
-          accessHash: (0, import_big_integer2.default)(0)
-        }),
-        true
-      );
-      await invokeRequest(client, new import_api8.default.auth.LogOut());
-      console.warn({
-        accountId: ID,
         prefix,
-        message: `\u{1F4A5} RE-LOGIN ${ID} EXIT \u{1F4A5}`,
-        payload: { nextId: id }
-      });
-      return clients;
-    } catch (error) {
-      console.error({
-        accountId: ID,
-        prefix,
-        message: `[${error.message}]`
-      });
-      console.warn({
-        accountId: ID,
-        prefix,
-        message: `\u{1F4A5} RE-LOGIN ${ID} EXIT \u{1F4A5}`
-      });
-      await updateAccountById(ID, {
-        error: error.message,
-        reloginAttemptDate: /* @__PURE__ */ new Date()
-      });
-      await sendToMainBot(
-        `\u26A0\uFE0F RELOGIN_ERROR \u26A0\uFE0F
+        dcId: account.dcId,
+        empty: true
+      },
+      () => {
+      },
+      (error) => sendToMainBot(error)
+    );
+    clients.push(clientReLogin);
+    const codeResult = await requestLoginCode(
+      clientReLogin,
+      phoneNumber,
+      loginCodeHandler.promise,
+      currentApiId
+    );
+    if (codeResult.error) {
+      throw Error(codeResult.error);
+    }
+    if (!codeResult.code || !codeResult.phoneCodeHash) {
+      throw Error("CODE_ERROR");
+    }
+    const signIn = await invokeRequest(
+      clientReLogin,
+      new import_api9.default.auth.SignIn({
+        phoneNumber,
+        phoneCodeHash: codeResult.phoneCodeHash,
+        phoneCode: codeResult.code
+      })
+    );
+    if (!signIn || signIn instanceof import_api9.default.auth.AuthorizationSignUpRequired) {
+      throw Error("SIGN_IN_ERROR");
+    }
+    const sessionData = clientReLogin.session.getSessionData();
+    const { keys, mainDcId } = sessionData;
+    if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
+      throw Error("SESSION_DATA_ERROR");
+    }
+    const data = {
+      accountId: id,
+      parentAccountId: ID,
+      phone: phoneNumber,
+      dcId: Number(mainDcId),
+      prefix
+    };
+    data[`dc${mainDcId}`] = keys[mainDcId];
+    await updateAccountById(id, data);
+    await updateAccountById(ID, {
+      workedOut: true,
+      error: null,
+      reloginDate: /* @__PURE__ */ new Date()
+    });
+    await deleteHistory(
+      client,
+      new import_api9.default.InputPeerUser({
+        userId: (0, import_big_integer2.default)(777e3),
+        accessHash: (0, import_big_integer2.default)(0)
+      }),
+      true
+    );
+    await invokeRequest(client, new import_api9.default.auth.LogOut());
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `\u{1F4A5} RE-LOGIN ${ID} EXIT \u{1F4A5}`,
+      payload: { nextId: id }
+    });
+    return clients;
+  } catch (error) {
+    console.error({
+      accountId: ID,
+      prefix,
+      message: `[${error.message}]`
+    });
+    console.warn({
+      accountId: ID,
+      prefix,
+      message: `\u{1F4A5} RE-LOGIN ${ID} EXIT \u{1F4A5}`
+    });
+    await updateAccountById(ID, {
+      error: error.message,
+      reloginAttemptDate: /* @__PURE__ */ new Date()
+    });
+    await sendToMainBot(
+      `\u26A0\uFE0F RELOGIN_ERROR \u26A0\uFE0F
 ACCOUNT_ID: ${ID}
 ERROR: ${error.message}`
-      );
-      return clients;
-    }
-  } catch {
-    await sendToMainBot(`\u26A0\uFE0F RELOGIN_GLOBAL_ERROR \u26A0\uFE0F
-ACCOUNT_ID: ${ID}
-ERROR: ACCOUNT_NOT_FOUND`);
+    );
+    return clients;
   }
 };
 
@@ -67929,7 +68029,7 @@ var reLogin = async () => {
     return;
   }
   console.log({
-    message: "\u{1F4A5} RELOGIN ITERATION INIT \u{1F4A5}",
+    message: "\u{1F4A5} RE-LOGIN ITERATION INIT \u{1F4A5}",
     prefix: "GLOBAL_METRICS",
     accountId: "GLOBAL_METRICS_RELOGIN",
     payload: accounts
@@ -67940,12 +68040,35 @@ var reLogin = async () => {
     reloginPromises.push(relogin(accountId));
   });
   await Promise.all(reloginPromises).then(async (clients) => {
-    await makeMetrics(clients.flat(1), startCheckerTime);
+    await makeMetrics(clients.flat(1), startCheckerTime, "RELOGIN");
   });
+};
+var reCheck = async () => {
+  const accounts = await getAccountsReCheck();
+  if (!accounts.length) {
+    return;
+  }
+  console.log({
+    message: "\u{1F4A5} RE-CHECK ITERATION INIT \u{1F4A5}",
+    prefix: "GLOBAL_METRICS",
+    accountId: "GLOBAL_METRICS_RECHECK",
+    payload: accounts
+  });
+  const startCheckerTime = performance.now();
+  const reloginPromises = [];
+  accounts.forEach((accountId) => {
+    reloginPromises.push(recheck(accountId));
+  });
+  await Promise.all(reloginPromises).then(async (clients) => {
+    await makeMetrics(clients.flat(1), startCheckerTime, "RECHECK");
+  });
+};
+var main = async () => {
+  await Promise.all([reLogin(), reCheck()]);
   await waitConsole();
   process.exit(1);
 };
-reLogin();
+main();
 /*! Bundled license information:
 
 mime-db/index.js:
