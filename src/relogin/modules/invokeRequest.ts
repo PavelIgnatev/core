@@ -62,6 +62,10 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
         'SESSION_PASSWORD_NEEDED',
       ].includes(err.message)
     ) {
+      await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀
+ID: ${client._accountId}
+ERROR: ${err.message}
+REQUEST: ${JSON.stringify(request)}`);
       await updateAccountById(client._accountId, {
         banned: true,
         reason: err.message,

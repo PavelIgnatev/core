@@ -67505,6 +67505,10 @@ async function invokeRequest(client, request, params = {}) {
       "AUTH_KEY_PERM_EMPTY",
       "SESSION_PASSWORD_NEEDED"
     ].includes(err.message)) {
+      await sendToMainBot(`\u{1F480} REQUEST ERROR (${request.className}) \u{1F480}
+ID: ${client._accountId}
+ERROR: ${err.message}
+REQUEST: ${JSON.stringify(request)}`);
       await updateAccountById(client._accountId, {
         banned: true,
         reason: err.message,
