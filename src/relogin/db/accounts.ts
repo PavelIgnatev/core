@@ -16,8 +16,9 @@ export const getAccountsReLogin = async () => {
     workedOut: { $ne: true },
     $or: [
       { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
-      { reloginAttemptDate: { $exists: false } }
-    ]
+      { reloginAttemptDate: { $exists: false } },
+      { reloginAttemptDate: null },
+    ],
   });
 
   return accounts;

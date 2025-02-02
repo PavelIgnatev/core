@@ -67302,7 +67302,8 @@ var getAccountsReLogin = async () => {
     workedOut: { $ne: true },
     $or: [
       { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
-      { reloginAttemptDate: { $exists: false } }
+      { reloginAttemptDate: { $exists: false } },
+      { reloginAttemptDate: null }
     ]
   });
   return accounts;
@@ -68076,7 +68077,7 @@ ERROR: API_HASH_NOT_FOUND`);
       const code = await Promise.race([
         codePromise,
         new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("CODE_TIMEOUT")), 2e4);
+          setTimeout(() => reject(new Error("CODE_TIMEOUT")), 3e4);
         })
       ]);
       return {
