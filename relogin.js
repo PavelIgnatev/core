@@ -67295,10 +67295,15 @@ var getAccountCollection = async () => {
 };
 var getAccountsReLogin = async () => {
   const accountCollection = await getAccountCollection();
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1e3);
   const accounts = await accountCollection.distinct("accountId", {
     banned: { $ne: true },
     parentAccountId: null,
-    workedOut: { $ne: true }
+    workedOut: { $ne: true },
+    $or: [
+      { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
+      { reloginAttemptDate: { $exists: false } }
+    ]
   });
   return accounts;
 };

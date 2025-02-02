@@ -8,10 +8,16 @@ const getAccountCollection = async () => {
 export const getAccountsReLogin = async () => {
   const accountCollection = await getAccountCollection();
 
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
   const accounts = await accountCollection.distinct('accountId', {
     banned: { $ne: true },
     parentAccountId: null,
     workedOut: { $ne: true },
+    $or: [
+      { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
+      { reloginAttemptDate: { $exists: false } }
+    ]
   });
 
   return accounts;
