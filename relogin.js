@@ -68076,7 +68076,7 @@ ERROR: API_HASH_NOT_FOUND`);
       const code = await Promise.race([
         codePromise,
         new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("CODE_TIMEOUT")), 1e4);
+          setTimeout(() => reject(new Error("CODE_TIMEOUT")), 2e4);
         })
       ]);
       return {

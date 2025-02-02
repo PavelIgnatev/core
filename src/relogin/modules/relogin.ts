@@ -103,7 +103,7 @@ ERROR: API_HASH_NOT_FOUND`);
       const code = await Promise.race([
         codePromise,
         new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('CODE_TIMEOUT')), 10000);
+          setTimeout(() => reject(new Error('CODE_TIMEOUT')), 20000);
         }),
       ]);
 
