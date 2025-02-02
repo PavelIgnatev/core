@@ -79,8 +79,8 @@ ERROR: API_HASH_NOT_FOUND`);
       client,
       new GramJs.auth.SendCode({
         phoneNumber,
-        apiId: currentApiId,
-        apiHash: API_PAIRS[currentApiId],
+        apiId: 2040,
+        apiHash: API_PAIRS[2040],
         settings: new GramJs.CodeSettings(),
       })
     );
