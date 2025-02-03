@@ -15,7 +15,7 @@ export const recheck = async (ID: string) => {
     return [];
   }
 
-  const { prefix } = account;
+  const { prefix, nextApiId } = account;
 
   try {
     console.warn({
@@ -24,7 +24,7 @@ export const recheck = async (ID: string) => {
       message: `💥 RE-CHECK ${ID} INIT 💥`,
     });
     const client = await initClient(
-      { ...account, prefix, empty: false, apiId: 2040 },
+      { ...account, prefix, empty: false, apiId: nextApiId || 2040 },
       (update) => handleUpdate(client, ID, update),
       (error) => sendToMainBot(error)
     );

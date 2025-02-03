@@ -67686,7 +67686,7 @@ async function init(account, onUpdate, onError) {
   console.log({
     accountId: account.accountId,
     prefix: account.prefix,
-    message: `[CLIENT_STARTED]`,
+    message: `[CLIENT_STARTED (${account.apiId})]`,
     payload: {
       initTime: `${client._initTime}ms`
     }
@@ -67734,7 +67734,7 @@ var recheck = async (ID) => {
     await sendToMainBot(`\u26A0\uFE0F ACCOUNT_NOT_FOUND (ID: ${ID}) \u26A0\uFE0F`);
     return [];
   }
-  const { prefix } = account;
+  const { prefix, nextApiId } = account;
   try {
     console.warn({
       accountId: ID,
@@ -67742,7 +67742,7 @@ var recheck = async (ID) => {
       message: `\u{1F4A5} RE-CHECK ${ID} INIT \u{1F4A5}`
     });
     const client = await initClient(
-      { ...account, prefix, empty: false, apiId: 2040 },
+      { ...account, prefix, empty: false, apiId: nextApiId || 2040 },
       (update) => handleUpdate(client, ID, update),
       (error) => sendToMainBot(error)
     );

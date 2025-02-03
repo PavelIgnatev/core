@@ -63,7 +63,7 @@ async function init(
   console.log({
     accountId: account.accountId,
     prefix: account.prefix,
-    message: `[CLIENT_STARTED]`,
+    message: `[CLIENT_STARTED (${account.apiId})]`,
     payload: {
       initTime: `${client._initTime}ms`,
     },
