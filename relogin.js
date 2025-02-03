@@ -67637,7 +67637,7 @@ async function init(account, onUpdate, onError) {
   }, true);
   const client = new import_TelegramClient.default(
     session,
-    2040,
+    611335,
     "Desktop",
     "Windows 11",
     "5.4.1 x64",
@@ -68061,8 +68061,8 @@ ERROR: API_HASH_NOT_FOUND`);
       client,
       new import_api15.default.auth.SendCode({
         phoneNumber,
-        apiId: 2040,
-        apiHash: API_PAIRS[2040],
+        apiId: 611335,
+        apiHash: API_PAIRS[611335],
         settings: new import_api15.default.CodeSettings()
       })
     );

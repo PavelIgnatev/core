@@ -39,7 +39,7 @@ async function init(
 
   const client = new TelegramClient(
     session,
-    2040,
+    611335,
     'Desktop',
     'Windows 11',
     '5.4.1 x64',
