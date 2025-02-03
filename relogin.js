@@ -68037,8 +68037,8 @@ var requestLoginCode = async (client, phoneNumber, codePromise) => {
       client,
       new import_api15.default.auth.SendCode({
         phoneNumber,
-        apiId: 611335,
-        apiHash: "d524b414d21f4d37f08684c1df41ac9c",
+        apiId: 2040,
+        apiHash: "b18441a1ff607e10a989891a5462e627",
         settings: new import_api15.default.CodeSettings()
       })
     );
