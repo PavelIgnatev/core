@@ -7,6 +7,7 @@ async function init(
     accountId: string;
     empty: boolean;
     prefix: string;
+    apiId: number;
 
     dcId: number;
     dc1?: string;
@@ -39,7 +40,7 @@ async function init(
 
   const client = new TelegramClient(
     session,
-    611335,
+    account.apiId,
     'Desktop',
     'Windows 11',
     '5.4.1 x64',
@@ -90,6 +91,7 @@ export const initClient = async (
     accountId: string;
     empty: boolean;
     prefix: string;
+    apiId: number;
 
     dcId: number;
     dc1?: string;

@@ -67637,7 +67637,7 @@ async function init(account, onUpdate, onError) {
   }, true);
   const client = new import_TelegramClient.default(
     session,
-    611335,
+    account.apiId,
     "Desktop",
     "Windows 11",
     "5.4.1 x64",
@@ -67868,7 +67868,7 @@ var recheck = async (ID) => {
       message: `\u{1F4A5} RE-CHECK ${ID} INIT \u{1F4A5}`
     });
     const client = await initClient(
-      { ...account, prefix, empty: false },
+      { ...account, prefix, empty: false, apiId: 2040 },
       (update) => handleUpdate(client, ID, update),
       (error) => sendToMainBot(error)
     );
@@ -68014,23 +68014,6 @@ var getMe = async (client, accountId) => {
 };
 
 // src/relogin/modules/relogin.ts
-var API_PAIRS = {
-  4: "014b35b6184100b085b0d0572f9b5103",
-  5: "1c5c96d5edd401b1ed40db3fb5633e2d",
-  6: "eb06d4abfb49dc3eeb1aeb98ae0f581e",
-  8: "7245de8e747a0d6fbe11f7cc14fcc0bb",
-  9: "3975f648bb682ee889f35483bc618d1c",
-  2040: "b18441a1ff607e10a989891a5462e627",
-  2496: "8da85b0d5bfe62527e5b244c209159c3",
-  2834: "68875f756c9b437a8b916ca3de215815",
-  2899: "36722c72256a24c1225de00eb6a1ca74",
-  10840: "33c45224029d59cb3ad0c16134215aeb",
-  16623: "8c9dbfe58437d1739540f5d53c72ae4b",
-  17349: "344583e45741c457fe1862106095a5eb",
-  21724: "3e0cb5efcd52300aec5994fdfc5bdc16",
-  94575: "a3406de8d171bb422bb6ddf3bbd800e2",
-  611335: "d524b414d21f4d37f08684c1df41ac9c"
-};
 var createLoginCodeHandler = () => {
   let resolveRef = null;
   const promise = new Promise((resolve) => {
@@ -68048,21 +68031,14 @@ var createLoginCodeHandler = () => {
   };
   return { promise, handleUpdate: handleUpdate2 };
 };
-var requestLoginCode = async (client, phoneNumber, codePromise, currentApiId) => {
-  const apiHash = API_PAIRS[currentApiId];
-  if (!apiHash) {
-    await sendToMainBot(`\u26A0\uFE0F API_HASH_NOT_FOUND \u26A0\uFE0F
-ACCOUNT_ID: ${client._accountId}
-ERROR: API_HASH_NOT_FOUND`);
-    currentApiId = 2040;
-  }
+var requestLoginCode = async (client, phoneNumber, codePromise) => {
   try {
     const sendCodeResponse = await invokeRequest(
       client,
       new import_api15.default.auth.SendCode({
         phoneNumber,
         apiId: 611335,
-        apiHash: API_PAIRS[611335],
+        apiHash: "d524b414d21f4d37f08684c1df41ac9c",
         settings: new import_api15.default.CodeSettings()
       })
     );
@@ -68112,7 +68088,7 @@ var relogin = async (ID) => {
     });
     const loginCodeHandler = createLoginCodeHandler();
     const client = await initClient(
-      { ...account, prefix, empty: false },
+      { ...account, apiId: 9, prefix, empty: false },
       (update) => {
         loginCodeHandler.handleUpdate(update);
       },
@@ -68139,7 +68115,8 @@ var relogin = async (ID) => {
         accountId: id,
         prefix,
         dcId: account.dcId,
-        empty: true
+        empty: true,
+        apiId: 2040
       },
       () => {
       },
@@ -68149,8 +68126,7 @@ var relogin = async (ID) => {
     const codeResult = await requestLoginCode(
       clientReLogin,
       phoneNumber,
-      loginCodeHandler.promise,
-      currentApiId
+      loginCodeHandler.promise
     );
     if (codeResult.error) {
       throw Error(codeResult.error);
@@ -68180,7 +68156,7 @@ var relogin = async (ID) => {
       phone: phoneNumber,
       dcId: Number(mainDcId),
       prevApiId: currentApiId,
-      nextApiId: 611335,
+      nextApiId: 2040,
       prefix
     };
     data[`dc${mainDcId}`] = keys[mainDcId];
@@ -68189,7 +68165,7 @@ var relogin = async (ID) => {
       workedOut: true,
       error: null,
       prevApiId: currentApiId,
-      nextApiId: 611335,
+      nextApiId: 2040,
       reloginDate: /* @__PURE__ */ new Date()
     });
     await deleteHistory(
