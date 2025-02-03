@@ -129,7 +129,7 @@ const main = async (ID: string) => {
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
+            // await autoResponse(client, ID, meId, tgFirstName);
           }
 
           if (i === randomI) {

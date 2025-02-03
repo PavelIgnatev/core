@@ -47,6 +47,7 @@ export const autoSender = async (
   //   }
   // }
 
+  return
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
 
