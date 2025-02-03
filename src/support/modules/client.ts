@@ -1,3 +1,5 @@
+import UserAgent from 'user-agents';
+
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import CallbackSession from '../../gramjs/sessions/CallbackSession';
 import GramJs from '../../gramjs/tl/api';
@@ -6,6 +8,7 @@ async function init(
   account: {
     accountId: string;
     prefix: string;
+    apiId: number;
 
     dcId: number;
     dc1?: string;
@@ -34,20 +37,41 @@ async function init(
   };
   const session = new CallbackSession(sessionData, () => {}, true);
 
-  const client = new TelegramClient(
-    session,
-    2040,
-    'Desktop',
-    'Windows 11',
-    '5.4.1 x64',
-    'en',
-    'tdesktop',
-    'en',
-    account.accountId,
-    account.prefix,
-    dcId,
-    onError
-  );
+  const userAgent = new UserAgent();
+  const { userAgent: userAgentString, platform } = userAgent.data;
+
+  const client =
+    account.apiId === 2496
+      ? new TelegramClient(
+          session,
+          2496,
+          userAgentString,
+          platform,
+          `${Math.floor(Math.random() * 10)}.${Math.floor(
+            Math.random() * 10
+          )}.${Math.floor(Math.random() * 10)} A`,
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          account.prefix,
+          dcId,
+          onError
+        )
+      : new TelegramClient(
+          session,
+          account.apiId,
+          'Desktop',
+          'Windows 11',
+          '5.4.1 x64',
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          account.prefix,
+          dcId,
+          onError
+        );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
@@ -59,7 +83,7 @@ async function init(
   console.log({
     accountId: account.accountId,
     prefix: account.prefix,
-    message: `[CLIENT_STARTED]`,
+    message: `[CLIENT_STARTED (${account.apiId})]`,
     payload: {
       initTime: `${client._initTime}ms`,
     },
@@ -86,6 +110,7 @@ export const initClient = async (
   account: {
     accountId: string;
     prefix: string;
+    apiId: number;
 
     dcId: number;
     dc1?: string;

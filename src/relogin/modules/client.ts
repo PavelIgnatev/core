@@ -54,7 +54,7 @@ async function init(
             Math.random() * 10
           )}.${Math.floor(Math.random() * 10)} A`,
           'en',
-          'weba',
+          'en',
           'en',
           account.accountId,
           account.prefix,

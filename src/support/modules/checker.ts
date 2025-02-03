@@ -41,14 +41,14 @@ export const checker = async (
       paylod: { count: randomI },
     });
 
-    const { dcId, setuped = false } = accountByID;
+    const { dcId, setuped = false, nextApiId } = accountByID;
     if (!dcId) {
       throw new Error('NOT_ENOUGH_PARAMS');
     }
 
     account = accountByID;
     client = await initClient(
-      { ...account, prefix },
+      { ...account, prefix, apiId: nextApiId || 2040 },
       true,
       (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)

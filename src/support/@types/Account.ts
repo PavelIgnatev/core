@@ -14,6 +14,8 @@ export interface Account {
   banned?: boolean;
   setuped?: boolean;
 
+  nextApiId?: number;
+
   prefix?: string;
 
   twoFa?: boolean;
