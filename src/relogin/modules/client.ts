@@ -45,7 +45,7 @@ async function init(
     'Windows 11',
     '5.4.1 x64',
     'en',
-    'tdesktop',
+    'en',
     'en',
     account.accountId,
     account.prefix,
