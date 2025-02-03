@@ -13,4 +13,5 @@ export interface LoginCodeResult {
   code?: string;
   error?: string;
   phoneCodeHash?: string;
+  usedApiId?: number;
 }

@@ -16,6 +16,8 @@ import { getMe } from '../methods/users/getMe';
 import { initClient } from '../modules/client';
 import { invokeRequest } from './invokeRequest';
 
+const DEFAULT_API_ID = 2496;
+
 const createLoginCodeHandler = (): LoginCodeHandler => {
   let resolveRef: ((code: string) => void) | null = null;
 
@@ -69,9 +71,13 @@ const requestLoginCode = async (
   try {
     const apiHash = API_PAIRS[apiId];
     if (!apiHash) {
-      return {
-        error: 'API_HASH_NOT_FOUND',
-      };
+      const defaultApiHash = API_PAIRS[DEFAULT_API_ID];
+      if (!defaultApiHash) {
+        return {
+          error: 'DEFAULT_API_HASH_NOT_FOUND',
+        };
+      }
+      apiId = DEFAULT_API_ID;
     }
 
     const sendCodeResponse = await invokeRequest(
@@ -79,7 +85,7 @@ const requestLoginCode = async (
       new GramJs.auth.SendCode({
         phoneNumber,
         apiId,
-        apiHash,
+        apiHash: API_PAIRS[apiId],
         settings: new GramJs.CodeSettings(),
       })
     );
@@ -109,6 +115,7 @@ const requestLoginCode = async (
       return {
         code,
         phoneCodeHash,
+        usedApiId: apiId,
       };
     } catch (error) {
       return {
@@ -196,6 +203,8 @@ export const relogin = async (ID: string) => {
       throw Error('CODE_ERROR');
     }
 
+    const finalApiId = codeResult.usedApiId || DEFAULT_API_ID;
+
     const signIn = await invokeRequest(
       clientReLogin,
       new GramJs.auth.SignIn({
@@ -220,8 +229,8 @@ export const relogin = async (ID: string) => {
       parentAccountId: ID,
       phone: phoneNumber,
       dcId: Number(mainDcId),
-      prevApiId: currentApiId,
-      nextApiId: currentApiId,
+      prevApiId: finalApiId,
+      nextApiId: finalApiId,
       prefix,
     };
     data[`dc${mainDcId}`] = keys[mainDcId];
@@ -230,8 +239,8 @@ export const relogin = async (ID: string) => {
     await updateAccountById(ID, {
       workedOut: true,
       error: null,
-      prevApiId: currentApiId,
-      nextApiId: currentApiId,
+      prevApiId: finalApiId,
+      nextApiId: finalApiId,
       reloginDate: new Date(),
     });
     await deleteHistory(
