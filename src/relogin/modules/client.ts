@@ -57,8 +57,8 @@ async function init(
           'weba',
           'en',
           account.accountId,
-          '',
-          null,
+          account.prefix,
+          dcId,
           onError
         )
       : new TelegramClient(
