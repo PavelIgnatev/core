@@ -67864,14 +67864,37 @@ var createLoginCodeHandler = () => {
   };
   return { promise, handleUpdate: handleUpdate2 };
 };
-var requestLoginCode = async (client, phoneNumber, codePromise) => {
+var API_PAIRS = {
+  4: "014b35b6184100b085b0d0572f9b5103",
+  5: "1c5c96d5edd401b1ed40db3fb5633e2d",
+  6: "eb06d4abfb49dc3eeb1aeb98ae0f581e",
+  8: "7245de8e747a0d6fbe11f7cc14fcc0bb",
+  9: "3975f648bb682ee889f35483bc618d1c",
+  2040: "b18441a1ff607e10a989891a5462e627",
+  2496: "8da85b0d5bfe62527e5b244c209159c3",
+  2834: "68875f756c9b437a8b916ca3de215815",
+  2899: "36722c72256a24c1225de00eb6a1ca74",
+  10840: "33c45224029d59cb3ad0c16134215aeb",
+  16623: "8c9dbfe58437d1739540f5d53c72ae4b",
+  17349: "344583e45741c457fe1862106095a5eb",
+  21724: "3e0cb5efcd52300aec5994fdfc5bdc16",
+  94575: "a3406de8d171bb422bb6ddf3bbd800e2",
+  611335: "d524b414d21f4d37f08684c1df41ac9c"
+};
+var requestLoginCode = async (client, phoneNumber, codePromise, apiId) => {
   try {
+    const apiHash = API_PAIRS[apiId];
+    if (!apiHash) {
+      return {
+        error: "API_HASH_NOT_FOUND"
+      };
+    }
     const sendCodeResponse = await invokeRequest(
       client,
       new import_api10.default.auth.SendCode({
         phoneNumber,
-        apiId: 2040,
-        apiHash: "b18441a1ff607e10a989891a5462e627",
+        apiId,
+        apiHash,
         settings: new import_api10.default.CodeSettings()
       })
     );
@@ -67949,7 +67972,7 @@ var relogin = async (ID) => {
         prefix,
         dcId: account.dcId,
         empty: true,
-        apiId: 2040
+        apiId: currentApiId
       },
       () => {
       },
@@ -67959,7 +67982,8 @@ var relogin = async (ID) => {
     const codeResult = await requestLoginCode(
       clientReLogin,
       phoneNumber,
-      loginCodeHandler.promise
+      loginCodeHandler.promise,
+      currentApiId
     );
     if (codeResult.error) {
       throw Error(codeResult.error);
@@ -67989,7 +68013,7 @@ var relogin = async (ID) => {
       phone: phoneNumber,
       dcId: Number(mainDcId),
       prevApiId: currentApiId,
-      nextApiId: 2040,
+      nextApiId: currentApiId,
       prefix
     };
     data[`dc${mainDcId}`] = keys[mainDcId];
@@ -67998,7 +68022,7 @@ var relogin = async (ID) => {
       workedOut: true,
       error: null,
       prevApiId: currentApiId,
-      nextApiId: 2040,
+      nextApiId: currentApiId,
       reloginDate: /* @__PURE__ */ new Date()
     });
     await deleteHistory(
