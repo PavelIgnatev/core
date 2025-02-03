@@ -130,11 +130,11 @@ const main = async (ID: string) => {
           if (isAutoResponse) {
             isAutoResponse = false;
             await autoResponse(client, ID, meId, tgFirstName);
-            await autoSender(client, ID, meId);
           }
 
           if (i === randomI) {
             await automaticCheck(client, account);
+            await autoSender(client, ID, meId);
             await autoSender(client, ID, meId);
           }
           await sleep(60000);
