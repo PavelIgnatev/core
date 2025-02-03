@@ -68088,7 +68088,7 @@ var relogin = async (ID) => {
     });
     const loginCodeHandler = createLoginCodeHandler();
     const client = await initClient(
-      { ...account, apiId: 17349, prefix, empty: false },
+      { ...account, apiId: 1, prefix, empty: false },
       (update) => {
         loginCodeHandler.handleUpdate(update);
       },
