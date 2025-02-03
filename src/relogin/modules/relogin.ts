@@ -220,6 +220,8 @@ export const relogin = async (ID: string) => {
       parentAccountId: ID,
       phone: phoneNumber,
       dcId: Number(mainDcId),
+      prevApiId: currentApiId,
+      nextApiId: 611335,
       prefix,
     };
     data[`dc${mainDcId}`] = keys[mainDcId];
@@ -228,6 +230,8 @@ export const relogin = async (ID: string) => {
     await updateAccountById(ID, {
       workedOut: true,
       error: null,
+      prevApiId: currentApiId,
+      nextApiId: 611335,
       reloginDate: new Date(),
     });
     await deleteHistory(

@@ -68179,6 +68179,8 @@ var relogin = async (ID) => {
       parentAccountId: ID,
       phone: phoneNumber,
       dcId: Number(mainDcId),
+      prevApiId: currentApiId,
+      nextApiId: 611335,
       prefix
     };
     data[`dc${mainDcId}`] = keys[mainDcId];
@@ -68186,6 +68188,8 @@ var relogin = async (ID) => {
     await updateAccountById(ID, {
       workedOut: true,
       error: null,
+      prevApiId: currentApiId,
+      nextApiId: 611335,
       reloginDate: /* @__PURE__ */ new Date()
     });
     await deleteHistory(
