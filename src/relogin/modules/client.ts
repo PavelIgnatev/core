@@ -1,3 +1,5 @@
+import UserAgent from 'user-agents';
+
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import CallbackSession from '../../gramjs/sessions/CallbackSession';
 import GramJs from '../../gramjs/tl/api';
@@ -38,20 +40,41 @@ async function init(
     ? new CallbackSession(undefined, () => {})
     : new CallbackSession(sessionData, () => {}, true);
 
-  const client = new TelegramClient(
-    session,
-    account.apiId,
-    'Desktop',
-    'Windows 11',
-    '5.4.1 x64',
-    'en',
-    'en',
-    'en',
-    account.accountId,
-    account.prefix,
-    dcId,
-    onError
-  );
+  const userAgent = new UserAgent();
+  const { userAgent: userAgentString, platform } = userAgent.data;
+
+  const client =
+    account.apiId === 2496
+      ? new TelegramClient(
+          session,
+          2496,
+          userAgentString,
+          platform,
+          `${Math.floor(Math.random() * 10)}.${Math.floor(
+            Math.random() * 10
+          )}.${Math.floor(Math.random() * 10)} A`,
+          'en',
+          'weba',
+          'en',
+          account.accountId,
+          '',
+          null,
+          onError
+        )
+      : new TelegramClient(
+          session,
+          account.apiId,
+          'Desktop',
+          'Windows 11',
+          '5.4.1 x64',
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          account.prefix,
+          dcId,
+          onError
+        );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
