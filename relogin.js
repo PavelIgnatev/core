@@ -50111,7 +50111,7 @@ var require_crypto = __commonJS({
 var require_Helpers = __commonJS({
   "src/gramjs/Helpers.js"(exports2, module2) {
     "use strict";
-    var BigInt6 = require_BigInteger();
+    var BigInt4 = require_BigInteger();
     var crypto = require_crypto();
     function readBigIntFromBuffer3(buffer, little = true, signed = false) {
       let randBuffer = Buffer.from(buffer);
@@ -50119,14 +50119,14 @@ var require_Helpers = __commonJS({
       if (little) {
         randBuffer = randBuffer.reverse();
       }
-      let bigInt3 = BigInt6(randBuffer.toString("hex"), 16);
+      let bigInt3 = BigInt4(randBuffer.toString("hex"), 16);
       if (signed && Math.floor(bigInt3.toString(2).length / 8) >= bytesNumber) {
-        bigInt3 = bigInt3.subtract(BigInt6(2).pow(BigInt6(bytesNumber * 8)));
+        bigInt3 = bigInt3.subtract(BigInt4(2).pow(BigInt4(bytesNumber * 8)));
       }
       return bigInt3;
     }
     function toSignedLittleBuffer(big, number = 8) {
-      const bigNumber = BigInt6(big);
+      const bigNumber = BigInt4(big);
       const byteArray = [];
       for (let i = 0; i < number; i++) {
         byteArray[i] = bigNumber.shiftRight(8 * i).and(255);
@@ -50134,17 +50134,17 @@ var require_Helpers = __commonJS({
       return Buffer.from(byteArray);
     }
     function readBufferFromBigInt2(bigInt3, bytesNumber, little = true, signed = false) {
-      bigInt3 = BigInt6(bigInt3);
+      bigInt3 = BigInt4(bigInt3);
       const bitLength = bigInt3.bitLength().toJSNumber();
       const bytes = Math.ceil(bitLength / 8);
       if (bytesNumber < bytes) {
         throw new Error("OverflowError: int too big to convert");
       }
-      if (!signed && bigInt3.lesser(BigInt6(0))) {
+      if (!signed && bigInt3.lesser(BigInt4(0))) {
         throw new Error("Cannot convert to unsigned");
       }
       let below = false;
-      if (bigInt3.lesser(BigInt6(0))) {
+      if (bigInt3.lesser(BigInt4(0))) {
         below = true;
         bigInt3 = bigInt3.abs();
       }
@@ -50211,12 +50211,12 @@ var require_Helpers = __commonJS({
     }
     function modExp2(a, b, n) {
       a = a.remainder(n);
-      let result = BigInt6.one;
+      let result = BigInt4.one;
       let x = a;
-      while (b.greater(BigInt6.zero)) {
-        const leastSignificantBit = b.remainder(BigInt6(2));
-        b = b.divide(BigInt6(2));
-        if (leastSignificantBit.eq(BigInt6.one)) {
+      while (b.greater(BigInt4.zero)) {
+        const leastSignificantBit = b.remainder(BigInt4(2));
+        b = b.divide(BigInt4(2));
+        if (leastSignificantBit.eq(BigInt4.one)) {
           result = result.multiply(x);
           result = result.remainder(n);
         }
@@ -50228,14 +50228,14 @@ var require_Helpers = __commonJS({
     function getByteArray(integer, signed = false) {
       const bits = integer.toString(2).length;
       const byteLength = Math.floor((bits + 8 - 1) / 8);
-      return readBufferFromBigInt2(BigInt6(integer), byteLength, false, signed);
+      return readBufferFromBigInt2(BigInt4(integer), byteLength, false, signed);
     }
     function getRandomInt(min, max) {
       min = Math.ceil(min);
       max = Math.floor(max);
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    var sleep5 = (ms) => new Promise((resolve) => {
+    var sleep4 = (ms) => new Promise((resolve) => {
       setTimeout(resolve, ms);
     });
     function bufferXor(a, b) {
@@ -50286,7 +50286,7 @@ var require_Helpers = __commonJS({
       bigIntMod,
       modExp: modExp2,
       getRandomInt,
-      sleep: sleep5,
+      sleep: sleep4,
       getByteArray,
       // isArrayLike,
       toSignedLittleBuffer,
@@ -55801,7 +55801,7 @@ var require_BinaryReader = __commonJS({
 var require_MTProtoState = __commonJS({
   "src/gramjs/network/MTProtoState.js"(exports2, module2) {
     "use strict";
-    var BigInt6 = require_BigInteger();
+    var BigInt4 = require_BigInteger();
     var aes = require_aes_min();
     var Helpers2 = require_Helpers();
     var IGE2 = require_IGE();
@@ -55847,7 +55847,7 @@ var require_MTProtoState = __commonJS({
       reset() {
         this.id = Helpers2.generateRandomLong(true);
         this._sequence = 0;
-        this._lastMsgId = BigInt6(0);
+        this._lastMsgId = BigInt4(0);
         this.msgIds = [];
       }
       /**
@@ -56086,9 +56086,9 @@ var require_MTProtoState = __commonJS({
       _getNewMsgId() {
         const now = Date.now() / 1e3 + this.timeOffset;
         const nanoseconds = Math.floor((now - Math.floor(now)) * 1e9);
-        let newMsgId = BigInt6(Math.floor(now)).shiftLeft(BigInt6(32)).or(BigInt6(nanoseconds).shiftLeft(BigInt6(2)));
+        let newMsgId = BigInt4(Math.floor(now)).shiftLeft(BigInt4(32)).or(BigInt4(nanoseconds).shiftLeft(BigInt4(2)));
         if (this._lastMsgId.greaterOrEquals(newMsgId)) {
-          newMsgId = this._lastMsgId.add(BigInt6(4));
+          newMsgId = this._lastMsgId.add(BigInt4(4));
         }
         this._lastMsgId = newMsgId;
         return newMsgId;
@@ -56100,7 +56100,7 @@ var require_MTProtoState = __commonJS({
         if (this._lastMsgId.eq(0)) {
           return false;
         }
-        return msgId.shiftRight(BigInt6(32)).toJSNumber() - this.timeOffset;
+        return msgId.shiftRight(BigInt4(32)).toJSNumber() - this.timeOffset;
       }
       /**
        * Updates the time offset to the correct
@@ -56111,10 +56111,10 @@ var require_MTProtoState = __commonJS({
         const bad = this._getNewMsgId();
         const old = this.timeOffset;
         const now = Math.floor(Date.now() / 1e3);
-        const correct = correctMsgId.shiftRight(BigInt6(32));
+        const correct = correctMsgId.shiftRight(BigInt4(32));
         this.timeOffset = correct - now;
         if (this.timeOffset !== old) {
-          this._lastMsgId = BigInt6(0);
+          this._lastMsgId = BigInt4(0);
         }
         return this.timeOffset;
       }
@@ -56148,7 +56148,7 @@ var require_AuthKey = __commonJS({
       readBigIntFromBuffer: readBigIntFromBuffer3
     } = require_Helpers();
     var BinaryReader2 = require_BinaryReader();
-    var { sleep: sleep5 } = require_Helpers();
+    var { sleep: sleep4 } = require_Helpers();
     var AuthKey2 = class _AuthKey {
       constructor(value, hash) {
         if (!hash || !value) {
@@ -56185,7 +56185,7 @@ var require_AuthKey = __commonJS({
       }
       async waitForKey() {
         while (!this.keyId) {
-          await sleep5(20);
+          await sleep4(20);
         }
       }
       getKey() {
@@ -56284,7 +56284,7 @@ var require_RequestState = __commonJS({
 var require_MTProtoPlainSender = __commonJS({
   "src/gramjs/network/MTProtoPlainSender.js"(exports2, module2) {
     "use strict";
-    var BigInt6 = require_BigInteger();
+    var BigInt4 = require_BigInteger();
     var MTProtoState = require_MTProtoState();
     var BinaryReader2 = require_BinaryReader();
     var { InvalidBufferError } = require_Common();
@@ -56316,11 +56316,11 @@ var require_MTProtoPlainSender = __commonJS({
         }
         const reader = new BinaryReader2(body);
         const authKeyId = reader.readLong();
-        if (authKeyId.neq(BigInt6(0))) {
+        if (authKeyId.neq(BigInt4(0))) {
           throw new Error("Bad authKeyId");
         }
         msgId = reader.readLong();
-        if (msgId.eq(BigInt6(0))) {
+        if (msgId.eq(BigInt4(0))) {
           throw new Error("Bad msgId");
         }
         const length = reader.readInt();
@@ -56615,7 +56615,7 @@ var init_RSA = __esm({
 var require_Factorizator = __commonJS({
   "src/gramjs/crypto/Factorizator.js"(exports2, module2) {
     "use strict";
-    var BigInt6 = require_BigInteger();
+    var BigInt4 = require_BigInteger();
     var { modExp: modExp2 } = require_Helpers();
     var Factorizator2 = class _Factorizator {
       /**
@@ -56625,7 +56625,7 @@ var require_Factorizator = __commonJS({
        * @returns {BigInteger}
        */
       static gcd(a, b) {
-        while (b.neq(BigInt6.zero)) {
+        while (b.neq(BigInt4.zero)) {
           const temp = b;
           b = a.remainder(b);
           a = temp;
@@ -56638,32 +56638,32 @@ var require_Factorizator = __commonJS({
        * @returns {{p: *, q: *}}
        */
       static factorize(pq) {
-        if (pq.remainder(2).equals(BigInt6.zero)) {
+        if (pq.remainder(2).equals(BigInt4.zero)) {
           return {
-            p: BigInt6(2),
-            q: pq.divide(BigInt6(2))
+            p: BigInt4(2),
+            q: pq.divide(BigInt4(2))
           };
         }
-        let y = BigInt6.randBetween(BigInt6(1), pq.minus(1));
-        const c = BigInt6.randBetween(BigInt6(1), pq.minus(1));
-        const m = BigInt6.randBetween(BigInt6(1), pq.minus(1));
-        let g = BigInt6.one;
-        let r = BigInt6.one;
-        let q = BigInt6.one;
-        let x = BigInt6.zero;
-        let ys = BigInt6.zero;
+        let y = BigInt4.randBetween(BigInt4(1), pq.minus(1));
+        const c = BigInt4.randBetween(BigInt4(1), pq.minus(1));
+        const m = BigInt4.randBetween(BigInt4(1), pq.minus(1));
+        let g = BigInt4.one;
+        let r = BigInt4.one;
+        let q = BigInt4.one;
+        let x = BigInt4.zero;
+        let ys = BigInt4.zero;
         let k;
-        while (g.eq(BigInt6.one)) {
+        while (g.eq(BigInt4.one)) {
           x = y;
-          for (let i = 0; BigInt6(i).lesser(r); i++) {
-            y = modExp2(y, BigInt6(2), pq).add(c).remainder(pq);
+          for (let i = 0; BigInt4(i).lesser(r); i++) {
+            y = modExp2(y, BigInt4(2), pq).add(c).remainder(pq);
           }
-          k = BigInt6.zero;
-          while (k.lesser(r) && g.eq(BigInt6.one)) {
+          k = BigInt4.zero;
+          while (k.lesser(r) && g.eq(BigInt4.one)) {
             ys = y;
-            const condition = BigInt6.min(m, r.minus(k));
-            for (let i = 0; BigInt6(i).lesser(condition); i++) {
-              y = modExp2(y, BigInt6(2), pq).add(c).remainder(pq);
+            const condition = BigInt4.min(m, r.minus(k));
+            for (let i = 0; BigInt4(i).lesser(condition); i++) {
+              y = modExp2(y, BigInt4(2), pq).add(c).remainder(pq);
               q = q.multiply(x.minus(y).abs()).remainder(pq);
             }
             g = _Factorizator.gcd(q, pq);
@@ -56673,7 +56673,7 @@ var require_Factorizator = __commonJS({
         }
         if (g.eq(pq)) {
           while (true) {
-            ys = modExp2(ys, BigInt6(2), pq).add(c).remainder(pq);
+            ys = modExp2(ys, BigInt4(2), pq).add(c).remainder(pq);
             g = _Factorizator.gcd(x.minus(ys).abs(), pq);
             if (g.greater(1)) {
               break;
@@ -56703,8 +56703,8 @@ __export(Authenticator_exports, {
 async function doAuthentication(sender) {
   let bytes = Helpers.generateRandomBytes(16);
   const nonce = Helpers.readBigIntFromBuffer(bytes, false, true);
-  const resPQ = await sender.send(new import_api4.default.ReqPqMulti({ nonce }));
-  if (!(resPQ instanceof import_api4.default.ResPQ)) {
+  const resPQ = await sender.send(new import_api5.default.ReqPqMulti({ nonce }));
+  if (!(resPQ instanceof import_api5.default.ResPQ)) {
     throw new import_errors.SecurityError(`Step 1 answer was ${resPQ}`);
   }
   if (resPQ.nonce.neq(nonce)) {
@@ -56716,7 +56716,7 @@ async function doAuthentication(sender) {
   const qBuffer = Helpers.getByteArray(q);
   bytes = Helpers.generateRandomBytes(32);
   const newNonce = Helpers.readBigIntFromBuffer(bytes, true, true);
-  const pqInnerData = new import_api4.default.PQInnerData({
+  const pqInnerData = new import_api5.default.PQInnerData({
     pq: Helpers.getByteArray(pq),
     // unsigned
     p: pBuffer,
@@ -56784,7 +56784,7 @@ async function doAuthentication(sender) {
     throw new import_errors.SecurityError("Step 2 could create a secure encrypted key");
   }
   const serverDhParams = await sender.send(
-    new import_api4.default.ReqDHParams({
+    new import_api5.default.ReqDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       p: pBuffer,
@@ -56793,7 +56793,7 @@ async function doAuthentication(sender) {
       encryptedData
     })
   );
-  if (!(serverDhParams instanceof import_api4.default.ServerDHParamsOk || serverDhParams instanceof import_api4.default.ServerDHParamsFail)) {
+  if (!(serverDhParams instanceof import_api5.default.ServerDHParamsOk || serverDhParams instanceof import_api5.default.ServerDHParamsFail)) {
     throw new Error(`Step 2.1 answer was ${serverDhParams}`);
   }
   if (serverDhParams.nonce.neq(resPQ.nonce)) {
@@ -56802,7 +56802,7 @@ async function doAuthentication(sender) {
   if (serverDhParams.serverNonce.neq(resPQ.serverNonce)) {
     throw new import_errors.SecurityError("Step 2 invalid server nonce from server");
   }
-  if (serverDhParams instanceof import_api4.default.ServerDHParamsFail) {
+  if (serverDhParams instanceof import_api5.default.ServerDHParamsFail) {
     const sh = await Helpers.sha1(
       Helpers.toSignedLittleBuffer(newNonce, 32).slice(4, 20)
     );
@@ -56811,7 +56811,7 @@ async function doAuthentication(sender) {
       throw new import_errors.SecurityError("Step 2 invalid DH fail nonce from server");
     }
   }
-  if (!(serverDhParams instanceof import_api4.default.ServerDHParamsOk)) {
+  if (!(serverDhParams instanceof import_api5.default.ServerDHParamsOk)) {
     throw new Error(`Step 2.2 answer was ${serverDhParams}`);
   }
   const { key, iv } = await Helpers.generateKeyDataFromNonce(
@@ -56826,7 +56826,7 @@ async function doAuthentication(sender) {
   const reader = new BinaryReader(plainTextAnswer);
   const hash = reader.read(20);
   const serverDhInner = reader.tgReadObject();
-  if (!(serverDhInner instanceof import_api4.default.ServerDHInnerData)) {
+  if (!(serverDhInner instanceof import_api5.default.ServerDHInnerData)) {
     throw new Error(`Step 3 answer was ${serverDhInner}`);
   }
   const sha1Answer = await Helpers.sha1(serverDhInner.getBytes());
@@ -56876,7 +56876,7 @@ async function doAuthentication(sender) {
       "Step 3 failed dh_prime - 2^{2048-64} < gb < 2^{2048-64} check"
     );
   }
-  const clientDhInner = new import_api4.default.ClientDHInnerData({
+  const clientDhInner = new import_api5.default.ClientDHInnerData({
     nonce: resPQ.nonce,
     serverNonce: resPQ.serverNonce,
     retryId: bigInt2.zero,
@@ -56889,13 +56889,13 @@ async function doAuthentication(sender) {
   ]);
   const clientDhEncrypted = ige.encryptIge(clientDdhInnerHashed);
   const dhGen = await sender.send(
-    new import_api4.default.SetClientDHParams({
+    new import_api5.default.SetClientDHParams({
       nonce: resPQ.nonce,
       serverNonce: resPQ.serverNonce,
       encryptedData: clientDhEncrypted
     })
   );
-  const nonceTypes = [import_api4.default.DhGenOk, import_api4.default.DhGenRetry, import_api4.default.DhGenFail];
+  const nonceTypes = [import_api5.default.DhGenOk, import_api5.default.DhGenRetry, import_api5.default.DhGenFail];
   const nonceTypesString = ["DhGenOk", "DhGenRetry", "DhGenFail"];
   if (!(dhGen instanceof nonceTypes[0] || dhGen instanceof nonceTypes[1] || dhGen instanceof nonceTypes[2])) {
     throw new Error(`Step 3.1 answer was ${dhGen}`);
@@ -56915,18 +56915,18 @@ async function doAuthentication(sender) {
   if (dhHash.neq(newNonceHash)) {
     throw new import_errors.SecurityError("Step 3 invalid new nonce hash");
   }
-  if (!(dhGen instanceof import_api4.default.DhGenOk)) {
+  if (!(dhGen instanceof import_api5.default.DhGenOk)) {
     throw new Error(`Step 3.2 answer was ${dhGen}`);
   }
   return { authKey, timeOffset };
 }
-var import_errors, import_api4, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
+var import_errors, import_api5, bigInt2, IGE, AuthKey, Factorizator, Helpers, BinaryReader, RETRIES;
 var init_Authenticator = __esm({
   "src/gramjs/network/Authenticator.ts"() {
     "use strict";
     init_RSA();
     import_errors = __toESM(require_errors3());
-    import_api4 = __toESM(require_api());
+    import_api5 = __toESM(require_api());
     bigInt2 = require_BigInteger();
     IGE = require_IGE();
     AuthKey = require_AuthKey();
@@ -62729,7 +62729,7 @@ Error: ${e.message}`);
 var require_TCPAbridged = __commonJS({
   "src/gramjs/network/connection/TCPAbridged.js"(exports2, module2) {
     "use strict";
-    var BigInt6 = require_BigInteger();
+    var BigInt4 = require_BigInteger();
     var { readBufferFromBigInt: readBufferFromBigInt2 } = require_Helpers();
     var { Connection, PacketCodec } = require_Connection();
     var AbridgedPacketCodec = class _AbridgedPacketCodec extends PacketCodec {
@@ -62749,7 +62749,7 @@ var require_TCPAbridged = __commonJS({
         } else {
           length = Buffer.concat([
             Buffer.from("7f", "hex"),
-            readBufferFromBigInt2(BigInt6(length), 3)
+            readBufferFromBigInt2(BigInt4(length), 3)
           ]);
         }
         return Buffer.concat([length, data]);
@@ -63180,12 +63180,12 @@ async function uploadFile(client, reailFile) {
             sender = await client.getSender();
             const partBytes = await blobSliceMemo.arrayBuffer();
             await sender.send(
-              isLarge ? new import_api5.default.upload.SaveBigFilePart({
+              isLarge ? new import_api6.default.upload.SaveBigFilePart({
                 fileId,
                 filePart: jMemo,
                 fileTotalParts: partCount,
                 bytes: Buffer.from(partBytes)
-              }) : new import_api5.default.upload.SaveFilePart({
+              }) : new import_api6.default.upload.SaveFilePart({
                 fileId,
                 filePart: jMemo,
                 bytes: Buffer.from(partBytes)
@@ -63209,23 +63209,23 @@ async function uploadFile(client, reailFile) {
     currentForemanIndex++;
   }
   await Promise.all(promises);
-  return isLarge ? new import_api5.default.InputFileBig({
+  return isLarge ? new import_api6.default.InputFileBig({
     id: fileId,
     parts: partCount,
     name
-  }) : new import_api5.default.InputFile({
+  }) : new import_api6.default.InputFile({
     id: fileId,
     parts: partCount,
     name,
     md5Checksum: ""
   });
 }
-var import_buffer, import_api5, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
+var import_buffer, import_api6, import_Helpers2, import_Utils, import_errors2, KB_TO_BYTES, LARGE_FILE_THRESHOLD, MAX_CONCURRENT_CONNECTIONS, MAX_CONCURRENT_CONNECTIONS_PREMIUM, MAX_WORKERS_PER_CONNECTION, foremans;
 var init_uploadFile = __esm({
   "src/gramjs/client/uploadFile.js"() {
     "use strict";
     import_buffer = require("buffer");
-    import_api5 = __toESM(require_api());
+    import_api6 = __toESM(require_api());
     import_Helpers2 = __toESM(require_Helpers());
     import_Utils = __toESM(require_Utils());
     import_errors2 = __toESM(require_errors3());
@@ -63243,7 +63243,7 @@ var init_uploadFile = __esm({
 var require_TelegramClient = __commonJS({
   "src/gramjs/client/TelegramClient.js"(exports2, module2) {
     "use strict";
-    var { sleep: sleep5 } = require_Helpers();
+    var { sleep: sleep4 } = require_Helpers();
     var errors2 = require_errors3();
     var { LAYER } = require_AllTLObjects();
     var { constructors, requests } = require_tl();
@@ -63369,7 +63369,7 @@ ID: ${this._accountId}`);
             if (e instanceof errors2.ServerError || e.message === "RPC_CALL_FAIL" || e.message === "RPC_MCGET_FAIL") {
             } else if (e instanceof errors2.FloodWaitError || e instanceof errors2.FloodTestPhoneWaitError) {
               if (e.seconds <= 60) {
-                await sleep5(e.seconds * 1e3);
+                await sleep4(e.seconds * 1e3);
               } else {
                 if (request.className === "contacts.Block" || request.className === "contacts.Unblock" || request.className === "messages.DeleteChatUser") {
                   state.finished.resolve();
@@ -63395,7 +63395,7 @@ ERROR: ${e.message}`
               state.after = void 0;
             } else if (e.message === "CONNECTION_NOT_INITED") {
               await this.disconnect();
-              await sleep5(2e3);
+              await sleep4(2e3);
               await this.connect();
             } else if (e.message === "TIMEOUT_ERROR") {
               if (request.className !== "account.UpdateStatus") {
@@ -67151,18 +67151,6 @@ var logsDB = async () => {
 
 // src/relogin/helpers/helpers.ts
 var allTimings = [];
-function reduceSpaces(string) {
-  return string.replace(/\s+/g, " ").trim();
-}
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
-function removeNonAlphaPrefix(string) {
-  if (string === "/start") {
-    return string;
-  }
-  return string.replace(/^[^a-zA-Zа-яА-Я]+/, "");
-}
 var sleep = (delay) => {
   return new Promise((res) => {
     setTimeout(res, delay);
@@ -67463,7 +67451,7 @@ DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDis
 NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})`);
 };
 
-// src/relogin/methods/account/updateStatus.ts
+// src/relogin/methods/account/clearAuthorizations.ts
 var import_api = __toESM(require_api());
 
 // src/relogin/modules/invokeRequest.ts
@@ -67534,11 +67522,52 @@ REQUEST: ${JSON.stringify(request)}`);
   }
 }
 
+// src/relogin/methods/account/clearAuthorizations.ts
+async function clearAuthorizations(client) {
+  const invokedAuthorizations = await invokeRequest(
+    client,
+    new import_api.default.account.GetAuthorizations()
+  );
+  const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
+  let currentApiId;
+  for (const authorization of authorizations) {
+    try {
+      if (authorization.current) {
+        console.log({
+          accountId: client._accountId,
+          prefix: client._prefix,
+          message: "[CURRENT_SESSION]",
+          payload: authorization
+        });
+        currentApiId = authorization.apiId;
+      }
+      if (!authorization.current) {
+        console.error({
+          accountId: client._accountId,
+          prefix: client._prefix,
+          message: "[UNKNOWN_SESSION]",
+          payload: authorization
+        });
+        await invokeRequest(
+          client,
+          new import_api.default.account.ResetAuthorization({
+            hash: authorization.hash
+          }),
+          { shouldIgnoreErrors: true }
+        );
+      }
+    } catch {
+    }
+  }
+  return currentApiId;
+}
+
 // src/relogin/methods/account/updateStatus.ts
+var import_api2 = __toESM(require_api());
 var updateStatus = async (client, offline) => {
   const result = await invokeRequest(
     client,
-    new import_api.default.account.UpdateStatus({
+    new import_api2.default.account.UpdateStatus({
       offline
     })
   );
@@ -67547,14 +67576,14 @@ var updateStatus = async (client, offline) => {
 
 // src/relogin/methods/update/handleUpdate.ts
 var import_big_integer = __toESM(require_BigInteger());
-var import_api3 = __toESM(require_api());
+var import_api4 = __toESM(require_api());
 
 // src/relogin/methods/messages/deleteHistory.ts
-var import_api2 = __toESM(require_api());
+var import_api3 = __toESM(require_api());
 async function deleteHistory(client, peer, shouldDeleteForAll) {
   const result = await invokeRequest(
     client,
-    new import_api2.default.messages.DeleteHistory({
+    new import_api3.default.messages.DeleteHistory({
       peer,
       ...shouldDeleteForAll && { revoke: true },
       ...!shouldDeleteForAll && { just_clear: true }
@@ -67579,7 +67608,7 @@ var handleUpdate = async (client, accountId, update) => {
       return;
     }
   }
-  if (update instanceof import_api3.default.UpdateShortMessage && String(update.userId) === "777000") {
+  if (update instanceof import_api4.default.UpdateShortMessage && String(update.userId) === "777000") {
     console.warn({
       accountId,
       prefix: client._prefix,
@@ -67589,7 +67618,7 @@ var handleUpdate = async (client, accountId, update) => {
     if (client) {
       await deleteHistory(
         client,
-        new import_api3.default.InputPeerUser({
+        new import_api4.default.InputPeerUser({
           userId: update.userId,
           accessHash: (0, import_big_integer.default)(0)
         }),
@@ -67612,7 +67641,7 @@ var handleUpdate = async (client, accountId, update) => {
 // src/relogin/modules/client.ts
 var import_TelegramClient = __toESM(require_TelegramClient());
 var import_CallbackSession = __toESM(require_CallbackSession());
-var import_api6 = __toESM(require_api());
+var import_api7 = __toESM(require_api());
 async function init(account, onUpdate, onError) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, empty } = account;
@@ -67664,7 +67693,7 @@ async function init(account, onUpdate, onError) {
   });
   client.addEventHandler(
     (update) => {
-      if (!(update instanceof import_api6.default.UpdatesTooLong)) {
+      if (!(update instanceof import_api7.default.UpdatesTooLong)) {
         const updates = "updates" in update ? update.updates : [update];
         updates.forEach(async (update2) => {
           onUpdate(update2);
@@ -67695,161 +67724,6 @@ var initClient = async (account, onUpdate, onError) => {
   } catch (e) {
     throw new Error(e.message);
   }
-};
-
-// src/relogin/modules/checkSpamBlock.ts
-var import_api11 = __toESM(require_api());
-
-// src/relogin/methods/contacts/resolveUsername.ts
-var import_api7 = __toESM(require_api());
-var resolveUsername = async (client, username) => {
-  const userByUsername = await invokeRequest(
-    client,
-    new import_api7.default.contacts.ResolveUsername({
-      username
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  return userByUsername;
-};
-
-// src/relogin/methods/contacts/unBlockContact.ts
-var import_api8 = __toESM(require_api());
-var unBlockContact = async (client, peer) => {
-  return await invokeRequest(
-    client,
-    new import_api8.default.contacts.Unblock({ id: peer }),
-    {
-      shouldIgnoreErrors: true
-    }
-  );
-};
-
-// src/relogin/methods/messages/getHistory.ts
-var import_big_integer3 = __toESM(require_BigInteger());
-var import_api9 = __toESM(require_api());
-var getHistory = async (client, userId, accessHash, minId) => {
-  const history = await invokeRequest(
-    client,
-    new import_api9.default.messages.GetHistory({
-      peer: new import_api9.default.InputPeerUser({
-        userId: (0, import_big_integer3.default)(userId),
-        accessHash: (0, import_big_integer3.default)(accessHash)
-      }),
-      minId
-    })
-  );
-  if (!history || history instanceof import_api9.default.messages.MessagesNotModified) {
-    return [];
-  }
-  return history.messages.filter((m) => m instanceof import_api9.default.Message);
-};
-
-// src/relogin/methods/messages/sendMessage.ts
-var import_big_integer4 = __toESM(require_BigInteger());
-var import_api10 = __toESM(require_api());
-var sendMessage = async (client, userId, accessHash, message) => {
-  let messageUpdate;
-  try {
-    const update = await invokeRequest(
-      client,
-      new import_api10.default.messages.SendMessage({
-        message: removeNonAlphaPrefix(
-          capitalizeFirstLetter(reduceSpaces(message))
-        ),
-        clearDraft: true,
-        peer: new import_api10.default.InputPeerUser({
-          userId: (0, import_big_integer4.default)(userId),
-          accessHash: (0, import_big_integer4.default)(accessHash)
-        }),
-        randomId: (0, import_big_integer4.default)(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
-      })
-    );
-    if (!update) {
-      messageUpdate = null;
-    } else if (update instanceof import_api10.default.UpdateShortSentMessage || update instanceof import_api10.default.UpdateMessageID) {
-      messageUpdate = update;
-    } else if ("updates" in update) {
-      messageUpdate = update.updates.find(
-        (u) => u instanceof import_api10.default.UpdateMessageID
-      );
-    }
-    if (!(messageUpdate == null ? void 0 : messageUpdate.id)) {
-      throw new Error("MESSAGE_NOT_SENT");
-    }
-    return messageUpdate;
-  } catch (error) {
-    throw error;
-  }
-};
-
-// src/relogin/modules/checkSpamBlock.ts
-var checkSpamBlock = async (client, account) => {
-  const { accountId, spamBlockDate: dbSpamBlockDate } = account;
-  const result = await resolveUsername(client, "spambot");
-  if (!result || !result.users.length || !(result.users[0] instanceof import_api11.default.User)) {
-    throw new Error("SPAMBOT_NOT_USER");
-  }
-  const { id: userId, accessHash, username } = result.users[0];
-  if (!accessHash || !username || username !== "SpamBot") {
-    throw new Error("SPAMBOT_NOT_FOUND");
-  }
-  await unBlockContact(
-    client,
-    new import_api11.default.InputPeerUser({
-      userId,
-      accessHash
-    })
-  );
-  const sentMessage = await sendMessage(
-    client,
-    String(userId),
-    String(accessHash),
-    "/start"
-  );
-  await sleep(5e3);
-  const messages = await getHistory(
-    client,
-    String(userId),
-    String(accessHash),
-    sentMessage.id
-  );
-  if (!messages[0]) {
-    throw new Error("SPAMBOT_MESSAGES_NOT_FOUND");
-  }
-  const { message, replyMarkup } = messages[0];
-  if (message.includes("no limits are currently applied")) {
-    await updateAccountById(accountId, {
-      isProblemSpamBlock: false,
-      spamBlockDate: null
-    });
-    await deleteHistory(
-      client,
-      new import_api11.default.InputPeerUser({
-        userId,
-        accessHash
-      }),
-      true
-    );
-    return false;
-  }
-  const match = message.match(/until\s(.*)\./);
-  const spamBlockDate = match ? match[1].replace("UTC", "").trim() : "INFINITY";
-  const spamBlockDateUTC = /* @__PURE__ */ new Date(spamBlockDate + "Z");
-  if (!dbSpamBlockDate || dbSpamBlockDate === "INFINITY" && spamBlockDate !== "INFINITY" || dbSpamBlockDate !== "INFINITY" && spamBlockDate === "INFINITY" || dbSpamBlockDate !== "INFINITY" && dbSpamBlockDate.getTime() !== spamBlockDateUTC.getTime()) {
-    await updateAccountById(accountId, {
-      spamBlockDate: match ? spamBlockDateUTC : "INFINITY"
-    });
-  }
-  await deleteHistory(
-    client,
-    new import_api11.default.InputPeerUser({
-      userId,
-      accessHash
-    }),
-    true
-  );
-  return true;
 };
 
 // src/relogin/modules/recheck.ts
@@ -67884,7 +67758,7 @@ var recheck = async (ID) => {
         errored = error.message;
       }
     }, 1e4);
-    await checkSpamBlock(client, account);
+    await clearAuthorizations(client);
     await sleep(18e4);
     if (errored) {
       throw new Error(errored);
@@ -67917,60 +67791,19 @@ ERROR: ${error.message}`
 };
 
 // src/relogin/modules/relogin.ts
-var import_big_integer5 = __toESM(require_BigInteger());
-var import_api15 = __toESM(require_api());
-
-// src/relogin/methods/account/clearAuthorizations.ts
-var import_api12 = __toESM(require_api());
-async function clearAuthorizations(client) {
-  const invokedAuthorizations = await invokeRequest(
-    client,
-    new import_api12.default.account.GetAuthorizations()
-  );
-  const authorizations = (invokedAuthorizations == null ? void 0 : invokedAuthorizations.authorizations) || [];
-  let currentApiId;
-  for (const authorization of authorizations) {
-    try {
-      if (authorization.current) {
-        console.log({
-          accountId: client._accountId,
-          prefix: client._prefix,
-          message: "[CURRENT_SESSION]",
-          payload: authorization
-        });
-        currentApiId = authorization.apiId;
-      }
-      if (!authorization.current) {
-        console.error({
-          accountId: client._accountId,
-          prefix: client._prefix,
-          message: "[UNKNOWN_SESSION]",
-          payload: authorization
-        });
-        await invokeRequest(
-          client,
-          new import_api12.default.account.ResetAuthorization({
-            hash: authorization.hash
-          }),
-          { shouldIgnoreErrors: true }
-        );
-      }
-    } catch {
-    }
-  }
-  return currentApiId;
-}
+var import_big_integer3 = __toESM(require_BigInteger());
+var import_api10 = __toESM(require_api());
 
 // src/relogin/methods/account/setup2FA.ts
-var import_api13 = __toESM(require_api());
+var import_api8 = __toESM(require_api());
 var setup2FA = async (client, account) => {
   try {
     const { twoFa } = account;
     const resetPassword = await invokeRequest(
       client,
-      new import_api13.default.account.ResetPassword()
+      new import_api8.default.account.ResetPassword()
     );
-    if (resetPassword instanceof import_api13.default.account.ResetPasswordOk) {
+    if (resetPassword instanceof import_api8.default.account.ResetPasswordOk) {
       throw new Error("PASSWORD_EMPTY");
     }
     await updateAccountById(client._accountId, {
@@ -67991,15 +67824,15 @@ var setup2FA = async (client, account) => {
 };
 
 // src/relogin/methods/users/getMe.ts
-var import_api14 = __toESM(require_api());
+var import_api9 = __toESM(require_api());
 var getMe = async (client, accountId) => {
   const me = await invokeRequest(
     client,
-    new import_api14.default.users.GetFullUser({
-      id: new import_api14.default.InputUserSelf()
+    new import_api9.default.users.GetFullUser({
+      id: new import_api9.default.InputUserSelf()
     })
   );
-  if (!me || me.users[0] instanceof import_api14.default.UserEmpty || !me.users[0].phone) {
+  if (!me || me.users[0] instanceof import_api9.default.UserEmpty || !me.users[0].phone) {
     throw new Error("GET_ME_ERROR");
   }
   await updateAccountById(accountId, {
@@ -68035,14 +67868,14 @@ var requestLoginCode = async (client, phoneNumber, codePromise) => {
   try {
     const sendCodeResponse = await invokeRequest(
       client,
-      new import_api15.default.auth.SendCode({
+      new import_api10.default.auth.SendCode({
         phoneNumber,
         apiId: 2040,
         apiHash: "b18441a1ff607e10a989891a5462e627",
-        settings: new import_api15.default.CodeSettings()
+        settings: new import_api10.default.CodeSettings()
       })
     );
-    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api15.default.auth.SentCode && sendCodeResponse.type instanceof import_api15.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
+    const isValidResponse = sendCodeResponse && sendCodeResponse instanceof import_api10.default.auth.SentCode && sendCodeResponse.type instanceof import_api10.default.auth.SentCodeTypeApp && typeof sendCodeResponse.phoneCodeHash === "string";
     if (!isValidResponse) {
       return {
         error: "SENT_CODE_ERROR"
@@ -68136,13 +67969,13 @@ var relogin = async (ID) => {
     }
     const signIn = await invokeRequest(
       clientReLogin,
-      new import_api15.default.auth.SignIn({
+      new import_api10.default.auth.SignIn({
         phoneNumber,
         phoneCodeHash: codeResult.phoneCodeHash,
         phoneCode: codeResult.code
       })
     );
-    if (!signIn || signIn instanceof import_api15.default.auth.AuthorizationSignUpRequired) {
+    if (!signIn || signIn instanceof import_api10.default.auth.AuthorizationSignUpRequired) {
       throw Error("SIGN_IN_ERROR");
     }
     const sessionData = clientReLogin.session.getSessionData();
@@ -68170,13 +68003,13 @@ var relogin = async (ID) => {
     });
     await deleteHistory(
       client,
-      new import_api15.default.InputPeerUser({
-        userId: (0, import_big_integer5.default)(777e3),
-        accessHash: (0, import_big_integer5.default)(0)
+      new import_api10.default.InputPeerUser({
+        userId: (0, import_big_integer3.default)(777e3),
+        accessHash: (0, import_big_integer3.default)(0)
       }),
       true
     );
-    await invokeRequest(client, new import_api15.default.auth.LogOut());
+    await invokeRequest(client, new import_api10.default.auth.LogOut());
     console.warn({
       accountId: ID,
       prefix,

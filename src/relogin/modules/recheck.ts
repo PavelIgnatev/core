@@ -2,10 +2,10 @@ import { TelegramClient } from '../../gramjs';
 import { getAccountById, updateAccountById } from '../db/accounts';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
+import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { updateStatus } from '../methods/account/updateStatus';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { initClient } from '../modules/client';
-import { checkSpamBlock } from './checkSpamBlock';
 
 export const recheck = async (ID: string) => {
   const clients: TelegramClient[] = [];
@@ -49,7 +49,7 @@ export const recheck = async (ID: string) => {
       }
     }, 10000);
 
-    await checkSpamBlock(client, account);
+    await clearAuthorizations(client);
 
     await sleep(180000);
 
