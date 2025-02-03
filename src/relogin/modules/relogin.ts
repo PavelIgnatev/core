@@ -142,7 +142,7 @@ export const relogin = async (ID: string) => {
 
     const loginCodeHandler = createLoginCodeHandler();
     const client = await initClient(
-      { ...account, apiId: 1, prefix, empty: false },
+      { ...account, apiId: 2496, prefix, empty: false },
       (update) => {
         loginCodeHandler.handleUpdate(update);
       },
