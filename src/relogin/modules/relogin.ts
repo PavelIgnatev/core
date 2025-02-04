@@ -229,7 +229,6 @@ export const relogin = async (ID: string) => {
       parentAccountId: ID,
       phone: phoneNumber,
       dcId: Number(mainDcId),
-      prevApiId: finalApiId,
       nextApiId: finalApiId,
       prefix,
     };
@@ -239,7 +238,6 @@ export const relogin = async (ID: string) => {
     await updateAccountById(ID, {
       workedOut: true,
       error: null,
-      prevApiId: finalApiId,
       nextApiId: finalApiId,
       reloginDate: new Date(),
     });
