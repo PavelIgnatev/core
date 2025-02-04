@@ -66,7 +66,9 @@ async function init(
           account.apiId,
           'Desktop',
           'Windows 11',
-          '5.4.1 x64',
+          `${Math.floor(Math.random() * 10)}.${Math.floor(
+            Math.random() * 10
+          )}.${Math.floor(Math.random() * 10)} x64`,
           'en',
           'en',
           'en',
