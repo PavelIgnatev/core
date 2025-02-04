@@ -43,22 +43,38 @@ async function init(
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
 
-  const client = new TelegramClient(
-    session,
-    account.apiId,
-    userAgentString,
-    platform,
-    `${Math.floor(Math.random() * 10)}.${Math.floor(
-      Math.random() * 10
-    )}.${Math.floor(Math.random() * 10)}`,
-    'en',
-    'en',
-    'en',
-    account.accountId,
-    account.prefix,
-    dcId,
-    onError
-  );
+  const client =
+    account.apiId === 2496
+      ? new TelegramClient(
+          session,
+          2496,
+          userAgentString,
+          platform,
+          `${Math.floor(Math.random() * 10)}.${Math.floor(
+            Math.random() * 10
+          )}.${Math.floor(Math.random() * 10)} A`,
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          account.prefix,
+          dcId,
+          onError
+        )
+      : new TelegramClient(
+          session,
+          account.apiId,
+          'Desktop',
+          'Windows 11',
+          '5.4.1 x64',
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          account.prefix,
+          dcId,
+          onError
+        );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
