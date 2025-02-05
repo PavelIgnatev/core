@@ -128,7 +128,7 @@ export const initClient = async (
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
         reject(new Error('CLIENT_TIMEOUT_ERROR'));
-      }, 30000);
+      }, 90000);
     });
 
     const client = await Promise.race([
