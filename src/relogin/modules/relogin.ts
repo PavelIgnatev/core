@@ -263,6 +263,26 @@ export const relogin = async (ID: string) => {
 
     return clients;
   } catch (error: any) {
+    if (
+      [
+        'USER_DEACTIVATED_BAN',
+        'AUTH_KEY_UNREGISTERED',
+        'AUTH_KEY_INVALID',
+        'USER_DEACTIVATED',
+        'SESSION_REVOKED',
+        'SESSION_EXPIRED',
+        'AUTH_KEY_DUPLICATED',
+        'AUTH_KEY_PERM_EMPTY',
+        'SESSION_PASSWORD_NEEDED',
+      ].includes(error.message)
+    ) {
+      await updateAccountById(ID, {
+        banned: true,
+        reason: error.message,
+        bannedDate: new Date(),
+      });
+    }
+
     console.error({
       accountId: ID,
       prefix,
