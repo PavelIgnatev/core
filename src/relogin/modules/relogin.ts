@@ -16,7 +16,6 @@ import { getMe } from '../methods/users/getMe';
 import { initClient } from '../modules/client';
 import { invokeRequest } from './invokeRequest';
 
-
 const createLoginCodeHandler = (): LoginCodeHandler => {
   let resolveRef: ((code: string) => void) | null = null;
 
@@ -69,15 +68,10 @@ const requestLoginCode = async (
   apiId: number
 ): Promise<LoginCodeResult> => {
   try {
-    const apiHash = API_PAIRS[apiId];
-    if (!apiHash) {
-      const defaultApiHash = API_PAIRS[DEFAULT_API_ID];
-      if (!defaultApiHash) {
-        return {
-          error: 'DEFAULT_API_HASH_NOT_FOUND',
-        };
-      }
-      apiId = DEFAULT_API_ID;
+    if (!API_PAIRS[apiId]) {
+      return {
+        error: 'API_HASH_ERROR',
+      };
     }
 
     const sendCodeResponse = await invokeRequest(
@@ -176,13 +170,18 @@ export const relogin = async (ID: string) => {
       throw new Error('ACCOUNT_ALREADY_EXISTS');
     }
 
+    let finalApiId = currentApiId;
+    if (!API_PAIRS[finalApiId]) {
+      finalApiId = DEFAULT_API_ID;
+    }
+
     const clientReLogin = await initClient(
       {
         accountId: id,
         prefix,
         dcId: account.dcId,
         empty: true,
-        apiId: currentApiId,
+        apiId: finalApiId,
       },
       () => {},
       (error) => sendToMainBot(error)
@@ -193,7 +192,7 @@ export const relogin = async (ID: string) => {
       clientReLogin,
       phoneNumber,
       loginCodeHandler.promise,
-      currentApiId
+      finalApiId
     );
 
     if (codeResult.error) {
@@ -202,8 +201,6 @@ export const relogin = async (ID: string) => {
     if (!codeResult.code || !codeResult.phoneCodeHash) {
       throw Error('CODE_ERROR');
     }
-
-    const finalApiId = codeResult.usedApiId || DEFAULT_API_ID;
 
     const signIn = await invokeRequest(
       clientReLogin,
@@ -224,7 +221,7 @@ export const relogin = async (ID: string) => {
       throw Error('SESSION_DATA_ERROR');
     }
 
-    const data: Record<string, any> = {
+    const updateId: Record<string, any> = {
       accountId: id,
       parentAccountId: ID,
       phone: phoneNumber,
@@ -232,15 +229,21 @@ export const relogin = async (ID: string) => {
       nextApiId: finalApiId,
       prefix,
     };
-    data[`dc${mainDcId}`] = keys[mainDcId];
+    updateId[`dc${mainDcId}`] = keys[mainDcId];
 
-    await updateAccountById(id, data);
-    await updateAccountById(ID, {
+    const updateID: Record<string, any> = {
       workedOut: true,
       error: null,
       nextApiId: finalApiId,
       reloginDate: new Date(),
-    });
+    };
+    if (finalApiId !== currentApiId) {
+      updateId['prevApiId'] = currentApiId;
+      updateID['prevApiId'] = currentApiId;
+    }
+
+    await updateAccountById(id, updateId);
+    await updateAccountById(ID, updateID);
     await deleteHistory(
       client,
       new GramJs.InputPeerUser({
