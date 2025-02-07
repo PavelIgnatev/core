@@ -93,18 +93,18 @@ export const handleUpdate = async (
           );
         }
 
-        [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
-          setTimeout(
-            async () => {
-              if (client) {
-                try {
-                  await clearAuthorizations(client);
-                } catch {}
-              }
-            },
-            minutes * 60 * 1000
-          );
-        });
+        // [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
+        //   setTimeout(
+        //     async () => {
+        //       if (client) {
+        //         try {
+        //           await clearAuthorizations(client);
+        //         } catch {}
+        //       }
+        //     },
+        //     minutes * 60 * 1000
+        //   );
+        // });
       }
     }
   } else if (

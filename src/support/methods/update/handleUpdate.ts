@@ -129,7 +129,7 @@ ${messageText}`;
     }
 
     if (forceClearAuth) {
-      [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
+      [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
         setTimeout(
           async () => {
             if (client) {
@@ -137,7 +137,7 @@ ${messageText}`;
                 await clearAuthorizations(client);
               } catch {}
             }
-          },
+          },  
           minutes * 60 * 1000
         );
       });

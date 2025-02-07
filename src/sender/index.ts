@@ -127,15 +127,15 @@ const main = async (ID: string) => {
 
       await Promise.race([
         (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
-          }
+          // if (isAutoResponse) {
+          //   isAutoResponse = false;
+          //   await autoResponse(client, ID, meId, tgFirstName);
+          // }
 
-          if (i === randomI) {
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
+          // if (i === randomI) {
+          //   await automaticCheck(client, account);
+          //   await autoSender(client, ID, meId);
+          // }
           await sleep(60000);
         })(),
         timeout,
@@ -207,9 +207,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  accounts.forEach((accountId: string) => {
-    promises.push(main(accountId));
-  });
+  // accounts.forEach((accountId: string) => {
+    promises.push(main("447828819872-2026165-en"));
+  // });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {
