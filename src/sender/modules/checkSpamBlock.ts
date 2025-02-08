@@ -7,6 +7,7 @@ import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { unBlockContact } from '../methods/contacts/unBlockContact';
+import { deleteHistory } from '../methods/messages/deleteHistory';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 
@@ -226,6 +227,14 @@ export const checkSpamBlock = async (
       spamBlockInitDate: null,
       spamBlockDays: null,
     });
+    await deleteHistory(
+      client,
+      new GramJs.InputPeerUser({
+        userId,
+        accessHash,
+      }),
+      true
+    );
     return false;
   }
 
@@ -281,5 +290,13 @@ SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
     await updateAccountById(accountId, updateData);
   }
 
+  await deleteHistory(
+    client,
+    new GramJs.InputPeerUser({
+      userId,
+      accessHash,
+    }),
+    true
+  );
   return true;
 };

