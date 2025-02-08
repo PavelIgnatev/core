@@ -20,6 +20,7 @@ export interface Account {
   aiContactCount?: number;
 
   stopSender?: boolean;
+  nextApiId?: number;
 
   spamBlockDate?: Date | 'INFINITY';
   spamBlockInitDate?: Date;

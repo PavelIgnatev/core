@@ -57,15 +57,21 @@ const main = async (ID: string) => {
       paylod: { count: randomI },
     });
 
-    const { dcId, id: tgId, firstName, setuped = false } = accountByID;
+    const {
+      dcId,
+      id: tgId,
+      firstName,
+      setuped = false,
+      nextApiId,
+    } = accountByID;
 
-    if (!dcId) {
+    if (!dcId || !nextApiId) {
       throw new Error('NOT_ENOUGH_PARAMS');
     }
 
     account = accountByID;
     client = await initClient(
-      account,
+      { ...account, nextApiId },
       (update) =>
         handleUpdate(client, ID, update, () => (isAutoResponse = true)),
       (error) => sendToMainBot(error)

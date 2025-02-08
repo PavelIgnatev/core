@@ -7,7 +7,7 @@ import GramJs from '../gramjs/tl/api';
 async function init(
   account: {
     accountId: string;
-    isDesktop?: boolean;
+    nextApiId: number;
 
     dcId: number;
     dc1?: string;
@@ -20,7 +20,7 @@ async function init(
   onError: (error: any) => void
 ) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, isDesktop } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -38,37 +38,38 @@ async function init(
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
 
-  const client = !isDesktop
-    ? new TelegramClient(
-        session,
-        2496,
-        userAgentString,
-        platform,
-        `${Math.floor(Math.random() * 10)}.${Math.floor(
-          Math.random() * 10
-        )}.${Math.floor(Math.random() * 10)} A`,
-        'en',
-        'weba',
-        'en',
-        account.accountId,
-        '',
-        null,
-        onError
-      )
-    : new TelegramClient(
-        session,
-        2040,
-        'Desktop',
-        'Windows 11',
-        '5.4.1 x64',
-        'en',
-        'tdesktop',
-        'en',
-        account.accountId,
-        '',
-        null,
-        onError
-      );
+  const client =
+    nextApiId === 2496
+      ? new TelegramClient(
+          session,
+          2496,
+          userAgentString,
+          platform,
+          `${Math.floor(Math.random() * 10)}.${Math.floor(
+            Math.random() * 10
+          )}.${Math.floor(Math.random() * 10)} A`,
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          '',
+          null,
+          onError
+        )
+      : new TelegramClient(
+          session,
+          nextApiId,
+          'Desktop',
+          'Windows 11',
+          '5.4.1 x64',
+          'en',
+          'en',
+          'en',
+          account.accountId,
+          '',
+          null,
+          onError
+        );
 
   if (!client) {
     throw new Error('CLIENT_NOT_INITED');
@@ -105,7 +106,7 @@ async function init(
 export const initClient = async (
   account: {
     accountId: string;
-    isDesktop?: boolean;
+    nextApiId: number;
 
     dcId: number;
     dc1?: string;
