@@ -132,10 +132,10 @@ const main = async (ID: string) => {
             await autoResponse(client, ID, meId, tgFirstName);
           }
 
-          // if (i === randomI) {
+          if (i === randomI) {
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
-          // }
+          }
           await sleep(60000);
         })(),
         timeout,
@@ -207,9 +207,9 @@ getAccounts().then(async (accounts) => {
   console.log({ message: '💥 ITERATION INIT 💥' });
   const startTime = performance.now();
 
-  // accounts.forEach((accountId: string) => {
-    promises.push(main("183-7-september-9-sep"));
-  // });
+  accounts.forEach((accountId: string) => {
+    promises.push(main(accountId));
+  });
   // 447828819872-2026165-en
 
   const interval = setInterval(() => {
