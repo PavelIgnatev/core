@@ -3,7 +3,6 @@ import BigInt from 'big-integer';
 import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
 import { updateAccountById } from '../../db/accounts';
-import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
 export const handleUpdate = async (
