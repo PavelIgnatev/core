@@ -61,7 +61,7 @@ async function init(
           nextApiId,
           'Desktop',
           'Windows 11',
-          '5.4.1 x64',
+          '6.8.2 x64',
           'en',
           'en',
           'en',
