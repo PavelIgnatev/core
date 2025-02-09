@@ -15,7 +15,10 @@ export const recheck = async (ID: string) => {
     return [];
   }
 
-  const { prefix, nextApiId } = account;
+  const { prefix, nextApiId, dcId } = account;
+  if (!dcId || !nextApiId) {
+    throw new Error('NOT_ENOUGH_PARAMS');
+  }
 
   try {
     console.warn({

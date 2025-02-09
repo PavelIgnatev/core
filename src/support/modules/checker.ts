@@ -42,7 +42,7 @@ export const checker = async (
     });
 
     const { dcId, setuped = false, nextApiId } = accountByID;
-    if (!dcId) {
+    if (!dcId || !nextApiId) {
       throw new Error('NOT_ENOUGH_PARAMS');
     }
 

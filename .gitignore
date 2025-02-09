@@ -14,5 +14,6 @@ dev/perf/screenshot*
 .package-lock.json
 data.txt
 js.js
+json2.json
 core.accounts.json
 /core.accounts.json
