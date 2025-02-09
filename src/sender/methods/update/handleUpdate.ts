@@ -7,27 +7,8 @@ import {
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
-import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
-
-const extractLoginCode = (message: string): string | null => {
-  const numbers = message.match(/\d+/g);
-  const code = numbers?.find((num) => num.length === 5);
-  return code ?? null;
-};
-
-const is2FAChange = (message: string): boolean => {
-  return (
-    message.includes('Two-Step') ||
-    message.includes('Изменены настройки двухэтапной аутентификации') ||
-    message.includes('Включена двухэтапная аутентификация')
-  );
-};
-
-const isInclompleteLogin = (message: string): boolean => {
-  return message.includes('Incomplete login attempt');
-};
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -100,25 +81,6 @@ export const handleUpdate = async (
           message: '[TELEGRAM_SERVICE_NOTIFICATION]',
           payload: JSON.parse(JSON.stringify(update)),
         });
-
-        const code = extractLoginCode(update.message);
-        let messageText = update.message;
-
-        if (code) {
-          messageText = update.message.includes('my.telegram.org')
-            ? `CODE_FOR_DEACTIVATE: ${code}`
-            : `CODE_FOR_LOGIN: ${code}`;
-        } else if (is2FAChange(update.message)) {
-          messageText = '2FA_SETTINGS_CHANGED';
-        } else if (isInclompleteLogin(update.message)) {
-          messageText = 'INCOMPLETE_LOGIN_ATTEMPT';
-        }
-
-        const notificationMessage = `[TELEGRAM_SERVICE_NOTIFICATION]
-ID: ${accountId}
-${messageText}`;
-
-        await sendToMainBot(notificationMessage);
 
         if (client) {
           await deleteHistory(
