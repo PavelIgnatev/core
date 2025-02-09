@@ -2,12 +2,12 @@ import BigInt from 'big-integer';
 
 import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
-import { sendToMainBot } from '../../../support/helpers/sendToMainBot';
 import {
   getDialogue,
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
+import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
