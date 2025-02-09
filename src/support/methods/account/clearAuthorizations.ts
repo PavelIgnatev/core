@@ -41,6 +41,6 @@ export async function clearAuthorizations(client: TelegramClient) {
   }
 
   await updateAccountById(client._accountId, {
-    isMainSession: Boolean(authorizations.length),
+    isMainSession: authorizations.length === 1 ? true : false,
   });
 }
