@@ -10,7 +10,6 @@ export const getAccounts = async () => {
 
   const accounts = await accountCollection.distinct('accountId', {
     stable: true,
-    setuped: {$ne: true},
     banned: { $ne: true },
     stopped: { $ne: true },
     parentAccountId: { $ne: null },
