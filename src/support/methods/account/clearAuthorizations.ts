@@ -1,5 +1,6 @@
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
+import { updateAccountById } from '../../db/accounts';
 import { invokeRequest } from '../../modules/invokeRequest';
 
 export async function clearAuthorizations(client: TelegramClient) {
@@ -38,4 +39,8 @@ export async function clearAuthorizations(client: TelegramClient) {
       }
     } catch {}
   }
+
+  await updateAccountById(client._accountId, {
+    isMainSession: Boolean(authorizations.length),
+  });
 }
