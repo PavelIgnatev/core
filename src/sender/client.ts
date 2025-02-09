@@ -80,7 +80,7 @@ async function init(
 
   console.warn({
     accountId: account.accountId,
-    message: `[CLIENT_STARTED]`,
+    message: `[CLIENT_STARTED (${nextApiId})]`,
     payload: {
       initTime: `${client._initTime}ms`,
     },
