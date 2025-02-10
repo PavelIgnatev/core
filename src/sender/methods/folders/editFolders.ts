@@ -8,6 +8,7 @@ export const editFolders = async (
 ) => {
   await invokeRequest(
     client,
-    new GramJs.folders.EditPeerFolders({ folderPeers })
+    new GramJs.folders.EditPeerFolders({ folderPeers }),
+    { shouldIgnoreErrors: true }
   );
 };

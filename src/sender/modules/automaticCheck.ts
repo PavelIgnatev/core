@@ -47,6 +47,43 @@ export const automaticCheck = async (
 
     await clearAllTrash(client);
 
+    const dialogs = await getDialogs(client, accountId, 0);
+    for (const dialog of dialogs) {
+      const { type } = dialog;
+
+      const peer = buildInputPeer(dialog);
+      if (type === 'channel') {
+        await leaveChannel(client, peer, true);
+      } else if (type === 'chat') {
+        const { chat } = dialog;
+
+        if (
+          chat instanceof GramJs.Chat ||
+          chat instanceof GramJs.ChatForbidden ||
+          chat instanceof GramJs.ChatEmpty
+        ) {
+          await deleteChatUser(
+            client,
+            String(chat.id),
+            new GramJs.InputUserSelf()
+          );
+          await deleteHistory(client, peer, false);
+        } else {
+          await leaveChannel(client, peer, true);
+        }
+      } else if (type === 'user') {
+        const { user } = dialog;
+
+        if (user instanceof GramJs.User && user.bot) {
+          await deleteHistory(client, peer, false);
+          await blockContact(client, peer);
+        } else if (!dialogsIds.includes(String(user.id))) {
+          await deleteHistory(client, peer, true);
+          await blockContact(client, peer);
+        }
+      }
+    }
+
     const folderPeers = [];
     const archiveDialogs = await getDialogs(client, accountId, 1);
     for (const archiveDialog of archiveDialogs) {
@@ -75,43 +112,6 @@ export const automaticCheck = async (
       for (let i = 0; i < folderPeers.length; i += 100) {
         const chunk = folderPeers.slice(i, i + 100);
         await editFolders(client, chunk);
-      }
-    }
-
-    const dialogs = await getDialogs(client, accountId, 0);
-    for (const dialog of dialogs) {
-      const { type } = dialog;
-
-      const peer = buildInputPeer(dialog);
-      if (type === 'channel') {
-        await leaveChannel(client, peer);
-      } else if (type === 'chat') {
-        const { chat } = dialog;
-
-        if (
-          chat instanceof GramJs.Chat ||
-          chat instanceof GramJs.ChatForbidden ||
-          chat instanceof GramJs.ChatEmpty
-        ) {
-          await deleteChatUser(
-            client,
-            String(chat.id),
-            new GramJs.InputUserSelf()
-          );
-          await deleteHistory(client, peer, false);
-        } else {
-          await leaveChannel(client, peer);
-        }
-      } else if (type === 'user') {
-        const { user } = dialog;
-
-        if (user instanceof GramJs.User && user.bot) {
-          await deleteHistory(client, peer, false);
-          await blockContact(client, peer);
-        } else if (!dialogsIds.includes(String(user.id))) {
-          await deleteHistory(client, peer, true);
-          await blockContact(client, peer);
-        }
       }
     }
 
