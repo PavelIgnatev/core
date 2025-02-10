@@ -9,6 +9,8 @@ export interface GroupId {
   currentCount: number;
   target: number;
 
+  gender?: string;
+
   part?: string;
   language?: 'RUSSIAN' | 'ENGLISH' | 'UKRAINIAN';
   flowHandling?: string;

@@ -101,7 +101,6 @@ const main = async (ID: string) => {
 
     await updateStatus(client, false);
     await clearAuthorizations(client);
-    await setup2FA(client, account);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
 
@@ -139,6 +138,7 @@ const main = async (ID: string) => {
           }
 
           if (i === randomI) {
+            await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
