@@ -1,6 +1,6 @@
+import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
 import { Dialogue } from '../../@types/Dialogue';
-import GramJs from '../../../gramjs/tl/api';
 import { incrementMessageCount, updateAccountById } from '../../db/accounts';
 import { updateDialogue } from '../../db/dialogues';
 import { incrementCurrentCount } from '../../db/groupId';
@@ -78,19 +78,13 @@ export const saveRecipient = async (
       });
 
       if (status === 'create') {
-        const messageCount = accountByID?.messageCount || 0;
-        const multiplier = messageCount < 40 ? 1.5 : 1;
         if (accountId.includes('-prefix-premium')) {
           await updateAccountById(accountId, {
             remainingTime: new Date(new Date().getTime() + 1500000),
-            multiplier: 1,
           });
         } else {
           await updateAccountById(accountId, {
-            remainingTime: new Date(
-              new Date().getTime() + 7200000 * multiplier
-            ),
-            multiplier,
+            remainingTime: new Date(new Date().getTime() + 7200000),
           });
         }
 
