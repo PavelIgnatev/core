@@ -281,7 +281,12 @@ FILE_NAME: ${file.name}`);
           about: '',
         });
 
-        user = { firstName, lastName: '', username, randomElseUsername: '' };
+        user = {
+          firstName: 'Александра',
+          lastName: '',
+          username,
+          randomElseUsername: '',
+        };
       } else {
         const genUser = generateUser();
         const {
