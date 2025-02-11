@@ -7,7 +7,10 @@ import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { generateUser } from '../helpers/generateUser';
-import { getProfileFiles } from '../helpers/getProfileFiles';
+import {
+  getAdultProfileFiles,
+  getDefaultProfileFiles,
+} from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
@@ -19,7 +22,8 @@ const settings = {
   silent: true,
 };
 
-const emojis = [
+const adultEmojis = ['🍌', '🍆', '🍑', '💦', '🍒', '🍇'];
+const defaultEmojis = [
   '🌎',
   '🌍',
   '🌏',
@@ -240,8 +244,9 @@ ID: ${accountId}`);
     );
   }
 
-  const files = getProfileFiles();
-
+  const files = accountId.includes('adult')
+    ? getAdultProfileFiles()
+    : getDefaultProfileFiles();
   for (const file of files) {
     const isUF = await invokeRequest(
       client,
@@ -261,28 +266,45 @@ FILE_NAME: ${file.name}`);
   let user;
   while (true) {
     try {
-      const genUser = generateUser();
-      const {
-        firstName: genFirstName,
-        lastName,
-        username,
-        randomElseUsername,
-      } = genUser;
+      if (accountId.includes('adult')) {
+        const username = `magicblow${Math.floor(Math.random() * 10000)}`;
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
 
-      await invokeRequest(
-        client,
-        new GramJs.account.UpdateUsername({
+        await updateProfile(client, {
+          firstName: 'Александра',
+          lastName: `${adultEmojis[Math.floor(Math.random() * adultEmojis.length)]}`,
+          about: '',
+        });
+
+        user = { firstName, lastName: '', username, randomElseUsername: '' };
+      } else {
+        const genUser = generateUser();
+        const {
+          firstName: genFirstName,
+          lastName,
           username,
-        })
-      );
+          randomElseUsername,
+        } = genUser;
 
-      await updateProfile(client, {
-        firstName: genFirstName,
-        lastName: `${lastName} ${emojis[Math.floor(Math.random() * emojis.length)]}`,
-        about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
-      });
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
 
-      user = genUser;
+        await updateProfile(client, {
+          firstName: genFirstName,
+          lastName: `${lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
+          about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
+        });
+        user = genUser;
+      }
 
       break;
     } catch (error: any) {

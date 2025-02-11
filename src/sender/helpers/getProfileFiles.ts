@@ -15,17 +15,17 @@ class CustomFile {
   }
 }
 
-export const getProfileFiles = () => {
+export const getDefaultProfileFiles = () => {
   let files: string[] = [];
   let folderName = '';
 
   const getFilesFromFolder = () => {
-    const folders = fs.readdirSync(path.join(__dirname, '/src/sender/images'));
+    const folders = fs.readdirSync(path.join(__dirname, '/src/sender/images/default'));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
     folderName = path.basename(randomFolder);
     files = fs
-      .readdirSync(path.join(__dirname, `/src/sender/images/${folderName}`))
+      .readdirSync(path.join(__dirname, `/src/sender/images/default/${folderName}`))
       .filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
   };
 
@@ -37,11 +37,46 @@ export const getProfileFiles = () => {
     return new CustomFile(
       fileName,
       fs.statSync(
-        path.join(__dirname, `/src/sender/images/${folderName}/${fileName}`)
+        path.join(__dirname, `/src/sender/images/default/${folderName}/${fileName}`)
       ).size,
-      path.join(__dirname, `/src/sender/images/${folderName}/${fileName}`),
+      path.join(__dirname, `/src/sender/images/default/${folderName}/${fileName}`),
       fs.readFileSync(
-        path.join(__dirname, `/src/sender/images/${folderName}/${fileName}`)
+        path.join(__dirname, `/src/sender/images/default/${folderName}/${fileName}`)
+      )
+    );
+  });
+
+  return customFiles;
+};
+
+
+export const getAdultProfileFiles = () => {
+  let files: string[] = [];
+  let folderName = '';
+
+  const getFilesFromFolder = () => {
+    const folders = fs.readdirSync(path.join(__dirname, '/src/sender/images/adult'));
+    const randomIndex = Math.floor(Math.random() * folders.length);
+    const randomFolder = folders[randomIndex];
+    folderName = path.basename(randomFolder);
+    files = fs
+      .readdirSync(path.join(__dirname, `/src/sender/images/adult/${folderName}`))
+      .filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
+  };
+
+  while (files.length < 3) {
+    getFilesFromFolder();
+  }
+
+  const customFiles = files.map((fileName) => {
+    return new CustomFile(
+      fileName,
+      fs.statSync(
+        path.join(__dirname, `/src/sender/images/adult/${folderName}/${fileName}`)
+      ).size,
+      path.join(__dirname, `/src/sender/images/adult/${folderName}/${fileName}`),
+      fs.readFileSync(
+        path.join(__dirname, `/src/sender/images/adult/${folderName}/${fileName}`)
       )
     );
   });
