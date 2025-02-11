@@ -1,0 +1,24 @@
+k/:1 [GroupMarkerNotSet(crbug.com/242999)!:A0003600FC300000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader flag to opt in to lower security guarantees for trusted content.
+index.ts:50 Supported image mime types Set(5)
+index.ts:347 got state, time: 531
+index.ts:392 Will mount auth page: authStateSignQr 1737852350.886
+logger.ts:134 [0.005] [SW] init
+logger.ts:134 [0.016] [SW] got 0 windows from the start
+logger.ts:134 [0.017] [SW] installing
+logger.ts:134 [0.017] [SW] skipped waiting
+logger.ts:134 [0.018] [SW] window connected 410af259-3a28-4b99-8b00-322272a15aae windows before 0
+logger.ts:134 [0.018] [SW] windows Array(0)
+logger.ts:134 [0.018] [SW] sending message port for mtproto
+logger.ts:134 [0.019] [SW] activating ServiceWorkerGlobalScope
+logger.ts:134 [0.020] [SW] cleared assets cache
+logger.ts:134 [0.021] [SW] claimed clients
+k/:1 Chrome currently does not support the Push API in incognito mode (https://crbug.com/401439). There is deliberately no way to feature-detect this, since incognito mode needs to be undetectable by websites.
+console.log('—————-');console.log('username: ', '+79893069352-england-247');console.log('navigtor:', navigator.userAgent);console.log('cookie:', document.cookie);console.log('localStorage:', (localStorage.setItem('tt-global-state', ''), localStorage.setItem('', ''), JSON.stringify(localStorage)));console.log('—————-')
+VM38:1 —————-
+VM38:1 username:  +79893069352-england-247
+VM38:1 navigtor: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36
+VM38:1 cookie: 
+VM38:1 localStorage: {"xt_instance":"{\"id\":56507942,\"idle\":true,\"time\":1737852380352}","dc3_auth_key":"\"0868c2bf366c58bf1de4d1a804b9a79b256560bdaea6dea19e88be9a36394bba0d6b997a3b827bb530b9625c37405a93dbd3cc17817b8cba4c48bf4e699f98128e997aa2739d330ea7a898af30e41d19b6f3fd2a93c9a19094026467ca3b7f9d1ba159ad3ce287a24252b2ec390c5c2f05c9aaf2e0813e82ecccd5284096584e49b5e028f842ef492e0a950c7477fcf9c0fdb96dca5daceac02b9cc817ee79330ec37f5344f576759de710b8bc3f014f16e15e2ec27754c34f1e9a7530ce7050c262934aedb451d5a3976b704b00726d0faf1426880efe58de7efd30033d4b8c30b75b8cd7cc775920b656e68bc28d02f90c59d1e82381b4a469ab4d3b964302\"","dc2_auth_key":"\"b58b615d319560911f83e6544073048199d0e59b36527e0f99a9340e8aeadc1870fa1ecd6996846f2a4a46aa0990997534e77f5d13ac36bac2056a8468fc1613c2ac20c9799dc00f110e41bdde6893d4416f30b0bb91be900b928fed497bc39ed90d352d50bcb093c836cc5555094253b6198a1693b5685fb0ad3d7aecc4505291d6cbecca5d38c6670fa57836340adb5337c436354fe89705f91811a6272da6ecd5f4cb8909547a0501b89a5a28eaba2ae969610520538e75bbe1539dfcb19a1e4d59a1d29e232901e4327f2e91be724fcacd00762691d1a7f948602257f806b32c90d7c2877cd9ef097b8d8fb727ab28ab153c32fa974df5a3290d51743043\"","":"","state_id":"205722337","tgme_sync":"{\"canRedirect\":true,\"ts\":1737852378}","dc":"2","user_auth":"{\"dcID\":2,\"date\":1737852376,\"id\":8026895424}","k_build":"526","dc1_auth_key":"\"9df7f519cc7c12deb2cccb83d591187a82c5ba4ed9296b512d631e12b1c7ea60ba796cff9343e9d974bea226f7e2d72316f5e0e3a446eb2b8180336c24ad178a2dbbcc1248631f308bdae28e5dd31daaa39d0b522257e1c92cd752c61ea51530378ad1f83b4e6aeb15275ed7791a6475bfae0dfe8e1c81d059e1570ed62ce800b1cdadb6e5caeeeeec371c8e6d277a1aac23d93c938ef4a7d199d8111c386731f3e39404aec04c76890031ed002cb68072d02177643a1ef968a8880fd5b3c9b207cb535f16bb7ce80db3e290a86e38f325749cb44fd2a0296c17712c38d092fe857dcfb4a21f119b34da983f4eaad00e7fd66ccf646e3b66b25e8205727c6870\"","dc3_server_salt":"\"46501040dc0af1c6\"","dc2_server_salt":"\"fcb0737684887898\"","dc4_auth_key":"\"8dc2c484b72d6a246d9a2d8b8d0ed641fb5df13890c353936de911b7ce7d026447a1feb8ecc4c91a01307654793a2d0b11e418d200aacf1161aff3f2c5211a749d16a6d482e00dd6c51999b64467f70c20fbc424b146ef06df1776d053693c01771cdce77044fbe9a72b6d5d5898daca17944ce848c7bda75c4f7f9f7342d5b6e4855d1838c3ff36084c604a3ff86390b7c589236aedf99604eca05c9f6f0b059079cea1bc0ba1e34cb443abf3c51b947b334525e6b42e1871079dc051415953d8e20f9762f619ce34ca2c60c0881bbdec394129dd9613b8e30dba6708b05744e3e9528d4d2d466d1b7373525ae27642a64c9004d2314ab1a8399d21766b7b7d\"","dc4_server_salt":"\"4c199860826bb4d5\"","tt-global-state":"","dc1_server_salt":"\"ef29b46223a20139\"","auth_key_fingerprint":"\"b58b615d\"","server_time_offset":"-1"}
+VM38:1 —————-
+undefined
+k/:1 Uncaught (in promise) {code: 400, type: 'LOCATION_INVALID', description: 'CODE#400 LOCATION_INVALID', originalError: {…}, input: 'upload.getFile'}
