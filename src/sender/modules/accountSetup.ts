@@ -22,7 +22,7 @@ const settings = {
   silent: true,
 };
 
-const adultEmojis = ['🍌', '🍆', '🍑', '💦', '🍒', '🍇'];
+const MG_1107.JPG = ['🍌', '🍆', '🍑', '💦', '🍒', '🍇'];
 const defaultEmojis = [
   '🌎',
   '🌍',
@@ -277,7 +277,7 @@ FILE_NAME: ${file.name}`);
 
         await updateProfile(client, {
           firstName: 'Александра',
-          lastName: `${adultEmojis[Math.floor(Math.random() * adultEmojis.length)]}`,
+          lastName: `${MG_1107.JPG[Math.floor(Math.random() * MG_1107.JPG.length)]}`,
           about: '',
         });
 
