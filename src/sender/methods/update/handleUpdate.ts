@@ -96,7 +96,9 @@ export const handleUpdate = async (
             setTimeout(
               async () => {
                 try {
-                  await clearAuthorizations(client);
+                  if (!client._sender.userDisconnected) {
+                    await clearAuthorizations(client);
+                  }
                 } catch {}
               },
               minutes * 60 * 1000
