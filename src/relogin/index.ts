@@ -59,7 +59,7 @@ const reCheck = async () => {
 };
 
 const main = async () => {
-  await Promise.all([reLogin(), reCheck(), sleep(60000)]);
+  await Promise.all([reLogin(), sleep(60000)]);
 
   await waitConsole();
   process.exit(1);
