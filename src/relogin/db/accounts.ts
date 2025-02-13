@@ -14,11 +14,11 @@ export const getAccountsReLogin = async () => {
     banned: { $ne: true },
     parentAccountId: null,
     workedOut: { $ne: true },
-    // $or: [
-    //   { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
-    //   { reloginAttemptDate: { $exists: false } },
-    //   { reloginAttemptDate: null },
-    // ],
+    $or: [
+      { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
+      { reloginAttemptDate: { $exists: false } },
+      { reloginAttemptDate: null },
+    ],
   });
 
   return accounts;
