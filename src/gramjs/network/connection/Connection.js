@@ -29,7 +29,7 @@ class Connection {
     this._accountId = accountId;
     this._onError = onError;
     this.shouldLongPoll = false;
-    this.socket = new PromisedWebSockets(this.disconnectCallback.bind(this));
+    this.socket = new PromisedWebSockets(accountId, this.disconnectCallback.bind(this));
   }
 
   isConnected() {
