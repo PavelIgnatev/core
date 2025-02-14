@@ -9,6 +9,7 @@ export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
   const accounts = await accountCollection.distinct('accountId', {
+    accountId: RegExp('-prefix-surgai'),
     banned: { $ne: true },
     stopped: { $ne: true },
   });
