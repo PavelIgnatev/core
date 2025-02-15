@@ -5,6 +5,10 @@ const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3250;
 const MAX_TIMEOUT = 30000;
 
+function get(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 class PromisedWebSockets {
   constructor(accountId, disconnectedCallback) {
     this._accountId = accountId;
@@ -67,9 +71,10 @@ class PromisedWebSockets {
 
     this.client = new WebSocket(this.website, 'binary', {
       agent: new HttpsProxyAgent(
-        accountId.includes('surgai')
-          ? 'http://QGvLKRKuY4YlLK06Tp-dc-ANY:F7U9nrhJeg395Ok@gw.thunderproxy.net:5959'
-          : 'http://2NN9t04blzUA9505Py-dc-ANY:i2pkKrlPqQW92Zp@gw.thunderproxy.net:5959'
+        get([
+          'http://QGvLKRKuY4YlLK06Tp-dc-ANY:F7U9nrhJeg395Ok@gw.thunderproxy.net:5959',
+          'http://2NN9t04blzUA9505Py-dc-ANY:i2pkKrlPqQW92Zp@gw.thunderproxy.net:5959',
+        ])
       ),
     });
     return new Promise((resolve, reject) => {
