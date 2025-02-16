@@ -17,3 +17,5 @@ js.js
 json2.json
 core.accounts.json
 /core.accounts.json
+ai.js
+checkGeo.js

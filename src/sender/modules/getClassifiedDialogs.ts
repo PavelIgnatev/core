@@ -135,11 +135,11 @@ export const getClassifiedDialogs = async (
     };
 
     if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
-      const account = await getAccountById(accountId);
+      // const account = await getAccountById(accountId);
 
-      if (!account.spamBlockDate) {
-        manualDialogs.push(dialogData);
-      }
+      // if (!account.spamBlockDate) {
+      manualDialogs.push(dialogData);
+      // }
     } else if (pingDialogsIds.includes(recipientId)) {
       pingDialogs.push(dialogData);
     } else {
