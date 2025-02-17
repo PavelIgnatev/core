@@ -139,7 +139,7 @@ const main = async (ID: string) => {
 
           if (i === randomI) {
             // await autoResponse(client, ID, meId, tgFirstName);
-            // await setup2FA(client, account);
+            await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }

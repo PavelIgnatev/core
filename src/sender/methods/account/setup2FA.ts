@@ -12,6 +12,7 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
     const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
 
+    return
     if (!pwd || !pwd.hasPassword) {
       throw new Error('PASSWORD_EMPTY');
     }
@@ -31,7 +32,7 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       email: undefined,
       newSecureSettings: undefined,
     });
-    return;
+
     const deletedPassword = await client.invoke(
       new GramJs.account.UpdatePasswordSettings({
         password,
