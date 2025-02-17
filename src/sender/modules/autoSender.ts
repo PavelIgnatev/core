@@ -36,18 +36,18 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
-    return;
-  }
-
-  // if (!accountId.includes('-prefix-')) {
-  //   const weekday = getWeekday();
-  //   if (weekday === 'Sat' || weekday === 'Sun') {
-  //     return;
-  //   }
+  // if (currentUTCHours < 5 || currentUTCHours > 14) {
+  //   return;
   // }
 
-  return
+  if (!accountId.includes('-prefix-aisender')) {
+    return
+    const weekday = getWeekday();
+    if (weekday === 'Sat' || weekday === 'Sun') {
+      return;
+    }
+  }
+
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
 
