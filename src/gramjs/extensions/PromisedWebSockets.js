@@ -74,6 +74,8 @@ class PromisedWebSockets {
         get([
           'http://QGvLKRKuY4YlLK06Tp-dc-ANY:F7U9nrhJeg395Ok@gw.thunderproxy.net:5959',
           'http://2NN9t04blzUA9505Py-dc-ANY:i2pkKrlPqQW92Zp@gw.thunderproxy.net:5959',
+          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          'http://LPFWqAMZe9k7Bi09Ss-dc-ANY:qezfF7pwpgh95Ef@gw.thunderproxy.net:5959'
         ])
       ),
     });

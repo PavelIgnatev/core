@@ -136,7 +136,7 @@ ID: ${this._accountId}`);
 
     const es = [];
     const maxTimeout =
-      request.className === 'account.UpdateStatus' ? 10000 : 30000;
+      request.className === 'account.UpdateStatus' ? 10000 : 45000;
     const state = new RequestState(request);
 
     let attempt = 0;
@@ -219,7 +219,7 @@ REQUEST: ${request.className}`);
       state.resetPromise();
     }
     throw new Error(
-      `Request was unsuccessful ${attempt} time(s) [${es.join(', ')}]`
+      `Request (${request.className}) was unsuccessful ${attempt} time(s) [${es.join(', ')}]`
     );
   }
 
