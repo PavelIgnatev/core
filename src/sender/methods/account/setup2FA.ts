@@ -16,7 +16,6 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       throw new Error('PASSWORD_EMPTY');
     }
 
-
     if (!(pwd.newAlgo instanceof GramJs.PasswordKdfAlgoUnknown)) {
       pwd.newAlgo.salt1 = Buffer.concat([
         pwd.newAlgo.salt1,
@@ -25,17 +24,18 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
     }
 
     const password = await computeCheck(pwd, twoFaPassword);
-    return
+    const newSettings = new GramJs.account.PasswordInputSettings({
+      newAlgo: pwd.newAlgo,
+      newPasswordHash: Buffer.alloc(0),
+      hint: '',
+      email: undefined,
+      newSecureSettings: undefined,
+    });
+    return;
     const deletedPassword = await client.invoke(
       new GramJs.account.UpdatePasswordSettings({
         password,
-        newSettings: new GramJs.account.PasswordInputSettings({
-          newAlgo: pwd.newAlgo,
-          newPasswordHash: Buffer.alloc(0),
-          hint: '',
-          email: undefined,
-          newSecureSettings: undefined,
-        }),
+        newSettings,
       })
     );
 
