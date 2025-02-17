@@ -55,7 +55,9 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
         });
       }
     } else if (e.message === 'PASSWORD_HASH_INVALID') {
-      await invokeRequest(client, new GramJs.account.ResetPassword());
+      await invokeRequest(client, new GramJs.account.ResetPassword(), {
+        shouldIgnoreErrors: true,
+      });
     } else {
       await sendToMainBot(
         `💀 ERROR_DELETE_2FA 💀
