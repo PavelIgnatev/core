@@ -42,7 +42,7 @@ const accountsInWork: Record<string, number> = {};
 const main = async (ID: string) => {
   const startTime = performance.now();
 
-  let isAutoResponse = false;
+  let isAutoResponse = true;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
@@ -140,7 +140,6 @@ const main = async (ID: string) => {
           if (i === randomI) {
             await setup2FA(client, account);
             await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
           }
           await sleep(60000);
         })(),
