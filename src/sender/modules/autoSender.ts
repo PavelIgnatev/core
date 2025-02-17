@@ -40,10 +40,6 @@ export const autoSender = async (
     return;
   }
 
-  if (accountId.includes('aisender')) {
-    return;
-  }
-
   // if (!accountId.includes('-prefix-')) {
   //   const weekday = getWeekday();
   //   if (weekday === 'Sat' || weekday === 'Sun') {
