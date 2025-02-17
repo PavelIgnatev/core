@@ -141,7 +141,7 @@ const main = async (ID: string) => {
             // await autoResponse(client, ID, meId, tgFirstName);
             await setup2FA(client, account);
             await automaticCheck(client, account);
-            // await autoSender(client, ID, meId);
+            await autoSender(client, ID, meId);
           }
           await sleep(60000);
         })(),
