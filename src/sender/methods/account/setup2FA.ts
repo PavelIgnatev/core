@@ -12,7 +12,6 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
     const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
 
-    return
     if (!pwd || !pwd.hasPassword) {
       throw new Error('PASSWORD_EMPTY');
     }
@@ -25,6 +24,8 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
     }
 
     const password = await computeCheck(pwd, twoFaPassword);
+    return
+
     const newSettings = new GramJs.account.PasswordInputSettings({
       newAlgo: pwd.newAlgo,
       newPasswordHash: Buffer.alloc(0),
