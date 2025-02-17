@@ -11,10 +11,12 @@ const twoFaPassword = '2fapassword';
 export const setup2FA = async (client: TelegramClient, account: Account) => {
   try {
     const pwd = await invokeRequest(client, new GramJs.account.GetPassword());
-
+    return
     if (!pwd || !pwd.hasPassword) {
       throw new Error('PASSWORD_EMPTY');
     }
+
+    return
 
     if (!(pwd.newAlgo instanceof GramJs.PasswordKdfAlgoUnknown)) {
       pwd.newAlgo.salt1 = Buffer.concat([
