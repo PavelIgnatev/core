@@ -20,6 +20,10 @@ export const autoResponse = async (
   meId: string,
   meName: string
 ) => {
+  if (accountId.includes('aisender')) {
+    return;
+  }
+
   const [dialogs, pingDialogs, manualDialogs] = await getClassifiedDialogs(
     client,
     accountId,
