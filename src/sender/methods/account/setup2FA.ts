@@ -43,6 +43,8 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
     if (!deletedPassword) {
       throw new Error('PASSWORD_NOT_DELETED');
     }
+
+    throw new Error('PASSWORD_EMPTY');
   } catch (e: any) {
     if (e.message === 'PASSWORD_EMPTY') {
       const { twoFa } = account;
