@@ -51896,12 +51896,12 @@ var main = async () => {
   var _a, _b;
   const accountChunks = await getAccountCreationDate();
   const workers = [
-    createWorker(accountChunks[0].slice(0, 50)),
-    createWorker(accountChunks[1].slice(0, 50)),
-    createWorker(accountChunks[2].slice(0, 50)),
-    createWorker(accountChunks[3].slice(0, 50)),
-    createWorker(accountChunks[4].slice(0, 50)),
-    createWorker(accountChunks[5].slice(0, 50))
+    createWorker(accountChunks[0]),
+    createWorker(accountChunks[1]),
+    createWorker(accountChunks[2]),
+    createWorker(accountChunks[3]),
+    createWorker(accountChunks[4]),
+    createWorker(accountChunks[5])
   ];
   const promises = await Promise.all(workers);
   for (const promise of promises) {
