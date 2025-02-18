@@ -47,7 +47,7 @@ const starter = async (
   let errored = false;
 
   try {
-    const randomI = 0
+    const randomI = Math.floor(Math.random() * 30);
     const accountByID = await getAccountById(ID);
 
     console.warn({
@@ -112,11 +112,11 @@ const starter = async (
       i += 1;
       accountsInWork[ID] = i;
 
-      if (i === 1) {
+      if (i === 30) {
         client._endTime = Number(performance.now() - startTime).toFixed(0);
       }
 
-      if (Object.values(accountsInWork).every((n) => n >= 1)) {
+      if (Object.values(accountsInWork).every((n) => n >= 30)) {
         break;
       }
 
