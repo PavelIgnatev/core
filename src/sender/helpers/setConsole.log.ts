@@ -1,5 +1,3 @@
-import { Db, MongoClient } from 'mongodb';
-
 import { logsDB } from '../db/db';
 import { sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';

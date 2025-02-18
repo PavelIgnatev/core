@@ -1,10 +1,3 @@
-import { exec as childExec } from 'child_process';
-
-import 'dotenv/config';
-import './helpers/setConsole.log';
-
-import util from 'util';
-
 import TelegramClient from '../gramjs/client/TelegramClient';
 import { Account } from './@types/Account';
 import { initClient } from './client';
@@ -21,7 +14,11 @@ import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 
-const main = async (ID: string, accountsInWork: Record<string, number>, exec: any) => {
+const main = async (
+  ID: string,
+  accountsInWork: Record<string, number>,
+  exec: any
+) => {
   const startTime = performance.now();
 
   let isAutoResponse = true;
