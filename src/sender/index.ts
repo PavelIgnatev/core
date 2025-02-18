@@ -89,8 +89,6 @@ const main = async () => {
     createWorker(accountChunks[3].slice(0, 50)),
     createWorker(accountChunks[4].slice(0, 50)),
     createWorker(accountChunks[5].slice(0, 50)),
-
-
   ];
 
   const promises = await Promise.all(workers);
