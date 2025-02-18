@@ -3,7 +3,7 @@
     "prettier:fix": "prettier --write .",
     "eslint:fix": "eslint . --ext .ts --fix",
     "fix": "npm run prettier:fix && npm run eslint:fix",
-    "watch": "concurrently \"npx esbuild src/sender/index.ts --bundle --platform=node --target=node14 --outfile=sender.js --format=cjs --watch\" \"npx esbuild src/support/index.ts --bundle --platform=node --target=node14 --outfile=support.js --format=cjs --watch\" \"npx esbuild src/relogin/index.ts --bundle --platform=node --target=node14 --outfile=relogin.js --format=cjs --watch\" \"npx esbuild src/sender/mainBuilder.ts --bundle --platform=node --target=node14 --outfile=src/sender/main.js --format=cjs --minify --tree-shaking --minify-whitespace --minify-identifiers --minify-syntax --watch\""
+    "watch": "concurrently \"npx esbuild src/sender/index.ts --bundle --platform=node --target=node14 --outfile=sender.js --format=cjs --watch\" \"npx esbuild src/support/index.ts --bundle --platform=node --target=node14 --outfile=support.js --format=cjs --watch\" \"npx esbuild src/relogin/index.ts --bundle --platform=node --target=node14 --outfile=relogin.js --format=cjs --watch\" \"npx esbuild src/sender/_main.ts --bundle --platform=node --target=node14 --outfile=src/sender/_main.js --format=cjs --minify --tree-shaking --minify-whitespace --minify-identifiers --minify-syntax --watch\""
   },
   "dependencies": {
     "@cryptography/aes": "^0.1.1",

@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongodb';
+
 import { Account } from '../@types/Account';
 import { coreDB } from './db';
 
@@ -14,6 +16,42 @@ export const getAccounts = async () => {
   });
 
   return accounts;
+};
+
+export const getAccountCreationDate = async () => {
+  const accountCollection = await getAccountCollection();
+
+  const accounts = await accountCollection
+    .find<Account>(
+      {
+        banned: { $ne: true },
+        stopped: { $ne: true },
+      },
+      { projection: { accountId: 1 } }
+    )
+    .toArray();
+
+  const accountsWithTimestamp = accounts.map((account) => ({
+    _id: account._id,
+    accountId: account.accountId,
+    timestamp: account._id.getTimestamp(),
+  }));
+
+  const sortedAccounts = accountsWithTimestamp.sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
+
+  const CHUNK_SIZE = 300;
+  const chunks = [];
+
+  for (let i = 0; i < sortedAccounts.length; i += CHUNK_SIZE) {
+    const chunk = sortedAccounts
+      .slice(i, i + CHUNK_SIZE)
+      .map((acc) => acc.accountId);
+    chunks.push(chunk);
+  }
+
+  return chunks;
 };
 
 export const getAccountById = async (accountId: string) => {
