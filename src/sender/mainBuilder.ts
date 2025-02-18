@@ -83,51 +83,51 @@ const main = async (
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
 
-    let i = -1;
-    while (true) {
-      if (errored) {
-        throw new Error(errored);
-      }
+    // let i = -1;
+    // while (true) {
+    //   if (errored) {
+    //     throw new Error(errored);
+    //   }
 
-      i += 1;
-      accountsInWork[ID] = i;
+    //   i += 1;
+    //   accountsInWork[ID] = i;
 
-      if (i === 30) {
-        client._endTime = Number(performance.now() - startTime).toFixed(0);
-      }
+    //   if (i === 30) {
+    //     client._endTime = Number(performance.now() - startTime).toFixed(0);
+    //   }
 
-      if (Object.values(accountsInWork).every((n) => n >= 30)) {
-        break;
-      }
+    //   if (Object.values(accountsInWork).every((n) => n >= 30)) {
+    //     break;
+    //   }
 
-      let timer;
-      const timeout = new Promise(
-        (_, rej) =>
-          (timer = setTimeout(
-            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-            900000
-          ))
-      );
+    //   let timer;
+    //   const timeout = new Promise(
+    //     (_, rej) =>
+    //       (timer = setTimeout(
+    //         () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
+    //         900000
+    //       ))
+    //   );
 
-      await Promise.race([
-        (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
-          }
+    //   await Promise.race([
+    //     (async () => {
+    //       if (isAutoResponse) {
+    //         isAutoResponse = false;
+    //         await autoResponse(client, ID, meId, tgFirstName);
+    //       }
 
-          if (i === randomI) {
-            await setup2FA(client, account);
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
-          await sleep(60000);
-        })(),
-        timeout,
-      ]);
+    //       if (i === randomI) {
+    //         await setup2FA(client, account);
+    //         await automaticCheck(client, account);
+    //         await autoSender(client, ID, meId);
+    //       }
+    //       await sleep(60000);
+    //     })(),
+    //     timeout,
+    //   ]);
 
-      clearTimeout(timer);
-    }
+    //   clearTimeout(timer);
+    // }
   } catch (e: any) {
     console.error({
       accountId: ID,
