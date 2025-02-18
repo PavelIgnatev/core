@@ -33,12 +33,18 @@ export const setup2FA = async (client: TelegramClient, account: Account) => {
       newSecureSettings: undefined,
     });
 
-    const deletedPassword = await client.invoke(
+    const deletedPassword = await invokeRequest(
+      client,
       new GramJs.account.UpdatePasswordSettings({
         password,
         newSettings,
-      })
+      }),
+      { shouldIgnoreErrors: true }
     );
+
+    if (deletedPassword === undefined) {
+      return;
+    }
 
     if (!deletedPassword) {
       throw new Error('PASSWORD_NOT_DELETED');
