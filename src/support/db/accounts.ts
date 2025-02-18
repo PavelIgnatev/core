@@ -8,11 +8,17 @@ const getAccountCollection = async () => {
 export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
+  await accountCollection.updateMany(
+    { forceStop: true },
+    { $set: { banned: true, reason: 'manual-stopped' } }
+  );
+
   const accounts = await accountCollection.distinct('accountId', {
     stable: true,
     banned: { $ne: true },
     stopped: { $ne: true },
     parentAccountId: { $ne: null },
+    forceStop: { $ne: true },
   });
 
   return accounts;
