@@ -169,7 +169,8 @@ ID: ${this._accountId}`);
             if (
               request.className === 'contacts.Block' ||
               request.className === 'contacts.Unblock' ||
-              request.className === 'messages.DeleteChatUser'
+              request.className === 'messages.DeleteChatUser' ||
+              request.className === 'account.UpdatePasswordSettings'
             ) {
               state.finished.resolve();
               throw e;
