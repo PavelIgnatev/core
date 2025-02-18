@@ -134,13 +134,13 @@ const main = async (ID: string) => {
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
+            // await autoResponse(client, ID, meId, tgFirstName);
           }
 
           if (i === randomI) {
             await setup2FA(client, account);
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
+            // await automaticCheck(client, account);
+            // await autoSender(client, ID, meId);
           }
           await sleep(60000);
         })(),
