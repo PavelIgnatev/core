@@ -296,21 +296,6 @@ Promise: ${JSON.stringify(promise)}`);
       current.value > max.value ? current : max
     );
 
-    const reconnectCounts = senders.map((s) => ({
-      id: s._accountId,
-      value: s._reconnectCounts,
-    }));
-    const totalReconnectCounts = reconnectCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midReconnectCounts = (
-      totalReconnectCounts / reconnectCounts.length
-    ).toFixed(2);
-    const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
-
     const disconnectCounts = senders.map((s) => ({
       id: s._accountId,
       value: s._disconnectCounts,
@@ -399,15 +384,86 @@ ${errorStats.intervals
   .join('\n')}`;
     }
 
+    const reconnectCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._reconnectCounts.length,
+    }));
+    const totalReconnectCounts = reconnectCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
+    const midReconnectCounts = (
+      totalReconnectCounts / reconnectCounts.length
+    ).toFixed(2);
+    const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
+      current.value > max.value ? current : max
+    );
+
+    const reconnectDateCounts = senders.map((s) => ({
+      id: s._accountId,
+      dates: s._reconnectCounts,
+    }));
+
+    const allReconnectDates = reconnectDateCounts
+      .flatMap((item) => item.dates)
+      .map((d) => new Date(d));
+
+    const reconnectStats = (() => {
+      if (!allReconnectDates.length) return null;
+
+      const intervals = [
+        { range: '0-5 мин', reconnects: 0 },
+        { range: '5-15 мин', reconnects: 0 },
+        { range: '15-30 мин', reconnects: 0 },
+        { range: '30+ мин', reconnects: 0 },
+      ];
+
+      allReconnectDates.forEach((date) => {
+        const diffMinutes =
+          (date.getTime() - startTimeDate.getTime()) / (1000 * 60);
+
+        if (diffMinutes <= 5) intervals[0].reconnects++;
+        else if (diffMinutes <= 15) intervals[1].reconnects++;
+        else if (diffMinutes <= 30) intervals[2].reconnects++;
+        else intervals[3].reconnects++;
+      });
+
+      const activeIntervals = intervals.filter((i) => i.reconnects > 0);
+
+      return {
+        totalReconnects: allReconnectDates.length,
+        intervals: activeIntervals,
+        summary: {
+          firstReconnectTime: new Date(
+            Math.min(...allReconnectDates.map((d) => d.getTime()))
+          ).toISOString(),
+          lastReconnectTime: new Date(
+            Math.max(...allReconnectDates.map((d) => d.getTime()))
+          ).toISOString(),
+          averageReconnectsPerInterval: (
+            allReconnectDates.length / activeIntervals.length
+          ).toFixed(2),
+        },
+      };
+    })();
+
+    let reconnectStatsMessage = '';
+    if (reconnectStats && reconnectStats.intervals.length > 0) {
+      reconnectStatsMessage = `
+${reconnectStats.intervals
+  .map((interval) => `${interval.range}: ${interval.reconnects}`)
+  .join('\n')}`;
+    }
+
     console.log({
       message: `💥 ITERATION DONE (${getTimeString(startTime)}) 💥`,
       initTimings,
       endTimings,
       connectCounts,
-      reconnectCounts,
       disconnectCounts,
       connectErrorCounts,
       errorStats,
+      reconnectStats,
       accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
     });
 
@@ -429,7 +485,7 @@ RESPONSE_TIME: ${Number(
       ).toFixed(2)
     )}ms
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
-RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
+RECONNECT: ${allReconnectDates.length} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})${reconnectStatsMessage}
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
 NETWORK_ERRORS: ${allErrorDates.length} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})${errorStatsMessage}
 

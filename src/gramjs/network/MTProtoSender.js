@@ -66,7 +66,7 @@ class MTProtoSender {
     this._prefix = args.prefix;
     this._onError = args.onError;
     this._connectCounts = 0;
-    this._reconnectCounts = 0;
+    this._reconnectCounts = [];
     this._disconnectCounts = 0;
     this._connectErrorCounts = [];
     this._authKeyCallback = args.authKeyCallback;
@@ -438,7 +438,7 @@ MESSAGE: ${JSON.stringify(message)}`);
   }
 
   async _reconnect() {
-    this._reconnectCounts += 1;
+    this._reconnectCounts.push(new Date().toISOString());
     try {
       await this._disconnect(this.getConnection());
     } catch {}

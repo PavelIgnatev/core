@@ -81,7 +81,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
 
   const reconnectCounts = senders.map((s) => ({
     id: s._accountId,
-    value: s._reconnectCounts,
+    value: s._reconnectCounts.length,
   }));
   const totalReconnectCounts = reconnectCounts.reduce(
     (acc, num) => acc + num.value,
