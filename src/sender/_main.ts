@@ -324,12 +324,25 @@ Promise: ${JSON.stringify(promise)}`);
       id: s._accountId,
       dates: s._connectErrorCounts,
     }));
+    const connectErrorLengthCounts = senders.map((s) => ({
+      id: s._accountId,
+      value: s._connectErrorCounts.length,
+    }));
 
-    // Собираем все даты в один массив
     const allErrorDates = connectErrorCounts
       .flatMap((item) => item.dates)
       .map((d) => new Date(d));
-    console.log(allErrorDates, startTimeDate);
+
+    const totalConnectErrorCounts = connectErrorLengthCounts.reduce(
+      (acc, num) => acc + num.value,
+      0
+    );
+    const midConnectErrorCounts = (
+      totalConnectErrorCounts / connectErrorLengthCounts.length
+    ).toFixed(2);
+    const maxConnectErrorCounts = connectErrorLengthCounts.reduce(
+      (max, current) => (current.value > max.value ? current : max)
+    );
 
     const errorStats = (() => {
       if (!allErrorDates.length) return null;
@@ -412,7 +425,7 @@ RESPONSE_TIME: ${Number(
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
 RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
-NETWORK_ERRORS: ${allErrorDates.length}${errorStatsMessage}
+NETWORK_ERRORS: ${allErrorDates.length} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})${errorStatsMessage}
 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(startSender).length}
