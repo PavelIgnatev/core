@@ -11,7 +11,7 @@ interface WorkerMessage {
   accountIds?: string[];
 }
 
-const WORKER_TIMEOUT_MS = 45 * 60 * 1000;
+const WORKER_TIMEOUT_MS = 60 * 60 * 1000;
 
 const createWorker = (accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {

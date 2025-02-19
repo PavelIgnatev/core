@@ -51830,7 +51830,7 @@ var getAccountCreationDate = async () => {
 };
 
 // src/sender/index.ts
-var WORKER_TIMEOUT_MS = 45 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 60 * 60 * 1e3;
 var createWorker = (accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
