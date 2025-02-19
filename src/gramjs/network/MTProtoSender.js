@@ -66,9 +66,9 @@ class MTProtoSender {
     this._prefix = args.prefix;
     this._onError = args.onError;
     this._connectCounts = 0;
-    this._reconnectCounts = [];
+    this._reconnectCounts = 0;
     this._disconnectCounts = 0;
-    this._connectErrorCounts = [];
+    this._connectErrorCounts = 0;
     this._authKeyCallback = args.authKeyCallback;
     this._working = args.working;
 
@@ -178,7 +178,7 @@ class MTProtoSender {
 
         break;
       } catch (err) {
-        this._connectErrorCounts.push(new Date().toISOString());
+        this._connectErrorCounts += 1;
 
         if (attempt === 0) {
           this._updateCallback?.(
@@ -214,7 +214,7 @@ class MTProtoSender {
   destroy() {
     this._send_queue.clear();
   }
-  
+
   /**
      *
      This method enqueues the given request to be sent. Its send
@@ -438,7 +438,7 @@ MESSAGE: ${JSON.stringify(message)}`);
   }
 
   async _reconnect() {
-    this._reconnectCounts.push(new Date().toISOString());
+    this._reconnectCounts += 1;
     try {
       await this._disconnect(this.getConnection());
     } catch {}
