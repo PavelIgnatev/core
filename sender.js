@@ -52130,13 +52130,11 @@ run();`,
 };
 var main = async () => {
   await Promise.all([coreDB(), logsDB()]);
-  const accountChunks = await getAccountCreationDate();
+  const chunks = await getAccountCreationDate();
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
   });
-  const workers = accountChunks.map(
-    (chunk, index) => createWorker(index + 1, chunk)
-  );
+  const workers = chunks.map((chunk, index) => createWorker(index + 1, chunk));
   const promises = await Promise.all(workers);
   for (const promise of promises) {
     if (promise.type === "error") {
