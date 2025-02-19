@@ -111,7 +111,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
 
   const connectErrorCounts = senders.map((s) => ({
     id: s._accountId,
-    value: s._connectErrorCounts,
+    value: s._connectErrorCounts.length,
   }));
   const totalConnectErrorCounts = connectErrorCounts.reduce(
     (acc, num) => acc + num.value,

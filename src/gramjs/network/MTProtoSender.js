@@ -68,7 +68,7 @@ class MTProtoSender {
     this._connectCounts = 0;
     this._reconnectCounts = 0;
     this._disconnectCounts = 0;
-    this._connectErrorCounts = 0;
+    this._connectErrorCounts = [];
     this._authKeyCallback = args.authKeyCallback;
     this._working = args.working;
 
@@ -178,7 +178,7 @@ class MTProtoSender {
 
         break;
       } catch (err) {
-        this._connectErrorCounts += 1;
+        this._connectErrorCounts.push(new Date().toISOString());
 
         if (attempt === 0) {
           this._updateCallback?.(
@@ -214,7 +214,7 @@ class MTProtoSender {
   destroy() {
     this._send_queue.clear();
   }
-
+  
   /**
      *
      This method enqueues the given request to be sent. Its send

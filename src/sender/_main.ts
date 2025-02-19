@@ -103,51 +103,51 @@ const starter = async (
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
 
-    let i = -1;
-    while (true) {
-      if (errored) {
-        throw new Error(errored);
-      }
+    // let i = -1;
+    // while (true) {
+    //   if (errored) {
+    //     throw new Error(errored);
+    //   }
 
-      i += 1;
-      accountsInWork[ID] = i;
+    //   i += 1;
+    //   accountsInWork[ID] = i;
 
-      if (i === 30) {
-        client._endTime = Number(performance.now() - startTime).toFixed(0);
-      }
+    //   if (i === 30) {
+    //     client._endTime = Number(performance.now() - startTime).toFixed(0);
+    //   }
 
-      if (Object.values(accountsInWork).every((n) => n >= 30)) {
-        break;
-      }
+    //   if (Object.values(accountsInWork).every((n) => n >= 30)) {
+    //     break;
+    //   }
 
-      let timer;
-      const timeout = new Promise(
-        (_, rej) =>
-          (timer = setTimeout(
-            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-            900000
-          ))
-      );
+    //   let timer;
+    //   const timeout = new Promise(
+    //     (_, rej) =>
+    //       (timer = setTimeout(
+    //         () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
+    //         900000
+    //       ))
+    //   );
 
-      await Promise.race([
-        (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
-            await autoResponse(client, ID, meId, tgFirstName);
-          }
+    //   await Promise.race([
+    //     (async () => {
+    //       if (isAutoResponse) {
+    //         isAutoResponse = false;
+    //         await autoResponse(client, ID, meId, tgFirstName);
+    //       }
 
-          if (i === randomI) {
-            await setup2FA(client, account);
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
-          await sleep(60000);
-        })(),
-        timeout,
-      ]);
+    //       if (i === randomI) {
+    //         await setup2FA(client, account);
+    //         await automaticCheck(client, account);
+    //         await autoSender(client, ID, meId);
+    //       }
+    //       await sleep(60000);
+    //     })(),
+    //     timeout,
+    //   ]);
 
-      clearTimeout(timer);
-    }
+    //   clearTimeout(timer);
+    // }
   } catch (e: any) {
     console.error({
       accountId: ID,
@@ -219,6 +219,7 @@ export const main = async (accounts: string[]) => {
     accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
   });
   const startTime = performance.now();
+  const startTimeDate = new Date()
 
   for (const accountId of accounts) {
     promises.push(starter(accountId, accountsInWork, exec));
@@ -321,18 +322,56 @@ Promise: ${JSON.stringify(promise)}`);
 
     const connectErrorCounts = senders.map((s) => ({
       id: s._accountId,
-      value: s._connectErrorCounts,
+      dates: s._connectErrorCounts
     }));
-    const totalConnectErrorCounts = connectErrorCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midConnectErrorCounts = (
-      totalConnectErrorCounts / connectErrorCounts.length
-    ).toFixed(2);
-    const maxConnectErrorCounts = connectErrorCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
+
+    // Собираем все даты в один массив
+    const allErrorDates = connectErrorCounts
+      .flatMap(item => item.dates)
+      .map(d => new Date(d));
+    console.log(allErrorDates, startTimeDate)
+
+    const errorStats = (() => {
+      if (!allErrorDates.length) return null;
+
+      // Разбиваем ошибки по временным промежуткам
+      const intervals = [
+        { range: '0-5 мин', errors: 0 },
+        { range: '5-15 мин', errors: 0 },
+        { range: '15-30 мин', errors: 0 },
+        { range: '30+ мин', errors: 0 }
+      ];
+
+      allErrorDates.forEach(date => {
+        const diffMinutes = (date.getTime() - startTimeDate.getTime()) / (1000 * 60);
+        
+        if (diffMinutes <= 5) intervals[0].errors++;
+        else if (diffMinutes <= 15) intervals[1].errors++;
+        else if (diffMinutes <= 30) intervals[2].errors++;
+        else intervals[3].errors++;
+      });
+
+      // Убираем пустые интервалы
+      const activeIntervals = intervals.filter(i => i.errors > 0);
+
+      return {
+        totalErrors: allErrorDates.length,
+        intervals: activeIntervals,
+        summary: {
+          firstErrorTime: new Date(Math.min(...allErrorDates.map(d => d.getTime()))).toISOString(),
+          lastErrorTime: new Date(Math.max(...allErrorDates.map(d => d.getTime()))).toISOString(),
+          averageErrorsPerInterval: (allErrorDates.length / activeIntervals.length).toFixed(2)
+        }
+      };
+    })();
+
+    let errorStatsMessage = '';
+    if (errorStats && errorStats.intervals.length > 0) {
+      errorStatsMessage = `
+${errorStats.intervals.map(interval => 
+  `${interval.range}: ${interval.errors}`
+).join('\n')}`;
+    }
 
     console.log({
       message: `💥 ITERATION DONE (${getTimeString(startTime)}) 💥`,
@@ -342,6 +381,7 @@ Promise: ${JSON.stringify(promise)}`);
       reconnectCounts,
       disconnectCounts,
       connectErrorCounts,
+      errorStats,
       accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
     });
 
@@ -365,7 +405,7 @@ RESPONSE_TIME: ${Number(
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
 RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
-NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})
+NETWORK_ERRORS: ${allErrorDates.length}${errorStatsMessage}
 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(startSender).length}

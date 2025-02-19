@@ -51895,7 +51895,7 @@ var createWorker = (accountIds) => {
 var main = async () => {
   var _a, _b;
   const accountChunks = await getAccountCreationDate();
-  const workers = accountChunks.map((chunk) => createWorker(chunk));
+  const workers = [createWorker(["447828819872-2026165-en"])];
   const promises = await Promise.all(workers);
   for (const promise of promises) {
     if (promise.type === "error") {
