@@ -79,7 +79,7 @@ const starter = async (
     if (!client) {
       throw new Error('CLIENT_NOT_INITED');
     }
-    
+
     let currentInterval = 10000;
     const checkStatus = async () => {
       try {
@@ -96,7 +96,7 @@ const starter = async (
         }
 
         await updateStatus(client, false);
-        currentInterval = Math.min(currentInterval + 10000, 90000);
+        currentInterval = Math.min(currentInterval + 10000, 30000);
         setTimeout(checkStatus, currentInterval);
       } catch (error: any) {
         errored = error.message;
