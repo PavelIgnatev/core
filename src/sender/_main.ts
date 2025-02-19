@@ -47,7 +47,7 @@ const starter = async (
   let errored = false;
 
   try {
-    const randomI = Math.floor(Math.random() * 30);
+    const randomI = Math.floor(Math.random() * 29) + 1;
     const accountByID = await getAccountById(ID);
 
     console.warn({
@@ -80,7 +80,14 @@ const starter = async (
       throw new Error('CLIENT_NOT_INITED');
     }
 
-    setInterval(async () => {
+    await updateStatus(client, false);
+    await clearAuthorizations(client);
+    const tgFirstName = await accountSetup(client, account, setuped, firstName);
+    const meId = await getMe(client, ID, tgId);
+
+    let currentInterval = 10000;
+    
+    const checkStatus = async () => {
       try {
         if (
           !client?._sender ||
@@ -89,19 +96,19 @@ const starter = async (
           client._sender.userDisconnected ||
           errored
         ) {
+          currentInterval = 10000
+          setTimeout(checkStatus, currentInterval);
           return;
         }
 
         await updateStatus(client, false);
+        currentInterval = Math.min(currentInterval + 10000, 90000);
+        setTimeout(checkStatus, currentInterval);
       } catch (error: any) {
         errored = error.message;
       }
-    }, 10000);
-
-    await updateStatus(client, false);
-    await clearAuthorizations(client);
-    const tgFirstName = await accountSetup(client, account, setuped, firstName);
-    const meId = await getMe(client, ID, tgId);
+    };
+    setTimeout(checkStatus, currentInterval);
 
     let i = -1;
     while (true) {

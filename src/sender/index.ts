@@ -81,6 +81,7 @@ const createWorker = (accountIds: string[]) => {
 
 const main = async () => {
   const accountChunks = await getAccountCreationDate();
+  //const workers = [createWorker(['1716295652-support-new-100'])];
   const workers = accountChunks.map((chunk) => createWorker(chunk));
 
   const promises = await Promise.all(workers);
