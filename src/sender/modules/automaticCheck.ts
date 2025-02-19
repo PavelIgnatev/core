@@ -281,19 +281,14 @@ DIALOG: ${JSON.stringify(dialog)}`
         const peer = buildInputPeer(dialog);
 
         if (deletedAndBlocked) {
-          await sendToMainBot(
-            `** AUTOMATIC: REPEAT STATUS DELETED AND BLOCKED **
-ACCOUNT_ID: ${accountId}
-ID: ${userId}`
-          );
           continue;
-        } else {
-          await deleteHistory(client, peer, true);
-          await blockContact(client, peer);
-          await updateSimpleDialogue(accountId, userId, {
-            deletedAndBlocked: true,
-          });
         }
+
+        await deleteHistory(client, peer, false);
+        await blockContact(client, peer);
+        await updateSimpleDialogue(accountId, userId, {
+          deletedAndBlocked: true,
+        });
       }
     }
 
