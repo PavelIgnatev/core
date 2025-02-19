@@ -1,6 +1,7 @@
-import { exec as childExec } from 'child_process';
-
+import 'dotenv/config';
 import './helpers/setConsole.log';
+
+import { exec as childExec } from 'child_process';
 
 import util from 'util';
 
