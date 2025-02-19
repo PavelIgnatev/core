@@ -96,7 +96,7 @@ const starter = async (
         }
 
         await updateStatus(client, false);
-        currentInterval = Math.min(currentInterval + 10000, 20000);
+        currentInterval = Math.min(currentInterval + 10000, 10000);
         setTimeout(checkStatus, currentInterval);
       } catch (error: any) {
         errored = error.message;
