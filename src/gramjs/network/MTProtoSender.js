@@ -191,6 +191,8 @@ class MTProtoSender {
           prefix: this._prefix,
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
+
+        await new Promise((resolve) => setTimeout(resolve, 333));
       }
     }
     this.isConnecting = false;

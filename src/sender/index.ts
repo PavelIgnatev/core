@@ -1,54 +1,85 @@
 import 'dotenv/config';
+import './helpers/setConsole.log';
 
 import { Worker } from 'worker_threads';
 
 import { getAccountCreationDate } from './db/accounts';
+import { makeMetrics } from './helpers/makeMetrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
 
-interface WorkerMessage {
-  type: 'success' | 'error';
-  error?: string;
-  accountIds?: string[];
-}
+type WorkerMessageError = {
+  type: 'error';
+  error: string;
+  chunkId: number;
+};
+
+type WorkerMessageSuccess = {
+  type: 'success';
+  clients: {
+    accountId: string;
+    initTime: number;
+    endTime: number;
+    connectCounts: number;
+    connectErrorCounts: number;
+    disconnectCounts: number;
+    reconnectCounts: number;
+  }[];
+  clientsData: {
+    aiReqest: Record<string, number>;
+    aiRetryError: Record<string, number>;
+    allTimings: Array<number>;
+    endSender: Record<string, number>;
+    errorSender: Record<string, number>;
+    peerFloods: Record<string, number>;
+    phoneSearchError: Record<string, number>;
+    startSender: Record<string, number>;
+    withoutRecipientError: Record<string, number>;
+  };
+  startTime: number;
+  chunkId: number;
+};
+
+type WorkerMessage = WorkerMessageSuccess | WorkerMessageError;
 
 const WORKER_TIMEOUT_MS = 60 * 60 * 1000;
 
-const createWorker = (accountIds: string[]) => {
+const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
     const worker = new Worker(
       `
-      const { workerData, parentPort } = require('worker_threads');
-      const { main } = require('./src/sender/_main.js');
+const { workerData, parentPort } = require('worker_threads');
+const { main } = require('./src/sender/_main.js');
 
-      async function run() {
-        try {
-          await main(workerData.accountIds);
-          parentPort.postMessage({ 
-            type: 'success',
-            accountIds: workerData.accountIds 
-          });
-        } catch (error) {
-          parentPort.postMessage({ 
-            type: 'error',
-            error: error.message,
-            accountIds: workerData.accountIds
-          });
-        }
-      }
-
-      run();
-    `,
+async function run() {
+  try {
+    const { clients, clientsData, startTime } = await main(workerData.chunkId, workerData.accountIds);
+    parentPort.postMessage({ 
+      type: 'success',
+      clients,
+      clientsData,
+      startTime,
+      chunkId: workerData.chunkId,
+    });
+  } catch (error) {
+    parentPort.postMessage({ 
+      type: 'error',
+      error: error.message,
+      chunkId: workerData.chunkId
+    });
+  }
+}
+run();`,
       {
         eval: true,
-        workerData: { accountIds },
+        workerData: { chunkId, accountIds },
       }
     );
 
     const timeoutId = setTimeout(() => {
       resolve({
         type: 'error',
-        error: `Worker timeout after ${WORKER_TIMEOUT_MS / 1000 / 60} minutes`,
-        accountIds,
+        error: `WORKER_TIMEOUT_ERROR`,
+        chunkId,
       });
     }, WORKER_TIMEOUT_MS);
 
@@ -62,7 +93,7 @@ const createWorker = (accountIds: string[]) => {
       resolve({
         type: 'error',
         error: error.message,
-        accountIds,
+        chunkId,
       });
     });
 
@@ -71,8 +102,8 @@ const createWorker = (accountIds: string[]) => {
       if (code !== 0) {
         resolve({
           type: 'error',
-          error: `Worker stopped with exit code ${code}`,
-          accountIds,
+          error: `WORKER_STOPPED_WITH_CODE_${code}`,
+          chunkId,
         });
       }
     });
@@ -81,18 +112,30 @@ const createWorker = (accountIds: string[]) => {
 
 const main = async () => {
   const accountChunks = await getAccountCreationDate();
-  //const workers = [createWorker(['1716295652-support-new-100'])];
-  const workers = accountChunks.map((chunk) => createWorker(chunk));
+  console.log({
+    message: '💥 ITERATION INIT 💥',
+  });
 
+  const workers = accountChunks.map((chunk, index) =>
+    createWorker(index + 1, chunk)
+  );
   const promises = await Promise.all(workers);
 
   for (const promise of promises) {
     if (promise.type === 'error') {
       await sendToMainBot(`** WORKER_ERROR **
 ERROR: ${promise.error}
-ACCOUNTS: ||${promise.accountIds?.[0]}||${promise.accountIds?.[promise.accountIds.length - 1]}||`);
+CHUNK_ID: ${promise.chunkId}`);
+    } else {
+      await makeMetrics(
+        promise.chunkId,
+        promise.clients,
+        promise.clientsData,
+        promise.startTime
+      );
     }
   }
+
   process.exit(1);
 };
 

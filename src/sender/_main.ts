@@ -15,7 +15,6 @@ import {
   endSender,
   errorSender,
   getTimeString,
-  getTimeStringByTime,
   peerFloods,
   phoneSearchError,
   sleep,
@@ -33,6 +32,12 @@ import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
+
+const exec = util.promisify(childExec);
+
+function isTelegramClient<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined && Boolean(value);
+}
 
 const starter = async (
   ID: string,
@@ -211,17 +216,10 @@ Error: ${e.message}`
   return client;
 };
 
-export const main = async (accounts: string[]) => {
-  const promises: Promise<any>[] = [];
-  const accountsInWork: Record<string, number> = {};
-  const exec = util.promisify(childExec);
-
-  console.log({
-    message: '💥 ITERATION INIT 💥',
-    accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
-  });
+export const main = async (chunkId: number, accounts: string[]) => {
   const startTime = performance.now();
-  const startTimeDate = new Date();
+  const promises: Promise<TelegramClient | null>[] = [];
+  const accountsInWork: Record<string, number> = {};
 
   for (const accountId of accounts) {
     promises.push(starter(accountId, accountsInWork, exec));
@@ -229,162 +227,58 @@ export const main = async (accounts: string[]) => {
 
   const interval = setInterval(() => {
     console.log({
-      message: `ITERATION IN PROGRESS (${Object.keys(accountsInWork).length})`,
+      message: `CHUNK #${chunkId} IN PROGRESS (${Object.keys(accountsInWork).length})`,
       accountsInWork,
-      accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
     });
   }, 60000);
 
   process.on('uncaughtException', async (err) => {
     await waitConsole();
-    await sendToMainBot(`**** UNCAUGHT_EXCEPTION ****
-ACCOUNTS: ||${accounts[0]}||${accounts[accounts.length - 1]}||
-Error: ${err.message}`);
+    await sendToMainBot(`** UNCAUGHT_EXCEPTION **
+CHUNK_ID: ${chunkId}
+ERROR: ${err.message}`);
     process.exit(1);
   });
 
   process.on('unhandledRejection', async (reason, promise) => {
     await waitConsole();
-    await sendToMainBot(`**** UNHANDLED_REJECTION ****
-ACCOUNTS: ||${accounts[0]}||${accounts[accounts.length - 1]}||
-Reason: ${reason}
-Promise: ${JSON.stringify(promise)}`);
+    await sendToMainBot(`** UNHANDLED_REJECTION **
+CHUNK_ID: ${chunkId}
+REASON: ${reason}
+PROMISE: ${JSON.stringify(promise)}`);
     process.exit(1);
   });
 
-  await Promise.all(promises).then(async (clients) => {
-    const ps = clients.filter(Boolean);
-    const senders = ps.map((p) => p._sender);
-    const initTimings = ps.map((p) => ({
-      id: p._accountId,
-      value: Number(p._initTime),
-    }));
-    const endTimings = ps.map((p) => ({
-      id: p._accountId,
-      value: Number(p._endTime),
-    }));
-    const midInitTimings = Math.floor(
-      initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length
-    );
-    const maxInitTiming = initTimings.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
+  const clients = await Promise.all(promises);
 
-    const midEndTimings = Math.floor(
-      endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length
-    );
-    const maxEndTiming = endTimings.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
+  clearInterval(interval);
+  await waitConsole();
 
-    const connectCounts = senders.map((s) => ({
-      id: s._accountId,
-      value: s._connectCounts,
-    }));
-    const totalConnectCounts = connectCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midConnectCounts = (
-      totalConnectCounts / connectCounts.length
-    ).toFixed(2);
-    const maxConnectCounts = connectCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
+  return {
+    startTime,
+    clients: clients.filter(isTelegramClient).map((client) => {
+      const sender = client._sender;
 
-    const disconnectCounts = senders.map((s) => ({
-      id: s._accountId,
-      value: s._disconnectCounts,
-    }));
-    const totalDisconnectCounts = disconnectCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midDisconnectCounts = (
-      totalDisconnectCounts / disconnectCounts.length
-    ).toFixed(2);
-    const maxDisconnectCounts = disconnectCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
-
-    const connectErrorCounts = senders.map((s) => ({
-      id: s._accountId,
-      value: s._connectErrorCounts,
-    }));
-
-    const totalConnectErrorCounts = connectErrorCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midConnectErrorCounts = (
-      totalConnectErrorCounts / connectErrorCounts.length
-    ).toFixed(2);
-    const maxConnectErrorCounts = connectErrorCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
-
-    const reconnectCounts = senders.map((s) => ({
-      id: s._accountId,
-      value: s._reconnectCounts,
-    }));
-    const totalReconnectCounts = reconnectCounts.reduce(
-      (acc, num) => acc + num.value,
-      0
-    );
-    const midReconnectCounts = (
-      totalReconnectCounts / reconnectCounts.length
-    ).toFixed(2);
-    const maxReconnectCounts = reconnectCounts.reduce((max, current) =>
-      current.value > max.value ? current : max
-    );
-
-    console.log({
-      message: `💥 ITERATION DONE (${getTimeString(startTime)}) 💥`,
-      initTimings,
-      endTimings,
-      connectCounts,
-      reconnectCounts,
-      disconnectCounts,
-      connectErrorCounts,
-      accounts: `||${accounts[0]}||${accounts[accounts.length - 1]}||`,
-    });
-
-    await sendToMainBot(`💥 ITERATION DONE (${getTimeString(startTime)}) 💥
-ACCOUNTS: ||${accounts[0]}||${accounts[accounts.length - 1]}||
-
-* АККАУНТЫ * 
-В РАБОТЕ: ${promises.length} ${promises.length !== promises.filter(Boolean).length ? `(${promises.filter(Boolean).length})` : ''}
-СРЕДНЕЕ ВРЕМЯ ЗАПУСКА: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
-СРЕДНЕЕ ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
-
-* СТАБИЛЬНОСТЬ *
-REQUEST_COUNT: ${allTimings.length}
-RESPONSE_TIME: ${Number(
-      (
-        allTimings.reduce((acc, num) => acc + num, 0) /
-        allTimings.length /
-        1000
-      ).toFixed(2)
-    )}ms
-CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
-DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
-RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
-NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})
-
-* ОТПРАВКИ *
-ИНИЦИИРОВАНО: ${Object.keys(startSender).length}
-ПОДТВЕРЖДЕНО: ${Object.keys(endSender).length}
-ОШИБОК: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(withoutRecipientError).length})` : ''}
-БЛОКИРОВКА ПОИСКА ПО НОМЕРУ: ${Object.keys(phoneSearchError).length}${
-      Object.keys(aiReqest).length > 0
-        ? `\n\n* ИИ *
-${Object.keys(aiReqest)
-  .map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r] || 0} errors`)
-  .join('\n')}`
-        : ''
-    }
-`);
-    clearInterval(interval);
-    await waitConsole();
-  });
+      return {
+        accountId: sender._accountId,
+        initTime: client._initTime,
+        endTime: client._endTime,
+        connectCounts: sender._connectCounts,
+        connectErrorCounts: sender._connectErrorCounts,
+        disconnectCounts: sender._disconnectCounts,
+        reconnectCounts: sender._reconnectCounts,
+      };
+    }),
+    clientsData: {
+      aiReqest,
+      aiRetryError,
+      allTimings,
+      endSender,
+      errorSender,
+      peerFloods,
+      phoneSearchError,
+      startSender,
+      withoutRecipientError,
+    },
+  };
 };

@@ -8415,8 +8415,8 @@ var require_mongo_logger = __commonJS({
     }
     function createStdioLogger(stream4) {
       return {
-        write: (0, util_1.promisify)((log, cb) => {
-          const logLine = (0, util_1.inspect)(log, { compact: true, breakLength: Infinity });
+        write: (0, util_1.promisify)((log2, cb) => {
+          const logLine = (0, util_1.inspect)(log2, { compact: true, breakLength: Infinity });
           stream4.write(`${logLine}
 `, "utf-8", cb);
           return;
@@ -8474,92 +8474,92 @@ var require_mongo_logger = __commonJS({
       const objAsLogConvertible = obj;
       return objAsLogConvertible.toLog !== void 0 && typeof objAsLogConvertible.toLog === "function";
     }
-    function attachServerSelectionFields(log, serverSelectionEvent, maxDocumentLength = exports2.DEFAULT_MAX_DOCUMENT_LENGTH) {
+    function attachServerSelectionFields(log2, serverSelectionEvent, maxDocumentLength = exports2.DEFAULT_MAX_DOCUMENT_LENGTH) {
       const { selector, operation, topologyDescription, message } = serverSelectionEvent;
-      log.selector = stringifyWithMaxLen(selector, maxDocumentLength);
-      log.operation = operation;
-      log.topologyDescription = stringifyWithMaxLen(topologyDescription, maxDocumentLength);
-      log.message = message;
-      return log;
+      log2.selector = stringifyWithMaxLen(selector, maxDocumentLength);
+      log2.operation = operation;
+      log2.topologyDescription = stringifyWithMaxLen(topologyDescription, maxDocumentLength);
+      log2.message = message;
+      return log2;
     }
-    function attachCommandFields(log, commandEvent) {
-      log.commandName = commandEvent.commandName;
-      log.requestId = commandEvent.requestId;
-      log.driverConnectionId = commandEvent.connectionId;
+    function attachCommandFields(log2, commandEvent) {
+      log2.commandName = commandEvent.commandName;
+      log2.requestId = commandEvent.requestId;
+      log2.driverConnectionId = commandEvent.connectionId;
       const { host, port } = utils_1.HostAddress.fromString(commandEvent.address).toHostPort();
-      log.serverHost = host;
-      log.serverPort = port;
+      log2.serverHost = host;
+      log2.serverPort = port;
       if (commandEvent == null ? void 0 : commandEvent.serviceId) {
-        log.serviceId = commandEvent.serviceId.toHexString();
+        log2.serviceId = commandEvent.serviceId.toHexString();
       }
-      log.databaseName = commandEvent.databaseName;
-      log.serverConnectionId = commandEvent.serverConnectionId;
-      return log;
+      log2.databaseName = commandEvent.databaseName;
+      log2.serverConnectionId = commandEvent.serverConnectionId;
+      return log2;
     }
-    function attachConnectionFields(log, event) {
+    function attachConnectionFields(log2, event) {
       const { host, port } = utils_1.HostAddress.fromString(event.address).toHostPort();
-      log.serverHost = host;
-      log.serverPort = port;
-      return log;
+      log2.serverHost = host;
+      log2.serverPort = port;
+      return log2;
     }
-    function attachSDAMFields(log, sdamEvent) {
-      log.topologyId = sdamEvent.topologyId;
-      return log;
+    function attachSDAMFields(log2, sdamEvent) {
+      log2.topologyId = sdamEvent.topologyId;
+      return log2;
     }
-    function attachServerHeartbeatFields(log, serverHeartbeatEvent) {
+    function attachServerHeartbeatFields(log2, serverHeartbeatEvent) {
       const { awaited, connectionId } = serverHeartbeatEvent;
-      log.awaited = awaited;
-      log.driverConnectionId = serverHeartbeatEvent.connectionId;
+      log2.awaited = awaited;
+      log2.driverConnectionId = serverHeartbeatEvent.connectionId;
       const { host, port } = utils_1.HostAddress.fromString(connectionId).toHostPort();
-      log.serverHost = host;
-      log.serverPort = port;
-      return log;
+      log2.serverHost = host;
+      log2.serverPort = port;
+      return log2;
     }
     function defaultLogTransform(logObject, maxDocumentLength = exports2.DEFAULT_MAX_DOCUMENT_LENGTH) {
       var _a, _b, _c, _d, _e;
-      let log = /* @__PURE__ */ Object.create(null);
+      let log2 = /* @__PURE__ */ Object.create(null);
       switch (logObject.name) {
         case constants_1.SERVER_SELECTION_STARTED:
-          log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-          return log;
+          log2 = attachServerSelectionFields(log2, logObject, maxDocumentLength);
+          return log2;
         case constants_1.SERVER_SELECTION_FAILED:
-          log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-          log.failure = (_a = logObject.failure) == null ? void 0 : _a.message;
-          return log;
+          log2 = attachServerSelectionFields(log2, logObject, maxDocumentLength);
+          log2.failure = (_a = logObject.failure) == null ? void 0 : _a.message;
+          return log2;
         case constants_1.SERVER_SELECTION_SUCCEEDED:
-          log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-          log.serverHost = logObject.serverHost;
-          log.serverPort = logObject.serverPort;
-          return log;
+          log2 = attachServerSelectionFields(log2, logObject, maxDocumentLength);
+          log2.serverHost = logObject.serverHost;
+          log2.serverPort = logObject.serverPort;
+          return log2;
         case constants_1.WAITING_FOR_SUITABLE_SERVER:
-          log = attachServerSelectionFields(log, logObject, maxDocumentLength);
-          log.remainingTimeMS = logObject.remainingTimeMS;
-          return log;
+          log2 = attachServerSelectionFields(log2, logObject, maxDocumentLength);
+          log2.remainingTimeMS = logObject.remainingTimeMS;
+          return log2;
         case constants_1.COMMAND_STARTED:
-          log = attachCommandFields(log, logObject);
-          log.message = "Command started";
-          log.command = stringifyWithMaxLen(logObject.command, maxDocumentLength, { relaxed: true });
-          log.databaseName = logObject.databaseName;
-          return log;
+          log2 = attachCommandFields(log2, logObject);
+          log2.message = "Command started";
+          log2.command = stringifyWithMaxLen(logObject.command, maxDocumentLength, { relaxed: true });
+          log2.databaseName = logObject.databaseName;
+          return log2;
         case constants_1.COMMAND_SUCCEEDED:
-          log = attachCommandFields(log, logObject);
-          log.message = "Command succeeded";
-          log.durationMS = logObject.duration;
-          log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
-          return log;
+          log2 = attachCommandFields(log2, logObject);
+          log2.message = "Command succeeded";
+          log2.durationMS = logObject.duration;
+          log2.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
+          return log2;
         case constants_1.COMMAND_FAILED:
-          log = attachCommandFields(log, logObject);
-          log.message = "Command failed";
-          log.durationMS = logObject.duration;
-          log.failure = ((_b = logObject.failure) == null ? void 0 : _b.message) ?? "(redacted)";
-          return log;
+          log2 = attachCommandFields(log2, logObject);
+          log2.message = "Command failed";
+          log2.durationMS = logObject.duration;
+          log2.failure = ((_b = logObject.failure) == null ? void 0 : _b.message) ?? "(redacted)";
+          return log2;
         case constants_1.CONNECTION_POOL_CREATED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection pool created";
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection pool created";
           if (logObject.options) {
             const { maxIdleTimeMS, minPoolSize, maxPoolSize, maxConnecting, waitQueueTimeoutMS } = logObject.options;
-            log = {
-              ...log,
+            log2 = {
+              ...log2,
               maxIdleTimeMS,
               minPoolSize,
               maxPoolSize,
@@ -8567,144 +8567,144 @@ var require_mongo_logger = __commonJS({
               waitQueueTimeoutMS
             };
           }
-          return log;
+          return log2;
         case constants_1.CONNECTION_POOL_READY:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection pool ready";
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection pool ready";
+          return log2;
         case constants_1.CONNECTION_POOL_CLEARED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection pool cleared";
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection pool cleared";
           if (((_c = logObject.serviceId) == null ? void 0 : _c._bsontype) === "ObjectId") {
-            log.serviceId = (_d = logObject.serviceId) == null ? void 0 : _d.toHexString();
+            log2.serviceId = (_d = logObject.serviceId) == null ? void 0 : _d.toHexString();
           }
-          return log;
+          return log2;
         case constants_1.CONNECTION_POOL_CLOSED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection pool closed";
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection pool closed";
+          return log2;
         case constants_1.CONNECTION_CREATED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection created";
-          log.driverConnectionId = logObject.connectionId;
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection created";
+          log2.driverConnectionId = logObject.connectionId;
+          return log2;
         case constants_1.CONNECTION_READY:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection ready";
-          log.driverConnectionId = logObject.connectionId;
-          log.durationMS = logObject.durationMS;
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection ready";
+          log2.driverConnectionId = logObject.connectionId;
+          log2.durationMS = logObject.durationMS;
+          return log2;
         case constants_1.CONNECTION_CLOSED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection closed";
-          log.driverConnectionId = logObject.connectionId;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection closed";
+          log2.driverConnectionId = logObject.connectionId;
           switch (logObject.reason) {
             case "stale":
-              log.reason = "Connection became stale because the pool was cleared";
+              log2.reason = "Connection became stale because the pool was cleared";
               break;
             case "idle":
-              log.reason = "Connection has been available but unused for longer than the configured max idle time";
+              log2.reason = "Connection has been available but unused for longer than the configured max idle time";
               break;
             case "error":
-              log.reason = "An error occurred while using the connection";
+              log2.reason = "An error occurred while using the connection";
               if (logObject.error) {
-                log.error = logObject.error;
+                log2.error = logObject.error;
               }
               break;
             case "poolClosed":
-              log.reason = "Connection pool was closed";
+              log2.reason = "Connection pool was closed";
               break;
             default:
-              log.reason = `Unknown close reason: ${logObject.reason}`;
+              log2.reason = `Unknown close reason: ${logObject.reason}`;
           }
-          return log;
+          return log2;
         case constants_1.CONNECTION_CHECK_OUT_STARTED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection checkout started";
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection checkout started";
+          return log2;
         case constants_1.CONNECTION_CHECK_OUT_FAILED:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection checkout failed";
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection checkout failed";
           switch (logObject.reason) {
             case "poolClosed":
-              log.reason = "Connection pool was closed";
+              log2.reason = "Connection pool was closed";
               break;
             case "timeout":
-              log.reason = "Wait queue timeout elapsed without a connection becoming available";
+              log2.reason = "Wait queue timeout elapsed without a connection becoming available";
               break;
             case "connectionError":
-              log.reason = "An error occurred while trying to establish a new connection";
+              log2.reason = "An error occurred while trying to establish a new connection";
               if (logObject.error) {
-                log.error = logObject.error;
+                log2.error = logObject.error;
               }
               break;
             default:
-              log.reason = `Unknown close reason: ${logObject.reason}`;
+              log2.reason = `Unknown close reason: ${logObject.reason}`;
           }
-          log.durationMS = logObject.durationMS;
-          return log;
+          log2.durationMS = logObject.durationMS;
+          return log2;
         case constants_1.CONNECTION_CHECKED_OUT:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection checked out";
-          log.driverConnectionId = logObject.connectionId;
-          log.durationMS = logObject.durationMS;
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection checked out";
+          log2.driverConnectionId = logObject.connectionId;
+          log2.durationMS = logObject.durationMS;
+          return log2;
         case constants_1.CONNECTION_CHECKED_IN:
-          log = attachConnectionFields(log, logObject);
-          log.message = "Connection checked in";
-          log.driverConnectionId = logObject.connectionId;
-          return log;
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Connection checked in";
+          log2.driverConnectionId = logObject.connectionId;
+          return log2;
         case constants_1.SERVER_OPENING:
-          log = attachSDAMFields(log, logObject);
-          log = attachConnectionFields(log, logObject);
-          log.message = "Starting server monitoring";
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Starting server monitoring";
+          return log2;
         case constants_1.SERVER_CLOSED:
-          log = attachSDAMFields(log, logObject);
-          log = attachConnectionFields(log, logObject);
-          log.message = "Stopped server monitoring";
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2 = attachConnectionFields(log2, logObject);
+          log2.message = "Stopped server monitoring";
+          return log2;
         case constants_1.SERVER_HEARTBEAT_STARTED:
-          log = attachSDAMFields(log, logObject);
-          log = attachServerHeartbeatFields(log, logObject);
-          log.message = "Server heartbeat started";
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2 = attachServerHeartbeatFields(log2, logObject);
+          log2.message = "Server heartbeat started";
+          return log2;
         case constants_1.SERVER_HEARTBEAT_SUCCEEDED:
-          log = attachSDAMFields(log, logObject);
-          log = attachServerHeartbeatFields(log, logObject);
-          log.message = "Server heartbeat succeeded";
-          log.durationMS = logObject.duration;
-          log.serverConnectionId = logObject.serverConnectionId;
-          log.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2 = attachServerHeartbeatFields(log2, logObject);
+          log2.message = "Server heartbeat succeeded";
+          log2.durationMS = logObject.duration;
+          log2.serverConnectionId = logObject.serverConnectionId;
+          log2.reply = stringifyWithMaxLen(logObject.reply, maxDocumentLength, { relaxed: true });
+          return log2;
         case constants_1.SERVER_HEARTBEAT_FAILED:
-          log = attachSDAMFields(log, logObject);
-          log = attachServerHeartbeatFields(log, logObject);
-          log.message = "Server heartbeat failed";
-          log.durationMS = logObject.duration;
-          log.failure = (_e = logObject.failure) == null ? void 0 : _e.message;
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2 = attachServerHeartbeatFields(log2, logObject);
+          log2.message = "Server heartbeat failed";
+          log2.durationMS = logObject.duration;
+          log2.failure = (_e = logObject.failure) == null ? void 0 : _e.message;
+          return log2;
         case constants_1.TOPOLOGY_OPENING:
-          log = attachSDAMFields(log, logObject);
-          log.message = "Starting topology monitoring";
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2.message = "Starting topology monitoring";
+          return log2;
         case constants_1.TOPOLOGY_CLOSED:
-          log = attachSDAMFields(log, logObject);
-          log.message = "Stopped topology monitoring";
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2.message = "Stopped topology monitoring";
+          return log2;
         case constants_1.TOPOLOGY_DESCRIPTION_CHANGED:
-          log = attachSDAMFields(log, logObject);
-          log.message = "Topology description changed";
-          log.previousDescription = log.reply = stringifyWithMaxLen(logObject.previousDescription, maxDocumentLength);
-          log.newDescription = log.reply = stringifyWithMaxLen(logObject.newDescription, maxDocumentLength);
-          return log;
+          log2 = attachSDAMFields(log2, logObject);
+          log2.message = "Topology description changed";
+          log2.previousDescription = log2.reply = stringifyWithMaxLen(logObject.previousDescription, maxDocumentLength);
+          log2.newDescription = log2.reply = stringifyWithMaxLen(logObject.newDescription, maxDocumentLength);
+          return log2;
         default:
           for (const [key, value] of Object.entries(logObject)) {
             if (value != null)
-              log[key] = value;
+              log2[key] = value;
           }
       }
-      return log;
+      return log2;
     }
     var MongoLogger = class {
       constructor(options) {
@@ -47719,7 +47719,7 @@ var require_node2 = __commonJS({
     var tty = require("tty");
     var util2 = require("util");
     exports2.init = init;
-    exports2.log = log;
+    exports2.log = log2;
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
@@ -47854,7 +47854,7 @@ var require_node2 = __commonJS({
       }
       return (/* @__PURE__ */ new Date()).toISOString() + " ";
     }
-    function log(...args) {
+    function log2(...args) {
       return process.stderr.write(util2.formatWithOptions(exports2.inspectOpts, ...args) + "\n");
     }
     function save(namespaces) {
@@ -48424,9 +48424,6 @@ var require_follow_redirects = __commonJS({
     )
   );
 })();
-
-// src/sender/index.ts
-var import_worker_threads = require("worker_threads");
 
 // src/sender/db/db.ts
 var import_mongodb = __toESM(require_lib3());
@@ -51785,6 +51782,7 @@ var sendToMainBot = async (text) => {
 
 // src/sender/db/db.ts
 var coreDb;
+var logsDb;
 var coreDB = async () => {
   while (!coreDb) {
     try {
@@ -51798,6 +51796,124 @@ var coreDB = async () => {
   }
   return coreDb;
 };
+var logsDB = async () => {
+  while (!logsDb) {
+    try {
+      const client = new import_mongodb.MongoClient(process.env.DATABASE_SENDER_URI || "");
+      const connect = await client.connect();
+      logsDb = connect.db("logs");
+      break;
+    } catch {
+      await sendToMainBot("DB not inited. Dangerous mistake. Retry.");
+    }
+  }
+  return logsDb;
+};
+
+// src/sender/helpers/helpers.ts
+var sleep = (delay) => {
+  return new Promise((res) => {
+    setTimeout(res, delay);
+  });
+};
+var getTimeString = (startTime) => {
+  const time = Math.round((performance.now() - startTime) / 1e3);
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  let timeString;
+  if (minutes > 0) {
+    timeString = `${minutes}m ${seconds}s`;
+  } else {
+    timeString = `${seconds}s`;
+  }
+  return timeString;
+};
+var getTimeStringByTime = (timeDate) => {
+  const time = Math.round(timeDate / 1e3);
+  const minutes = Math.floor(time / 60);
+  const seconds = time % 60;
+  let timeString;
+  if (minutes > 0) {
+    timeString = `${minutes}m ${seconds}s`;
+  } else {
+    timeString = `${seconds}s`;
+  }
+  return timeString;
+};
+
+// src/sender/helpers/setConsole.log.ts
+var { log } = require("console");
+var lastLogTime = Date.now();
+var activePromises = [];
+var getNextLogTime = () => {
+  const now = /* @__PURE__ */ new Date();
+  if (now.getTime() <= lastLogTime) {
+    now.setMilliseconds(new Date(lastLogTime).getMilliseconds() + 1);
+  }
+  lastLogTime = now.getTime();
+  return now.toISOString();
+};
+var insertLog = async (data) => {
+  for (let i = 0; i < 5; i++) {
+    try {
+      const database = await logsDB();
+      log(JSON.stringify(data));
+      await database.collection("logs").insertOne(data);
+      return;
+    } catch {
+      if (i === 4)
+        throw new Error("SAVE_LOG_CRITICAL_ERROR");
+      await sleep(1e3 * (i + 1));
+    }
+  }
+};
+var mongoLog = async (level, ...args) => {
+  const promise = (async () => {
+    try {
+      if (typeof args[0] !== "object") {
+        throw new Error("LOG_NOT_OBJECT");
+      }
+      if (!args[0].message) {
+        throw new Error("LOG_NOT_HAVE_MESSAGE");
+      }
+      const timestamp = getNextLogTime();
+      const metadata = { ...args[0], timestamp: new Date(timestamp) };
+      const message = metadata.message;
+      delete metadata.message;
+      await insertLog({
+        timestamp: new Date(timestamp),
+        level,
+        message,
+        metadata
+      });
+    } catch (e) {
+      await sendToMainBot(`\u{1F6A8} ${e.message} \u{1F6A8}
+ERROR: ${JSON.stringify(args[0])}`);
+    }
+  })();
+  activePromises.push(promise);
+  promise.finally(() => {
+    const index = activePromises.indexOf(promise);
+    if (index > -1) {
+      activePromises.splice(index, 1);
+    }
+  });
+  return promise;
+};
+if (process.env.DEV !== "true") {
+  console.log = async (...args) => {
+    await mongoLog("info", ...args);
+  };
+  console.error = async (...args) => {
+    await mongoLog("error", ...args);
+  };
+  console.warn = async (...args) => {
+    await mongoLog("warn", ...args);
+  };
+}
+
+// src/sender/index.ts
+var import_worker_threads = require("worker_threads");
 
 // src/sender/db/accounts.ts
 var getAccountCollection = async () => {
@@ -51829,43 +51945,163 @@ var getAccountCreationDate = async () => {
   return chunks;
 };
 
+// src/sender/helpers/makeMetrics.ts
+var makeMetrics = async (chunkId, clients, clientsData, startTime) => {
+  const {
+    aiReqest,
+    aiRetryError,
+    allTimings,
+    endSender,
+    errorSender,
+    peerFloods,
+    phoneSearchError,
+    startSender,
+    withoutRecipientError
+  } = clientsData;
+  const initTimings = clients.map((p) => ({
+    id: p.accountId,
+    value: Number(p.initTime)
+  }));
+  const endTimings = clients.map((p) => ({
+    id: p.accountId,
+    value: Number(p.endTime)
+  }));
+  const midInitTimings = Math.floor(
+    initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length
+  );
+  const maxInitTiming = initTimings.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  const midEndTimings = Math.floor(
+    endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length
+  );
+  const maxEndTiming = endTimings.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  const connectCounts = clients.map((s) => ({
+    id: s.accountId,
+    value: Number(s.connectCounts)
+  }));
+  const totalConnectCounts = connectCounts.reduce(
+    (acc, num) => acc + num.value,
+    0
+  );
+  const midConnectCounts = (totalConnectCounts / connectCounts.length).toFixed(
+    2
+  );
+  const maxConnectCounts = connectCounts.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  const disconnectCounts = clients.map((s) => ({
+    id: s.accountId,
+    value: Number(s.disconnectCounts)
+  }));
+  const totalDisconnectCounts = disconnectCounts.reduce(
+    (acc, num) => acc + num.value,
+    0
+  );
+  const midDisconnectCounts = (totalDisconnectCounts / disconnectCounts.length).toFixed(2);
+  const maxDisconnectCounts = disconnectCounts.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  const connectErrorCounts = clients.map((s) => ({
+    id: s.accountId,
+    value: Number(s.connectErrorCounts)
+  }));
+  const totalConnectErrorCounts = connectErrorCounts.reduce(
+    (acc, num) => acc + num.value,
+    0
+  );
+  const midConnectErrorCounts = (totalConnectErrorCounts / connectErrorCounts.length).toFixed(2);
+  const maxConnectErrorCounts = connectErrorCounts.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  const reconnectCounts = clients.map((s) => ({
+    id: s.accountId,
+    value: Number(s.reconnectCounts)
+  }));
+  const totalReconnectCounts = reconnectCounts.reduce(
+    (acc, num) => acc + num.value,
+    0
+  );
+  const midReconnectCounts = (totalReconnectCounts / reconnectCounts.length).toFixed(2);
+  const maxReconnectCounts = reconnectCounts.reduce(
+    (max, current) => current.value > max.value ? current : max
+  );
+  console.log({
+    message: `\u{1F4A5} CHUNK #${chunkId} DONE (${getTimeString(startTime)}) \u{1F4A5}`,
+    initTimings,
+    endTimings,
+    connectCounts,
+    reconnectCounts,
+    disconnectCounts,
+    connectErrorCounts
+  });
+  await sendToMainBot(`\u{1F4A5} CHUNK #${chunkId} DONE (${getTimeString(startTime)}) \u{1F4A5}
+
+* \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
+\u0412 \u0420\u0410\u0411\u041E\u0422\u0415: ${clients.length}
+\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0417\u0410\u041F\u0423\u0421\u041A\u0410: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
+\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0420\u0410\u0411\u041E\u0422\u042B: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
+
+* \u0421\u0422\u0410\u0411\u0418\u041B\u042C\u041D\u041E\u0421\u0422\u042C *
+REQUEST_COUNT: ${allTimings.length}
+RESPONSE_TIME: ${Number(
+    (allTimings.reduce((acc, num) => acc + Number(num), 0) / allTimings.length / 1e3).toFixed(2)
+  )}ms
+CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
+RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
+DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
+NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})
+
+* \u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0418 *
+\u0418\u041D\u0418\u0426\u0418\u0418\u0420\u041E\u0412\u0410\u041D\u041E: ${Object.keys(startSender).length}
+\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E: ${Object.keys(endSender).length}
+\u041E\u0428\u0418\u0411\u041E\u041A: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(withoutRecipientError).length})` : ""}
+\u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041A\u0410 \u041F\u041E\u0418\u0421\u041A\u0410 \u041F\u041E \u041D\u041E\u041C\u0415\u0420\u0423: ${Object.keys(phoneSearchError).length}${Object.keys(aiReqest).length > 0 ? `
+
+* \u0418\u0418 *
+${Object.keys(aiReqest).map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r] || 0} errors`).join("\n")}` : ""}`);
+};
+
 // src/sender/index.ts
 var WORKER_TIMEOUT_MS = 60 * 60 * 1e3;
-var createWorker = (accountIds) => {
+var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
       `
-      const { workerData, parentPort } = require('worker_threads');
-      const { main } = require('./src/sender/_main.js');
+const { workerData, parentPort } = require('worker_threads');
+const { main } = require('./src/sender/_main.js');
 
-      async function run() {
-        try {
-          await main(workerData.accountIds);
-          parentPort.postMessage({ 
-            type: 'success',
-            accountIds: workerData.accountIds 
-          });
-        } catch (error) {
-          parentPort.postMessage({ 
-            type: 'error',
-            error: error.message,
-            accountIds: workerData.accountIds
-          });
-        }
-      }
-
-      run();
-    `,
+async function run() {
+  try {
+    const { clients, clientsData, startTime } = await main(workerData.chunkId, workerData.accountIds);
+    parentPort.postMessage({ 
+      type: 'success',
+      clients,
+      clientsData,
+      startTime,
+      chunkId: workerData.chunkId,
+    });
+  } catch (error) {
+    parentPort.postMessage({ 
+      type: 'error',
+      error: error.message,
+      chunkId: workerData.chunkId
+    });
+  }
+}
+run();`,
       {
         eval: true,
-        workerData: { accountIds }
+        workerData: { chunkId, accountIds }
       }
     );
     const timeoutId = setTimeout(() => {
       resolve({
         type: "error",
-        error: `Worker timeout after ${WORKER_TIMEOUT_MS / 1e3 / 60} minutes`,
-        accountIds
+        error: `WORKER_TIMEOUT_ERROR`,
+        chunkId
       });
     }, WORKER_TIMEOUT_MS);
     worker.on("message", (message) => {
@@ -51877,7 +52113,7 @@ var createWorker = (accountIds) => {
       resolve({
         type: "error",
         error: error.message,
-        accountIds
+        chunkId
       });
     });
     worker.on("exit", (code) => {
@@ -51885,23 +52121,34 @@ var createWorker = (accountIds) => {
       if (code !== 0) {
         resolve({
           type: "error",
-          error: `Worker stopped with exit code ${code}`,
-          accountIds
+          error: `WORKER_STOPPED_WITH_CODE_${code}`,
+          chunkId
         });
       }
     });
   });
 };
 var main = async () => {
-  var _a, _b;
   const accountChunks = await getAccountCreationDate();
-  const workers = accountChunks.map((chunk) => createWorker(chunk));
+  console.log({
+    message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
+  });
+  const workers = accountChunks.map(
+    (chunk, index) => createWorker(index + 1, chunk)
+  );
   const promises = await Promise.all(workers);
   for (const promise of promises) {
     if (promise.type === "error") {
       await sendToMainBot(`** WORKER_ERROR **
 ERROR: ${promise.error}
-ACCOUNTS: ||${(_a = promise.accountIds) == null ? void 0 : _a[0]}||${(_b = promise.accountIds) == null ? void 0 : _b[promise.accountIds.length - 1]}||`);
+CHUNK_ID: ${promise.chunkId}`);
+    } else {
+      await makeMetrics(
+        promise.chunkId,
+        promise.clients,
+        promise.clientsData,
+        promise.startTime
+      );
     }
   }
   process.exit(1);
