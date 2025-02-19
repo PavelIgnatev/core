@@ -120,7 +120,7 @@ const main = async () => {
   });
 
   // const workers = [createWorker(0, ['1716295652-support-new-100'])];
-  const workers = chunks.map((chunk, index) => createWorker(index + 1, chunk));
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
   for (const promise of promises) {
