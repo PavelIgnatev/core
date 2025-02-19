@@ -170,23 +170,6 @@ class MTProtoSender {
 
     for (let attempt = 0; attempt < attempt + 1; attempt++) {
       try {
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-        this._connectErrorCounts.push(new Date().toISOString());
-
         await this._connect(this.getConnection());
 
         this._updateCallback?.(
