@@ -2,7 +2,6 @@ import 'dotenv/config';
 import './helpers/setConsole.log';
 
 import { exec as childExec } from 'child_process';
-
 import util from 'util';
 
 import TelegramClient from '../gramjs/client/TelegramClient';
@@ -91,13 +90,13 @@ const starter = async (
           client._sender.userDisconnected ||
           errored
         ) {
-          currentInterval = 10000
+          currentInterval = 10000;
           setTimeout(checkStatus, currentInterval);
           return;
         }
 
         await updateStatus(client, false);
-        currentInterval = Math.min(currentInterval + 10000, 10000);
+        currentInterval = Math.min(currentInterval + 10000, 20000);
         setTimeout(checkStatus, currentInterval);
       } catch (error: any) {
         errored = error.message;
