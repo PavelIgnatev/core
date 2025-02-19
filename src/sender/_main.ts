@@ -485,9 +485,9 @@ RESPONSE_TIME: ${Number(
       ).toFixed(2)
     )}ms
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
-RECONNECT: ${allReconnectDates.length} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})${reconnectStatsMessage}
+RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})${reconnectStatsMessage}
 DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
-NETWORK_ERRORS: ${allErrorDates.length} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})${errorStatsMessage}
+NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})${errorStatsMessage}
 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(startSender).length}
