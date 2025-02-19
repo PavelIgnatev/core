@@ -6,6 +6,7 @@ import { Worker } from 'worker_threads';
 import { getAccountCreationDate } from './db/accounts';
 import { makeMetrics } from './helpers/makeMetrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
+import { coreDB, logsDB } from './db/db';
 
 type WorkerMessageError = {
   type: 'error';
@@ -111,11 +112,14 @@ run();`,
 };
 
 const main = async () => {
+  await Promise.all([coreDB(), logsDB()]);
+
   const accountChunks = await getAccountCreationDate();
   console.log({
     message: '💥 ITERATION INIT 💥',
   });
 
+  // const workers = [createWorker(0, ['1716295652-support-new-100'])];
   const workers = accountChunks.map((chunk, index) =>
     createWorker(index + 1, chunk)
   );

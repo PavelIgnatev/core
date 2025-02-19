@@ -8,6 +8,7 @@ import TelegramClient from '../gramjs/client/TelegramClient';
 import { initClient } from './_client';
 import { Account } from './@types/Account';
 import { getAccountById, updateAccountById } from './db/accounts';
+import { coreDB, logsDB } from './db/db';
 import {
   aiReqest,
   aiRetryError,
@@ -221,6 +222,7 @@ export const main = async (chunkId: number, accounts: string[]) => {
   const promises: Promise<TelegramClient | null>[] = [];
   const accountsInWork: Record<string, number> = {};
 
+  await Promise.all([coreDB(), logsDB()]);
   for (const accountId of accounts) {
     promises.push(starter(accountId, accountsInWork, exec));
   }

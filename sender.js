@@ -52129,6 +52129,7 @@ run();`,
   });
 };
 var main = async () => {
+  await Promise.all([coreDB(), logsDB()]);
   const accountChunks = await getAccountCreationDate();
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
