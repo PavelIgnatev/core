@@ -208,7 +208,7 @@ ERROR: ${e.message}`
             this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
-          } 
+          }
           await this._sender.reconnect();
         } else if (e instanceof errors.TimedOutError) {
         } else {
