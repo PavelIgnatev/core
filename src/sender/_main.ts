@@ -257,7 +257,7 @@ PROMISE: ${JSON.stringify(promise)}`);
   await waitConsole();
 
   return {
-    startTime,
+    endTime: getTimeString(startTime),
     clients: clients.filter(isTelegramClient).map((client) => {
       const sender = client._sender;
 

@@ -1,4 +1,4 @@
-import { getTimeString, getTimeStringByTime } from './helpers';
+import { getTimeStringByTime } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
 
 export const makeMetrics = async (
@@ -23,7 +23,7 @@ export const makeMetrics = async (
     startSender: Record<string, number>;
     withoutRecipientError: Record<string, number>;
   },
-  startTime: number
+  endTime: string
 ) => {
   const {
     aiReqest,
@@ -124,7 +124,7 @@ export const makeMetrics = async (
   );
 
   console.log({
-    message: `💥 CHUNK #${chunkId} DONE (${getTimeString(startTime)}) 💥`,
+    message: `💥 CHUNK #${chunkId} DONE (${endTime}) 💥`,
     initTimings,
     endTimings,
     connectCounts,
@@ -133,7 +133,7 @@ export const makeMetrics = async (
     connectErrorCounts,
   });
 
-  await sendToMainBot(`💥 CHUNK #${chunkId} DONE (${getTimeString(startTime)}) 💥
+  await sendToMainBot(`💥 CHUNK #${chunkId} DONE (${endTime}) 💥
 
 * АККАУНТЫ * 
 В РАБОТЕ: ${clients.length}

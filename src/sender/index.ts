@@ -6,6 +6,7 @@ import { Worker } from 'worker_threads';
 import { getAccountCreationDate } from './db/accounts';
 import { coreDB, logsDB } from './db/db';
 import { makeMetrics } from './helpers/makeMetrics';
+import { makeMetricsAll } from './helpers/makeMetricsAll';
 import { sendToMainBot } from './helpers/sendToMainBot';
 
 type WorkerMessageError = {
@@ -36,7 +37,7 @@ type WorkerMessageSuccess = {
     startSender: Record<string, number>;
     withoutRecipientError: Record<string, number>;
   };
-  startTime: number;
+  endTime: string;
   chunkId: number;
 };
 
@@ -53,12 +54,12 @@ const { main } = require('./src/sender/_main.js');
 
 async function run() {
   try {
-    const { clients, clientsData, startTime } = await main(workerData.chunkId, workerData.accountIds);
+    const { clients, clientsData, endTime } = await main(workerData.chunkId, workerData.accountIds);
     parentPort.postMessage({ 
       type: 'success',
       clients,
       clientsData,
-      startTime,
+      endTime,
       chunkId: workerData.chunkId,
     });
   } catch (error) {
@@ -123,19 +124,30 @@ const main = async () => {
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
+  const successPromises = [];
   for (const promise of promises) {
     if (promise.type === 'error') {
       await sendToMainBot(`** WORKER_ERROR **
 ERROR: ${promise.error}
 CHUNK_ID: ${promise.chunkId}`);
     } else {
+      successPromises.push({
+        chunkId: promise.chunkId,
+        clients: promise.clients,
+        clientsData: promise.clientsData,
+        endTime: promise.endTime,
+      });
       await makeMetrics(
         promise.chunkId,
         promise.clients,
         promise.clientsData,
-        promise.startTime
+        promise.endTime
       );
     }
+  }
+
+  if (successPromises.length > 0) {
+    await makeMetricsAll(successPromises);
   }
 
   process.exit(1);
