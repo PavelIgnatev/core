@@ -156,8 +156,8 @@ const fileComplaint = async (
     }
   } else {
     if (
-      !buttons.includes('I was wrong, please release me now') &&  
-      !buttons.includes('I’m actually a spammer')
+      !buttons.includes('please release me now') &&  
+      !buttons.includes('actually a spammer')
     ) {
       await sendToMainBot(`** SPAMBOT_BUTTONS_NOT_FOUND **
 BUTTONS: ${buttons.join(', ')}`);
