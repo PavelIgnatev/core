@@ -70,6 +70,9 @@ class PromisedWebSockets {
         'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959'
       ),
     });
+
+    this.client.setMaxListeners(20);
+
     return new Promise((resolve, reject) => {
       let hasResolved = false;
       let timeout;
