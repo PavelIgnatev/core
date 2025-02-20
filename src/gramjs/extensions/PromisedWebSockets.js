@@ -73,6 +73,16 @@ class PromisedWebSockets {
 
     this.client.setMaxListeners(20);
 
+    if (this.client._socket) {
+      this.client._socket.setMaxListeners(20);
+    }
+
+    this.client.on('upgrade', () => {
+      if (this.client._socket) {
+        this.client._socket.setMaxListeners(20);
+      }
+    });
+
     return new Promise((resolve, reject) => {
       let hasResolved = false;
       let timeout;
