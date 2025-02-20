@@ -154,7 +154,7 @@ const fileComplaint = async (
     if (!m4 || !m4.includes('successfully submitted')) {
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
-  } 
+  }
 };
 
 export const checkSpamBlock = async (
