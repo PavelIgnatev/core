@@ -2,7 +2,7 @@ import axios from 'axios';
 import emojiRegex from 'emoji-regex';
 
 import { aiReqest, aiRetryError, sleep } from './helpers';
-import { sendToMainBot } from './sendToMainBot';
+import { sendToErrorGenerateBot } from './sendToErrorGenerateBot';
 
 function trimmer(str: string) {
   if (
@@ -420,7 +420,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
     }
   }
 
-  await sendToMainBot(`** GENERATION_ERROR **
+  await sendToErrorGenerateBot(`** GENERATION_ERROR **
 GROUP ID: ${groupId}
 ACCOUNT ID: ${accountId}
 _____________

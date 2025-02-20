@@ -51933,125 +51933,6 @@ var getAccountCreationDate = async () => {
   return chunks;
 };
 
-// src/sender/helpers/makeMetrics.ts
-var makeMetrics = async (chunkId, clients, clientsData, endTime) => {
-  const {
-    aiReqest,
-    aiRetryError,
-    allTimings,
-    endSender,
-    errorSender,
-    peerFloods,
-    phoneSearchError,
-    startSender,
-    withoutRecipientError
-  } = clientsData;
-  const initTimings = clients.map((p) => ({
-    id: p.accountId,
-    value: Number(p.initTime)
-  }));
-  const endTimings = clients.map((p) => ({
-    id: p.accountId,
-    value: Number(p.endTime)
-  }));
-  const midInitTimings = Math.floor(
-    initTimings.reduce((acc, num) => acc + num.value, 0) / initTimings.length
-  );
-  const maxInitTiming = initTimings.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  const midEndTimings = Math.floor(
-    endTimings.reduce((acc, num) => acc + num.value, 0) / endTimings.length
-  );
-  const maxEndTiming = endTimings.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  const connectCounts = clients.map((s) => ({
-    id: s.accountId,
-    value: Number(s.connectCounts)
-  }));
-  const totalConnectCounts = connectCounts.reduce(
-    (acc, num) => acc + num.value,
-    0
-  );
-  const midConnectCounts = (totalConnectCounts / connectCounts.length).toFixed(
-    2
-  );
-  const maxConnectCounts = connectCounts.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  const disconnectCounts = clients.map((s) => ({
-    id: s.accountId,
-    value: Number(s.disconnectCounts)
-  }));
-  const totalDisconnectCounts = disconnectCounts.reduce(
-    (acc, num) => acc + num.value,
-    0
-  );
-  const midDisconnectCounts = (totalDisconnectCounts / disconnectCounts.length).toFixed(2);
-  const maxDisconnectCounts = disconnectCounts.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  const connectErrorCounts = clients.map((s) => ({
-    id: s.accountId,
-    value: Number(s.connectErrorCounts)
-  }));
-  const totalConnectErrorCounts = connectErrorCounts.reduce(
-    (acc, num) => acc + num.value,
-    0
-  );
-  const midConnectErrorCounts = (totalConnectErrorCounts / connectErrorCounts.length).toFixed(2);
-  const maxConnectErrorCounts = connectErrorCounts.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  const reconnectCounts = clients.map((s) => ({
-    id: s.accountId,
-    value: Number(s.reconnectCounts)
-  }));
-  const totalReconnectCounts = reconnectCounts.reduce(
-    (acc, num) => acc + num.value,
-    0
-  );
-  const midReconnectCounts = (totalReconnectCounts / reconnectCounts.length).toFixed(2);
-  const maxReconnectCounts = reconnectCounts.reduce(
-    (max, current) => current.value > max.value ? current : max
-  );
-  console.log({
-    message: `\u{1F4A5} CHUNK #${chunkId} DONE (${endTime}) \u{1F4A5}`,
-    initTimings,
-    endTimings,
-    connectCounts,
-    reconnectCounts,
-    disconnectCounts,
-    connectErrorCounts
-  });
-  await sendToMainBot(`\u{1F4A5} CHUNK #${chunkId} DONE (${endTime}) \u{1F4A5}
-
-* \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
-\u0412 \u0420\u0410\u0411\u041E\u0422\u0415: ${clients.length}
-\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0417\u0410\u041F\u0423\u0421\u041A\u0410: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
-\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0420\u0410\u0411\u041E\u0422\u042B: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
-
-* \u0421\u0422\u0410\u0411\u0418\u041B\u042C\u041D\u041E\u0421\u0422\u042C *
-REQUEST_COUNT: ${allTimings.length}
-RESPONSE_TIME: ${Number(
-    (allTimings.reduce((acc, num) => acc + Number(num), 0) / allTimings.length / 1e3).toFixed(2)
-  )}ms
-CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
-RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
-DISCONNECT: ${totalDisconnectCounts} (mid: ${midDisconnectCounts}, max: ${maxDisconnectCounts.value})
-NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: ${maxConnectErrorCounts.value})
-
-* \u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0418 *
-\u0418\u041D\u0418\u0426\u0418\u0418\u0420\u041E\u0412\u0410\u041D\u041E: ${Object.keys(startSender).length}
-\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E: ${Object.keys(endSender).length}
-\u041E\u0428\u0418\u0411\u041E\u041A: ${Object.keys(errorSender).length} ${Object.keys(peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(withoutRecipientError).length})` : ""}
-\u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041A\u0410 \u041F\u041E\u0418\u0421\u041A\u0410 \u041F\u041E \u041D\u041E\u041C\u0415\u0420\u0423: ${Object.keys(phoneSearchError).length}${Object.keys(aiReqest).length > 0 ? `
-
-* \u0418\u0418 *
-${Object.keys(aiReqest).map((r) => `${r}: ${aiReqest[r]} requests, ${aiRetryError[r] || 0} errors`).join("\n")}` : ""}`);
-};
-
 // src/sender/helpers/makeMetricsAll.ts
 var makeMetricsAll = async (promises) => {
   const globalMetrics = {
@@ -52277,12 +52158,6 @@ CHUNK_ID: ${promise.chunkId}`);
         clientsData: promise.clientsData,
         endTime: promise.endTime
       });
-      await makeMetrics(
-        promise.chunkId,
-        promise.clients,
-        promise.clientsData,
-        promise.endTime
-      );
     }
   }
   if (successPromises.length > 0) {

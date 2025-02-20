@@ -5,7 +5,6 @@ import { Worker } from 'worker_threads';
 
 import { getAccountCreationDate } from './db/accounts';
 import { coreDB, logsDB } from './db/db';
-import { makeMetrics } from './helpers/makeMetrics';
 import { makeMetricsAll } from './helpers/makeMetricsAll';
 import { sendToMainBot } from './helpers/sendToMainBot';
 
@@ -137,12 +136,6 @@ CHUNK_ID: ${promise.chunkId}`);
         clientsData: promise.clientsData,
         endTime: promise.endTime,
       });
-      await makeMetrics(
-        promise.chunkId,
-        promise.clients,
-        promise.clientsData,
-        promise.endTime
-      );
     }
   }
 

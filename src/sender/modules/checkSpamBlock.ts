@@ -155,7 +155,10 @@ const fileComplaint = async (
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
   } else {
-    if (!buttons.includes('I was wrong, please release me now')) {
+    if (
+      !buttons.includes('I was wrong, please release me now') ||
+      !buttons.includes('I’m actually a spammer')
+    ) {
       await sendToMainBot(`** SPAMBOT_BUTTONS_NOT_FOUND **
 BUTTONS: ${buttons.join(', ')}`);
     }
