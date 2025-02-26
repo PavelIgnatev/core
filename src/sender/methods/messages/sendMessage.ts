@@ -67,7 +67,8 @@ export const sendMessage = async (
   message: string,
   accountId: string,
   withTyping: boolean,
-  withReadHistory: boolean
+  withReadHistory: boolean,
+  withFilter: boolean = true
 ) => {
   let messageUpdate;
   try {
@@ -90,12 +91,14 @@ export const sendMessage = async (
       }
     }
 
+    const filtredMessage = withFilter
+      ? removeNonAlphaPrefix(capitalizeFirstLetter(reduceSpaces(message)))
+      : message;
+
     const update = await invokeRequest(
       client,
       new GramJs.messages.SendMessage({
-        message: removeNonAlphaPrefix(
-          capitalizeFirstLetter(reduceSpaces(message))
-        ),
+        message: filtredMessage,
         clearDraft: true,
         peer: new GramJs.InputPeerUser({
           userId: BigInt(userId),

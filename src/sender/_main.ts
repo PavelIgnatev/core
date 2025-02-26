@@ -33,6 +33,7 @@ import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
+import { personalChannel } from './modules/personalChannel';
 
 const exec = util.promisify(childExec);
 
@@ -110,6 +111,7 @@ const starter = async (
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
+    await personalChannel(ID, client);
 
     let i = -1;
     while (true) {
@@ -195,14 +197,14 @@ ID: ${ID}`);
       await sendToMainBot(
         `** BAN ACCOUNT **
 ID: ${ID};
-Error: ${e.message}`
+ERROR: ${e.message}`
       );
       await client?.disconnect();
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
 ID: ${ID};
-Error: ${e.message}`
+ERROR: ${e.message}`
       );
     }
   }

@@ -2,6 +2,7 @@ import BigInt from 'big-integer';
 
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
+import { updateAccountById } from '../db/accounts';
 import { generateCustomString } from '../helpers/generateCustomString';
 import { sleep } from '../helpers/helpers';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
@@ -10,8 +11,43 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
-export const personalChannel = async (client: TelegramClient) => {
-  const parentChannel = await resolveUsername(client, 'mp1wFVdJU1szODJi');
+export const personalChannel = async (
+  accountId: string,
+  client: TelegramClient
+) => {
+  if (
+    ![
+      '6532170006-prefix-aisender',
+      '7182563201-prefix-aisender',
+      '5765644686-prefix-aisender',
+      '7083414397-prefix-aisender',
+      '6516454392-prefix-aisender',
+      '6088274769-prefix-aisender',
+      '7327879244-prefix-aisender',
+      '7330642051-prefix-aisender',
+      '6034690340-prefix-aisender',
+      '7043459945-prefix-aisender',
+      '7332632555-prefix-aisender',
+      '7058455435-prefix-aisender',
+      '7230116304-prefix-aisender',
+      '6976113445-prefix-aisender',
+      '6823941440-prefix-aisender',
+      '6589786445-prefix-aisender',
+      '6469489107-prefix-aisender',
+      '7002207564-prefix-aisender',
+      '7270182020-prefix-aisender',
+      '6831860505-prefix-aisender',
+      '6914272452-prefix-aisender',
+      '6736252842-prefix-aisender',
+      '7068775107-prefix-aisender',
+      '6129790891-prefix-aisender',
+      '7492136483-prefix-aisender',
+    ].includes(accountId)
+  ) {
+    return;
+  }
+
+  const parentChannel = await resolveUsername(client, 'fakerchannel');
 
   if (!parentChannel) {
     throw new Error('PARENT_CHANNEL_NOT_FOUND');
@@ -314,7 +350,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const startBotFatherMessages = await getHistory(
       client,
       String(botFatherUserId),
@@ -340,7 +376,7 @@ export const personalChannel = async (client: TelegramClient) => {
         false
       );
 
-      await sleep(5000);
+      await sleep(30000);
       const deleteBotFatherMessages = await getHistory(
         client,
         String(botFatherUserId),
@@ -388,7 +424,7 @@ export const personalChannel = async (client: TelegramClient) => {
           false
         );
 
-        await sleep(5000);
+        await sleep(30000);
         const deleteBotFatherMessages = await getHistory(
           client,
           String(botFatherUserId),
@@ -413,7 +449,7 @@ export const personalChannel = async (client: TelegramClient) => {
           false
         );
 
-        await sleep(5000);
+        await sleep(30000);
         const sureBotFatherMessages = await getHistory(
           client,
           String(botFatherUserId),
@@ -440,7 +476,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const newBotFatherMessages = await getHistory(
       client,
       String(botFatherUserId),
@@ -466,7 +502,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const nameBotFatherMessages = await getHistory(
       client,
       String(botFatherUserId),
@@ -493,7 +529,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const usernameBotFatherMessages = await getHistory(
       client,
       String(botFatherUserId),
@@ -611,7 +647,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const startBotControllerMessages = await getHistory(
       client,
       String(botControllerUserId),
@@ -636,7 +672,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(15000);
+    await sleep(30000);
     const addChannelBotControllerMessages = await getHistory(
       client,
       String(botControllerUserId),
@@ -687,7 +723,7 @@ export const personalChannel = async (client: TelegramClient) => {
         }
       }
 
-      await sleep(15000);
+      await sleep(30000);
       const addChannelBotControllerMessages2 = await getHistory(
         client,
         String(botControllerUserId),
@@ -735,7 +771,7 @@ export const personalChannel = async (client: TelegramClient) => {
         }
       }
 
-      await sleep(15000);
+      await sleep(30000);
       const addChannelBotControllerMessages3 = await getHistory(
         client,
         String(botControllerUserId),
@@ -770,7 +806,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(15000);
+    await sleep(30000);
     const tokenBotControllerMessages = await getHistory(
       client,
       String(botControllerUserId),
@@ -796,7 +832,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(15000);
+    await sleep(30000);
     const usernameBotControllerMessages = await getHistory(
       client,
       String(botControllerUserId),
@@ -822,7 +858,7 @@ export const personalChannel = async (client: TelegramClient) => {
         false
       );
 
-      await sleep(5000);
+      await sleep(30000);
       const usernameBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -868,7 +904,7 @@ export const personalChannel = async (client: TelegramClient) => {
         }
       }
 
-      await sleep(5000);
+      await sleep(30000);
       const usernameBotControllerMessages2 = await getHistory(
         client,
         String(botControllerUserId),
@@ -896,7 +932,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const startNewBotFatherMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -944,7 +980,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const startNewBotFatherMessages2 = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -990,7 +1026,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const startNewBotFatherMessages3 = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1034,7 +1070,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const startNewBotFatherMessages4 = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1060,7 +1096,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const lastMessageNewBotFatherMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1103,7 +1139,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const lastMessageNewBotFatherMessages2 = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1133,7 +1169,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const buttonsTextMessageMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1158,7 +1194,7 @@ export const personalChannel = async (client: TelegramClient) => {
       false
     );
 
-    await sleep(5000);
+    await sleep(30000);
     const sendMessageMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1202,7 +1238,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const sureMessageMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1248,7 +1284,7 @@ export const personalChannel = async (client: TelegramClient) => {
       }
     }
 
-    await sleep(5000);
+    await sleep(30000);
     const sendedMessageMessages = await getHistory(
       client,
       String(newBotFatherUserId),
@@ -1312,7 +1348,7 @@ export const personalChannel = async (client: TelegramClient) => {
     false
   );
 
-  await sleep(5000);
+  await sleep(30000);
   const startMessages = await getHistory(
     client,
     String(userId),
@@ -1333,7 +1369,7 @@ export const personalChannel = async (client: TelegramClient) => {
     false,
     false
   );
-  await sleep(5000);
+  await sleep(30000);
   const usernameMessages = await getHistory(
     client,
     String(userId),
@@ -1394,5 +1430,7 @@ export const personalChannel = async (client: TelegramClient) => {
     throw new Error('UPDATE_PERSONAL_CHANNEL_NOT_FOUND');
   }
 
-  console.log('done', username);
+  await updateAccountById(accountId, {
+    personalChannel: username,
+  });
 };

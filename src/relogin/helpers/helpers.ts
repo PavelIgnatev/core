@@ -9,7 +9,7 @@ export function capitalizeFirstLetter(string: string) {
 }
 
 export function removeNonAlphaPrefix(string: string) {
-  if (string === '/start') {
+  if (string[0] === '/') {
     return string;
   }
 

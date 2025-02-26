@@ -7,7 +7,6 @@ import { getUserInformation } from '../helpers/getUserInformation';
 import {
   endSender,
   errorSender,
-  getWeekday,
   peerFloods,
   phoneSearchError,
   sleep,

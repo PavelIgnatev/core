@@ -152,12 +152,6 @@ export const automaticCheck = async (
           !fullUser.users.length ||
           fullUser.users[0] instanceof GramJs.UserEmpty
         ) {
-          await sendToMainBot(
-            `** AUTOMATIC: FULL USER NOT FOUND **
-ACCOUNT_ID: ${accountId}
-ID: ${id}
-ACCESS_HASH: ${accessHash}`
-          );
           continue;
         }
 
