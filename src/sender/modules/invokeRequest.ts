@@ -44,9 +44,13 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       });
     }
 
-    if (err.message === 'No workers running') {
+    if (
+      err.message === 'No workers running' ||
+      err.message === 'USER_RESTRICTED'
+    ) {
       throw new Error(err.message);
     }
+
     if (
       [
         'USER_DEACTIVATED_BAN',

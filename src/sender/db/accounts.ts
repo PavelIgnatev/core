@@ -78,6 +78,18 @@ export const updateAccountById = async (
   );
 };
 
+export const unsetAccountById = async (
+  accountId: string,
+  accountData: object
+) => {
+  const accountCollection = await getAccountCollection();
+
+  await accountCollection.findOneAndUpdate(
+    { accountId },
+    { $unset: { ...accountData } }
+  );
+};
+
 export const incrementMessageCount = async (accountId: string) => {
   const accountCollection = await getAccountCollection();
 
