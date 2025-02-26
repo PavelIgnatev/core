@@ -21,6 +21,18 @@ export const personalChannel = async (
   if (
     personalChannelAccount ||
     ![
+      '+79123888760-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123956635-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123965682-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123965993-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123966529-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123983167-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123983323-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123983699-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123983817-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123984059-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123985129-256-after-lolz-new-19-sep-prefix-aisender',
+      '+79123985139-256-after-lolz-new-19-sep-prefix-aisender',
       '6532170006-prefix-aisender',
       '7182563201-prefix-aisender',
       '5765644686-prefix-aisender',
