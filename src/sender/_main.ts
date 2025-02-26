@@ -111,7 +111,7 @@ const starter = async (
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
     const meId = await getMe(client, ID, tgId);
-    await personalChannel(ID, client);
+    await personalChannel(account, client);
 
     let i = -1;
     while (true) {

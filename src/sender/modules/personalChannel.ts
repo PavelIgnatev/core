@@ -2,6 +2,7 @@ import BigInt from 'big-integer';
 
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
+import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { generateCustomString } from '../helpers/generateCustomString';
 import { sleep } from '../helpers/helpers';
@@ -12,10 +13,13 @@ import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
 export const personalChannel = async (
-  accountId: string,
+  account: Account,
   client: TelegramClient
 ) => {
+  const { personalChannel: personalChannelAccount, accountId } = account;
+
   if (
+    personalChannelAccount ||
     ![
       '6532170006-prefix-aisender',
       '7182563201-prefix-aisender',

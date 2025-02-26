@@ -38,6 +38,8 @@ export interface Account {
     spamBlockInitDate?: Date;
   }>;
 
+  personalChannel?: string;
+
   banned?: boolean;
   setuped?: boolean;
 
