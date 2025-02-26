@@ -257,7 +257,6 @@ DIALOG: ${JSON.stringify(dialog)}`
         ) {
           await updateSimpleDialogue(accountId, userId, {
             read: true,
-            dateUpdated: new Date(),
           });
         }
       }
