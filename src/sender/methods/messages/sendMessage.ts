@@ -68,7 +68,8 @@ export const sendMessage = async (
   accountId: string,
   withTyping: boolean,
   withReadHistory: boolean,
-  withFilter: boolean = true
+  withFilter: boolean = true,
+  entities: GramJs.TypeMessageEntity[] = []
 ) => {
   let messageUpdate;
   try {
@@ -104,6 +105,7 @@ export const sendMessage = async (
           userId: BigInt(userId),
           accessHash: BigInt(accessHash),
         }),
+        entities: entities.length > 0 ? entities : undefined,
         randomId: BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10),
       })
     );

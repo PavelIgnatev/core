@@ -21,6 +21,170 @@ export const personalChannel = async (
   if (
     personalChannelAccount ||
     ![
+      '5386260304-prefix-aisender',
+      '5469313688-prefix-aisender',
+      '5469527077-prefix-aisender',
+      '5475614681-prefix-aisender',
+      '5475884972-prefix-aisender',
+      '5478693194-prefix-aisender',
+      '5479580380-prefix-aisender',
+      '5482050979-prefix-aisender',
+      '5482140410-prefix-aisender',
+      '5486986079-prefix-aisender',
+      '5487204260-prefix-aisender',
+      '5487692327-prefix-aisender',
+      '5495171448-prefix-aisender',
+      '5497094785-prefix-aisender',
+      '5504388853-prefix-aisender',
+      '5504476351-prefix-aisender',
+      '5509678791-prefix-aisender',
+      '5510921997-prefix-aisender',
+      '5514833287-prefix-aisender',
+      '5518553090-prefix-aisender',
+      '5519401495-prefix-aisender',
+      '5529022002-prefix-aisender',
+      '5531976720-prefix-aisender',
+      '5534122955-prefix-aisender',
+      '5534381735-prefix-aisender',
+      '5543808790-prefix-aisender',
+      '5548406987-prefix-aisender',
+      '5553328834-prefix-aisender',
+      '5558528492-prefix-aisender',
+      '5560743837-prefix-aisender',
+      '5567905608-prefix-aisender',
+      '5570124313-prefix-aisender',
+      '5572985888-prefix-aisender',
+      '5576603587-prefix-aisender',
+      '5591750365-prefix-aisender',
+      '5592519319-prefix-aisender',
+      '5594101497-prefix-aisender',
+      '5595483244-prefix-aisender',
+      '5605960529-prefix-aisender',
+      '5610227341-prefix-aisender',
+      '5616514162-prefix-aisender',
+      '5624545022-prefix-aisender',
+      '5627166966-prefix-aisender',
+      '5631272153-prefix-aisender',
+      '5631567765-prefix-aisender',
+      '5632445501-prefix-aisender',
+      '5643720540-prefix-aisender',
+      '5646455911-prefix-aisender',
+      '5650298252-prefix-aisender',
+      '5654284732-prefix-aisender',
+      '5656620295-prefix-aisender',
+      '5658346140-prefix-aisender',
+      '5666357712-prefix-aisender',
+      '5667201864-prefix-aisender',
+      '5673078660-prefix-aisender',
+      '5673419317-prefix-aisender',
+      '5676294047-prefix-aisender',
+      '5678057293-prefix-aisender',
+      '5684983534-prefix-aisender',
+      '5698690702-prefix-aisender',
+      '5700928171-prefix-aisender',
+      '5702422554-prefix-aisender',
+      '5703212098-prefix-aisender',
+      '5707088380-prefix-aisender',
+      '5707529498-prefix-aisender',
+      '5714656568-prefix-aisender',
+      '5715682591-prefix-aisender',
+      '5716633507-prefix-aisender',
+      '5716900607-prefix-aisender',
+      '5722018852-prefix-aisender',
+      '5723214829-prefix-aisender',
+      '5724905979-prefix-aisender',
+      '5731829452-prefix-aisender',
+      '5732308556-prefix-aisender',
+      '573503789171-columbaaaaaaain-8-dec-prefix-aisender',
+      '573504911906-columbaaaaaaain-8-dec-prefix-aisender',
+      '573505217690-columbaaaaaaain-8-dec-prefix-aisender',
+      '573505570222-cooooooolunbain-9-dec-prefix-aisender',
+      '573505646469-cooooooolunbain-9-dec-prefix-aisender',
+      '573505647505-cooooooolunbain-9-dec-prefix-aisender',
+      '573505926968-cooooooolunbain-9-dec-prefix-aisender',
+      '573505957314-cooooooolunbain-9-dec-prefix-aisender',
+      '573506023539-cooooooolunbain-9-dec-prefix-aisender',
+      '573506024813-cooooooolunbain-9-dec-prefix-aisender',
+      '573506025316-cooooooolunbain-9-dec-prefix-aisender',
+      '573506026017-cooooooolunbain-9-dec-prefix-aisender',
+      '573506026307-cooooooolunbain-9-dec-prefix-aisender',
+      '573506028151-cooooooolunbain-9-dec-prefix-aisender',
+      '573506032491-cooooooolunbain-9-dec-prefix-aisender',
+      '573506034616-cooooooolunbain-9-dec-prefix-aisender',
+      '573506085116-cooooooolunbain-9-dec-prefix-aisender',
+      '573506085481-cooooooolunbain-9-dec-prefix-aisender',
+      '573506088980-cooooooolunbain-9-dec-prefix-aisender',
+      '573506192735-cooooooolunbain-9-dec-prefix-aisender',
+      '573506193079-cooooooolunbain-9-dec-prefix-aisender',
+      '573506202625-cooooooolunbain-9-dec-prefix-aisender',
+      '573506343986-cooooooolunbain-9-dec-prefix-aisender',
+      '573506344124-cooooooolunbain-9-dec-prefix-aisender',
+      '573506357038-cooooooolunbain-9-dec-prefix-aisender',
+      '573506359157-cooooooolunbain-9-dec-prefix-aisender',
+      '573506360967-cooooooolunbain-9-dec-prefix-aisender',
+      '573506362215-cooooooolunbain-9-dec-prefix-aisender',
+      '573506365415-cooooooolunbain-9-dec-prefix-aisender',
+      '573506365691-cooooooolunbain-9-dec-prefix-aisender',
+      '573507220680-cooooooolunbain-9-dec-prefix-aisender',
+      '573507565072-cooooooolunbain-9-dec-prefix-aisender',
+      '573507581194-cooooooolunbain-9-dec-prefix-aisender',
+      '573507831727-cooooooolunbain-9-dec-prefix-aisender',
+      '573507832918-cooooooolunbain-9-dec-prefix-aisender',
+      '573507833172-cooooooolunbain-9-dec-prefix-aisender',
+      '573507833573-cooooooolunbain-9-dec-prefix-aisender',
+      '573507833947-cooooooolunbain-9-dec-prefix-aisender',
+      '573508203532-cooooooolunbain-9-dec-prefix-aisender',
+      '573508203812-cooooooolunbain-9-dec-prefix-aisender',
+      '573508344416-cooooooolunbain-9-dec-prefix-aisender',
+      '573508850358-cooooooolunbain-9-dec-prefix-aisender',
+      '5826229423-prefix-aisender',
+      '5826630644-prefix-aisender',
+      '5842862546-prefix-aisender',
+      '5847180260-prefix-aisender',
+      '5850856834-prefix-aisender',
+      '5858141661-prefix-aisender',
+      '5858794681-prefix-aisender',
+      '5917588640-prefix-aisender',
+      '5918320640-prefix-aisender',
+      '5926024689-prefix-aisender',
+      '5930791750-prefix-aisender',
+      '5933808365-prefix-aisender',
+      '5934992445-prefix-aisender',
+      '5937352554-prefix-aisender',
+      '5950103767-prefix-aisender',
+      '5963221043-prefix-aisender',
+      '5967945454-prefix-aisender',
+      '5968285246-prefix-aisender',
+      '6038569175-prefix-aisender',
+      '6039251122-prefix-aisender',
+      '6040903483-prefix-aisender',
+      '6041097064-prefix-aisender',
+      '6044004814-prefix-aisender',
+      '6045508502-prefix-aisender',
+      '6049219449-prefix-aisender',
+      '6054455379-prefix-aisender',
+      '6056175848-prefix-aisender',
+      '6057228387-prefix-aisender',
+      '6057247295-prefix-aisender',
+      '6061667277-prefix-aisender',
+      '6064539755-prefix-aisender',
+      '6065456630-prefix-aisender',
+      '6065951244-prefix-aisender',
+      '6067612726-prefix-aisender',
+      '6077867584-prefix-aisender',
+      '6081060682-prefix-aisender',
+      '6084389593-prefix-aisender',
+      '6088274769-prefix-aisender',
+      '6088367570-prefix-aisender',
+      '6095956045-prefix-aisender',
+      '6097803459-prefix-aisender',
+      '6102022333-prefix-aisender',
+      '6105707638-prefix-aisender',
+      '6109876094-prefix-aisender',
+      '6112055593-prefix-aisender',
+      '6117891563-prefix-aisender',
+      '6119636939-prefix-aisender',
+      '6120550152-prefix-aisender',
       '+79123888760-256-after-lolz-new-19-sep-prefix-aisender',
       '+79123956635-256-after-lolz-new-19-sep-prefix-aisender',
       '+79123965682-256-after-lolz-new-19-sep-prefix-aisender',
@@ -64,7 +228,7 @@ export const personalChannel = async (
   }
 
   try {
-    const parentChannel = await resolveUsername(client, 'fakerchannel');
+    const parentChannel = await resolveUsername(client, 'channelforcopyy');
 
     if (!parentChannel) {
       throw new Error('PARENT_CHANNEL_NOT_FOUND');
@@ -308,29 +472,30 @@ export const personalChannel = async (
       }
     }
 
-    const forwardedMessages = await invokeRequest(
-      client,
-      new GramJs.messages.ForwardMessages({
-        fromPeer: new GramJs.InputPeerChannel({
-          channelId: parentChannelChat.id,
-          accessHash: parentChannelChat.accessHash,
-        }),
-        toPeer: new GramJs.InputPeerChannel({
-          channelId: newChannel.id,
-          accessHash: newChannel.accessHash,
-        }),
-        randomId: ids.map(() =>
-          BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
-        ),
-        id: ids,
-        dropAuthor: true,
-      })
-    );
+    if (ids.length) {
+      const forwardedMessages = await invokeRequest(
+        client,
+        new GramJs.messages.ForwardMessages({
+          fromPeer: new GramJs.InputPeerChannel({
+            channelId: parentChannelChat.id,
+            accessHash: parentChannelChat.accessHash,
+          }),
+          toPeer: new GramJs.InputPeerChannel({
+            channelId: newChannel.id,
+            accessHash: newChannel.accessHash,
+          }),
+          randomId: ids.map(() =>
+            BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10)
+          ),
+          id: ids,
+          dropAuthor: true,
+        })
+      );
 
-    if (!forwardedMessages) {
-      throw new Error('FORWARDED_MESSAGES_NOT_FOUND');
+      if (!forwardedMessages) {
+        throw new Error('FORWARDED_MESSAGES_NOT_FOUND');
+      }
     }
-
     if (lastMessage.message && buttons.length) {
       const botFather = await resolveUsername(client, 'botfather');
       if (
@@ -1119,6 +1284,8 @@ export const personalChannel = async (
         throw new Error('START_NEW_BOT_FATHER_MESSAGES_NOT_FOUND4');
       }
 
+      console.log(lastMessage.message, lastMessage.entities);
+
       const lastMessageNewBotFatherMessage = await sendMessage(
         client,
         String(newBotFatherUserId),
@@ -1127,7 +1294,8 @@ export const personalChannel = async (
         '',
         false,
         false,
-        false
+        false,
+        lastMessage.entities
       );
 
       await sleep(30000);
