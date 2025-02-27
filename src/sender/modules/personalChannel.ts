@@ -1284,8 +1284,6 @@ export const personalChannel = async (
         throw new Error('START_NEW_BOT_FATHER_MESSAGES_NOT_FOUND4');
       }
 
-      console.log(lastMessage.message, lastMessage.entities);
-
       const lastMessageNewBotFatherMessage = await sendMessage(
         client,
         String(newBotFatherUserId),
