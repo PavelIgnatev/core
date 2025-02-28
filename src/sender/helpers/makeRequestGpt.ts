@@ -54,7 +54,7 @@ const validateText = (
   const englishRegex = /^[a-z]+$/i;
 
   const pattern =
-    /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+    /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,2000}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
   const links = inputString.match(pattern);
   if (links) {
     for (const link of links) {
@@ -316,7 +316,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       );
 
       const pattern =
-        /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,6}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
+        /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,2000}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
       const hasTextLink = message.match(pattern);
 
       message = isRemoveGreetings ? removeGreetings(message) : message;
