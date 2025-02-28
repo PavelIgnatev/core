@@ -51,9 +51,7 @@ export const handleUpdate = async (
     update.className === 'UpdateUserStatus' ||
     update.className === 'UpdateUserTyping'
   ) {
-    if (process.env.DEV !== 'true') {
-      return;
-    }
+    return;
   }
 
   console.log({
