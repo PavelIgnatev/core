@@ -177,7 +177,8 @@ ID: ${this._accountId}`);
               request.className === 'contacts.Block' ||
               request.className === 'contacts.Unblock' ||
               request.className === 'messages.DeleteChatUser' ||
-              request.className === 'account.UpdatePasswordSettings'
+              request.className === 'account.UpdatePasswordSettings' ||
+              request.className === 'channels.UpdateUsername'
             ) {
               state.finished.resolve();
               throw e;
