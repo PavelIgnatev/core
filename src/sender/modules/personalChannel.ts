@@ -121,7 +121,8 @@ export const personalChannel = async (
           accessHash: newChannel.accessHash,
         }),
         username,
-      })
+      }),
+      { shouldIgnoreErrors: true }
     );
 
     if (!channelUsername) {
