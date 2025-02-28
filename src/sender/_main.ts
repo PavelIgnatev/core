@@ -33,7 +33,6 @@ import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { personalChannel } from './modules/personalChannel';
-import { setup2FA } from './methods/account/setup2FA';
 
 const exec = util.promisify(childExec);
 
@@ -48,7 +47,7 @@ const starter = async (
 ) => {
   const startTime = performance.now();
 
-  let isAutoResponse = true;
+  let isAutoResponse = false;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
@@ -147,7 +146,7 @@ const starter = async (
           }
 
           if (i === randomI) {
-            await setup2FA(client, account);
+            // await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
