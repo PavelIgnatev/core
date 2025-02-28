@@ -3,7 +3,7 @@ const { WebSocket } = require('ws');
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
-const MAX_TIMEOUT = 30000;
+const MAX_TIMEOUT = 15000;
 
 class PromisedWebSockets {
   constructor(accountId, disconnectedCallback) {
