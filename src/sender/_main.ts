@@ -25,6 +25,7 @@ import {
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
+import { setup2FA } from './methods/account/setup2FA';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { getMe } from './methods/users/getMe';
@@ -33,7 +34,6 @@ import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { personalChannel } from './modules/personalChannel';
-import { setup2FA } from './methods/account/setup2FA';
 
 const exec = util.promisify(childExec);
 
@@ -164,7 +164,10 @@ const starter = async (
       message: `MAIN_ERROR (${e.message})`,
     });
 
-    if (e.message.includes('GLOBAL_ERROR')) {
+    if (
+      e.message.includes('GLOBAL_ERROR') ||
+      e.message.includes('No workers running')
+    ) {
     } else if (e.message.includes('STOPPED_ERROR')) {
       await updateAccountById(ID, {
         stopped: true,

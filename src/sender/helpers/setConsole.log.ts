@@ -37,6 +37,13 @@ const mongoLog = async (level: string, ...args: any[]) => {
   const promise = (async () => {
     try {
       if (typeof args[0] !== 'object') {
+        if (
+          typeof args[0] === 'string' &&
+          args[0].includes('MaxListenersExceededWarning')
+        ) {
+          return;
+        }
+
         throw new Error('LOG_NOT_OBJECT');
       }
 

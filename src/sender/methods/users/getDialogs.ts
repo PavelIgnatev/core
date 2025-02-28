@@ -41,9 +41,6 @@ export const getDialogs = async (
       const id = getIdByPeer(dialog.peer);
       const message = d.messages.find((m) => getIdByPeer(m.peerId) === id);
       if (!message) {
-        await sendToMainBot(`** GET USERS: MESSAGE ERROR **
-ACCOUNT ID: ${accountId}
-DIALOG: ${JSON.stringify(dialog)}`);
         continue;
       }
 
