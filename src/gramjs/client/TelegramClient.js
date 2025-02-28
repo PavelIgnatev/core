@@ -211,11 +211,11 @@ ERROR: ${e.message}`
           await sleep(2000);
           await this.connect();
         } else if (e.message === 'TIMEOUT_ERROR') {
-          // if (request.className !== 'account.UpdateStatus') {
+          if (request.className !== 'account.UpdateStatus') {
             this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
-          // }
+          }
 
           await this._sender.reconnect();
         } else if (e instanceof errors.TimedOutError) {
