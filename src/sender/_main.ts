@@ -96,17 +96,17 @@ const starter = async (
           client._sender.userDisconnected ||
           errored
         ) {
-          setTimeout(checkStatus, 20000);
+          setTimeout(checkStatus, 15000);
           return;
         }
 
         await updateStatus(client, false);
-        setTimeout(checkStatus, 20000);
+        setTimeout(checkStatus, 15000);
       } catch (error: any) {
         errored = error.message;
       }
     };
-    setTimeout(checkStatus, 20000);
+    setTimeout(checkStatus, 15000);
 
     await clearAuthorizations(client);
     const tgFirstName = await accountSetup(client, account, setuped, firstName);
