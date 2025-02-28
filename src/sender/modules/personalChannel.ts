@@ -283,19 +283,16 @@ export const personalChannel = async (
         throw new Error('CHANNEL_NOT_DEFINED');
       }
 
-      const deletedChannel = await invokeRequest(
+      await invokeRequest(
         client,
         new GramJs.channels.DeleteChannel({
           channel: new GramJs.InputChannel({
             channelId: chat.id,
             accessHash: chat.accessHash,
           }),
-        })
+        }),
+        { shouldIgnoreErrors: true }
       );
-
-      if (!deletedChannel) {
-        throw new Error('CHANNEL_NOT_DELETED');
-      }
     }
 
     const fullChannel = await invokeRequest(
