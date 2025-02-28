@@ -321,7 +321,6 @@ export const personalChannel = async (
     }
 
     const username = generateCustomString();
-
     const channelUsername = await invokeRequest(
       client,
       new GramJs.channels.UpdateUsername({

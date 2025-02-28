@@ -146,7 +146,14 @@ ID: ${this._accountId}`);
         const result = await Promise.race([
           state.promise,
           new Promise((_, r) =>
-            setTimeout(() => r(new Error('TIMEOUT_ERROR')), maxTimeout)
+            setTimeout(() => {
+              if (
+                this._sender._user_connected &&
+                !this._sender.isReconnecting
+              ) {
+                r(new Error('TIMEOUT_ERROR'));
+              }
+            }, maxTimeout)
           ),
         ]);
 
@@ -204,11 +211,7 @@ ERROR: ${e.message}`
           await sleep(2000);
           await this.connect();
         } else if (e.message === 'TIMEOUT_ERROR') {
-          if (
-            request.className !== 'account.UpdateStatus' &&
-            this._sender._user_connected &&
-            !this._sender.isReconnecting
-          ) {
+          if (request.className !== 'account.UpdateStatus') {
             this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
