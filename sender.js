@@ -52470,7 +52470,7 @@ var getAccountCreationDate = async () => {
   const sortedAccounts = accountsWithTimestamp.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
-  const CHUNK_SIZE = 300;
+  const CHUNK_SIZE = 100;
   const chunks = [];
   for (let i = 0; i < sortedAccounts.length; i += CHUNK_SIZE) {
     const chunk = sortedAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
