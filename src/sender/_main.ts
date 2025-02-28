@@ -47,7 +47,7 @@ const starter = async (
 ) => {
   const startTime = performance.now();
 
-  let isAutoResponse = false;
+  let isAutoResponse = true;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
