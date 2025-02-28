@@ -52457,6 +52457,7 @@ var getAccountCreationDate = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.find(
     {
+      accountId: RegExp("aisender"),
       banned: { $ne: true },
       stopped: { $ne: true }
     },
