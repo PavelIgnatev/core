@@ -18,7 +18,6 @@ export const personalChannel = async (
 ) => {
   const { personalChannel: personalChannelAccount, accountId } = account;
 
-  console.log(!accountId.includes('aisender'));
   if (personalChannelAccount || !accountId.includes('aisender')) {
     return;
   }
