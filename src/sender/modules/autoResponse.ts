@@ -72,7 +72,11 @@ export const autoResponse = async (
     const language = gLanguage || 'RUSSIAN';
     const myName = language === 'RUSSIAN' ? converterName(meName) : meName;
     const stage = Math.ceil(step / 2);
-    const parted = stage === 2 && part ? part.trim() : '';
+    const parted = personalChannel
+      ? `t.me/${personalChannel}`
+      : stage === 2 && part
+        ? part.trim()
+        : '';
 
     let systemPrompt = `You are "${myName}" (role assistant, role <ASSISTANT>, ${gender} gender), acting as role "${aiRole}". Your name: ${myName}. Your gender: ${gender}. Fully adopt this identity as a real person whose task is to deeply engage the user within the context of ASSISTANT_COMPANY_DESCRIPTION. You have initiated the conversation with the user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION.${
       stage >= 2 && goal ? `\n!IMPORTANT INSTRUCTION!: **${goal}**` : ''
@@ -143,7 +147,7 @@ ${addedInformation}`
 Current date and time: ${getDateNow()}`;
 
     if (personalChannel) {
-      systemPrompt = systemPrompt.replace(pattern, personalChannel);
+      systemPrompt = systemPrompt.replace(pattern, `t.me/${personalChannel}`);
     }
 
     const replyMessage = await makeRequestGpt(
