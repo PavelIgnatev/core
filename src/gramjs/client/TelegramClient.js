@@ -135,6 +135,8 @@ ID: ${this._accountId}`);
     }
 
     const es = [];
+    const maxTimeout =
+      request.className === 'account.UpdateStatus' ? 10000 : 30000;
     const state = new RequestState(request);
 
     let attempt = 0;
@@ -151,7 +153,7 @@ ID: ${this._accountId}`);
               ) {
                 r(new Error('TIMEOUT_ERROR'));
               }
-            }, 10000)
+            }, maxTimeout)
           ),
         ]);
 
@@ -209,9 +211,11 @@ ERROR: ${e.message}`
           await sleep(2000);
           await this.connect();
         } else if (e.message === 'TIMEOUT_ERROR') {
-          this._onError(`💀 TIMEOUT_ERROR (10000ms) 💀
+          if (request.className !== 'account.UpdateStatus') {
+            this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
+          }
 
           await this._sender.reconnect();
         } else if (e instanceof errors.TimedOutError) {

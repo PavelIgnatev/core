@@ -25,7 +25,6 @@ import {
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
-import { setup2FA } from './methods/account/setup2FA';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { getMe } from './methods/users/getMe';
@@ -48,7 +47,7 @@ const starter = async (
 ) => {
   const startTime = performance.now();
 
-  let isAutoResponse = true;
+  let isAutoResponse = false;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
   let errored = false;
@@ -147,7 +146,7 @@ const starter = async (
           }
 
           if (i === randomI) {
-            await setup2FA(client, account);
+            // await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
