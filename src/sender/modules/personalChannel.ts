@@ -96,7 +96,8 @@ export const personalChannel = async (
         broadcast: true,
         title,
         about,
-      })
+      }),
+      { shouldIgnoreErrors: true }
     );
 
     if (!fullChannel || !(fullChannel instanceof GramJs.Updates)) {
