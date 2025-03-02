@@ -41,9 +41,9 @@ export const personalChannel = async (
     ? accountId.split('-prefix-')[1]
     : null;
 
-  if (!pc || !prefix) {
+  // if (!pc || !prefix) {
     return;
-  }
+  // }
 
   try {
     const channel = await getChannel(prefix);
