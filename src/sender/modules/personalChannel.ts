@@ -826,7 +826,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(60000);
       const tokenBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
