@@ -13,6 +13,10 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
+// "TOKEN_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
+// "ADD_CHANNEL_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
+// "START_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
+
 const isPersonalChannel = (account: Account) => {
   const { personalChannel, personalChannelDate } = account;
 
@@ -27,7 +31,7 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  return days >= 0.25;
+  return days >= 0;
 };
 
 export const personalChannel = async (
@@ -41,9 +45,9 @@ export const personalChannel = async (
     ? accountId.split('-prefix-')[1]
     : null;
 
-  // if (!pc || !prefix) {
+  if (!pc || !prefix) {
     return;
-  // }
+  }
 
   try {
     const channel = await getChannel(prefix);
@@ -321,7 +325,12 @@ export const personalChannel = async (
         throw new Error('FORWARDED_MESSAGES_NOT_FOUND');
       }
     }
+
     if (lastMessage.message && buttons.length) {
+      await new Promise((r) =>
+        setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
+      );
+
       const botFather = await resolveUsername(client, 'botfather');
       if (
         !botFather ||
@@ -659,7 +668,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(120000);
       const startBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -732,7 +741,8 @@ export const personalChannel = async (
                       msgId: addChannelBotControllerMessages[0].id,
                       data: button.data,
                       game: undefined,
-                    })
+                    }),
+                    { shouldIgnoreErrors: true }
                   );
                 }
               }
@@ -740,7 +750,7 @@ export const personalChannel = async (
           }
         }
 
-        await sleep(120000);
+        await sleep(30000);
         const addChannelBotControllerMessages2 = await getHistory(
           client,
           String(botControllerUserId),
@@ -782,7 +792,8 @@ export const personalChannel = async (
                     msgId: addChannelBotControllerMessages2[0].id,
                     data: button.data,
                     game: undefined,
-                  })
+                  }),
+                  { shouldIgnoreErrors: true }
                 );
               }
             }
@@ -826,7 +837,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(120000);
+      await sleep(300000);
       const tokenBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -919,7 +930,8 @@ export const personalChannel = async (
                     msgId: usernameBotControllerMessages[0].id,
                     data: button.data,
                     game: undefined,
-                  })
+                  }),
+                  { shouldIgnoreErrors: true }
                 );
               }
             }
@@ -1043,7 +1055,8 @@ export const personalChannel = async (
                   msgId: startNewBotFatherMessages2[0].id,
                   data: button.data,
                   game: undefined,
-                })
+                }),
+                { shouldIgnoreErrors: true }
               );
             }
           }
