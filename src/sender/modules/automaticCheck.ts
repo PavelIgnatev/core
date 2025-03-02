@@ -2,6 +2,7 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { Dialogue } from '../@types/Dialogue';
+import { updateAccountById } from '../db/accounts';
 import {
   getAccountDialogs,
   updateAutomaticDialogue,
@@ -24,11 +25,29 @@ import { getIdByPeer } from '../methods/peer/getIdByPeer';
 import { getDialogs } from '../methods/users/getDialogs';
 import { getFullUser } from '../methods/users/getFullUser';
 
+const isAutomaticCheck = (account: Account) => {
+  if (!account.automaticCheckDate) {
+    return true;
+  }
+
+  const days =
+    (new Date().getTime() - new Date(account.automaticCheckDate).getTime()) /
+    86400000;
+
+  return days >= 0.25;
+};
+
 export const automaticCheck = async (
   client: TelegramClient,
   account: Account
 ) => {
   const { accountId } = account;
+
+  const ac = isAutomaticCheck(account);
+  if (!ac) {
+    return;
+  }
+
   try {
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
@@ -186,6 +205,7 @@ export const automaticCheck = async (
             { read: true, withDialog: false }
           );
         }
+        dialogsWithReasonIds.push(userId);
       } else {
         const { user, type, message } = dialog;
         if (type !== 'user') {
@@ -203,6 +223,7 @@ DIALOG: ${JSON.stringify(dialog)}`
             userId,
             'automatic:account-deleted'
           );
+          dialogsWithReasonIds.push(userId);
         } else if (
           !user.status ||
           user.status instanceof GramJs.UserStatusEmpty
@@ -213,12 +234,14 @@ DIALOG: ${JSON.stringify(dialog)}`
             'automatic:blocked',
             { read: true, withDialog: true }
           );
+          dialogsWithReasonIds.push(userId);
         } else if (isBlocked) {
           await updateAutomaticDialogue(
             accountId,
             userId,
             'automatic:artificial-blocked'
           );
+          dialogsWithReasonIds.push(userId);
         } else if (!(message instanceof GramJs.Message)) {
           if (message instanceof GramJs.MessageEmpty) {
             await deleteMessages(client, [message.id], true);
@@ -230,6 +253,7 @@ DIALOG: ${JSON.stringify(dialog)}`
                 'automatic:messages-deleted',
                 { read: true, withDialog: true }
               );
+              dialogsWithReasonIds.push(userId);
             } else {
               await deleteMessages(client, [message.id], true);
             }
@@ -291,4 +315,8 @@ DIALOG: ${JSON.stringify(dialog)}`
 ACCOUNT ID: ${accountId}
 ERROR: ${e.message}`);
   }
+
+  await updateAccountById(account.accountId, {
+    automaticCheckDate: new Date(),
+  });
 };

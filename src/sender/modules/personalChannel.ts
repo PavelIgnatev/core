@@ -4,6 +4,7 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { unsetAccountById, updateAccountById } from '../db/accounts';
+import { getChannel } from '../db/channels';
 import { generateCustomString } from '../helpers/generateCustomString';
 import { sleep } from '../helpers/helpers';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
@@ -12,19 +13,50 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
+const isPersonalChannel = (account: Account) => {
+  const { personalChannel, personalChannelDate } = account;
+
+  if (personalChannel) {
+    return false;
+  }
+
+  if (!personalChannelDate) {
+    return true;
+  }
+
+  const days =
+    (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
+
+  return days >= 0.5;
+};
+
 export const personalChannel = async (
   account: Account,
   client: TelegramClient
 ) => {
-  const { personalChannel: personalChannelAccount, accountId } = account;
+  const { accountId } = account;
 
-  if (personalChannelAccount || !accountId.includes('aisender')) {
+  const pc = isPersonalChannel(account);
+  const prefix = accountId.includes('-prefix-')
+    ? accountId.split('-prefix-')[1]
+    : null;
+
+  if (!pc || !prefix) {
     return;
   }
 
   try {
-    const parentChannel = await resolveUsername(client, 'channelforcopyy');
+    const channel = await getChannel(prefix);
 
+    if (!channel) {
+      throw new Error('CHANNEL_NOT_FOUND');
+    }
+
+    if (!/^[a-zA-Z0-9]+$/.test(channel)) {
+      throw new Error('CHANNEL_NOT_VALID');
+    }
+
+    const parentChannel = await resolveUsername(client, channel);
     if (!parentChannel) {
       throw new Error('PARENT_CHANNEL_NOT_FOUND');
     }
@@ -1429,6 +1461,7 @@ export const personalChannel = async (
 
     await updateAccountById(accountId, {
       personalChannel: username,
+      personalChannelDate: new Date(),
     });
     await unsetAccountById(accountId, {
       personalChannelError: null,
@@ -1436,6 +1469,7 @@ export const personalChannel = async (
   } catch (error: any) {
     await updateAccountById(accountId, {
       personalChannelError: error.message,
+      personalChannelDate: new Date(),
     });
   }
 };

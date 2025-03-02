@@ -1,6 +1,5 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
-import { getAccountById } from '../db/accounts';
 import {
   getDialogue,
   getManualControlDialogsIds,

@@ -119,7 +119,8 @@ const main = async () => {
     message: '💥 ITERATION INIT 💥',
   });
 
-  // const workers = [createWorker(0, ['1716295652-support-new-100'])];
+  //1528143855-prefix-surgai2
+  // const workers = [createWorker(0, ['1528143855-prefix-surgai2'])];
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 

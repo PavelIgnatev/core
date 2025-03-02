@@ -69,7 +69,7 @@ export const saveRecipient = async (
         ...addedData,
       } as Dialogue;
 
-      await updateDialogue(data);
+      await updateDialogue({ ...data, dateUpdated: new Date() });
 
       console.log({
         accountId,

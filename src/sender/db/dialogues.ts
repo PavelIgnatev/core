@@ -132,10 +132,7 @@ export const updateDialogue = async (dialogue: Partial<Dialogue>) => {
       recipientId: dialogue.recipientId,
     },
     {
-      $set: {
-        ...dialogue,
-        dateUpdated: new Date(),
-      },
+      $set: dialogue,
       $setOnInsert: {
         dateCreated: new Date(),
       },
@@ -191,31 +188,6 @@ export const updateAutomaticDialogue = async (
   );
 };
 
-export const updateBlockedDialogue = async (
-  accountId: string,
-  recipientId: string,
-  reason: string
-) => {
-  const dialoguesCollection = await getDialoguesCollection();
-
-  await dialoguesCollection.updateOne(
-    {
-      accountId,
-      recipientId,
-    },
-    {
-      $set: {
-        reason,
-        blocked: true,
-        stopped: true,
-        viewed: false,
-        managerMessage: null,
-        dateUpdated: new Date(),
-      },
-    }
-  );
-};
-
 export const updateDateCheckedIds = async (
   accountId: string,
   ids: string[]
@@ -263,4 +235,24 @@ export const getRandomPhone = async (): Promise<string | null> => {
   }
 
   return null;
+};
+
+export const hasDialog4HoursAgo = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const fourHoursAgo = new Date();
+  fourHoursAgo.setHours(fourHoursAgo.getHours() - 4);
+
+  const dialogue = await dialoguesCollection.findOne(
+    {
+      accountId,
+      $or: [
+        { dateCreated: { $gte: fourHoursAgo } },
+        { dateUpdated: { $gte: fourHoursAgo } },
+      ],
+    },
+    { projection: { _id: 1 } }
+  );
+
+  return Boolean(dialogue);
 };

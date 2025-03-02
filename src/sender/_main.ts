@@ -25,7 +25,6 @@ import {
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
-import { setup2FA } from './methods/account/setup2FA';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { getMe } from './methods/users/getMe';
@@ -34,6 +33,7 @@ import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { personalChannel } from './modules/personalChannel';
+import { setup2FA } from './modules/setup2FA';
 
 const exec = util.promisify(childExec);
 
@@ -48,11 +48,11 @@ const starter = async (
 ) => {
   const startTime = performance.now();
 
+  let errored = false;
   let isAutoResponse = true;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
-  let errored = false;
-
+  
   try {
     const randomI = Math.floor(Math.random() * 28) + 1;
     const accountByID = await getAccountById(ID);
@@ -67,15 +67,16 @@ const starter = async (
       dcId,
       id: tgId,
       firstName,
-      setuped = false,
       nextApiId,
+      setuped = false,
     } = accountByID;
 
     if (!dcId || !nextApiId) {
       throw new Error('NOT_ENOUGH_PARAMS');
+    } else {
+      account = accountByID;
     }
 
-    account = accountByID;
     client = await initClient(
       { ...account, nextApiId },
       (update) =>
@@ -109,9 +110,11 @@ const starter = async (
     setTimeout(checkStatus, 20000);
 
     await clearAuthorizations(client);
-    const tgFirstName = await accountSetup(client, account, setuped, firstName);
-    const meId = await getMe(client, ID, tgId);
     await personalChannel(account, client);
+    await setup2FA(client, account);
+
+    const meId = await getMe(client, ID, tgId);
+    const meName = await accountSetup(client, account, setuped, firstName);
 
     let i = -1;
     while (true) {
@@ -143,11 +146,10 @@ const starter = async (
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, account, meId, tgFirstName);
+            await autoResponse(client, account, meId, meName);
           }
 
           if (i === randomI) {
-            await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }

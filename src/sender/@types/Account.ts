@@ -45,6 +45,9 @@ export interface Account {
 
   twoFa?: boolean;
   unknownTwoFa?: boolean;
+  twoFaDate?: Date;
+  personalChannelDate?: Date;
+  automaticCheckDate?: Date;
 
   remainingTime?: string;
 }
