@@ -111,7 +111,6 @@ const starter = async (
 
     await clearAuthorizations(client);
     await personalChannel(account, client);
-    await setup2FA(client, account);
 
     const meId = await getMe(client, ID, tgId);
     const meName = await accountSetup(client, account, setuped, firstName);
@@ -150,6 +149,7 @@ const starter = async (
           }
 
           if (i === randomI) {
+            await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
