@@ -13,10 +13,6 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
-// "TOKEN_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
-// "ADD_CHANNEL_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
-// "START_BOT_CONTROLLER_MESSAGES_NOT_FOUND"
-
 const isPersonalChannel = (account: Account) => {
   const { personalChannel, personalChannelDate } = account;
 
@@ -31,7 +27,7 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  return days >= 0;
+  return days >= 0.25;
 };
 
 export const personalChannel = async (

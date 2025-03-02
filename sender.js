@@ -52847,7 +52847,7 @@ ${Object.keys(globalMetrics.clientsData.aiReqest).map((r) => `${r}: ${globalMetr
 };
 
 // src/sender/index.ts
-var WORKER_TIMEOUT_MS = 60 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 90 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
