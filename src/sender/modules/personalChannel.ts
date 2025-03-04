@@ -34,8 +34,7 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  // 0.25
-  return days >= 0;
+  return days >= 0.25;
 };
 
 export const personalChannel = async (
@@ -331,9 +330,9 @@ export const personalChannel = async (
     }
 
     if (lastMessage.message && buttons.length) {
-      // await new Promise((r) =>
-      //   setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
-      // );
+      await new Promise((r) =>
+        setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
+      );
 
       const botFather = await resolveUsername(client, 'botfather');
       if (
