@@ -13,6 +13,13 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
+// START_BOT_CONTROLLER_MESSAGES_NOT_FOUND - 27
+// START_NEW_BOT_FATHER_MESSAGES_NOT_FOUND4 - 714
+
+const fiveMinutes = 300000; // 300000
+const twoMinutes = 120000; // 120000
+const halfMinute = 30000; // 30000
+
 const isPersonalChannel = (account: Account) => {
   const { personalChannel, personalChannelDate } = account;
 
@@ -27,7 +34,8 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  return days >= 0.25;
+  // 0.25
+  return days >= 0;
 };
 
 export const personalChannel = async (
@@ -323,9 +331,9 @@ export const personalChannel = async (
     }
 
     if (lastMessage.message && buttons.length) {
-      await new Promise((r) =>
-        setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
-      );
+      // await new Promise((r) =>
+      //   setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
+      // );
 
       const botFather = await resolveUsername(client, 'botfather');
       if (
@@ -367,7 +375,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const startBotFatherMessages = await getHistory(
         client,
         String(botFatherUserId),
@@ -393,7 +401,7 @@ export const personalChannel = async (
           false
         );
 
-        await sleep(30000);
+        await sleep(halfMinute);
         const deleteBotFatherMessages = await getHistory(
           client,
           String(botFatherUserId),
@@ -441,7 +449,7 @@ export const personalChannel = async (
             false
           );
 
-          await sleep(30000);
+          await sleep(halfMinute);
           const deleteBotFatherMessages = await getHistory(
             client,
             String(botFatherUserId),
@@ -466,7 +474,7 @@ export const personalChannel = async (
             false
           );
 
-          await sleep(30000);
+          await sleep(halfMinute);
           const sureBotFatherMessages = await getHistory(
             client,
             String(botFatherUserId),
@@ -493,7 +501,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const newBotFatherMessages = await getHistory(
         client,
         String(botFatherUserId),
@@ -519,7 +527,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const nameBotFatherMessages = await getHistory(
         client,
         String(botFatherUserId),
@@ -546,7 +554,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const usernameBotFatherMessages = await getHistory(
         client,
         String(botFatherUserId),
@@ -664,7 +672,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(120000);
+      await sleep(twoMinutes);
       const startBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -689,7 +697,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(120000);
+      await sleep(twoMinutes);
       const addChannelBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -746,7 +754,7 @@ export const personalChannel = async (
           }
         }
 
-        await sleep(30000);
+        await sleep(halfMinute);
         const addChannelBotControllerMessages2 = await getHistory(
           client,
           String(botControllerUserId),
@@ -796,7 +804,7 @@ export const personalChannel = async (
           }
         }
 
-        await sleep(30000);
+        await sleep(halfMinute);
         const addChannelBotControllerMessages3 = await getHistory(
           client,
           String(botControllerUserId),
@@ -833,7 +841,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(300000);
+      await sleep(fiveMinutes);
       const tokenBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -859,7 +867,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const usernameBotControllerMessages = await getHistory(
         client,
         String(botControllerUserId),
@@ -867,12 +875,8 @@ export const personalChannel = async (
         usernameBotControllerMessage.id
       );
 
-      if (!usernameBotControllerMessages[0]) {
-        throw new Error('USERNAME_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
-      }
-
       if (
-        usernameBotControllerMessages[0].message.includes(
+        usernameBotControllerMessages?.[0]?.message?.includes(
           'Setting the time zone'
         )
       ) {
@@ -887,7 +891,7 @@ export const personalChannel = async (
           false
         );
 
-        await sleep(30000);
+        await sleep(halfMinute);
         const usernameBotControllerMessages = await getHistory(
           client,
           String(botControllerUserId),
@@ -934,7 +938,7 @@ export const personalChannel = async (
           }
         }
 
-        await sleep(30000);
+        await sleep(halfMinute);
         const usernameBotControllerMessages2 = await getHistory(
           client,
           String(botControllerUserId),
@@ -948,10 +952,263 @@ export const personalChannel = async (
         ) {
           throw new Error('YES_BOT_CONTROLLER_MESSAGES_NOT_FOUND2');
         }
-      } else if (
-        !usernameBotControllerMessages[0].message.includes('Success!')
+      }
+
+      const myChannelsBotFatherMessage = await sendMessage(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        '/mychannels',
+        '',
+        false,
+        false
+      );
+
+      await sleep(twoMinutes);
+      const myChannelsBotFatherMessages = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        myChannelsBotFatherMessage.id
+      );
+
+      if (
+        !myChannelsBotFatherMessages[0] ||
+        !myChannelsBotFatherMessages[0].message.includes('Channel managment')
       ) {
-        throw new Error('SUCCESS_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
+        throw new Error('MY_REAL_CHANNELS_BOT_FATHER_MESSAGES_NOT_FOUND');
+      }
+
+      const { replyMarkup: myChannelsBotFatherReplyMarkup } =
+        myChannelsBotFatherMessages[0];
+
+      if (myChannelsBotFatherReplyMarkup instanceof GramJs.ReplyInlineMarkup) {
+        const { rows } = myChannelsBotFatherReplyMarkup;
+
+        if (rows.length < 2) {
+          throw new Error('MY_CHANNELS_BOT_FATHER_NOT_MINIMAL_2_MESSAGES');
+        }
+
+        const lastRow = rows[rows.length - 1];
+        const lastButton = lastRow.buttons[lastRow.buttons.length - 1];
+
+        if (!(lastButton instanceof GramJs.KeyboardButtonCallback)) {
+          throw new Error('MY_CHANNELS_BOT_FATHER_LAST_BUTTON_NOT_FOUND');
+        }
+
+        if (lastButton.text === '»') {
+          await invokeRequest(
+            client,
+            new GramJs.messages.GetBotCallbackAnswer({
+              peer: new GramJs.InputPeerUser({
+                userId: botControllerUserId,
+                accessHash: botControllerAccessHash,
+              }),
+              msgId: myChannelsBotFatherMessages[0].id,
+              data: lastButton.data,
+              game: undefined,
+            }),
+            { shouldIgnoreErrors: true }
+          );
+
+          await sleep(halfMinute);
+          const myChannelsBotFatherMessagesw = await getHistory(
+            client,
+            String(botControllerUserId),
+            String(botControllerAccessHash),
+            myChannelsBotFatherMessage.id
+          );
+
+          if (
+            !myChannelsBotFatherMessagesw[0] ||
+            !myChannelsBotFatherMessagesw[0].message.includes(
+              'Channel managment'
+            )
+          ) {
+            throw new Error('MY_CHANNELS_BOT_FATHER_MESSAGES_NOT_FOUND2222');
+          }
+
+          const { replyMarkup: myChannelsBotFatherReplyMarkup } =
+            myChannelsBotFatherMessagesw[0];
+
+          if (
+            myChannelsBotFatherReplyMarkup instanceof GramJs.ReplyInlineMarkup
+          ) {
+            const { rows } = myChannelsBotFatherReplyMarkup;
+
+            const lastRow = rows[rows.length - 2];
+            const lastButton = lastRow.buttons[lastRow.buttons.length - 1];
+
+            if (
+              !lastButton ||
+              !(lastButton instanceof GramJs.KeyboardButtonCallback)
+            ) {
+              throw new Error(
+                'MY_CHANNELS_BOT_FATHER_LAST_BUTTON_NOT_FOUND22222'
+              );
+            }
+            await invokeRequest(
+              client,
+              new GramJs.messages.GetBotCallbackAnswer({
+                peer: new GramJs.InputPeerUser({
+                  userId: botControllerUserId,
+                  accessHash: botControllerAccessHash,
+                }),
+                msgId: myChannelsBotFatherMessagesw[0].id,
+                data: lastButton.data,
+                game: undefined,
+              }),
+              { shouldIgnoreErrors: true }
+            );
+          }
+        } else {
+          await invokeRequest(
+            client,
+            new GramJs.messages.GetBotCallbackAnswer({
+              peer: new GramJs.InputPeerUser({
+                userId: botControllerUserId,
+                accessHash: botControllerAccessHash,
+              }),
+              msgId: myChannelsBotFatherMessages[0].id,
+              data: lastButton.data,
+              game: undefined,
+            }),
+            { shouldIgnoreErrors: true }
+          );
+        }
+      }
+
+      await sleep(halfMinute);
+      const myChannelsBotFatherMessages2 = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        myChannelsBotFatherMessage.id
+      );
+
+      if (
+        !myChannelsBotFatherMessages2[0] ||
+        !myChannelsBotFatherMessages2[0].message.includes(
+          'What do you want to do with the channel'
+        )
+      ) {
+        throw new Error('MY_CHANNELS_BOT_FATHER_MESSAGES_NOT_FOUND23');
+      }
+
+      const { replyMarkup: myChannelsBotFatherReplyMarkup2 } =
+        myChannelsBotFatherMessages2[0];
+
+      if (myChannelsBotFatherReplyMarkup2 instanceof GramJs.ReplyInlineMarkup) {
+        const { rows } = myChannelsBotFatherReplyMarkup2;
+        for (const row of rows) {
+          const { buttons } = row;
+          for (const button of buttons) {
+            if (
+              button instanceof GramJs.KeyboardButtonCallback &&
+              button.text === 'Change Time Zone'
+            ) {
+              await invokeRequest(
+                client,
+                new GramJs.messages.GetBotCallbackAnswer({
+                  peer: new GramJs.InputPeerUser({
+                    userId: botControllerUserId,
+                    accessHash: botControllerAccessHash,
+                  }),
+                  msgId: myChannelsBotFatherMessages2[0].id,
+                  data: button.data,
+                  game: undefined,
+                }),
+                { shouldIgnoreErrors: true }
+              );
+            }
+          }
+        }
+      }
+
+      await sleep(halfMinute);
+      const myChannelsBotFatherMessages3 = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        myChannelsBotFatherMessage.id
+      );
+
+      if (
+        !myChannelsBotFatherMessages3[0] ||
+        !myChannelsBotFatherMessages3[0].message.includes('Current time zone')
+      ) {
+        throw new Error('MY_CHANNELS_BOT_FATHER_MESSAGES_NOT_FOUND3');
+      }
+
+      const moskowBotControllerMessage = await sendMessage(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        `Moskow`,
+        '',
+        false,
+        false,
+        false
+      );
+
+      await sleep(halfMinute);
+      const moskowBotControllerMessages = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        moskowBotControllerMessage.id
+      );
+
+      if (
+        !moskowBotControllerMessages[0] ||
+        !moskowBotControllerMessages[0].message.includes('Is it right')
+      ) {
+        throw new Error('YES_MOSKOW_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
+      }
+
+      const { replyMarkup: moskowBotControllerReplyMarkup } =
+        moskowBotControllerMessages[0];
+
+      if (moskowBotControllerReplyMarkup instanceof GramJs.ReplyInlineMarkup) {
+        const { rows } = moskowBotControllerReplyMarkup;
+        for (const row of rows) {
+          const { buttons } = row;
+          for (const button of buttons) {
+            if (
+              button instanceof GramJs.KeyboardButtonCallback &&
+              button.text === "Yes, It's Right"
+            ) {
+              await invokeRequest(
+                client,
+                new GramJs.messages.GetBotCallbackAnswer({
+                  peer: new GramJs.InputPeerUser({
+                    userId: botControllerUserId,
+                    accessHash: botControllerAccessHash,
+                  }),
+                  msgId: moskowBotControllerMessages[0].id,
+                  data: button.data,
+                  game: undefined,
+                }),
+                { shouldIgnoreErrors: true }
+              );
+            }
+          }
+        }
+      }
+
+      await sleep(halfMinute);
+      const myChannelsBotFatherMessages4 = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        moskowBotControllerMessage.id
+      );
+
+      if (
+        !myChannelsBotFatherMessages4[0] ||
+        !myChannelsBotFatherMessages4[0].message.includes('Here it is')
+      ) {
+        throw new Error('MY_CHANNELS_BOT_FATHER_MESSAGES_NOT_FOUND4');
       }
 
       const startNewBotFatherMessage = await sendMessage(
@@ -964,7 +1221,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const startNewBotFatherMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1012,7 +1269,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const startNewBotFatherMessages2 = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1059,7 +1316,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const startNewBotFatherMessages3 = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1103,7 +1360,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const startNewBotFatherMessages4 = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1130,7 +1387,7 @@ export const personalChannel = async (
         lastMessage.entities
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const lastMessageNewBotFatherMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1174,7 +1431,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const lastMessageNewBotFatherMessages2 = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1204,7 +1461,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const buttonsTextMessageMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1229,7 +1486,7 @@ export const personalChannel = async (
         false
       );
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const sendMessageMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1273,7 +1530,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const sureMessageMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1319,7 +1576,7 @@ export const personalChannel = async (
         }
       }
 
-      await sleep(30000);
+      await sleep(halfMinute);
       const sendedMessageMessages = await getHistory(
         client,
         String(newBotFatherUserId),
@@ -1387,7 +1644,7 @@ export const personalChannel = async (
       false
     );
 
-    await sleep(30000);
+    await sleep(halfMinute);
     const startMessages = await getHistory(
       client,
       String(userId),
@@ -1408,7 +1665,7 @@ export const personalChannel = async (
       false,
       false
     );
-    await sleep(30000);
+    await sleep(halfMinute);
     const usernameMessages = await getHistory(
       client,
       String(userId),

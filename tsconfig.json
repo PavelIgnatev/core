@@ -17,12 +17,11 @@
     "jsx": "react"
   },
   "include": [
-    "src",
-    "tests",
-    "plugins",
-    "dev",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     "webpack.config.ts",
     "webpack-electron.config.ts",
     "babel.config.js"
-  ]
+  ],
+  "exclude": ["src/gramjs/**", "**/images/**", "node_modules"]
 }
