@@ -34,7 +34,7 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  return days >= 0;
+  return days >= 0.25;
 };
 
 export const personalChannel = async (
