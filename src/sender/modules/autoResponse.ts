@@ -362,7 +362,11 @@ ${pingMessage}`);
     }
 
     if (managerMessage) {
-      const nativeManagerMessage = generateRandomString(managerMessage);
+      const nativeManagerMessage = generateRandomString(managerMessage).replace(
+        /\$link/g,
+        `t.me/${personalChannel}`
+      );
+
       const sentManagerMessage = await sendMessage(
         client,
         recipientId,
