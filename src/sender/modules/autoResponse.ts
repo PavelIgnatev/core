@@ -362,11 +362,12 @@ ${pingMessage}`);
     }
 
     if (managerMessage) {
+      const nativeManagerMessage = generateRandomString(managerMessage);
       const sentManagerMessage = await sendMessage(
         client,
         recipientId,
         recipientAccessHash,
-        managerMessage,
+        nativeManagerMessage,
         accountId,
         true,
         true
@@ -374,7 +375,7 @@ ${pingMessage}`);
 
       messages.push({
         id: sentManagerMessage.id,
-        text: managerMessage,
+        text: nativeManagerMessage,
         fromId: meId,
         date: Math.round(Date.now() / 1000),
       });
