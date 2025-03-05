@@ -34,7 +34,7 @@ const isPersonalChannel = (account: Account) => {
   const days =
     (new Date().getTime() - new Date(personalChannelDate).getTime()) / 86400000;
 
-  return days >= 0.25;
+  return days >= 0;
 };
 
 export const personalChannel = async (
@@ -679,11 +679,108 @@ export const personalChannel = async (
         startBotControllerMessage.id
       );
 
-      if (
-        !startBotControllerMessages[0] ||
-        !startBotControllerMessages[0].message.includes('Telegram channels')
-      ) {
+      if (!startBotControllerMessages[0]) {
         throw new Error('START_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
+      }
+
+      const settingsBotControllerMessage = await sendMessage(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        '/settings',
+        '',
+        false,
+        false
+      );
+
+      await sleep(twoMinutes);
+      const settingsBotControllerMessages = await getHistory(
+        client,
+        String(botControllerUserId),
+        String(botControllerAccessHash),
+        settingsBotControllerMessage.id
+      );
+
+      if (!settingsBotControllerMessages[0]) {
+        throw new Error('SETTINGS_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
+      }
+
+      const { replyMarkup: settingsBotControllerReplyMarkup } =
+        settingsBotControllerMessages[0];
+
+      if (
+        settingsBotControllerReplyMarkup instanceof GramJs.ReplyInlineMarkup
+      ) {
+        const { rows } = settingsBotControllerReplyMarkup;
+
+        if (rows.length !== 2) {
+          throw new Error('SETTINGS_BOT_CONTROLLER_NOT_MINIMAL_2_MESSAGES');
+        }
+
+        const lastRow = rows[rows.length - 1];
+        const lastButton = lastRow.buttons[lastRow.buttons.length - 1];
+
+        if (!(lastButton instanceof GramJs.KeyboardButtonCallback)) {
+          throw new Error('SETTINGS_BOT_FATHER_LAST_BUTTON_NOT_FOUND');
+        }
+
+        await invokeRequest(
+          client,
+          new GramJs.messages.GetBotCallbackAnswer({
+            peer: new GramJs.InputPeerUser({
+              userId: botControllerUserId,
+              accessHash: botControllerAccessHash,
+            }),
+            msgId: settingsBotControllerMessages[0].id,
+            data: lastButton.data,
+            game: undefined,
+          }),
+          { shouldIgnoreErrors: true }
+        );
+
+        await sleep(halfMinute);
+        const settings2BotControllerMessages = await getHistory(
+          client,
+          String(botControllerUserId),
+          String(botControllerAccessHash),
+          settingsBotControllerMessage.id
+        );
+
+        if (!settings2BotControllerMessages[0]) {
+          throw new Error('SETTINGS2_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
+        }
+
+        const { replyMarkup: settings2BotControllerReplyMarkup } =
+          settings2BotControllerMessages[0];
+
+        if (
+          settings2BotControllerReplyMarkup instanceof GramJs.ReplyInlineMarkup
+        ) {
+          const { rows } = settings2BotControllerReplyMarkup;
+          for (const row of rows) {
+            const { buttons } = row;
+            for (const button of buttons) {
+              if (
+                button instanceof GramJs.KeyboardButtonCallback &&
+                button.text === 'English'
+              ) {
+                await invokeRequest(
+                  client,
+                  new GramJs.messages.GetBotCallbackAnswer({
+                    peer: new GramJs.InputPeerUser({
+                      userId: botControllerUserId,
+                      accessHash: botControllerAccessHash,
+                    }),
+                    msgId: settings2BotControllerMessages[0].id,
+                    data: button.data,
+                    game: undefined,
+                  }),
+                  { shouldIgnoreErrors: true }
+                );
+              }
+            }
+          }
+        }
       }
 
       const addChannelBotControllerMessage = await sendMessage(
