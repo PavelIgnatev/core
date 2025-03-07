@@ -67,7 +67,7 @@ export const accountSetup = async (
   setuped: boolean,
   firstName?: string
 ) => {
-  const { accountId } = account;
+  const { accountId, messageCount = 0 } = account;
 
   if (setuped) {
     return firstName!;
@@ -324,7 +324,7 @@ FILE_NAME: ${file.name}`);
     ...fullUser,
     setuped: true,
     banned: false,
-    messageCount: 0,
+    messageCount: messageCount || 0,
   });
 
   return firstName!;
