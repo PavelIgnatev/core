@@ -96,7 +96,7 @@ const russianNames = {
   nina: 'Нина',
   olga: 'Ольга',
   polina: 'Полина',
-  raisa: 'Райса',
+  raisa: 'Раиса',
   rita: 'Рита',
   sofia: 'София',
   svetlana: 'Светлана',
