@@ -67,9 +67,9 @@ export const autoResponse = async (
       flowHandling = '',
       addedInformation = '',
       companyDescription = '',
-      gender = 'male',
     } = groupId;
     const language = gLanguage || 'RUSSIAN';
+    const gender = accountId.includes('female') ? 'female' : 'male';
     const myName = language === 'RUSSIAN' ? converterName(meName) : meName;
     const stage = Math.ceil(step / 2);
     const parted =

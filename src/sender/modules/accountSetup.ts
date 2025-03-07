@@ -9,7 +9,7 @@ import { generateRandomString } from '../helpers/generateRandomString';
 import { generateUser } from '../helpers/generateUser';
 import {
   getAdultProfileFiles,
-  getDefaultProfileFiles,
+  getProfileFiles,
 } from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
@@ -244,9 +244,10 @@ ID: ${accountId}`);
     );
   }
 
-  const files = accountId.includes('adult')
-    ? getAdultProfileFiles()
-    : getDefaultProfileFiles();
+  const gender = accountId.includes('female') ? 'female' : 'male';
+  const isAdult = accountId.includes('adult');
+
+  const files = isAdult ? getAdultProfileFiles() : getProfileFiles(gender);
   for (const file of files) {
     const isUF = await invokeRequest(
       client,
@@ -288,7 +289,7 @@ FILE_NAME: ${file.name}`);
           randomElseUsername: '',
         };
       } else {
-        const genUser = generateUser();
+        const genUser = generateUser(gender);
         const {
           firstName: genFirstName,
           lastName,

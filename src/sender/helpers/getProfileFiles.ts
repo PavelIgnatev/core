@@ -15,17 +15,17 @@ class CustomFile {
   }
 }
 
-export const getDefaultProfileFiles = () => {
+export const getProfileFiles = (gender: 'male' | 'female') => {
   let files: string[] = [];
   let folderName = '';
 
   const getFilesFromFolder = () => {
-    const folders = fs.readdirSync(path.join(__dirname, '/images/default'));
+    const folders = fs.readdirSync(path.join(__dirname, `/images/${gender}`));
     const randomIndex = Math.floor(Math.random() * folders.length);
     const randomFolder = folders[randomIndex];
     folderName = path.basename(randomFolder);
     files = fs
-      .readdirSync(path.join(__dirname, `/images/default/${folderName}`))
+      .readdirSync(path.join(__dirname, `/images/${gender}/${folderName}`))
       .filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
   };
 
@@ -37,18 +37,17 @@ export const getDefaultProfileFiles = () => {
     return new CustomFile(
       fileName,
       fs.statSync(
-        path.join(__dirname, `/images/default/${folderName}/${fileName}`)
+        path.join(__dirname, `/images/${gender}/${folderName}/${fileName}`)
       ).size,
-      path.join(__dirname, `/images/default/${folderName}/${fileName}`),
+      path.join(__dirname, `/images/${gender}/${folderName}/${fileName}`),
       fs.readFileSync(
-        path.join(__dirname, `/images/default/${folderName}/${fileName}`)
+        path.join(__dirname, `/images/${gender}/${folderName}/${fileName}`)
       )
     );
   });
 
   return customFiles;
 };
-
 
 export const getAdultProfileFiles = () => {
   let files: string[] = [];

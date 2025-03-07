@@ -19,3 +19,7 @@ core.accounts.json
 /core.accounts.json
 ai.js
 checkGeo.js
+/*.xlsx
+/*.json
+/*.txt
+/*.py

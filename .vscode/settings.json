@@ -5,8 +5,11 @@
     "**/.hg": true,
     "**/CVS": true,
     "**/.DS_Store": true,
-    "**/Thumbs.db": true
+    "**/Thumbs.db": true,
+    "data.xlsx": true
   },
-  "hide-files.files": [],
+  "hide-files.files": [
+    "data.xlsx"
+  ],
   "files.autoSave": "afterDelay"
 }
