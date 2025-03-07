@@ -59,7 +59,7 @@ export const personalChannel = async (
       throw new Error('CHANNEL_NOT_FOUND');
     }
 
-    const { channel, withUpdatePersonalChannel = true } = prefixChannel;
+    const { channel, updatePersonalChannel = true } = prefixChannel;
 
     if (!/^[a-zA-Z0-9]+$/.test(channel)) {
       throw new Error('CHANNEL_NOT_VALID');
@@ -1811,7 +1811,7 @@ export const personalChannel = async (
       }
     }
 
-    if (withUpdatePersonalChannel) {
+    if (updatePersonalChannel) {
       const updatePersonalChannel = await invokeRequest(
         client,
         new GramJs.account.UpdatePersonalChannel({
