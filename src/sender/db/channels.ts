@@ -12,5 +12,5 @@ export const getChannel = async (prefix: string) => {
     prefix,
   });
 
-  return result?.channel;
+  return result;
 };

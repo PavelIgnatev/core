@@ -2,7 +2,6 @@ import axios from 'axios';
 
 import { generateRandomString } from './generateRandomString';
 import { capitalizeFirstLetter, sleep } from './helpers';
-import { sendToMainBot } from './sendToMainBot';
 import { sendToNameBot } from './sendToNameBot';
 
 const isRussian = (str: string) => /^[А-Яа-яЁё]+$/.test(str);
@@ -39,7 +38,10 @@ const getUser = async (userContent: string, language: string) => {
     .trim();
 
   const words = content.split(' ');
-  const requests = words.map(w => w.trim()).filter(Boolean).map(makeRequest);
+  const requests = words
+    .map((w) => w.trim())
+    .filter(Boolean)
+    .map(makeRequest);
 
   let contentMap: Set<string> = new Set();
   try {

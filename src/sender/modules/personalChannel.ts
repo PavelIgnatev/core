@@ -53,11 +53,13 @@ export const personalChannel = async (
   }
 
   try {
-    const channel = await getChannel(prefix);
+    const prefixChannel = await getChannel(prefix);
 
-    if (!channel) {
+    if (!prefixChannel || !prefixChannel.channel) {
       throw new Error('CHANNEL_NOT_FOUND');
     }
+
+    const { channel, withUpdatePersonalChannel = true } = prefixChannel;
 
     if (!/^[a-zA-Z0-9]+$/.test(channel)) {
       throw new Error('CHANNEL_NOT_VALID');
@@ -1809,18 +1811,20 @@ export const personalChannel = async (
       }
     }
 
-    const updatePersonalChannel = await invokeRequest(
-      client,
-      new GramJs.account.UpdatePersonalChannel({
-        channel: new GramJs.InputChannel({
-          channelId: newChannel.id,
-          accessHash: newChannel.accessHash,
-        }),
-      })
-    );
+    if (withUpdatePersonalChannel) {
+      const updatePersonalChannel = await invokeRequest(
+        client,
+        new GramJs.account.UpdatePersonalChannel({
+          channel: new GramJs.InputChannel({
+            channelId: newChannel.id,
+            accessHash: newChannel.accessHash,
+          }),
+        })
+      );
 
-    if (!updatePersonalChannel) {
-      throw new Error('UPDATE_PERSONAL_CHANNEL_NOT_FOUND');
+      if (!updatePersonalChannel) {
+        throw new Error('UPDATE_PERSONAL_CHANNEL_NOT_FOUND');
+      }
     }
 
     await updateAccountById(accountId, {

@@ -1,4 +1,5 @@
 const russianNames = {
+  // Мужские имена
   anatoliy: 'Анатолий',
   anton: 'Антон',
   arkadiy: 'Аркадий',
@@ -68,6 +69,42 @@ const russianNames = {
   stanislav: 'Станислав',
   timur: 'Тимур',
   yaroslav: 'Ярослав',
+
+  // Женские имена
+  albina: 'Альбина',
+  alisa: 'Алиса',
+  alla: 'Алла',
+  anastasia: 'Анастасия',
+  anfisa: 'Анфиса',
+  anna: 'Анна',
+  arina: 'Арина',
+  daria: 'Дарья',
+  darina: 'Дарина',
+  ekaterina: 'Екатерина',
+  elena: 'Елена',
+  evgenia: 'Евгения',
+  galina: 'Галина',
+  inna: 'Инна',
+  irina: 'Ирина',
+  kira: 'Кира',
+  liza: 'Лиза',
+  lubov: 'Любовь',
+  margarita: 'Маргарита',
+  maria: 'Мария',
+  marina: 'Марина',
+  mira: 'Мира',
+  nina: 'Нина',
+  olga: 'Ольга',
+  polina: 'Полина',
+  raisa: 'Райса',
+  rita: 'Рита',
+  sofia: 'София',
+  svetlana: 'Светлана',
+  tatiana: 'Татьяна',
+  valeria: 'Валерия',
+  vera: 'Вера',
+  yana: 'Яна',
+  yulia: 'Юлия',
 };
 
 export const converterName = (aiName: string) => {
