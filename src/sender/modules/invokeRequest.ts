@@ -78,6 +78,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       err.message !== 'PEER_FLOOD' &&
       err.message !== 'PASSWORD_EMPTY' &&
       err.message !== 'CHANNELS_ADMIN_PUBLIC_TOO_MUCH' &&
+      err.message !== 'ALLOW_PAYMENT_REQUIRED' &&
       request.className !== 'messages.DeleteChatUser'
     ) {
       await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀

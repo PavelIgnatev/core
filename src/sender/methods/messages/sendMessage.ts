@@ -142,6 +142,10 @@ export const sendMessage = async (
 
     return messageUpdate;
   } catch (error: any) {
+    if (error.message === 'ALLOW_PAYMENT_REQUIRED') {
+      throw new Error('ALLOW_PAYMENT_REQUIRED');
+    }
+
     if (error.message === 'PEER_FLOOD') {
       if (message.length > 30) {
         await logPeerFloodError(message, accountId, userId);

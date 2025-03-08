@@ -46,7 +46,7 @@ export const autoSender = async (
   //   }
   // }
 
-  if (currentTime >= new Date(account.remainingTime || currentTime)) {
+  if (currentTime >= new Date(account.remainingTime || currentTime) || true) {
     startSender[accountId] = 1;
 
     while (true) {
@@ -187,6 +187,7 @@ export const autoSender = async (
             'CONTACT_USERS_LENGTH',
             'USER_SPECIAL_PARAMS',
             'DIALOG_DUPLICATE',
+            'ALLOW_PAYMENT_REQUIRED',
           ].includes(e.message)
         ) {
           await updateFailedMessage(
