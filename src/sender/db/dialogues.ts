@@ -82,6 +82,31 @@ export const getAccountDialogs = async (accountId: string) => {
   return dialogues;
 };
 
+export const getFirstMessagePingDialogsIds = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const twelveHoursAgo = new Date();
+  twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
+
+  const hours24Ago = new Date();
+  hours24Ago.setHours(hours24Ago.getHours() - 24);
+
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+  const pingDialogsIds = await dialoguesCollection.distinct('recipientId', {
+    accountId,
+    step: 3,
+    ping: { $ne: true },
+    stopped: { $ne: true },
+    blocked: { $ne: true },
+    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
+    dateCreated: { $gte: oneWeekAgo },
+  });
+
+  return pingDialogsIds;
+};
+
 export const getPingDialogsIds = async (accountId: string) => {
   const dialoguesCollection = await getDialoguesCollection();
 

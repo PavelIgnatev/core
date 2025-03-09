@@ -6,10 +6,12 @@
     "**/CVS": true,
     "**/.DS_Store": true,
     "**/Thumbs.db": true,
-    "data.xlsx": true
+    "data.xlsx": true,
+    "json2.json": true
   },
   "hide-files.files": [
-    "data.xlsx"
+    "data.xlsx",
+    "json2.json"
   ],
   "files.autoSave": "afterDelay"
 }

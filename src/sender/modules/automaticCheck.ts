@@ -25,28 +25,11 @@ import { getIdByPeer } from '../methods/peer/getIdByPeer';
 import { getDialogs } from '../methods/users/getDialogs';
 import { getFullUser } from '../methods/users/getFullUser';
 
-const isAutomaticCheck = (account: Account) => {
-  if (!account.automaticCheckDate) {
-    return true;
-  }
-
-  const days =
-    (new Date().getTime() - new Date(account.automaticCheckDate).getTime()) /
-    86400000;
-
-  return days >= 0.25;
-};
-
 export const automaticCheck = async (
   client: TelegramClient,
   account: Account
 ) => {
   const { accountId } = account;
-
-  const ac = isAutomaticCheck(account);
-  if (!ac) {
-    return;
-  }
 
   try {
     const accountDialogs = await getAccountDialogs(accountId);
@@ -269,7 +252,7 @@ DIALOG: ${JSON.stringify(dialog)}`
 
         if (lastOnline !== lastOnlineAccount) {
           await updateSimpleDialogue(accountId, userId, {
-            lastOnline,
+            lastOnline: new Date(Number(`${lastOnline}000`)),
           });
         }
 
