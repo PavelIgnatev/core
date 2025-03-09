@@ -36,12 +36,12 @@ export const handleUpdate = async (
   if (userId && update instanceof GramJs.UpdateUserStatus) {
     if (update.status instanceof GramJs.UserStatusOffline) {
       await updateSimpleDialogue(accountId, String(userId), {
-        lastOnline: update.status.wasOnline,
+        dateLastOnline: new Date(Number(`${update.status.wasOnline}000`)),
       });
     }
     if (update.status instanceof GramJs.UserStatusOnline) {
       await updateSimpleDialogue(accountId, String(userId), {
-        lastOnline: update.status.expires,
+        dateLastOnline: new Date(Number(`${update.status.expires}000`)),
       });
     }
   }
@@ -126,6 +126,7 @@ export const handleUpdate = async (
           accountId,
           recipientId: String(userId),
           read: true,
+          dateLastRead: new Date(),
         });
       }
     }

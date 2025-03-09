@@ -144,7 +144,7 @@ export const automaticCheck = async (
       const {
         recipientId: id,
         recipientAccessHash: accessHash,
-        lastOnline: lastOnlineAccount,
+        dateLastOnline,
       } = accountDialogs.find((d) => d.recipientId === userId) as Dialogue;
 
       if (!dialog) {
@@ -250,9 +250,13 @@ DIALOG: ${JSON.stringify(dialog)}`
               ? user.status.expires
               : null;
 
-        if (lastOnline !== lastOnlineAccount) {
+        if (
+          lastOnline !== null &&
+          (!dateLastOnline ||
+            lastOnline !== Math.floor(dateLastOnline.getTime() / 1000))
+        ) {
           await updateSimpleDialogue(accountId, userId, {
-            lastOnline: new Date(Number(`${lastOnline}000`)),
+            dateLastOnline: new Date(Number(`${lastOnline}000`)),
           });
         }
 
@@ -264,6 +268,7 @@ DIALOG: ${JSON.stringify(dialog)}`
         ) {
           await updateSimpleDialogue(accountId, userId, {
             read: true,
+            dateLastRead: new Date(),
           });
         }
       }

@@ -73,7 +73,7 @@ export const getAccountDialogs = async (accountId: string) => {
           status: 1,
           read: 1,
           reason: 1,
-          lastOnline: 1,
+          dateLastOnline: 1,
         },
       }
     )

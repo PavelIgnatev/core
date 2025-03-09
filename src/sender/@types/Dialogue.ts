@@ -24,8 +24,9 @@ export interface Dialogue {
 
   deletedAndBlocked?: boolean;
 
-  lastOnline?: number | null;
-
+  dateLastOnline?: Date;
+  dateLastRead?: Date;
+  dateAutoCheck?: Date;
   dateCreated?: Date;
   dateUpdated?: Date;
 }
