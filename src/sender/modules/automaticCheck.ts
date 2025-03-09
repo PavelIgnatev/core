@@ -251,9 +251,9 @@ DIALOG: ${JSON.stringify(dialog)}`
               : null;
 
         if (
-          lastOnline !== null &&
-          (!dateLastOnline ||
-            lastOnline !== Math.floor(dateLastOnline.getTime() / 1000))
+          lastOnline &&
+          dateLastOnline &&
+          lastOnline !== Math.floor(dateLastOnline.getTime() / 1000)
         ) {
           await updateSimpleDialogue(accountId, userId, {
             dateLastOnline: new Date(Number(`${lastOnline}000`)),
@@ -282,7 +282,7 @@ DIALOG: ${JSON.stringify(dialog)}`
       if (dialog) {
         const { deletedAndBlocked } = accountDialogs.find(
           (d) => d.recipientId === userId
-        ) as Dialogue;
+        )!;
         const peer = buildInputPeer(dialog);
 
         if (deletedAndBlocked) {
