@@ -166,6 +166,8 @@ ID: ${this._accountId}`);
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
+          this._sender._connectErrorCounts += 1;
+
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
