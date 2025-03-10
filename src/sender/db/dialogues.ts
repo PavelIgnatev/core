@@ -191,6 +191,7 @@ export const updateAutomaticDialogue = async (
   automaticReason: string,
   additionalData?: Record<string, unknown>
 ) => {
+  console.log('updateAutomaticDialogue', accountId, recipientId, automaticReason);
   const dialoguesCollection = await getDialoguesCollection();
 
   await dialoguesCollection.updateOne(
