@@ -252,8 +252,7 @@ DIALOG: ${JSON.stringify(dialog)}`
 
         if (
           lastOnline &&
-          dateLastOnline &&
-          lastOnline !== Math.floor(dateLastOnline.getTime() / 1000)
+          lastOnline !== Math.floor((dateLastOnline?.getTime() || 0) / 1000)
         ) {
           await updateSimpleDialogue(accountId, userId, {
             dateLastOnline: new Date(Number(`${lastOnline}000`)),
