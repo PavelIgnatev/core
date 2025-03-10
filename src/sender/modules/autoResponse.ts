@@ -373,7 +373,7 @@ ${pingMessage}`);
         recipientAccessHash,
         nativeManagerMessage,
         accountId,
-        true,
+        false,
         true
       );
 

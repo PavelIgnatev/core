@@ -139,7 +139,6 @@ export const getManualControlDialogsIds = async (accountId: string) => {
     'recipientId',
     {
       accountId,
-      stopped: true,
       blocked: { $ne: true },
       managerMessage: { $ne: null },
     }
