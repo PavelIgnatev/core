@@ -18,7 +18,6 @@ export const saveRecipient = async (
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: 'create' | 'update',
   addedData: Record<string, unknown> = {},
-  accountByID: Account | null = null
 ) => {
   let isSave = false;
   while (!isSave) {
@@ -98,15 +97,9 @@ export const saveRecipient = async (
       }
       isSave = true;
     } catch (error: any) {
-      await sendToMainBot(`** ERROR SAVE RECIPIENT **
-ERROR: ${error.message};
-accountId: ${accountId};
-status: ${status};
-recipient: ${JSON.stringify(recipient)};
-recipientDb: ${JSON.stringify(recipientDb)};
-messages: ${JSON.stringify(messages)};
-addedData: ${JSON.stringify(addedData)};
-accountByID: ${JSON.stringify(accountByID)};`);
+      await sendToMainBot(`** SAVE_RECIPIENT_ERROR **
+ID: ${accountId}
+ERROR: ${error.message}`);
 
       await sleep(3000);
     }
