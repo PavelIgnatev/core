@@ -5,9 +5,11 @@ import {
   getDialogue,
   getManualControlDialogsIds,
   getPingDialogsIds,
+  getUnreadFirstDialogsIds,
   updateAutomaticDialogue,
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getHistory } from '../methods/messages/getHistory';
 import { readHistory } from '../methods/messages/readHistory';
 import { readMessageContents } from '../methods/messages/readMessageContents';
@@ -23,12 +25,14 @@ export const getClassifiedDialogs = async (
     return [[], [], []];
   }
 
+  const unreadFirstDialogsIds = await getUnreadFirstDialogsIds(accountId);
   const pingDialogsIds = await getPingDialogsIds(accountId);
   const manualControlDialogsIds = await getManualControlDialogsIds(accountId);
 
   const stableDialogs = [];
   const pingDialogs = [];
   const manualDialogs = [];
+  const unreadFirstDialogs = [];
 
   for (const dialog of dialogs) {
     const { type, message, user } = dialog;
@@ -41,6 +45,7 @@ export const getClassifiedDialogs = async (
       user.self ||
       user.status instanceof GramJs.UserStatusEmpty ||
       (message.out &&
+        !unreadFirstDialogsIds.includes(String(user.id)) &&
         !pingDialogsIds.includes(String(user.id)) &&
         !manualControlDialogsIds.includes(String(user.id)))
     ) {
@@ -133,12 +138,26 @@ export const getClassifiedDialogs = async (
       messages,
     };
 
+    if (dialogData.stopped && !manualControlDialogsIds.includes(recipientId)) {
+      await sendToMainBot(`** STOPPED_WTF_OTKUDA_ERROR **
+ID: ${accountId}
+RID: ${recipientId}`);
+    }
+
+    if (unreadFirstDialogsIds.includes(recipientId) && messages.length !== 2) {
+      await sendToMainBot(`** MESSAGES_UNREAD **
+ID: ${accountId}
+RID: ${recipientId}`);
+    }
+
     if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
       const account = await getAccountById(accountId);
 
       if (!account.spamBlockDate) {
         manualDialogs.push(dialogData);
       }
+    } else if (unreadFirstDialogsIds.includes(recipientId)) {
+      unreadFirstDialogs.push(dialogData);
     } else if (pingDialogsIds.includes(recipientId)) {
       pingDialogs.push(dialogData);
     } else {
@@ -146,5 +165,5 @@ export const getClassifiedDialogs = async (
     }
   }
 
-  return [stableDialogs, pingDialogs, manualDialogs];
+  return [stableDialogs, unreadFirstDialogs, pingDialogs, manualDialogs];
 };

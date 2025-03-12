@@ -157,9 +157,7 @@ export const autoSender = async (
               date: Math.round(Date.now() / 1000),
             },
           ],
-          'create',
-          {},
-          account
+          'create'
         );
         endSender[accountId] = 1;
         break;

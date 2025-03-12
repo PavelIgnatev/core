@@ -82,29 +82,58 @@ export const getAccountDialogs = async (accountId: string) => {
   return dialogues;
 };
 
-export const getFirstMessagePingDialogsIds = async (accountId: string) => {
+export const getUnreadFirstDialogsIds = async (accountId: string) => {
+  // if (!accountId.includes('female-aisender')) {
+    return [];
+  // }
+
   const dialoguesCollection = await getDialoguesCollection();
 
-  const twelveHoursAgo = new Date();
-  twelveHoursAgo.setHours(twelveHoursAgo.getHours() - 6);
+  const oneDayAgo = new Date();
+  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
-  const hours24Ago = new Date();
-  hours24Ago.setHours(hours24Ago.getHours() - 24);
+  const twoDayAgo = new Date();
+  twoDayAgo.setDate(twoDayAgo.getDate() - 2);
 
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  const sevenDayAgo = new Date();
+  sevenDayAgo.setDate(sevenDayAgo.getDate() - 7);
 
-  const pingDialogsIds = await dialoguesCollection.distinct('recipientId', {
+  const unreadIds = await dialoguesCollection.distinct('recipientId', {
+    step: 1,
     accountId,
-    step: 3,
-    ping: { $ne: true },
+    read: { $ne: true },
     stopped: { $ne: true },
     blocked: { $ne: true },
-    dateUpdated: { $gte: hours24Ago, $lte: twelveHoursAgo },
-    dateCreated: { $gte: oneWeekAgo },
+    dateUpdated: { $gte: twoDayAgo, $lte: oneDayAgo },
+    dateCreated: { $gte: sevenDayAgo },
   });
 
-  return pingDialogsIds;
+  return unreadIds;
+};
+
+export const getReadNotAnsweredFirstDialogsIds = async (accountId: string) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const thirtyMinutesAgo = new Date();
+  thirtyMinutesAgo.setMinutes(thirtyMinutesAgo.getMinutes() - 5);
+
+  const twoHoursAgo = new Date();
+  twoHoursAgo.setHours(twoHoursAgo.getHours() - 2);
+
+  const sevenDayAgo = new Date();
+  sevenDayAgo.setDate(sevenDayAgo.getDate() - 7);
+
+  const reaIds = await dialoguesCollection.distinct('recipientId', {
+    step: 1,
+    accountId,
+    read: true,
+    stopped: { $ne: true },
+    blocked: { $ne: true },
+    dateLastRead: { $gte: twoHoursAgo, $lte: thirtyMinutesAgo },
+    dateCreated: { $gte: sevenDayAgo },
+  });
+
+  return reaIds;
 };
 
 export const getPingDialogsIds = async (accountId: string) => {

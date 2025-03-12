@@ -1,13 +1,17 @@
+import BigInt from 'big-integer';
+
 import TelegramClient from '../../gramjs/client/TelegramClient';
+import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAutomaticDialogue } from '../db/dialogues';
 import { getGroupId } from '../db/groupId';
 import { converterName } from '../helpers/converterName';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
 import { generateRandomString } from '../helpers/generateRandomString';
-import { getDateNow } from '../helpers/helpers';
+import { getDateNow, sleep } from '../helpers/helpers';
 import { makeRequestGpt } from '../helpers/makeRequestGpt';
 import { sendToFormBot } from '../helpers/sendToFormBot';
+import { deleteHistory } from '../methods/messages/deleteHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { saveRecipient } from '../methods/recipient/saveRecipient';
 import { getFullUser } from '../methods/users/getFullUser';
@@ -24,11 +28,8 @@ export const autoResponse = async (
 ) => {
   const { accountId, personalChannel } = account;
 
-  const [dialogs, pingDialogs, manualDialogs] = await getClassifiedDialogs(
-    client,
-    accountId,
-    meId
-  );
+  const [dialogs, unreadFirstDialogs, pingDialogs, manualDialogs] =
+    await getClassifiedDialogs(client, accountId, meId);
 
   for (const dialog of dialogs) {
     const {
@@ -260,6 +261,91 @@ ${replyMessage}`);
       );
     }
   }
+
+  // for (const dialog of unreadFirstDialogs) {
+  //   const { recipientId, recipientAccessHash, messages, pings = [] } = dialog;
+
+  //   try {
+  //     const recipientFull = await getFullUser(
+  //       client,
+  //       recipientId,
+  //       recipientAccessHash
+  //     );
+  //     if (!recipientFull) {
+  //       continue;
+  //     }
+
+  //     await deleteHistory(
+  //       client,
+  //       new GramJs.InputPeerUser({
+  //         userId: BigInt(recipientId),
+  //         accessHash: BigInt(recipientAccessHash),
+  //       }),
+  //       true
+  //     );
+
+  //     const [firstMessage, secondMessage] = messages;
+
+  //     await sleep(5000);
+  //     const sentFirstMessage = await sendMessage(
+  //       client,
+  //       String(recipientId),
+  //       String(recipientAccessHash),
+  //       firstMessage.text,
+  //       accountId,
+  //       false,
+  //       false
+  //     );
+  //     const sentSecondMessage = await sendMessage(
+  //       client,
+  //       String(recipientId),
+  //       String(recipientAccessHash),
+  //       secondMessage.text,
+  //       accountId,
+  //       false,
+  //       false
+  //     );
+
+  //     await saveRecipient(
+  //       accountId,
+  //       recipientId,
+  //       recipientAccessHash,
+  //       recipientFull,
+  //       dialog,
+  //       [
+  //         {
+  //           id: sentFirstMessage.id,
+  //           text: firstMessage.text,
+  //           fromId: String(meId),
+  //           date: Math.round(Date.now() / 1000),
+  //         },
+  //         {
+  //           id: sentSecondMessage.id,
+  //           text: secondMessage.text,
+  //           fromId: String(meId),
+  //           date: Math.round(Date.now() / 1000),
+  //         },
+  //       ],
+  //       'update',
+  //       {
+  //         pings: [
+  //           ...pings,
+  //           { title: 'unread-first-message-ping', date: new Date() },
+  //         ],
+  //       }
+  //     );
+  //   } catch (error: any) {
+  //     if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
+  //       throw new Error(error.message);
+  //     }
+
+  //     await updateAutomaticDialogue(
+  //       accountId,
+  //       recipientId,
+  //       'automatic:allow-payment-required'
+  //     );
+  //   }
+  // }
 
   for (const dialog of pingDialogs) {
     const {
