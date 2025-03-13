@@ -5,7 +5,6 @@ import {
   getDialogue,
   getManualControlDialogsIds,
   getPingDialogsIds,
-  getUnreadFirstDialogsIds,
   updateAutomaticDialogue,
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
