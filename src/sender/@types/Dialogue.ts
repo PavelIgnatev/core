@@ -24,6 +24,8 @@ export interface Dialogue {
 
   deletedAndBlocked?: boolean;
 
+  pings?: Array<{ title: string; date: Date }>;
+
   dateLastOnline?: Date;
   dateLastRead?: Date;
   dateAutoCheck?: Date;

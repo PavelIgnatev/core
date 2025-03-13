@@ -5,9 +5,11 @@ import {
   getDialogue,
   getManualControlDialogsIds,
   getPingDialogsIds,
+  getUnreadFirstDialogsIds,
   updateAutomaticDialogue,
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getHistory } from '../methods/messages/getHistory';
 import { readHistory } from '../methods/messages/readHistory';
 import { readMessageContents } from '../methods/messages/readMessageContents';
@@ -132,6 +134,12 @@ export const getClassifiedDialogs = async (
       groupId,
       messages,
     };
+
+    if (dialogData.stopped && !manualControlDialogsIds.includes(recipientId)) {
+      await sendToMainBot(`** STOPPED_WTF_OTKUDA_ERROR **
+ID: ${accountId}
+RID: ${recipientId}`);
+    }
 
     if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
       const account = await getAccountById(accountId);
