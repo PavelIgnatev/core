@@ -5,10 +5,10 @@ import {
   getDialogue,
   getManualControlDialogsIds,
   getPingDialogsIds,
+  getUnreadFirstDialogsIds,
   updateAutomaticDialogue,
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
-import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getHistory } from '../methods/messages/getHistory';
 import { readHistory } from '../methods/messages/readHistory';
 import { readMessageContents } from '../methods/messages/readMessageContents';
@@ -26,10 +26,12 @@ export const getClassifiedDialogs = async (
 
   const pingDialogsIds = await getPingDialogsIds(accountId);
   const manualControlDialogsIds = await getManualControlDialogsIds(accountId);
+  const unreadFirstDialogsIds = await getUnreadFirstDialogsIds(accountId);
 
   const stableDialogs = [];
   const pingDialogs = [];
   const manualDialogs = [];
+  const unreadFirstDialogs = [];
 
   for (const dialog of dialogs) {
     const { type, message, user } = dialog;
@@ -42,6 +44,7 @@ export const getClassifiedDialogs = async (
       user.self ||
       user.status instanceof GramJs.UserStatusEmpty ||
       (message.out &&
+        !unreadFirstDialogsIds.includes(String(user.id)) &&
         !pingDialogsIds.includes(String(user.id)) &&
         !manualControlDialogsIds.includes(String(user.id)))
     ) {
@@ -138,12 +141,14 @@ export const getClassifiedDialogs = async (
       continue;
     }
 
-    if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
+    if (manualControlDialogsIds.includes(recipientId)) {
       const account = await getAccountById(accountId);
 
       if (!account.spamBlockDate) {
         manualDialogs.push(dialogData);
       }
+    } else if (unreadFirstDialogsIds.includes(recipientId)) {
+      unreadFirstDialogs.push(dialogData);
     } else if (pingDialogsIds.includes(recipientId)) {
       pingDialogs.push(dialogData);
     } else {
@@ -151,5 +156,5 @@ export const getClassifiedDialogs = async (
     }
   }
 
-  return [stableDialogs, pingDialogs, manualDialogs];
+  return [stableDialogs, pingDialogs, manualDialogs, unreadFirstDialogs];
 };

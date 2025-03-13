@@ -83,7 +83,7 @@ export const getAccountDialogs = async (accountId: string) => {
 };
 
 export const getUnreadFirstDialogsIds = async (accountId: string) => {
-  if (!accountId.includes('aisender')) {
+  if (!accountId.includes('female-aisender')) {
     return [];
   }
 
