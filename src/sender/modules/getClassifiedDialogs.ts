@@ -135,9 +135,7 @@ export const getClassifiedDialogs = async (
     };
 
     if (dialogData.stopped && !manualControlDialogsIds.includes(recipientId)) {
-      await sendToMainBot(`** STOPPED_WTF_OTKUDA_ERROR **
-ID: ${accountId}
-RID: ${recipientId}`);
+      continue;
     }
 
     if (dialogData.stopped || manualControlDialogsIds.includes(recipientId)) {
