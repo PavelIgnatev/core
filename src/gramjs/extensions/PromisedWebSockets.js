@@ -6,11 +6,11 @@ const CONNECTION_TIMEOUT = 15000;
 const MAX_TIMEOUT = 15000;
 
 class PromisedWebSockets {
-  constructor(accountId, disconnectedCallback) {
+  constructor(accountId, disconnectCallback) {
     this._accountId = accountId;
     this.client = undefined;
     this.closed = true;
-    this.disconnectedCallback = disconnectedCallback;
+    this.disconnectCallback = disconnectCallback;
     this.timeout = CONNECTION_TIMEOUT;
   }
 
@@ -71,18 +71,6 @@ class PromisedWebSockets {
       ),
     });
 
-    this.client.setMaxListeners(20);
-
-    if (this.client._socket) {
-      this.client._socket.setMaxListeners(20);
-    }
-
-    this.client.on('upgrade', () => {
-      if (this.client._socket) {
-        this.client._socket.setMaxListeners(20);
-      }
-    });
-
     return new Promise((resolve, reject) => {
       let hasResolved = false;
       let timeout;
@@ -100,8 +88,8 @@ class PromisedWebSockets {
       this.client.onclose = (event) => {
         this.resolveRead(false);
         this.closed = true;
-        if (this.disconnectedCallback) {
-          this.disconnectedCallback();
+        if (this.disconnectCallback) {
+          this.disconnectCallback();
         }
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
@@ -112,8 +100,8 @@ class PromisedWebSockets {
 
         this.resolveRead(false);
         this.closed = true;
-        if (this.disconnectedCallback) {
-          this.disconnectedCallback();
+        if (this.disconnectCallback) {
+          this.disconnectCallback();
         }
         this.client.close();
 
