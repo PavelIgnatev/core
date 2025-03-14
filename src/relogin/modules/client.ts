@@ -59,7 +59,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
-          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          'http://159c4d2ca2a19f963330__cr.ru:8093d55b69102050@gw.dataimpulse.com:823',
           onError
         )
       : new TelegramClient(
@@ -74,7 +74,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
-          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          'http://159c4d2ca2a19f963330__cr.ru:8093d55b69102050@gw.dataimpulse.com:823',
           onError
         );
 
