@@ -6,8 +6,9 @@ const CONNECTION_TIMEOUT = 15000;
 const MAX_TIMEOUT = 15000;
 
 class PromisedWebSockets {
-  constructor(accountId, disconnectCallback) {
+  constructor(accountId, proxy, disconnectCallback) {
     this._accountId = accountId;
+    this._proxy = proxy;
     this.client = undefined;
     this.closed = true;
     this.disconnectCallback = disconnectCallback;
@@ -54,8 +55,8 @@ class PromisedWebSockets {
   }
 
   connect(port, ip, accountId) {
-    if (typeof accountId !== 'string') {
-      throw new Error('Proxy index not defined');
+    if (typeof accountId !== 'string' || typeof this._proxy !== 'string') {
+      throw new Error('PROXY_INDEX_NOT_DEFINED');
     }
 
     this.stream = Buffer.alloc(0);
@@ -66,9 +67,7 @@ class PromisedWebSockets {
     this.website = this.getWebSocketLink(ip, port);
 
     this.client = new WebSocket(this.website, 'binary', {
-      agent: new HttpsProxyAgent(
-        'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959'
-      ),
+      agent: new HttpsProxyAgent(this._proxy),
     });
 
     return new Promise((resolve, reject) => {

@@ -59,6 +59,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
+          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError
         )
       : new TelegramClient(
@@ -73,6 +74,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
+          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError
         );
 

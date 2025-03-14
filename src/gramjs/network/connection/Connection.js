@@ -15,7 +15,7 @@ const AsyncQueue = require('../../extensions/AsyncQueue.js');
 class Connection {
   PacketCodecClass = undefined;
 
-  constructor(ip, port, dcId, accountId, onError) {
+  constructor(ip, port, dcId, accountId, proxy, onError) {
     this._ip = ip;
     this._port = port;
     this._dcId = dcId;
@@ -31,6 +31,7 @@ class Connection {
     this.shouldLongPoll = false;
     this.socket = new PromisedWebSockets(
       accountId,
+      proxy,
       this.disconnectCallback.bind(this)
     );
   }

@@ -63,6 +63,7 @@ class MTProtoSender {
     this._delay = args.delay;
     this._updateCallback = args.updateCallback;
     this._accountId = args.accountId;
+    this._proxy = args.proxy;
     this._prefix = args.prefix;
     this._onError = args.onError;
     this._connectCounts = 0;
@@ -453,6 +454,7 @@ MESSAGE: ${JSON.stringify(message)}`);
       this._connection._port,
       this._connection._dcId,
       this._accountId,
+      this._proxy,
       this._onError
     );
 

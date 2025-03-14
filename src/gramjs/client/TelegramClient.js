@@ -21,9 +21,14 @@ class TelegramClient {
     acountId,
     prefix,
     specialdcId,
+    proxy,
     onError
   ) {
-    if (typeof acountId !== 'string' || typeof onError !== 'function') {
+    if (
+      typeof acountId !== 'string' ||
+      typeof onError !== 'function' ||
+      typeof proxy !== 'string'
+    ) {
       throw new Error('Account Id or onError not defined');
     }
 
@@ -32,6 +37,7 @@ class TelegramClient {
     this.specialDcId = specialdcId;
     this.session = session;
     this._accountId = acountId;
+    this._proxy = proxy;
     this._prefix = prefix;
     this._eventBuilders = [];
     this._phoneCodeHash = {};
@@ -74,6 +80,7 @@ class TelegramClient {
         accountId: this._accountId,
         prefix: this._prefix,
         onError: this._onError,
+        proxy: this._proxy,
         working: this.session._working,
       });
     }
@@ -88,6 +95,7 @@ class TelegramClient {
       this.session.port,
       this.session.dcId,
       this._accountId,
+      this._proxy,
       this._onError
     );
 
@@ -167,7 +175,6 @@ ID: ${this._accountId}`);
           e.message === 'RPC_MCGET_FAIL'
         ) {
           this._sender._connectErrorCounts += 1;
-
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
