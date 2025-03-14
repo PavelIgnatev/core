@@ -110,7 +110,7 @@ const starter = async (
     setTimeout(checkStatus, 20000);
 
     await clearAuthorizations(client);
-    // await personalChannel(account, client);
+    await personalChannel(account, client);
 
     const meId = await getMe(client, ID, tgId);
     const meName = await accountSetup(client, account, setuped, firstName);

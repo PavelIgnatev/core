@@ -29,7 +29,7 @@ class TelegramClient {
       typeof onError !== 'function' ||
       typeof proxy !== 'string'
     ) {
-      throw new Error('Account Id or onError not defined');
+      throw new Error('DATA_NOT_CORRECT');
     }
 
     this.apiId = apiId;

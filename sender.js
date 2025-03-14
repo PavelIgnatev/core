@@ -52692,9 +52692,7 @@ var main = async () => {
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
   });
-  const workers = [
-    createWorker(0, ["+79923039584-256-after-lolz-new-19-sep-prefix-aisender"])
-  ];
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
