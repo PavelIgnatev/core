@@ -29,7 +29,10 @@ class Connection {
     this._accountId = accountId;
     this._onError = onError;
     this.shouldLongPoll = false;
-    this.socket = new PromisedWebSockets(accountId, this.disconnectCallback.bind(this));
+    this.socket = new PromisedWebSockets(
+      accountId,
+      this.disconnectCallback.bind(this)
+    );
   }
 
   isConnected() {
@@ -43,7 +46,7 @@ class Connection {
   async _connect() {
     this._codec = new this.PacketCodecClass(this);
     await this.socket.connect(this._port, this._ip, this._accountId);
-    await this._initConn();
+    this._initConn();
   }
 
   async connect() {
@@ -117,21 +120,6 @@ Error: ${e.message}`);
       }
       await this._recvArray.push(data);
     }
-  }
-
-  async _initConn() {
-    if (this._codec.tag) {
-      await this.socket.write(this._codec.tag);
-    }
-  }
-
-  _send(data) {
-    const encodedPacket = this._codec.encodePacket(data);
-    this.socket.write(encodedPacket);
-  }
-
-  _recv() {
-    return this._codec.readPacket(this.socket);
   }
 
   toString() {

@@ -88,29 +88,6 @@ class MessagePacker {
     this.setReady(true);
   }
 
-  async getBeacon(state) {
-    const buffer = new BinaryWriter(Buffer.alloc(0));
-    const size = state.data.length + TLMessage.SIZE_OVERHEAD;
-    if (size <= MessageContainer.MAXIMUM_SIZE) {
-      let afterId;
-      if (state.after) {
-        afterId = state.after.msgId;
-      }
-      state.msgId = await this._state.writeDataAsMessage(
-        buffer,
-        state.data,
-        state.request.classType === 'request',
-        afterId
-      );
-
-      return buffer.getValue();
-    }
-
-    state.reject('Request Payload is too big');
-
-    return undefined;
-  }
-
   async wait() {
     if (!this._queue.length) {
       this._ready = new Promise((resolve) => {
