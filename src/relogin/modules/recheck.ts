@@ -27,7 +27,7 @@ export const recheck = async (ID: string) => {
       message: `💥 RE-CHECK ${ID} INIT 💥`,
     });
     const client = await initClient(
-      { ...account, prefix, empty: false, apiId: nextApiId || 2040 },
+      { ...account, prefix, empty: false, apiId: nextApiId },
       (update) => handleUpdate(client, ID, update),
       (error) => sendToMainBot(error)
     );
