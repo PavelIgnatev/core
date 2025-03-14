@@ -83,7 +83,7 @@ export const getAccountDialogs = async (accountId: string) => {
 };
 
 export const getUnreadFirstDialogsIds = async (accountId: string) => {
-  if (!accountId.includes('female-aisender')) {
+  if (!accountId.includes('aisender')) { //female-aisender
     return [];
   }
 
@@ -93,7 +93,7 @@ export const getUnreadFirstDialogsIds = async (accountId: string) => {
   oneDayAgo.setDate(oneDayAgo.getDate() - 1);
 
   const twoDayAgo = new Date();
-  twoDayAgo.setDate(twoDayAgo.getDate() - 2);
+  twoDayAgo.setDate(twoDayAgo.getDate() - 2); // пото убрать это ограничение
 
   const sevenDayAgo = new Date();
   sevenDayAgo.setDate(sevenDayAgo.getDate() - 7);

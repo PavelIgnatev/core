@@ -1,6 +1,5 @@
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
-import { sleep } from '../../helpers/helpers';
 import { invokeRequest } from '../../modules/invokeRequest';
 
 export async function clearAuthorizations(client: TelegramClient) {

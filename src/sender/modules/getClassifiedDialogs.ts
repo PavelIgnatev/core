@@ -21,7 +21,7 @@ export const getClassifiedDialogs = async (
 ) => {
   const dialogs = await getDialogs(client, accountId, 0, true);
   if (!dialogs.length) {
-    return [[], [], []];
+    return [[], [], [], []];
   }
 
   const pingDialogsIds = await getPingDialogsIds(accountId);
