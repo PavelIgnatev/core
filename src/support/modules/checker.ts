@@ -110,12 +110,12 @@ export const checker = async (
             await setup2FA(client, account);
             await accountSetup(client, account, setuped);
             await clearAllTrash(client);
+            await checkSpamBlock(client, account);
             await automaticCheck(client, account);
           }
 
           if (i === randomI) {
             await automaticCheck(client, account);
-            await checkSpamBlock(client, account);
           }
           await sleep(60000);
         })(),

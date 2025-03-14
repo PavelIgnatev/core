@@ -178,6 +178,10 @@ export const checkSpamBlock = async (
 ) => {
   const { accountId, spamBlockDate: dbSpamBlockDate } = account;
 
+  await new Promise((r) =>
+    setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+  );
+  
   const result = await resolveUsername(client, 'spambot');
 
   if (
