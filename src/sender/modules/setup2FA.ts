@@ -3,7 +3,7 @@ import { generateRandomBytes } from '../../gramjs/Helpers';
 import { computeCheck } from '../../gramjs/Password';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
-import { getAccountById, updateAccountById } from '../db/accounts';
+import { updateAccountById } from '../db/accounts';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { invokeRequest } from '../modules/invokeRequest';
 

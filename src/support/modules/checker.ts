@@ -13,6 +13,17 @@ import { automaticCheck } from './automaticCheck';
 import { checkSpamBlock } from './checkSpamBlock';
 import { initClient } from './client';
 
+const isCheckMethods = (account: Account) => {
+  if (!account.checkDate) {
+    return true;
+  }
+
+  const days =
+    (new Date().getTime() - new Date(account.checkDate).getTime()) / 86400000;
+
+  return days >= 1;
+};
+
 export const checker = async (
   ID: string,
   accountsInWork: Record<string, number>
@@ -58,7 +69,7 @@ export const checker = async (
       throw new Error('CLIENT_NOT_INITED');
     }
 
-    setInterval(async () => {
+    const checkStatus = async () => {
       try {
         if (
           !client?._sender ||
@@ -67,14 +78,17 @@ export const checker = async (
           client._sender.userDisconnected ||
           errored
         ) {
+          setTimeout(checkStatus, 20000);
           return;
         }
 
         await updateStatus(client, false);
+        setTimeout(checkStatus, 20000);
       } catch (error: any) {
         errored = error.message;
       }
-    }, 10000);
+    };
+    setTimeout(checkStatus, 20000);
 
     let i = -1;
     while (true) {
@@ -105,18 +119,24 @@ export const checker = async (
       await Promise.race([
         (async () => {
           if (i === 0) {
-            await updateStatus(client, false);
             await clearAuthorizations(client);
-            await setup2FA(client, account);
-            await accountSetup(client, account, setuped);
-            await clearAllTrash(client);
+
+            if (isCheckMethods(account)) {
+              await setup2FA(client, account);
+              await accountSetup(client, account, setuped);
+              await clearAllTrash(client);
+              await updateAccountById(ID, {
+                checkDate: new Date(),
+              });
+            }
+
             await checkSpamBlock(client, account);
-            await automaticCheck(client, account);
           }
 
           if (i === randomI) {
             await automaticCheck(client, account);
           }
+
           await sleep(60000);
         })(),
         timeout,

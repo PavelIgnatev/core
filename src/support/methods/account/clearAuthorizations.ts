@@ -40,6 +40,10 @@ export async function clearAuthorizations(client: TelegramClient) {
     } catch {}
   }
 
+  if (authorizations.length > 1) {
+    await invokeRequest(client, new GramJs.auth.ResetAuthorizations());
+  }
+
   await updateAccountById(client._accountId, {
     isMainSession: authorizations.length === 1 ? true : false,
   });
