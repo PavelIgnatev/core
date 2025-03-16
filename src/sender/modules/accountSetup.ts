@@ -84,13 +84,6 @@ export const accountSetup = async (
     (!lastName ? true : me.lastName?.split(' ')[0] === lastName)
   ) {
     return [firstName!, meId];
-  } else {
-    await sendToMainBot(`** ACCOUNT SETUP: ACCOUNT ALREADY SETUP **
-ID: ${accountId}
-USERNAME: ${username}
-FIRST_NAME: ${firstName}
-LAST_NAME: ${lastName}`);
-    throw new Error('GLOBAL_ERROR');
   }
 
   const dialogFilters = await invokeRequest(
