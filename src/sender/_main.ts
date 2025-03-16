@@ -27,7 +27,6 @@ import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { handleUpdate } from './methods/update/handleUpdate';
-import { getMe } from './methods/users/getMe';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
@@ -63,13 +62,7 @@ const starter = async (
       paylod: { count: randomI },
     });
 
-    const {
-      dcId,
-      id: tgId,
-      firstName,
-      nextApiId,
-      setuped = false,
-    } = accountByID;
+    const { dcId, nextApiId } = accountByID;
 
     if (!dcId || !nextApiId) {
       throw new Error('NOT_ENOUGH_PARAMS');
@@ -112,8 +105,7 @@ const starter = async (
     await clearAuthorizations(client);
     await personalChannel(account, client);
 
-    const meId = await getMe(client, ID, tgId);
-    const meName = await accountSetup(client, account, setuped, firstName);
+    const [meName, meId] = await accountSetup(client, account);
 
     let i = -1;
     while (true) {
@@ -150,7 +142,7 @@ const starter = async (
 
           if (i === randomI) {
             await setup2FA(client, account);
-            await automaticCheck(client, account);
+            await automaticCheck(client, ID);
             await autoSender(client, ID, meId);
           }
           await sleep(60000);

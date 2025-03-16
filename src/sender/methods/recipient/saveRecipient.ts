@@ -1,5 +1,4 @@
 import GramJs from '../../../gramjs/tl/api';
-import { Account } from '../../@types/Account';
 import { Dialogue } from '../../@types/Dialogue';
 import { incrementMessageCount, updateAccountById } from '../../db/accounts';
 import { updateDialogue } from '../../db/dialogues';
@@ -17,7 +16,7 @@ export const saveRecipient = async (
   recipientDb: Partial<Dialogue> & { username?: string },
   messages: { id: number; text: string; fromId: string; date: number }[],
   status: 'create' | 'update',
-  addedData: Record<string, unknown> = {},
+  addedData: Record<string, unknown> = {}
 ) => {
   let isSave = false;
   while (!isSave) {

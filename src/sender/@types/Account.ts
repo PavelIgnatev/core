@@ -14,9 +14,9 @@ export interface Account {
   userAgent: string;
   platform: string;
 
-  id?: string;
+  id: string;
+  firstName: string;
 
-  firstName?: string;
   lastName?: string;
   username?: string;
   messageCount?: number;

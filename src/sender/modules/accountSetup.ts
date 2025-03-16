@@ -14,6 +14,7 @@ import {
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
+import { getMe } from '../methods/users/getMe';
 import { invokeRequest } from './invokeRequest';
 
 const settings = {
@@ -63,14 +64,28 @@ const defaultEmojis = [
 
 export const accountSetup = async (
   client: TelegramClient,
-  account: Account,
-  setuped: boolean,
-  firstName?: string
+  account: Account
 ) => {
-  const { accountId, messageCount = 0 } = account;
+  const {
+    accountId,
+    id,
+    firstName,
+    lastName,
+    username,
+    setuped = false,
+    messageCount = 0,
+  } = account;
 
-  if (setuped) {
-    return firstName!;
+  const { me, id: meId } = await getMe(client, account);
+
+  if (
+    id &&
+    setuped &&
+    me.username === username &&
+    me.firstName === firstName &&
+    me.lastName?.split(' ')[0] === lastName
+  ) {
+    return [firstName!, meId];
   }
 
   const dialogFilters = await invokeRequest(
@@ -320,10 +335,11 @@ FILE_NAME: ${file.name}`);
 
   await updateAccountById(accountId, {
     ...fullUser,
+    id: meId,
     setuped: true,
     banned: false,
     messageCount: messageCount || 0,
   });
 
-  return firstName!;
+  return [fullUser.firstName!, meId];
 };

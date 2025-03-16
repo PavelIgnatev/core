@@ -27,10 +27,8 @@ import { getFullUser } from '../methods/users/getFullUser';
 
 export const automaticCheck = async (
   client: TelegramClient,
-  account: Account
+  accountId: string
 ) => {
-  const { accountId } = account;
-
   try {
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
@@ -303,7 +301,7 @@ ACCOUNT ID: ${accountId}
 ERROR: ${e.message}`);
   }
 
-  await updateAccountById(account.accountId, {
+  await updateAccountById(accountId, {
     automaticCheckDate: new Date(),
   });
 };
