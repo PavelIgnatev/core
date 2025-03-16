@@ -81,7 +81,7 @@ export const accountSetup = async (
     id &&
     me.username === username &&
     me.firstName === firstName &&
-    me.lastName?.split(' ')[0] === lastName
+    (!lastName ? true : me.lastName?.split(' ')[0] === lastName)
   ) {
     return [firstName!, meId];
   } else {
