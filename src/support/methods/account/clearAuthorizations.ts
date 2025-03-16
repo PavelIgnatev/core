@@ -41,7 +41,9 @@ export async function clearAuthorizations(client: TelegramClient) {
   }
 
   if (authorizations.length > 1) {
-    await invokeRequest(client, new GramJs.auth.ResetAuthorizations());
+    await invokeRequest(client, new GramJs.auth.ResetAuthorizations(), {
+      shouldIgnoreErrors: true,
+    });
   }
 
   await updateAccountById(client._accountId, {
