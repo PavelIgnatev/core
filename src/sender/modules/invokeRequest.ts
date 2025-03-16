@@ -77,6 +77,8 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     if (
       err.message !== 'PEER_FLOOD' &&
       err.message !== 'PASSWORD_EMPTY' &&
+      err.message !== 'USERNAME_INVALID' &&
+      err.message !== 'USERNAME_OCCUPIED' &&
       err.message !== 'CHANNELS_ADMIN_PUBLIC_TOO_MUCH' &&
       err.message !== 'ALLOW_PAYMENT_REQUIRED' &&
       request.className !== 'messages.DeleteChatUser'
