@@ -41,5 +41,11 @@ export async function clearAuthorizations(client: TelegramClient) {
     } catch {}
   }
 
+  if (authorizations.length > 1) {
+    await invokeRequest(client, new GramJs.auth.ResetAuthorizations(), {
+      shouldIgnoreErrors: true,
+    });
+  }
+
   return currentApiId;
 }
