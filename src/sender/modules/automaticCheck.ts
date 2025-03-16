@@ -1,6 +1,5 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
-import { Account } from '../@types/Account';
 import { Dialogue } from '../@types/Dialogue';
 import { updateAccountById } from '../db/accounts';
 import {
@@ -297,7 +296,7 @@ DIALOG: ${JSON.stringify(dialog)}`
     await updateDateCheckedIds(accountId, dialogsWithoutReasonIds);
   } catch (e: any) {
     await sendToMainBot(`** AUTOMATIC CHECK ERROR **
-ACCOUNT ID: ${accountId}
+ID: ${accountId}
 ERROR: ${e.message}`);
   }
 
