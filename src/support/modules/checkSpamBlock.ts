@@ -4,7 +4,6 @@ import { Account } from '../@types/Account';
 import { unsetAccountById, updateAccountById } from '../db/accounts';
 import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
-import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { deleteHistory } from '../methods/messages/deleteHistory';
@@ -174,11 +173,6 @@ const fileComplaint = async (
     await updateAccountById(accountId, {
       isProblemSpamBlock: true,
     });
-    if (!buttons.includes('I was wrong, please release me now')) {
-      await sendToMainBot(`** SPAMBOT_BUTTONS_NOT_FOUND **
-ID: ${accountId}
-BUTTONS: ${buttons.join(', ')}`);
-    }
   }
 };
 
@@ -188,9 +182,9 @@ export const checkSpamBlock = async (
 ) => {
   const { accountId, spamBlockDate: dbSpamBlockDate } = account;
 
-  await new Promise((r) =>
-    setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
-  );
+  // await new Promise((r) =>
+  //   setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+  // );
 
   const result = await resolveUsername(client, 'spambot');
 
