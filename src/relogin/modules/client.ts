@@ -42,7 +42,6 @@ async function init(
 
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
-
   const proxy =
     Number(dcId) === 2
       ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
