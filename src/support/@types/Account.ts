@@ -24,5 +24,10 @@ export interface Account {
   spamBlockDate?: Date | 'INFINITY';
   checkDate?: Date;
 
+  spamBlockReasons?: {
+    reason: string;
+    date: Date;
+  }[];
+
   remainingTime?: string;
 }

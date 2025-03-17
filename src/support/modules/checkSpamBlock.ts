@@ -1,7 +1,7 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
-import { updateAccountById } from '../db/accounts';
+import { unsetAccountById, updateAccountById } from '../db/accounts';
 import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
@@ -13,11 +13,13 @@ import { sendMessage } from '../methods/messages/sendMessage';
 
 const fileComplaint = async (
   client: TelegramClient,
+  account: Account,
   userId: string,
   accessHash: string,
-  accountId: string,
   replyMarkup: GramJs.TypeReplyMarkup | undefined
 ) => {
+  const { accountId, spamBlockReasons = [] } = account;
+
   if (!replyMarkup || !(replyMarkup instanceof GramJs.ReplyKeyboardMarkup)) {
     return;
   }
@@ -85,6 +87,10 @@ const fileComplaint = async (
     if (!m3 || !m3.includes('successfully submitted')) {
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
+
+    await updateAccountById(accountId, {
+      spamBlockReasons: [...spamBlockReasons, { reason, date: new Date() }],
+    });
   } else if (buttons.includes('This is a mistake')) {
     const s1 = await sendMessage(
       client,
@@ -160,6 +166,10 @@ const fileComplaint = async (
     if (!m4 || !m4.includes('successfully submitted')) {
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
     }
+
+    await updateAccountById(accountId, {
+      spamBlockReasons: [...spamBlockReasons, { reason, date: new Date() }],
+    });
   } else {
     await updateAccountById(accountId, {
       isProblemSpamBlock: true,
@@ -181,7 +191,7 @@ export const checkSpamBlock = async (
   await new Promise((r) =>
     setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
   );
-  
+
   const result = await resolveUsername(client, 'spambot');
 
   if (
@@ -229,8 +239,8 @@ export const checkSpamBlock = async (
 
   const { message, replyMarkup } = messages[0];
   if (message.includes('no limits are currently applied')) {
-    await updateAccountById(accountId, {
-      isProblemSpamBlock: false,
+    await unsetAccountById(accountId, {
+      isProblemSpamBlock: null,
       spamBlockDate: null,
     });
     await deleteHistory(
@@ -246,9 +256,9 @@ export const checkSpamBlock = async (
 
   await fileComplaint(
     client,
+    account,
     String(userId),
     String(accessHash),
-    accountId,
     replyMarkup
   );
 

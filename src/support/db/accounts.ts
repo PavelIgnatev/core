@@ -48,3 +48,15 @@ export const updateAccountById = async (
     { upsert: true }
   );
 };
+
+export const unsetAccountById = async (
+  accountId: string,
+  accountData: object
+) => {
+  const accountCollection = await getAccountCollection();
+
+  await accountCollection.findOneAndUpdate(
+    { accountId },
+    { $unset: { ...accountData } }
+  );
+};
