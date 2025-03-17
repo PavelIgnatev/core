@@ -39,6 +39,10 @@ async function init(
 
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
+  const proxy =
+    Number(dcId) === 2
+      ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
+      : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959';
 
   const client =
     account.apiId === 2496
@@ -56,9 +60,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
-          Number(dcId) === 2
-            ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
-            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          proxy,
           onError
         )
       : new TelegramClient(
@@ -73,9 +75,7 @@ async function init(
           account.accountId,
           account.prefix,
           dcId,
-          Number(dcId) === 2
-            ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
-            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          proxy,
           onError
         );
 
