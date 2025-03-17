@@ -232,6 +232,7 @@ export const checkSpamBlock = async (
 
   if (message.includes('no limits are currently applied')) {
     await unsetAccountById(accountId, {
+      spamBlockReasons: null,
       spamBlockDays: null,
       spamBlockInitDate: null,
       spamBlockDate: null,
