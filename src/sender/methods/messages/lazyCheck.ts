@@ -1,3 +1,5 @@
+import BigInt from 'big-integer';
+
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
@@ -90,6 +92,21 @@ export const lazyCheck = async (client: TelegramClient, account: Account) => {
   await invokeRequest(client, new GramJs.contacts.ResetSaved());
 
   await invokeRequest(client, new GramJs.messages.SetDefaultHistoryTTL(period));
+
+  await invokeRequest(
+    client,
+    new GramJs.account.SaveAutoSaveSettings({
+      users: undefined,
+      chats: undefined,
+      broadcasts: undefined,
+      peer: new GramJs.InputPeerSelf(),
+      settings: new GramJs.AutoSaveSettings({
+        photos: undefined,
+        videos: undefined,
+        videoMaxSize: BigInt(0),
+      }),
+    })
+  );
 
   await updateAccountById(accountId, {
     lazyCheckDate: new Date(),

@@ -1468,6 +1468,7 @@ contacts.resolvePhone#8af94344 phone:string = contacts.ResolvedPeer;
 contacts.editCloseFriends#ba6705f0 id:Vector<long> = Bool;
 messages.getMessages#63c66506 id:Vector<InputMessage> = messages.Messages;
 messages.clearAllDrafts#7e58ee9c = Bool;
+account.saveAutoSaveSettings#d69b8361 flags:# users:flags.0?true chats:flags.1?true broadcasts:flags.2?true peer:flags.3?InputPeer settings:AutoSaveSettings = Bool;
 messages.setDefaultHistoryTTL#9eb51445 period:int = Bool;
 account.deleteAutoSaveExceptions#53bc0020 = Bool;
 contacts.resetSaved#879537f1 = Bool;
