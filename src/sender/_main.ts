@@ -142,7 +142,7 @@ const starter = async (
 
           if (i === randomI) {
             await setup2FA(client, account);
-            await automaticCheck(client, ID);
+            await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
           await sleep(60000);

@@ -1,5 +1,6 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
+import { Account } from '../@types/Account';
 import { Dialogue } from '../@types/Dialogue';
 import { updateAccountById } from '../db/accounts';
 import {
@@ -11,14 +12,10 @@ import {
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { leaveChannel } from '../methods/channels/leaveChannel';
 import { blockContact } from '../methods/contacts/blockContact';
-import { deleteContacts } from '../methods/contacts/deleteContacts';
-import { getContacts } from '../methods/contacts/getContacts';
-import { editFolders } from '../methods/folders/editFolders';
-import { clearAllTrash } from '../methods/messages/clearAllTrash';
 import { deleteChatUser } from '../methods/messages/deleteChatUser';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { deleteMessages } from '../methods/messages/deleteMessages';
-import { togglePin } from '../methods/messages/togglePin';
+import { lazyCheck } from '../methods/messages/lazyCheck';
 import { buildInputPeer } from '../methods/peer/buildInputPeer';
 import { getIdByPeer } from '../methods/peer/getIdByPeer';
 import { getDialogs } from '../methods/users/getDialogs';
@@ -26,9 +23,13 @@ import { getFullUser } from '../methods/users/getFullUser';
 
 export const automaticCheck = async (
   client: TelegramClient,
-  accountId: string
+  account: Account
 ) => {
+  const { accountId } = account;
+
   try {
+    await lazyCheck(client, account);
+
     const accountDialogs = await getAccountDialogs(accountId);
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
     const dialogsWithoutReasonIds = accountDialogs
@@ -43,8 +44,6 @@ export const automaticCheck = async (
     const readIds = accountDialogs
       .filter((d) => d.read)
       .map((d) => d.recipientId);
-
-    await clearAllTrash(client);
 
     const dialogs = await getDialogs(client, accountId, 0);
     for (const dialog of dialogs) {
@@ -80,56 +79,6 @@ export const automaticCheck = async (
           await deleteHistory(client, peer, true);
           await blockContact(client, peer);
         }
-      }
-    }
-
-    const folderPeers = [];
-    const archiveDialogs = await getDialogs(client, accountId, 1);
-    for (const archiveDialog of archiveDialogs) {
-      const { dialog } = archiveDialog;
-
-      const peer = buildInputPeer(archiveDialog);
-      if (dialog.pinned) {
-        await togglePin(
-          client,
-          new GramJs.InputDialogPeer({
-            peer,
-          }),
-          undefined
-        );
-      }
-
-      folderPeers.push(
-        new GramJs.InputFolderPeer({
-          peer,
-          folderId: 0,
-        })
-      );
-    }
-
-    if (folderPeers.length) {
-      for (let i = 0; i < folderPeers.length; i += 100) {
-        const chunk = folderPeers.slice(i, i + 100);
-        await editFolders(client, chunk);
-      }
-    }
-
-    const contacts = await getContacts(client);
-    if (contacts && contacts.users.length > 0) {
-      const users = [];
-      for (const user of contacts.users) {
-        if (user instanceof GramJs.User && user.accessHash) {
-          users.push(
-            new GramJs.InputPeerUser({
-              userId: user.id,
-              accessHash: user.accessHash,
-            })
-          );
-        }
-      }
-
-      if (users.length > 0) {
-        await deleteContacts(client, users);
       }
     }
 

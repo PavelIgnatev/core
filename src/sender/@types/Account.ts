@@ -53,6 +53,7 @@ export interface Account {
   twoFaDate?: Date;
   personalChannelDate?: Date;
   automaticCheckDate?: Date;
+  lazyCheckDate?: Date;
 
   remainingTime?: string;
 }
