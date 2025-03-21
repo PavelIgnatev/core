@@ -16,7 +16,7 @@ class CustomFile {
 }
 
 export const getProfileFiles = (
-  prefix: 'male' | 'female' | 'adult' | 'vasilisa'
+  prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino'
 ) => {
   let files: string[] = [];
   let folderName = '';

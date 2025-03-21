@@ -255,9 +255,10 @@ ID: ${accountId}`);
   const gender = accountId.includes('female') ? 'female' : 'male';
   const isAdult = accountId.includes('adult');
   const isVasilisa = accountId.includes('vasilisa');
+  const isCasino = accountId.includes('casino');
 
   const files = getProfileFiles(
-    isAdult ? 'adult' : isVasilisa ? 'vasilisa' : gender
+    isAdult ? 'adult' : isVasilisa ? 'vasilisa' : isCasino ? 'casino' : gender
   );
   for (const file of files) {
     const isUF = await invokeRequest(
@@ -299,7 +300,8 @@ FILE_NAME: ${file.name}`);
           username,
           randomElseUsername: '',
         };
-      } if (accountId.includes('vasilisa')) {
+      }
+      if (accountId.includes('vasilisa')) {
         const username = `iamvasilisa${Math.floor(Math.random() * 10000)}`;
         await invokeRequest(
           client,
