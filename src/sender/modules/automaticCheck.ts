@@ -31,6 +31,7 @@ export const automaticCheck = async (
     await lazyCheck(client, account);
 
     const accountDialogs = await getAccountDialogs(accountId);
+
     const dialogsIds = accountDialogs.map((d) => d.recipientId);
     const dialogsWithoutReasonIds = accountDialogs
       .filter((d) => !d.automaticReason)
@@ -43,6 +44,15 @@ export const automaticCheck = async (
       .map((d) => d.recipientId);
     const readIds = accountDialogs
       .filter((d) => d.read)
+      .map((d) => d.recipientId);
+    const latestDialogsIds = accountDialogs
+      .filter(
+        (dialog) =>
+          !dialog.dateUpdated ||
+          (dialog.dateUpdated &&
+            new Date(dialog.dateUpdated) <=
+              new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000))
+      )
       .map((d) => d.recipientId);
 
     const dialogs = await getDialogs(client, accountId, 0);
@@ -84,9 +94,11 @@ export const automaticCheck = async (
 
     for (const userId of dialogsWithoutReasonIds) {
       const isBlocked = blockedIds.includes(userId);
+      const isLatest = latestDialogsIds.includes(userId);
       const dialog = dialogs.find(
         ({ dialog }) => getIdByPeer(dialog.peer) === userId
       );
+
       const {
         recipientId: id,
         recipientAccessHash: accessHash,
@@ -94,6 +106,10 @@ export const automaticCheck = async (
       } = accountDialogs.find((d) => d.recipientId === userId) as Dialogue;
 
       if (!dialog) {
+        if (isLatest) {
+          continue;
+        }
+
         const fullUser = await getFullUser(client, id, accessHash);
         if (
           !fullUser ||
@@ -171,6 +187,10 @@ DIALOG: ${JSON.stringify(dialog)}`
             'automatic:artificial-blocked'
           );
           dialogsWithReasonIds.push(userId);
+        } else if (isLatest) {
+          const peer = buildInputPeer(dialog);
+          await deleteHistory(client, peer, false);
+          continue;
         } else if (!(message instanceof GramJs.Message)) {
           if (message instanceof GramJs.MessageEmpty) {
             await deleteMessages(client, [message.id], true);
