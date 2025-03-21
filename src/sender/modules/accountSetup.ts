@@ -20,7 +20,7 @@ const settings = {
   silent: true,
 };
 
-const adultEmojis = ['🍌', '🍆', '🍑', '💦', '🍒', '🍇'];
+const adultEmojis = ['❤️', '💖'];
 const defaultEmojis = [
   '🌎',
   '🌍',
