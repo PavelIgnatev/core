@@ -7,10 +7,7 @@ import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { generateUser } from '../helpers/generateUser';
-import {
-  getAdultProfileFiles,
-  getProfileFiles,
-} from '../helpers/getProfileFiles';
+import { getProfileFiles } from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
@@ -257,8 +254,11 @@ ID: ${accountId}`);
 
   const gender = accountId.includes('female') ? 'female' : 'male';
   const isAdult = accountId.includes('adult');
+  const isVasilisa = accountId.includes('vasilisa');
 
-  const files = isAdult ? getAdultProfileFiles() : getProfileFiles(gender);
+  const files = getProfileFiles(
+    isAdult ? 'adult' : isVasilisa ? 'vasilisa' : gender
+  );
   for (const file of files) {
     const isUF = await invokeRequest(
       client,
@@ -295,6 +295,27 @@ FILE_NAME: ${file.name}`);
 
         user = {
           firstName: 'Александра',
+          lastName: '',
+          username,
+          randomElseUsername: '',
+        };
+      } if (accountId.includes('vasilisa')) {
+        const username = `iamvasilisa${Math.floor(Math.random() * 10000)}`;
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
+
+        await updateProfile(client, {
+          firstName: 'Василиса',
+          lastName: `${adultEmojis[Math.floor(Math.random() * adultEmojis.length)]}`,
+          about: '',
+        });
+
+        user = {
+          firstName: 'Василиса',
           lastName: '',
           username,
           randomElseUsername: '',
