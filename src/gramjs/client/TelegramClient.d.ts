@@ -21,6 +21,13 @@ declare class TelegramClient {
     prefix: string,
     specialDcId: number | null,
     proxy: string,
+    onNetwork: (networkData: {
+      type: 'send' | 'recieve',
+      id: string,
+      size: number,
+      proxy: string,
+      date: Date,
+    }) => void,
     onError: (error: any) => void)
   async start();
 

@@ -22,12 +22,14 @@ class TelegramClient {
     prefix,
     specialdcId,
     proxy,
+    onNetwork,
     onError
   ) {
     if (
+      typeof proxy !== 'string' ||
       typeof acountId !== 'string' ||
-      typeof onError !== 'function' ||
-      typeof proxy !== 'string'
+      typeof onNetwork !== 'function' ||
+      typeof onError !== 'function' 
     ) {
       throw new Error('DATA_NOT_CORRECT');
     }
@@ -46,6 +48,7 @@ class TelegramClient {
     this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
     this._onError = onError;
+    this._onNetwork = onNetwork;
     this._initTime = 0;
     this._endTime = 0;
 
@@ -80,6 +83,7 @@ class TelegramClient {
         accountId: this._accountId,
         prefix: this._prefix,
         onError: this._onError,
+        onNetwork: this._onNetwork,
         proxy: this._proxy,
         working: this.session._working,
       });
@@ -96,6 +100,7 @@ class TelegramClient {
       this.session.dcId,
       this._accountId,
       this._proxy,
+      this._onNetwork,
       this._onError
     );
 

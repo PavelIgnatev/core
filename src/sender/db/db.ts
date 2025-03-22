@@ -4,6 +4,7 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 
 let coreDb: Db;
 let logsDb: Db;
+let networkDb: Db;
 
 export const coreDB = async () => {
   while (!coreDb) {
@@ -33,4 +34,19 @@ export const logsDB = async () => {
   }
 
   return logsDb;
+};
+
+export const networkDB = async () => {
+  while (!networkDb) {
+    try {
+      const client = new MongoClient(process.env.DATABASE_SENDER_URI || '');
+      const connect = await client.connect();
+      networkDb = connect.db('network');
+      break;
+    } catch {
+      await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
+    }
+  }
+
+  return networkDb;
 };

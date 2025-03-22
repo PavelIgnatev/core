@@ -1,16 +1,21 @@
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
+const { Mutex } = require('async-mutex');
+const { Response } = require('node-fetch');
+
+const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
 const MAX_TIMEOUT = 15000;
 
 class PromisedWebSockets {
-  constructor(accountId, proxy, disconnectCallback) {
+  constructor(accountId, proxy, onNetwork, disconnectCallback) {
     this._accountId = accountId;
     this._proxy = proxy;
     this.client = undefined;
     this.closed = true;
+    this.onNetwork = onNetwork;
     this.disconnectCallback = disconnectCallback;
     this.timeout = CONNECTION_TIMEOUT;
   }
@@ -85,7 +90,7 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
-        this.resolveRead(false);
+        this.resolveRead?.(false);
         this.closed = true;
         if (this.disconnectCallback) {
           this.disconnectCallback();
@@ -97,12 +102,12 @@ class PromisedWebSockets {
       timeout = setTimeout(() => {
         if (hasResolved) return;
 
-        this.resolveRead(false);
+        this.resolveRead?.(false);
         this.closed = true;
         if (this.disconnectCallback) {
           this.disconnectCallback();
         }
-        this.client.close();
+        this.client?.close();
 
         this.timeout *= 2;
         this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
@@ -111,22 +116,52 @@ class PromisedWebSockets {
     });
   }
 
-  write(data) {
+  async write(data) {
     if (this.closed) {
       throw closeError;
     }
-    this.client.send(data);
+
+    this.client.ping('ping', false, () => {
+      console.log('ping');
+    });
+
+    console.log('я здесь получается', data);
+
+    await this.onNetwork({
+      type: 'write',
+      id: this._accountId,
+      size: data.length,
+      proxy: this._proxy,
+      date: new Date(),
+    });
+
+    this.client?.send(data);
   }
 
   async close() {
-    await this.client.close();
+    await this.client?.close();
     this.closed = true;
   }
 
   receive() {
     this.client.onmessage = async (message) => {
-      this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
-      this.resolveRead(true);
+      await mutex.runExclusive(async () => {
+        const data =
+          message.data instanceof ArrayBuffer
+            ? Buffer.from(message.data)
+            : Buffer.from(await new Response(message.data).arrayBuffer());
+
+        await this.onNetwork({
+          type: 'recieve',
+          id: this._accountId,
+          size: data.length,
+          proxy: this._proxy,
+          date: new Date(),
+        });
+
+        this.stream = Buffer.concat([this.stream, data]);
+        this.resolveRead?.(true);
+      });
     };
   }
 }

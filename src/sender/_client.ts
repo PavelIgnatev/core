@@ -3,6 +3,7 @@ import UserAgent from 'user-agents';
 import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
+import { insertNetworkData } from './db/network';
 
 async function init(
   account: {
@@ -55,6 +56,7 @@ async function init(
           '',
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          insertNetworkData,
           onError
         )
       : new TelegramClient(
@@ -70,6 +72,7 @@ async function init(
           '',
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          insertNetworkData,
           onError
         );
 
