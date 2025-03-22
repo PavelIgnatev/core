@@ -121,11 +121,9 @@ class PromisedWebSockets {
       throw closeError;
     }
 
-    this.client.ping('ping', false, () => {
-      console.log('ping');
-    });
-
-    console.log('я здесь получается', data);
+    // this.client.ping('ping', false, () => {
+    //   console.log('ping');
+    // });
 
     await this.onNetwork({
       type: 'write',
