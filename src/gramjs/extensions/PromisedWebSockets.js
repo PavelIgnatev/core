@@ -1,9 +1,6 @@
 const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
 const { Mutex } = require('async-mutex');
-const { Response } = require('node-fetch');
-
-const mutex = new Mutex();
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
@@ -121,10 +118,6 @@ class PromisedWebSockets {
       throw closeError;
     }
 
-    // this.client.ping('ping', false, () => {
-    //   console.log('ping');
-    // });
-
     await this.onNetwork({
       type: 'write',
       id: this._accountId,
@@ -143,23 +136,18 @@ class PromisedWebSockets {
 
   receive() {
     this.client.onmessage = async (message) => {
-      await mutex.runExclusive(async () => {
-        const data =
-          message.data instanceof ArrayBuffer
-            ? Buffer.from(message.data)
-            : Buffer.from(await new Response(message.data).arrayBuffer());
+      const data = Buffer.from(message.data);
 
-        await this.onNetwork({
-          type: 'recieve',
-          id: this._accountId,
-          size: data.length,
-          proxy: this._proxy,
-          date: new Date(),
-        });
-
-        this.stream = Buffer.concat([this.stream, data]);
-        this.resolveRead?.(true);
+      this.onNetwork({
+        type: 'recieve',
+        id: this._accountId,
+        size: data.length,
+        proxy: this._proxy,
+        date: new Date(),
       });
+
+      this.stream = Buffer.concat([this.stream, data]);
+      this.resolveRead(true);
     };
   }
 }
