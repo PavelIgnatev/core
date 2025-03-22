@@ -113,12 +113,12 @@ class PromisedWebSockets {
     });
   }
 
-  async write(data) {
+  write(data) {
     if (this.closed) {
       throw closeError;
     }
 
-    await this.onNetwork({
+    this.onNetwork({
       type: 'write',
       id: this._accountId,
       size: data.length,
