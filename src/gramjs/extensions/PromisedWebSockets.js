@@ -3,7 +3,7 @@ const { WebSocket } = require('ws');
 
 const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 15000;
-const MAX_TIMEOUT = 15000;
+const MAX_TIMEOUT = 45000;
 
 class PromisedWebSockets {
   constructor(accountId, proxy, disconnectCallback) {
@@ -85,7 +85,7 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
-        this.resolveRead(false);
+        this.resolveRead?.(false);
         this.closed = true;
         if (this.disconnectCallback) {
           this.disconnectCallback();
@@ -97,12 +97,12 @@ class PromisedWebSockets {
       timeout = setTimeout(() => {
         if (hasResolved) return;
 
-        this.resolveRead(false);
+        this.resolveRead?.(false);
         this.closed = true;
         if (this.disconnectCallback) {
           this.disconnectCallback();
         }
-        this.client.close();
+        this.client?.close();
 
         this.timeout *= 2;
         this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
@@ -115,18 +115,18 @@ class PromisedWebSockets {
     if (this.closed) {
       throw closeError;
     }
-    this.client.send(data);
+    this.client?.send(data);
   }
 
   async close() {
-    await this.client.close();
+    await this.client?.close();
     this.closed = true;
   }
 
   receive() {
     this.client.onmessage = async (message) => {
       this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
-      this.resolveRead(true);
+      this.resolveRead?.(true);
     };
   }
 }

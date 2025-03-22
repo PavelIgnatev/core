@@ -137,13 +137,18 @@ const starter = async (
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, account, meId, meName);
+
+            if (!account.accountId.includes('vasilisa')) {
+              await autoResponse(client, account, meId, meName);
+            }
           }
 
           if (i === randomI) {
             await setup2FA(client, account);
             await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
+            if (!account.accountId.includes('vasilisa')) {
+              await autoSender(client, ID, meId);
+            }
           }
           await sleep(60000);
         })(),
