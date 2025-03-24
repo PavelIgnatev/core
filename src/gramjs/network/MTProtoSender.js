@@ -200,13 +200,11 @@ class MTProtoSender {
           throw new Error(err.message);
         }
 
-        {
-          console.warn({
-            accountId: this._accountId,
-            prefix: this._prefix,
-            message: `${err.message} [${attempt + 1} attempt(s)]`,
-          });
-        }
+        console.warn({
+          accountId: this._accountId,
+          prefix: this._prefix,
+          message: `${err.message} [${attempt + 1} attempt(s)]`,
+        });
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
