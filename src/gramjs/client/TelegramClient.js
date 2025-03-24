@@ -241,7 +241,7 @@ ERROR: ${e.message}`
         } else if (e.message === 'CONNECTION_NOT_INITED') {
           this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
-          if (request.className === 'PingDelayDisconnect') {
+          if (request.className !== 'PingDelayDisconnect') {
             this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
