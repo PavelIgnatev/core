@@ -80,12 +80,17 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onerror = (error) => {
+        console.warn({
+          accountId: this._accountId,
+          message: `[WEBSOCKET_ERROR]`,
+          event,
+        });
         reject(error);
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
-        console.log({
+        console.warn({
           accountId: this._accountId,
           message: `[WEBSOCKET_CLOSED]`,
           event,
