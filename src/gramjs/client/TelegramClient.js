@@ -196,10 +196,18 @@ class TelegramClient {
   async destroy() {
     await this.disconnect();
 
-    this._sender._send_queue.clear();
-    this._sender._pending_state.clear();
+    if (this._sender) {
+      this._sender._send_queue.clear();
+      this._sender._pending_state.clear();
+      this._sender._user_connected = false;
+      this._sender._disconnected = true;
+      this._sender.isReconnecting = false;
+      this._sender.userDisconnected = true;
 
-    this._sender = undefined;
+      if (this._sender._connection) {
+        this._sender._connection.close();
+      }
+    }
   }
 
   getSender() {
