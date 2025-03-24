@@ -20,7 +20,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     const response = await client.invoke(request);
 
     allTimings.push(Number((performance.now() - startTime).toFixed(4)));
-    // if (request.className !== 'PingDelayDisconnect') {
+    if (request.className !== 'PingDelayDisconnect') {
       console.log({
         accountId: client._accountId,
         prefix: client._prefix,
@@ -29,7 +29,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
           request: JSON.parse(JSON.stringify(request)),
         },
       });
-    // }
+    }
 
     return response;
   } catch (err: any) {
