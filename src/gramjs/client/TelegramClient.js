@@ -130,22 +130,43 @@ class TelegramClient {
     const sender = this._sender;
     if (!this._isReconnecting) {
       this._reconnectCounts += 1;
-
       this._isReconnecting = true;
 
-      await sleep(1000);
+      const attemptReconnect = async () => {
+        await this.disconnect();
+        sender._send_queue.append(undefined);
+        sender._state.reset();
+        await this.connect();
+        sender._send_queue.prepend(sender._pending_state.values());
+        sender._pending_state.clear();
+      };
 
-      await this.disconnect();
+      const timeout = 30000; 
+      let attempts = 0;
+      const maxAttempts = 3; 
 
-      sender._send_queue.append(undefined);
-      sender._state.reset();
-
-      await sleep(2000);
-      await this.connect();
+      while (attempts < maxAttempts) {
+        try {
+          await Promise.race([
+            attemptReconnect(),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('RECONNECT_TIMEOUT')), timeout)
+            ),
+          ]);
+          break;
+        } catch (error) {
+          attempts++;
+          if (attempts === maxAttempts) {
+            this._onError(
+              `💀 RECONNECT_ERROR (MAX ATTEMPTS) 💀
+ ACCOUNT ID: ${this._accountId}
+ ERROR: ${error.message}`
+            );
+          }
+        }
+      }
 
       this._isReconnecting = false;
-      sender._send_queue.prepend(sender._pending_state.values());
-      sender._pending_state.clear();
     }
   }
 
@@ -195,12 +216,7 @@ class TelegramClient {
           state.promise,
           new Promise((_, r) =>
             setTimeout(() => {
-              if (
-                this._sender._user_connected &&
-                !this._sender.isReconnecting
-              ) {
-                r(new Error('TIMEOUT_ERROR'));
-              }
+              r(new Error('TIMEOUT_ERROR'));
             }, maxTimeout)
           ),
         ]);
