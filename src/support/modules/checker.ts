@@ -7,6 +7,7 @@ import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { setup2FA } from '../methods/account/setup2FA';
 import { updateStatus } from '../methods/account/updateStatus';
 import { clearAllTrash } from '../methods/messages/clearAllTrash';
+import { pingDelayDisconnect } from '../methods/requests/pingDelayDisconnect';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { accountSetup } from './accountSetup';
 import { automaticCheck } from './automaticCheck';
@@ -69,26 +70,20 @@ export const checker = async (
       throw new Error('CLIENT_NOT_INITED');
     }
 
-    const checkStatus = async () => {
+    const updateLoop = async () => {
       try {
-        if (
-          !client?._sender ||
-          !client._sender._user_connected ||
-          client._sender.isReconnecting ||
-          client._sender.userDisconnected ||
-          errored
-        ) {
-          setTimeout(checkStatus, 20000);
+        if (!client?._sender || client._sender.isReconnecting || errored) {
+          setTimeout(updateLoop, 20000);
           return;
         }
 
-        await updateStatus(client, false);
-        setTimeout(checkStatus, 20000);
-      } catch (error: any) {
-        errored = error.message;
+        await pingDelayDisconnect(client);
+        setTimeout(updateLoop, 20000);
+      } catch (err: any) {
+        errored = err.message;
       }
     };
-    setTimeout(checkStatus, 20000);
+    setTimeout(updateLoop, 20000);
 
     let i = -1;
     while (true) {

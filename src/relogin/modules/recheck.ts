@@ -4,6 +4,7 @@ import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { updateStatus } from '../methods/account/updateStatus';
+import { pingDelayDisconnect } from '../methods/requests/pingDelayDisconnect';
 import { handleUpdate } from '../methods/update/handleUpdate';
 import { initClient } from '../modules/client';
 
@@ -34,23 +35,20 @@ export const recheck = async (ID: string) => {
     clients.push(client);
 
     let errored: string | null = null;
-    setInterval(async () => {
+    const updateLoop = async () => {
       try {
-        if (
-          !client?._sender ||
-          !client._sender._user_connected ||
-          client._sender.isReconnecting ||
-          client._sender.userDisconnected ||
-          errored
-        ) {
+        if (!client?._sender || client._sender.isReconnecting || errored) {
+          setTimeout(updateLoop, 20000);
           return;
         }
 
-        await updateStatus(client, false);
-      } catch (error: any) {
-        errored = error.message;
+        await pingDelayDisconnect(client);
+        setTimeout(updateLoop, 20000);
+      } catch (err: any) {
+        errored = err.message;
       }
-    }, 10000);
+    };
+    setTimeout(updateLoop, 20000);
 
     await clearAuthorizations(client);
 
