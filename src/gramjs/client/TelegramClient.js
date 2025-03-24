@@ -177,7 +177,7 @@ class TelegramClient {
 
     const es = [];
     const maxTimeout =
-      request.className === 'PingDelayDisconnect' ? 10000 : 90000;
+      request.className === 'PingDelayDisconnect' ? 10000 : 150000;
     const state = new RequestState(request);
 
     let attempt = 0;
