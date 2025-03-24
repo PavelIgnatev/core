@@ -137,8 +137,8 @@ class TelegramClient {
 
       await this.disconnect();
 
-      this._send_queue.append(undefined);
-      this._state.reset();
+      sender._send_queue.append(undefined);
+      sender._state.reset();
 
       await sleep(2000);
       await this.connect();
