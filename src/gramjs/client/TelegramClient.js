@@ -127,23 +127,29 @@ class TelegramClient {
   }
 
   async reconnect() {
-    const sender = this._sender;
     if (!this._isReconnecting) {
       this._reconnectCounts += 1;
       this._isReconnecting = true;
 
       const attemptReconnect = async () => {
+        const oldSender = this._sender;
+
+        oldSender._send_queue.append(undefined);
+        oldSender._state.reset();
+
+        const pendingTasks = oldSender._pending_state.values();
+
         await this.disconnect();
-        sender._send_queue.append(undefined);
-        sender._state.reset();
+        this._sender = undefined;
         await this.connect();
-        sender._send_queue.prepend(sender._pending_state.values());
-        sender._pending_state.clear();
+
+        this._sender._send_queue.prepend(pendingTasks);
+        this._sender._pending_state.clear();
       };
 
-      const timeout = 30000; 
+      const timeout = 30000;
       let attempts = 0;
-      const maxAttempts = 3; 
+      const maxAttempts = 3;
 
       while (attempts < maxAttempts) {
         try {
