@@ -82,6 +82,7 @@ class PromisedWebSockets {
       this.client.onerror = (error) => {
         console.warn({
           accountId: this._accountId,
+          prefix: 'WEBSOCKET',
           message: `[WEBSOCKET_ERROR]`,
           event,
         });
@@ -92,6 +93,7 @@ class PromisedWebSockets {
       this.client.onclose = (event) => {
         console.warn({
           accountId: this._accountId,
+          prefix: 'WEBSOCKET',
           message: `[WEBSOCKET_CLOSED]`,
           event,
         });
