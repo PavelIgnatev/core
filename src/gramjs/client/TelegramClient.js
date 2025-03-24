@@ -129,8 +129,6 @@ class TelegramClient {
     this._eventBuilders = savedEventBuilders;
 
     await this.connect();
-
-    this._sender._updateCallback = this._handleUpdate.bind(this);
   }
 
   _authKeyCallback(authKey, dcId) {

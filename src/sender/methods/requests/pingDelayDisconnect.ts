@@ -1,7 +1,7 @@
 import BigInt from 'big-integer';
 
 import { TelegramClient } from '../../../gramjs';
-import { getRandomInt, sleep } from '../../../gramjs/Helpers';
+import { getRandomInt } from '../../../gramjs/Helpers';
 import GramJs from '../../../gramjs/tl/api';
 import { invokeRequest } from '../../modules/invokeRequest';
 
