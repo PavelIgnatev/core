@@ -42,7 +42,7 @@ const createLoginCodeHandler = (): LoginCodeHandler => {
   return { promise, handleUpdate };
 };
 
-const DEFAULT_API_ID = 2040;
+const DEFAULT_API_ID = 2496;
 const API_PAIRS: Record<number, string> = {
   4: '014b35b6184100b085b0d0572f9b5103',
   5: '1c5c96d5edd401b1ed40db3fb5633e2d',
@@ -143,7 +143,7 @@ export const relogin = async (ID: string) => {
 
     const loginCodeHandler = createLoginCodeHandler();
     const client = await initClient(
-      { ...account, apiId: 2040, prefix, empty: false },
+      { ...account, apiId: 2496, prefix, empty: false },
       (update) => {
         loginCodeHandler.handleUpdate(update);
       },
@@ -279,7 +279,7 @@ export const relogin = async (ID: string) => {
       for (const client of clients) {
         await client.destroy();
       }
-
+      
       await updateAccountById(ID, {
         banned: true,
         reason: error.message,

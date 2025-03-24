@@ -184,11 +184,29 @@ class MTProtoSender {
           );
         }
 
-        console.warn({
-          accountId: this._accountId,
-          prefix: this._prefix,
-          message: `${err.message} [${attempt + 1} attempt(s)]`,
-        });
+        if (
+          [
+            'USER_DEACTIVATED_BAN',
+            'AUTH_KEY_UNREGISTERED',
+            'AUTH_KEY_INVALID',
+            'USER_DEACTIVATED',
+            'SESSION_REVOKED',
+            'SESSION_EXPIRED',
+            'AUTH_KEY_DUPLICATED',
+            'AUTH_KEY_PERM_EMPTY',
+            'SESSION_PASSWORD_NEEDED',
+          ].includes(err.message)
+        ) {
+          throw new Error(err.message);
+        }
+
+        {
+          console.warn({
+            accountId: this._accountId,
+            prefix: this._prefix,
+            message: `${err.message} [${attempt + 1} attempt(s)]`,
+          });
+        }
 
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
