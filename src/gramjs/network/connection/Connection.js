@@ -74,7 +74,7 @@ class Connection {
 
   async send(data) {
     if (!this._connected) {
-      throw new Error('Not connected');
+      throw new Error('NOT_CONNECTED');
     }
     await this._sendArray.push(data);
   }
@@ -87,7 +87,7 @@ class Connection {
         return result;
       }
     }
-    throw new Error('Not connected');
+    throw new Error('NOT_CONNECTED');
   }
 
   async _sendLoop() {
@@ -113,7 +113,7 @@ Error: ${e.message}`);
       try {
         data = await this._recv();
         if (!data) {
-          throw new Error('no data received');
+          throw new Error('NO_DATA_RECEIVED');
         }
       } catch (e) {
         this.disconnect();

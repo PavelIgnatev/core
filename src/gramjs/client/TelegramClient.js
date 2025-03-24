@@ -42,6 +42,7 @@ class TelegramClient {
     this._eventBuilders = [];
     this._phoneCodeHash = {};
     this._requestRetries = 5;
+    this._loopStarted = false;
     this._connectionRetries = Infinity;
     this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
@@ -79,12 +80,14 @@ class TelegramClient {
         authKeyCallback: this._authKeyCallback.bind(this),
         accountId: this._accountId,
         prefix: this._prefix,
-        onError: this._onError,
         proxy: this._proxy,
         working: this.session._working,
+        onReconnect: this.reconnect.bind(this),
+        onError: this._onError,
       });
     }
-    // set defaults vars
+
+    // Установка переменных состояния
     this._sender.userDisconnected = false;
     this._sender._user_connected = false;
     this._sender.isReconnecting = false;
@@ -99,15 +102,35 @@ class TelegramClient {
       this._onError
     );
 
-    const newConnection = await this._sender.connect(connection, undefined);
-    if (!newConnection) {
-      this._onError(`💀 NEW_CONNECTION_NOT_FOUND 💀
-ID: ${this._accountId}`);
-      return;
-    }
+    await this._sender.connect(connection, undefined);
+
+    // После успешного подключения устанавливаем правильные флаги
+    this._sender._user_connected = true;
+    this._sender._disconnected = false;
 
     this.session.setAuthKey(this._sender.authKey);
-    await this._sender.send(this._initWith(new requests.help.GetConfig({})));
+    await this._sender.send(
+      this._initWith(
+        new requests.account.UpdateStatus({
+          offline: false,
+        })
+      )
+    );
+  }
+
+  async reconnect() {
+    const savedEventBuilders = [...this._eventBuilders];
+
+    await this.disconnect();
+    await sleep(2000);
+
+    this._sender = undefined;
+
+    this._eventBuilders = savedEventBuilders;
+
+    await this.connect();
+
+    this._sender._updateCallback = this._handleUpdate.bind(this);
   }
 
   _authKeyCallback(authKey, dcId) {
@@ -144,7 +167,7 @@ ID: ${this._accountId}`);
 
     const es = [];
     const maxTimeout =
-      request.className === 'account.UpdateStatus' ? 10000 : 90000;
+      request.className === 'PingDelayDisconnect' ? 9000 : 90000;
     const state = new RequestState(request);
 
     let attempt = 0;
@@ -218,17 +241,17 @@ ERROR: ${e.message}`
           await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {
-          await this.disconnect();
-          await sleep(2000);
-          await this.connect();
+          this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
-          if (request.className !== 'account.UpdateStatus') {
-            this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
-ID: ${this._accountId}
-REQUEST: ${request.className}`);
+          if (request.className === 'PingDelayDisconnect') {
+            state.finished.resolve();
+            return {};
           }
 
-          await this._sender.reconnect();
+          this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
+ID: ${this._accountId}
+REQUEST: ${request.className}`);
+          this.reconnect();
         } else if (e instanceof errors.TimedOutError) {
         } else {
           state.finished.resolve();
@@ -239,7 +262,7 @@ REQUEST: ${request.className}`);
       state.resetPromise();
     }
     throw new Error(
-      `Request (${request.className}) was unsuccessful ${attempt} time(s) [${es.join(', ')}]`
+      `REQUEST (${request.className}) WAS UNSUCCESSFUL ${attempt} TIME(S) [${es.join(', ')}]`
     );
   }
 

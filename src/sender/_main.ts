@@ -26,6 +26,7 @@ import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
+import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
@@ -81,26 +82,20 @@ const starter = async (
       throw new Error('CLIENT_NOT_INITED');
     }
 
-    const checkStatus = async () => {
+    const updateLoop = async () => {
       try {
-        if (
-          !client?._sender ||
-          !client._sender._user_connected ||
-          client._sender.isReconnecting ||
-          client._sender.userDisconnected ||
-          errored
-        ) {
-          setTimeout(checkStatus, 20000);
+        if (!client?._sender || client._sender.isReconnecting || errored) {
+          setTimeout(updateLoop, 20000);
           return;
         }
 
-        await updateStatus(client, false);
-        setTimeout(checkStatus, 20000);
-      } catch (error: any) {
-        errored = error.message;
+        await pingDelayDisconnect(client);
+        setTimeout(updateLoop, 20000);
+      } catch (err: any) {
+        errored = err.message;
       }
     };
-    setTimeout(checkStatus, 20000);
+    setTimeout(updateLoop, 20000);
 
     await clearAuthorizations(client);
     await personalChannel(account, client);
@@ -138,6 +133,7 @@ const starter = async (
           if (isAutoResponse) {
             isAutoResponse = false;
 
+            await updateStatus(client, false);
             await autoResponse(client, account, meId, meName);
           }
 

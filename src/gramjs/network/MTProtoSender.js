@@ -1,5 +1,4 @@
 const MTProtoState = require('./MTProtoState');
-const Helpers = require('../Helpers');
 const AuthKey = require('../crypto/AuthKey');
 const RPCResult = require('../tl/core/RPCResult');
 const MessageContainer = require('../tl/core/MessageContainer');
@@ -72,6 +71,7 @@ class MTProtoSender {
     this._connectErrorCounts = 0;
     this._authKeyCallback = args.authKeyCallback;
     this._working = args.working;
+    this._onReconnect = args.onReconnect;
 
     /**
      * whether we disconnected ourself or telegram did it.
@@ -193,7 +193,7 @@ class MTProtoSender {
           message: `${err.message} [${attempt + 1} attempt(s)]`,
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 333));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
     this.isConnecting = false;
@@ -369,7 +369,7 @@ class MTProtoSender {
       } catch (e) {
         this._send_loop_handle = undefined;
         if (!this.userDisconnected) {
-          await this.reconnect();
+          await this._onReconnect();
         }
         return;
       } finally {
@@ -402,7 +402,7 @@ class MTProtoSender {
       } catch (e) {
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          await this.reconnect();
+          await this._onReconnect();
         }
         this._recv_loop_handle = undefined;
         return;
@@ -431,40 +431,6 @@ MESSAGE: ${JSON.stringify(message)}`);
     this._recv_loop_handle = undefined;
   }
 
-  async reconnect() {
-    if (this._user_connected && !this.isReconnecting) {
-      this.isReconnecting = true;
-
-      await Helpers.sleep(1000);
-      await this._reconnect();
-    }
-  }
-
-  async _reconnect() {
-    this._reconnectCounts += 1;
-    try {
-      await this._disconnect(this.getConnection());
-    } catch {}
-
-    this._send_queue.append(undefined);
-    this._state.reset();
-
-    const newConnection = new this._connection.constructor(
-      this._connection._ip,
-      this._connection._port,
-      this._connection._dcId,
-      this._accountId,
-      this._proxy,
-      this._onError
-    );
-
-    await this.connect(newConnection, true);
-
-    this.isReconnecting = false;
-    this._send_queue.prepend(this._pending_state.values());
-    this._pending_state.clear();
-  }
-
   async _processMessage(message) {
     if (message.obj.className === 'MsgsAck') return;
 
@@ -474,6 +440,7 @@ MESSAGE: ${JSON.stringify(message)}`);
     // eslint-disable-next-line require-atomic-updates
     message.obj = await message.obj;
     let handler = this._handlers[message.obj.CONSTRUCTOR_ID];
+
     if (!handler) {
       handler = this._handleUpdate.bind(this);
     }
@@ -567,11 +534,9 @@ MESSAGE: ${JSON.stringify(message)}`);
   }
   _handlePong(message) {
     const pong = message.obj;
-
-    const newTimeOffset = this._state.updateTimeOffset(message.msgId);
-    this._updateCallback?.(new UpdateServerTimeOffset(newTimeOffset));
-
     const state = this._pending_state.getAndDelete(pong.msgId);
+
+    this._updateCallback?.(pong);
 
     if (state) {
       state.resolve(pong);
