@@ -121,9 +121,8 @@ class TelegramClient {
     this.session.setAuthKey(this._sender.authKey);
 
     // if (!this.session._working) {
-      await this._sender.send(this._initWith(new requests.help.GetConfig({})));
+    await this._sender.send(this._initWith(new requests.help.GetConfig({})));
     // }
-
   }
 
   async reconnect() {
@@ -136,9 +135,6 @@ class TelegramClient {
       await sleep(1000);
 
       await this.disconnect();
-      sender._send_queue.append(undefined);
-      sender._state.reset();
-
       await sleep(2000);
       await this.connect();
 
