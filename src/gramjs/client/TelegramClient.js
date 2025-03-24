@@ -239,7 +239,7 @@ ERROR: ${e.message}`
           await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {
-          this.reconnect();
+          await this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (request.className !== 'PingDelayDisconnect') {
             this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
