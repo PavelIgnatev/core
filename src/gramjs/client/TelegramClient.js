@@ -198,6 +198,8 @@ class TelegramClient {
 
     this._sender._send_queue.clear();
     this._sender._pending_state.clear();
+
+    this._sender = undefined;
   }
 
   getSender() {
