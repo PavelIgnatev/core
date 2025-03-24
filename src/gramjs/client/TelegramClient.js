@@ -247,7 +247,7 @@ ID: ${this._accountId}
 REQUEST: ${request.className}`);
           }
 
-          this.reconnect();
+          await this.reconnect();
         } else if (e instanceof errors.TimedOutError) {
         } else {
           state.finished.resolve();
