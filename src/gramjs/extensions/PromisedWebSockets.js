@@ -84,7 +84,6 @@ class PromisedWebSockets {
           accountId: this._accountId,
           prefix: 'WEBSOCKET',
           message: `[WEBSOCKET_ERROR]`,
-          event,
         });
         reject(error);
         hasResolved = true;
