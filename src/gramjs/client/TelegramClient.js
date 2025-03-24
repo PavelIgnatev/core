@@ -193,6 +193,13 @@ class TelegramClient {
     }
   }
 
+  async destroy() {
+    await this.disconnect();
+
+    this._sender._send_queue.clear();
+    this._sender._pending_state.clear();
+  }
+
   getSender() {
     return Promise.resolve(this._sender);
   }

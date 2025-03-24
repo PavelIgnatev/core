@@ -193,7 +193,7 @@ ID: ${ID}`);
 ID: ${ID};
 ERROR: ${e.message}`
       );
-      await client?.disconnect();
+      await client?.destroy();
     } else {
       await sendToMainBot(
         `** UNKNOWN_ERROR **
