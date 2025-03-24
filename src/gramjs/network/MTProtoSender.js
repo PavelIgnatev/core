@@ -27,6 +27,7 @@ const { SecurityError } = require('../errors/Common');
 const { RPCMessageToError } = require('../errors');
 const { TypeNotFoundError } = require('../errors/Common');
 const { doAuthentication } = require('./Authenticator');
+const { requests } = require('../tl');
 
 /**
  * MTProto Mobile Protocol sender
@@ -287,6 +288,12 @@ class MTProtoSender {
     if (!this._recv_loop_handle) {
       this._recv_loop_handle = this._recvLoop();
     }
+
+    await this.send(
+      new requests.account.UpdateStatus({
+        offline: false,
+      })
+    );
 
     console.warn({
       accountId: this._accountId,

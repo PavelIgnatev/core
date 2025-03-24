@@ -93,7 +93,7 @@ class TelegramClient {
         onError: this._onError,
         onErrorCount: () => {
           this._connectErrorCounts += 1;
-        }
+        },
       });
     }
 
@@ -119,27 +119,33 @@ class TelegramClient {
     this._sender._disconnected = false;
 
     this.session.setAuthKey(this._sender.authKey);
-    await this._sender.send(
-      this._initWith(
-        new requests.account.UpdateStatus({
-          offline: false,
-        })
-      )
-    );
+
+    // if (!this.session._working) {
+      await this._sender.send(this._initWith(new requests.help.GetConfig({})));
+    // }
+
   }
 
   async reconnect() {
-    this._reconnectCounts += 1;
-    const savedEventBuilders = [...this._eventBuilders];
-    
-    await this.disconnect();
-    await sleep(2000);
+    const sender = this._sender;
+    if (!sender.isReconnecting) {
+      this._reconnectCounts += 1;
 
-    this._sender = undefined;
+      sender.isReconnecting = true;
 
-    this._eventBuilders = savedEventBuilders;
-    
-    await this.connect();
+      await sleep(1000);
+
+      await this.disconnect();
+      sender._send_queue.append(undefined);
+      sender._state.reset();
+
+      await sleep(2000);
+      await this.connect();
+
+      sender.isReconnecting = false;
+      sender._send_queue.prepend(sender._pending_state.values());
+      sender._pending_state.clear();
+    }
   }
 
   _authKeyCallback(authKey, dcId) {
@@ -161,7 +167,7 @@ class TelegramClient {
    */
   async disconnect() {
     if (this._sender) {
-        this._disconnectCounts += 1;
+      this._disconnectCounts += 1;
       await this._sender.disconnect();
     }
   }
