@@ -85,6 +85,11 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
+        console.log({
+          accountId: this._accountId,
+          message: `[WEBSOCKET_CLOSED]`,
+          event,
+        });
         this.resolveRead?.(false);
         this.closed = true;
         if (this.disconnectCallback) {
