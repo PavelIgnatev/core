@@ -43,6 +43,7 @@ class TelegramClient {
     this._phoneCodeHash = {};
     this._requestRetries = 5;
     this._loopStarted = false;
+    this._isReconnecting = false;
     this._connectionRetries = Infinity;
     this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
@@ -127,18 +128,22 @@ class TelegramClient {
 
   async reconnect() {
     const sender = this._sender;
-    if (!sender.isReconnecting) {
+    if (!this._isReconnecting) {
       this._reconnectCounts += 1;
 
-      sender.isReconnecting = true;
+      this._isReconnecting = true;
 
       await sleep(1000);
 
       await this.disconnect();
+
+      this._send_queue.append(undefined);
+      this._state.reset();
+
       await sleep(2000);
       await this.connect();
 
-      sender.isReconnecting = false;
+      this._isReconnecting = false;
       sender._send_queue.prepend(sender._pending_state.values());
       sender._pending_state.clear();
     }
