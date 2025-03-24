@@ -256,15 +256,13 @@ PROMISE: ${JSON.stringify(promise)}`);
     endTime: getTimeString(startTime),
     clients: clients.filter(isTelegramClient).map((client) => {
       const sender = client._sender;
+      const stats = client.getConnectionStats();
 
       return {
         accountId: sender._accountId,
         initTime: client._initTime,
         endTime: client._endTime,
-        connectCounts: sender._connectCounts,
-        connectErrorCounts: sender._connectErrorCounts,
-        disconnectCounts: sender._disconnectCounts,
-        reconnectCounts: sender._reconnectCounts,
+        ...stats
       };
     }),
     clientsData: {

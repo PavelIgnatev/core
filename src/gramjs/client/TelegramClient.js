@@ -50,6 +50,12 @@ class TelegramClient {
     this._initTime = 0;
     this._endTime = 0;
 
+    // Счетчики соединений
+    this._connectCounts = 0;
+    this._reconnectCounts = 0;
+    this._disconnectCounts = 0;
+    this._connectErrorCounts = 0;
+
     this._initWith = (x) => {
       return new requests.InvokeWithLayer({
         layer: LAYER,
@@ -69,6 +75,7 @@ class TelegramClient {
   }
 
   async connect() {
+    this._connectCounts += 1;
     await this._initSession();
 
     if (this._sender === undefined) {
@@ -84,6 +91,9 @@ class TelegramClient {
         working: this.session._working,
         onReconnect: this.reconnect.bind(this),
         onError: this._onError,
+        onErrorCount: () => {
+          this._connectErrorCounts += 1;
+        }
       });
     }
 
@@ -119,15 +129,16 @@ class TelegramClient {
   }
 
   async reconnect() {
+    this._reconnectCounts += 1;
     const savedEventBuilders = [...this._eventBuilders];
-
+    
     await this.disconnect();
     await sleep(2000);
 
     this._sender = undefined;
 
     this._eventBuilders = savedEventBuilders;
-
+    
     await this.connect();
   }
 
@@ -150,6 +161,7 @@ class TelegramClient {
    */
   async disconnect() {
     if (this._sender) {
+        this._disconnectCounts += 1;
       await this._sender.disconnect();
     }
   }
@@ -195,7 +207,7 @@ class TelegramClient {
           e.message === 'RPC_CALL_FAIL' ||
           e.message === 'RPC_MCGET_FAIL'
         ) {
-          this._sender._connectErrorCounts += 1;
+          this._connectErrorCounts += 1;
         } else if (
           e instanceof errors.FloodWaitError ||
           e instanceof errors.FloodTestPhoneWaitError
@@ -320,6 +332,16 @@ REQUEST: ${request.className}`);
       }
     }
     return false;
+  }
+
+  // Возвращает статистику соединений
+  getConnectionStats() {
+    return {
+      connectCounts: this._connectCounts,
+      reconnectCounts: this._reconnectCounts,
+      disconnectCounts: this._disconnectCounts,
+      connectErrorCounts: this._connectErrorCounts,
+    };
   }
 }
 

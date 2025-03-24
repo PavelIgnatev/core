@@ -60,9 +60,15 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     current.value > max.value ? current : max
   );
 
-  const connectCounts = senders.map((s) => ({
-    id: s._accountId,
-    value: s._connectCounts,
+  // Получаем статистику соединений для всех клиентов
+  const clientStats = ps.map((p) => ({
+    id: p._accountId,
+    stats: p.getConnectionStats()
+  }));
+
+  const connectCounts = clientStats.map((item) => ({
+    id: item.id,
+    value: item.stats.connectCounts,
   }));
   const totalConnectCounts = connectCounts.reduce(
     (acc, num) => acc + num.value,
@@ -75,9 +81,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     current.value > max.value ? current : max
   );
 
-  const reconnectCounts = senders.map((s) => ({
-    id: s._accountId,
-    value: s._reconnectCounts,
+  const reconnectCounts = clientStats.map((item) => ({
+    id: item.id,
+    value: item.stats.reconnectCounts,
   }));
   const totalReconnectCounts = reconnectCounts.reduce(
     (acc, num) => acc + num.value,
@@ -90,9 +96,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     current.value > max.value ? current : max
   );
 
-  const disconnectCounts = senders.map((s) => ({
-    id: s._accountId,
-    value: s._disconnectCounts,
+  const disconnectCounts = clientStats.map((item) => ({
+    id: item.id,
+    value: item.stats.disconnectCounts,
   }));
   const totalDisconnectCounts = disconnectCounts.reduce(
     (acc, num) => acc + num.value,
@@ -105,9 +111,9 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     current.value > max.value ? current : max
   );
 
-  const connectErrorCounts = senders.map((s) => ({
-    id: s._accountId,
-    value: s._connectErrorCounts,
+  const connectErrorCounts = clientStats.map((item) => ({
+    id: item.id,
+    value: item.stats.connectErrorCounts,
   }));
   const totalConnectErrorCounts = connectErrorCounts.reduce(
     (acc, num) => acc + num.value,

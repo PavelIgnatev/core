@@ -65,13 +65,10 @@ class MTProtoSender {
     this._proxy = args.proxy;
     this._prefix = args.prefix;
     this._onError = args.onError;
-    this._connectCounts = 0;
-    this._reconnectCounts = 0;
-    this._disconnectCounts = 0;
-    this._connectErrorCounts = 0;
     this._authKeyCallback = args.authKeyCallback;
     this._working = args.working;
     this._onReconnect = args.onReconnect;
+    this._onErrorCount = args.onErrorCount;
 
     /**
      * whether we disconnected ourself or telegram did it.
@@ -161,7 +158,6 @@ class MTProtoSender {
    * @returns {Promise<boolean>}
    */
   async connect(connection, force) {
-    this._connectCounts += 1;
     this.userDisconnected = false;
     if (this._user_connected && !force) {
       return false;
@@ -179,7 +175,7 @@ class MTProtoSender {
 
         break;
       } catch (err) {
-        this._connectErrorCounts += 1;
+        this._onErrorCount?.();
 
         if (attempt === 0) {
           this._updateCallback?.(
@@ -303,7 +299,6 @@ class MTProtoSender {
   }
 
   async _disconnect(connection) {
-    this._disconnectCounts += 1;
     this._updateCallback?.(
       new UpdateConnectionState(UpdateConnectionState.disconnected)
     );
