@@ -165,7 +165,7 @@ class TelegramClient {
 
     const es = [];
     const maxTimeout =
-      request.className === 'PingDelayDisconnect' ? 9000 : 90000;
+      request.className === 'PingDelayDisconnect' ? 10000 : 90000;
     const state = new RequestState(request);
 
     let attempt = 0;
@@ -242,13 +242,11 @@ ERROR: ${e.message}`
           this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (request.className === 'PingDelayDisconnect') {
-            state.finished.resolve();
-            return {};
-          }
-
-          this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
+            this._onError(`💀 TIMEOUT_ERROR (${maxTimeout}ms) 💀
 ID: ${this._accountId}
 REQUEST: ${request.className}`);
+          }
+
           this.reconnect();
         } else if (e instanceof errors.TimedOutError) {
         } else {

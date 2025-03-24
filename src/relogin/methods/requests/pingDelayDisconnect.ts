@@ -12,7 +12,7 @@ export const pingDelayDisconnect = async (client: TelegramClient) => {
       pingId: BigInt(
         getRandomInt(Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
       ),
-      disconnectDelay: 60,
+      disconnectDelay: 120,
     })
   );
 
