@@ -159,6 +159,8 @@ export const checker = async (
         'AUTH_KEY_DUPLICATED',
       ].includes(e.message)
     ) {
+      await client?.destroy();
+      
       await updateAccountById(ID, {
         banned: true,
         reason: e.message,

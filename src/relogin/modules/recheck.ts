@@ -80,6 +80,10 @@ export const recheck = async (ID: string) => {
         'SESSION_PASSWORD_NEEDED',
       ].includes(error.message)
     ) {
+      for (const client of clients) {
+        await client.destroy();
+      }
+
       await updateAccountById(ID, {
         banned: true,
         reason: error.message,

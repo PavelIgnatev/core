@@ -289,11 +289,15 @@ class MTProtoSender {
       this._recv_loop_handle = this._recvLoop();
     }
 
-    await this.send(
+    if(this._working){
+        await this.send(
       new requests.account.UpdateStatus({
         offline: false,
       })
     );
+    }
+
+
 
     console.warn({
       accountId: this._accountId,

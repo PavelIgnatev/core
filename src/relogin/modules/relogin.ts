@@ -171,9 +171,9 @@ export const relogin = async (ID: string) => {
     }
 
     let finalApiId = currentApiId;
-    if (!API_PAIRS[finalApiId]) {
-      finalApiId = DEFAULT_API_ID;
-    }
+    // if (!API_PAIRS[finalApiId]) {
+    finalApiId = DEFAULT_API_ID;
+    // }
 
     const clientReLogin = await initClient(
       {
@@ -276,6 +276,10 @@ export const relogin = async (ID: string) => {
         'SESSION_PASSWORD_NEEDED',
       ].includes(error.message)
     ) {
+      for (const client of clients) {
+        await client.destroy();
+      }
+
       await updateAccountById(ID, {
         banned: true,
         reason: error.message,

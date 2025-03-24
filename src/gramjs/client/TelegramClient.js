@@ -57,22 +57,24 @@ class TelegramClient {
     this._disconnectCounts = 0;
     this._connectErrorCounts = 0;
 
-    this._initWith = (x) => {
-      return new requests.InvokeWithLayer({
-        layer: LAYER,
-        query: new requests.InitConnection({
-          apiId: this.apiId,
-          deviceModel,
-          systemVersion,
-          appVersion,
-          langCode,
-          langPack,
-          systemLangCode,
-          query: x,
-          proxy: undefined,
-        }),
-      });
-    };
+    if (!this.session._working) {
+      this._initWith = (x) => {
+        return new requests.InvokeWithLayer({
+          layer: LAYER,
+          query: new requests.InitConnection({
+            apiId: this.apiId,
+            deviceModel,
+            systemVersion,
+            appVersion,
+            langCode,
+            langPack,
+            systemLangCode,
+            query: x,
+            proxy: undefined,
+          }),
+        });
+      };
+    }
   }
 
   async connect() {
@@ -115,15 +117,14 @@ class TelegramClient {
 
     await this._sender.connect(connection, undefined);
 
-    // После успешного подключения устанавливаем правильные флаги
     this._sender._user_connected = true;
     this._sender._disconnected = false;
 
     this.session.setAuthKey(this._sender.authKey);
 
-    // if (!this.session._working) {
-    await this._sender.send(this._initWith(new requests.help.GetConfig({})));
-    // }
+    if (!this.session._working) {
+      await this._sender.send(this._initWith(new requests.help.GetConfig({})));
+    }
   }
 
   async reconnect() {
@@ -132,38 +133,11 @@ class TelegramClient {
       this._isReconnecting = true;
       const pendingTasks = [...this._sender._pending_state.values()];
 
-      const attemptReconnect = async () => {
-        await this.disconnect();
-        this._sender = undefined;
+      await this.disconnect();
+      this._sender = undefined;
 
-        await this.connect();
-        this._sender._send_queue.prepend(pendingTasks);
-      };
-
-      const timeout = 30000;
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        try {
-          await Promise.race([
-            attemptReconnect(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('RECONNECT_TIMEOUT')), timeout)
-            ),
-          ]);
-          break;
-        } catch (error) {
-          attempts++;
-          if (attempts === maxAttempts) {
-            this._onError(
-              `💀 RECONNECT_ERROR (MAX ATTEMPTS) 💀
- ACCOUNT ID: ${this._accountId}
- ERROR: ${error.message}`
-            );
-          }
-        }
-      }
+      await this.connect();
+      this._sender._send_queue.prepend(pendingTasks);
 
       this._isReconnecting = false;
     }
