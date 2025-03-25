@@ -49,8 +49,8 @@ export const handleUpdate = async (
   if (
     update.className === 'UpdateConnectionState' ||
     update.className === 'UpdateUserStatus' ||
-    update.className === 'UpdateUserTyping' ||
-    update.className === 'Pong'
+    update.className === 'UpdateUserTyping'
+    // update.className === 'Pong'
   ) {
     return;
   }
