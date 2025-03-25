@@ -138,7 +138,7 @@ class TelegramClient {
       console.log({
         accountId: this._accountId,
         prefix: this._prefix,
-        message: `[RECONNECT INIT]`,
+        message: `[RECONNECT_INIT]`,
       });
       this._reconnectCounts += 1;
       this._isReconnecting = true;
