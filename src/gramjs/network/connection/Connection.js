@@ -122,7 +122,7 @@ Error: ${e.message}`);
           throw new Error('NO_DATA_RECEIVED');
         }
       } catch (e) {
-        this._onDisconnect();
+        // this._onDisconnect();
         return;
       }
       await this._recvArray.push(data);

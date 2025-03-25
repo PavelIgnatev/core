@@ -86,9 +86,9 @@ class PromisedWebSockets {
       this.client.onclose = (event) => {
         this.resolveRead?.(false);
         this.closed = true;
-        if (this._onDisconnect) {
-          this._onDisconnect();
-        }
+        // if (this._onDisconnect) {
+        //   this._onDisconnect();
+        // }
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
@@ -98,9 +98,9 @@ class PromisedWebSockets {
 
         this.resolveRead?.(false);
         this.closed = true;
-        if (this._onDisconnect) {
-          this._onDisconnect();
-        }
+        // if (this._onDisconnect) {
+        //   this._onDisconnect();
+        // }
         this.client?.close();
 
         timeout = undefined;
