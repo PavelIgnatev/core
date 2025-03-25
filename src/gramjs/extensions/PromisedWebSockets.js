@@ -4,12 +4,13 @@ const { WebSocket } = require('ws');
 const closeError = new Error('WEBSOCKET_CLOSED');
 
 class PromisedWebSockets {
-  constructor(accountId, proxy, onDisconnect, onTraffic) {
+  constructor(accountId, proxy, onDisconnect, onError, onTraffic) {
     this.client = undefined;
     this.closed = true;
     this._accountId = accountId;
     this._proxy = proxy;
     this._onDisconnect = onDisconnect;
+    this._onError = onError;
     this._onTraffic = onTraffic;
   }
 
@@ -103,7 +104,10 @@ class PromisedWebSockets {
         this.client?.close();
 
         timeout = undefined;
-      }, 45000);
+
+        this._onError(`** CONNECTION_FAILED **
+ID: ${accountId}`);
+      }, 15000);
     });
   }
 

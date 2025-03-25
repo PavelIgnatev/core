@@ -134,44 +134,42 @@ class TelegramClient {
   }
 
   async reconnect() {
-    if (!this._isReconnecting) {
-      console.log({
-        accountId: this._accountId,
-        prefix: this._prefix,
-        message: `[RECONNECT_INIT]`,
-      });
-      this._reconnectCounts += 1;
-      this._isReconnecting = true;
-      const pendingTasks = [...this._sender._pending_state.values()];
+    console.log({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: `[RECONNECT_INIT]`,
+    });
+    this._reconnectCounts += 1;
+    this._isReconnecting = true;
+    const pendingTasks = [...this._sender._pending_state.values()];
 
-      console.log({
-        accountId: this._accountId,
-        prefix: this._prefix,
-        message: `[DISCONNECTING...]`,
-      });
-      await this.disconnect();
-      console.log({
-        accountId: this._accountId,
-        prefix: this._prefix,
-        message: `[DISCONNECTED]`,
-      });
-      this._sender = undefined;
+    console.log({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: `[DISCONNECTING...]`,
+    });
+    await this.disconnect();
+    console.log({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: `[DISCONNECTED]`,
+    });
+    this._sender = undefined;
 
-      console.log({
-        accountId: this._accountId,
-        prefix: this._prefix,
-        message: `[CONNECTING...]`,
-      });
-      await this.connect();
-      this._sender._send_queue.prepend(pendingTasks);
+    console.log({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: `[CONNECTING...]`,
+    });
+    await this.connect();
+    this._sender._send_queue.prepend(pendingTasks);
 
-      this._isReconnecting = false;
-      console.log({
-        accountId: this._accountId,
-        prefix: this._prefix,
-        message: `[CONNECTED]`,
-      });
-    }
+    this._isReconnecting = false;
+    console.log({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: `[CONNECTED]`,
+    });
   }
 
   _authKeyCallback(authKey, dcId) {

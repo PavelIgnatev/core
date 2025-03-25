@@ -43,6 +43,7 @@ class Connection {
       accountId,
       proxy,
       onDisconnect,
+      onError,
       onTraffic
     );
   }
