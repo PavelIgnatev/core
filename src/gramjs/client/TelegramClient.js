@@ -115,7 +115,6 @@ class TelegramClient {
       this.session.dcId,
       this._accountId,
       this._proxy,
-      this.reconnect.bind(this),
       this._onError,
       this._onTraffic
     );
