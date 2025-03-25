@@ -95,7 +95,6 @@ class TelegramClient {
         prefix: this._prefix,
         proxy: this._proxy,
         working: this.session._working,
-        onReconnect: this.reconnect.bind(this),
         onError: this._onError,
         onTraffic: this._onTraffic,
         onErrorCount: () => {
@@ -242,6 +241,9 @@ ERROR: ${error.message}`);
     for (attempt = 0; attempt < this._requestRetries; attempt++) {
       try {
         if (!this._sender) {
+          this._onError(`💀 MAIN_CONNECTION_NOT_INITED 💀
+ACCOUNT ID: ${this._accountId}
+ERROR: ${e.message}`);
           throw new Error('MAIN_CONNECTION_NOT_INITED');
         }
 
@@ -312,6 +314,7 @@ ERROR: ${e.message}`
           await this.reconnect();
         } else if (e.message === 'MAIN_CONNECTION_NOT_INITED') {
           await sleep(10000);
+
           await this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (

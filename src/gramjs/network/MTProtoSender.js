@@ -69,7 +69,6 @@ class MTProtoSender {
     this._onError = args.onError;
     this._authKeyCallback = args.authKeyCallback;
     this._working = args.working;
-    this._onReconnect = args.onReconnect;
     this._onErrorCount = args.onErrorCount;
     this._onTraffic = args.onTraffic;
 
@@ -390,9 +389,6 @@ class MTProtoSender {
         await this.getConnection().send(data);
       } catch (e) {
         this._send_loop_handle = undefined;
-        if (!this.userDisconnected) {
-          this._onReconnect();
-        }
         return;
       } finally {
         for (const state of batch) {
@@ -422,10 +418,6 @@ class MTProtoSender {
       try {
         body = await this.getConnection().recv();
       } catch (e) {
-        /** when the server disconnects us we want to reconnect */
-        if (!this.userDisconnected) {
-          this._onReconnect();
-        }
         this._recv_loop_handle = undefined;
         return;
       }

@@ -114,6 +114,7 @@ const starter = async (
 
     const [meName, meId] = await accountSetup(client, account);
 
+
     let i = -1;
     while (true) {
       if (errored) {

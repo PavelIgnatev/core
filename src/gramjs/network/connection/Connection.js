@@ -15,16 +15,7 @@ const AsyncQueue = require('../../extensions/AsyncQueue.js');
 class Connection {
   PacketCodecClass = undefined;
 
-  constructor(
-    ip,
-    port,
-    dcId,
-    accountId,
-    proxy,
-    onDisconnect,
-    onError,
-    onTraffic
-  ) {
+  constructor(ip, port, dcId, accountId, proxy, onError, onTraffic) {
     this._ip = ip;
     this._port = port;
     this._dcId = dcId;
@@ -37,15 +28,8 @@ class Connection {
     this._recvArray = new AsyncQueue();
     this._accountId = accountId;
     this._onError = onError;
-    this._onDisconnect = onDisconnect;
     this.shouldLongPoll = false;
-    this.socket = new PromisedWebSockets(
-      accountId,
-      proxy,
-      onDisconnect,
-      onError,
-      onTraffic
-    );
+    this.socket = new PromisedWebSockets(accountId, proxy, onError, onTraffic);
   }
 
   isConnected() {
@@ -106,11 +90,7 @@ class Connection {
         }
         await this._send(data);
       }
-    } catch (e) {
-      this._onError(`💀 SEND_LOOP_ERROR 💀
-ID: ${this._accountId}
-Error: ${e.message}`);
-    }
+    } catch {}
   }
 
   async _recvLoop() {
@@ -122,7 +102,6 @@ Error: ${e.message}`);
           throw new Error('NO_DATA_RECEIVED');
         }
       } catch (e) {
-        // this._onDisconnect();
         return;
       }
       await this._recvArray.push(data);

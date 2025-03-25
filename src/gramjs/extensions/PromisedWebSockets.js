@@ -4,12 +4,11 @@ const { WebSocket } = require('ws');
 const closeError = new Error('WEBSOCKET_CLOSED');
 
 class PromisedWebSockets {
-  constructor(accountId, proxy, onDisconnect, onError, onTraffic) {
+  constructor(accountId, proxy, onError, onTraffic) {
     this.client = undefined;
     this.closed = true;
     this._accountId = accountId;
     this._proxy = proxy;
-    this._onDisconnect = onDisconnect;
     this._onError = onError;
     this._onTraffic = onTraffic;
   }
@@ -86,9 +85,6 @@ class PromisedWebSockets {
       this.client.onclose = (event) => {
         this.resolveRead?.(false);
         this.closed = true;
-        // if (this._onDisconnect) {
-        //   this._onDisconnect();
-        // }
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
@@ -98,9 +94,6 @@ class PromisedWebSockets {
 
         this.resolveRead?.(false);
         this.closed = true;
-        // if (this._onDisconnect) {
-        //   this._onDisconnect();
-        // }
         this.client?.close();
 
         timeout = undefined;
