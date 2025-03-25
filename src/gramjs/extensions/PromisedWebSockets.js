@@ -118,7 +118,6 @@ ID: ${accountId}`);
 
   async close() {
     await this.client?.close();
-    this.client = undefined;
     this.closed = true;
   }
 
