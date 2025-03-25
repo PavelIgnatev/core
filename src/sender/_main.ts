@@ -89,6 +89,7 @@ const starter = async (
           return;
         }
 
+        await updateStatus(client, false);
         await pingDelayDisconnect(client);
         setTimeout(updateLoop, 20000);
       } catch (err: any) {

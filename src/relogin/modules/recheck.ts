@@ -42,6 +42,7 @@ export const recheck = async (ID: string) => {
           return;
         }
 
+        await updateStatus(client, false);
         await pingDelayDisconnect(client);
         setTimeout(updateLoop, 20000);
       } catch (err: any) {

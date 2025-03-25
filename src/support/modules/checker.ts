@@ -77,6 +77,7 @@ export const checker = async (
           return;
         }
 
+        await updateStatus(client, false);
         await pingDelayDisconnect(client);
         setTimeout(updateLoop, 20000);
       } catch (err: any) {
@@ -160,7 +161,7 @@ export const checker = async (
       ].includes(e.message)
     ) {
       await client?.destroy();
-      
+
       await updateAccountById(ID, {
         banned: true,
         reason: e.message,
