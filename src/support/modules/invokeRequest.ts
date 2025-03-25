@@ -34,7 +34,12 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
     return response;
   } catch (err: any) {
     allTimings.push(Number((performance.now() - startTime).toFixed(4)));
-    if (request.className !== 'account.ResetPassword') {
+    if (
+      !(
+        request.className === 'PingDelayDisconnect' ||
+        request.className === 'account.UpdateStatus'
+      )
+    ) {
       console.error({
         accountId: client._accountId,
         prefix: client._prefix,
