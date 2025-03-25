@@ -131,10 +131,7 @@ class TelegramClient {
     if (!this._isReconnecting) {
       this._reconnectCounts += 1;
       this._isReconnecting = true;
-      const pendingTasks = [
-        ...this._sender._pending_state.values(),
-        ...this._sender._send_queue.values(),
-      ];
+      const pendingTasks = [...this._sender._pending_state.values()];
 
       await this.disconnect();
       this._sender = undefined;
