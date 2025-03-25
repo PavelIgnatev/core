@@ -252,6 +252,7 @@ ERROR: ${err.message}`);
 
   process.on('unhandledRejection', async (reason, promise) => {
     await waitConsole();
+
     await sendToMainBot(`** UNHANDLED_REJECTION **
 CHUNK_ID: ${chunkId}
 REASON: ${reason}

@@ -391,7 +391,7 @@ class MTProtoSender {
       } catch (e) {
         this._send_loop_handle = undefined;
         if (!this.userDisconnected) {
-          await this._onReconnect();
+          this._onReconnect();
         }
         return;
       } finally {
@@ -424,7 +424,7 @@ class MTProtoSender {
       } catch (e) {
         /** when the server disconnects us we want to reconnect */
         if (!this.userDisconnected) {
-          await this._onReconnect();
+          this._onReconnect();
         }
         this._recv_loop_handle = undefined;
         return;

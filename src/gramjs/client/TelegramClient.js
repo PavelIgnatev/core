@@ -134,42 +134,52 @@ class TelegramClient {
   }
 
   async reconnect() {
-    console.log({
-      accountId: this._accountId,
-      prefix: this._prefix,
-      message: `[RECONNECT_INIT]`,
-    });
-    this._reconnectCounts += 1;
-    this._isReconnecting = true;
-    const pendingTasks = [...this._sender._pending_state.values()];
+    if (!this._isReconnecting) {
+      this._reconnectCounts += 1;
+      this._isReconnecting = true;
 
-    console.log({
-      accountId: this._accountId,
-      prefix: this._prefix,
-      message: `[DISCONNECTING...]`,
-    });
+      const MAX_ATTEMPTS = 3;
+
+      let attemptCount = 0;
+      let reconnected = false;
+
+      const pendingTasks = [...this._sender._pending_state.values()];
+
+      while (attemptCount < MAX_ATTEMPTS && !reconnected) {
+        attemptCount++;
+        try {
+          await Promise.race([
+            this._reconnect(pendingTasks),
+            new Promise((_, r) =>
+              setTimeout(() => {
+                r(new Error('RECONNECT_TIMEOUT'));
+              }, 30000)
+            ),
+          ]);
+          reconnected = true;
+        } catch (error) {
+          if (attemptCount >= MAX_ATTEMPTS) {
+            this._onError(`** RECONNECT_FAILED **
+ACCOUNT ID: ${this._accountId}
+ERROR: ${error.message}`);
+            break;
+          }
+        }
+      }
+
+      this._isReconnecting = false;
+    }
+  }
+
+  async _reconnect(pendingTasks) {
     await this.disconnect();
-    console.log({
-      accountId: this._accountId,
-      prefix: this._prefix,
-      message: `[DISCONNECTED]`,
-    });
+
     this._sender = undefined;
 
-    console.log({
-      accountId: this._accountId,
-      prefix: this._prefix,
-      message: `[CONNECTING...]`,
-    });
+    await sleep(2000);
+
     await this.connect();
     this._sender._send_queue.prepend(pendingTasks);
-
-    this._isReconnecting = false;
-    console.log({
-      accountId: this._accountId,
-      prefix: this._prefix,
-      message: `[CONNECTED]`,
-    });
   }
 
   _authKeyCallback(authKey, dcId) {
