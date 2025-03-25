@@ -35,15 +35,26 @@ export const recheck = async (ID: string) => {
     clients.push(client);
 
     let errored: string | null = null;
+    let updateCounter = 0;
     const updateLoop = async () => {
       try {
-        if (!client?._sender || client._sender.isReconnecting || errored) {
+        if (
+          !client ||
+          !client._sender ||
+          client._destryed ||
+          client._isReconnecting ||
+          errored
+        ) {
           setTimeout(updateLoop, 20000);
           return;
         }
 
         await updateStatus(client, false);
-        await pingDelayDisconnect(client);
+
+        if (++updateCounter % 10 === 0) {
+          await pingDelayDisconnect(client);
+        }
+
         setTimeout(updateLoop, 20000);
       } catch (err: any) {
         errored = err.message;

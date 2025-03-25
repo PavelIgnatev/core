@@ -50,6 +50,7 @@ class TelegramClient {
     this._onError = onError;
     this._initTime = 0;
     this._endTime = 0;
+    this._destryed = false;
 
     // Счетчики соединений
     this._connectCounts = 0;
@@ -177,11 +178,9 @@ class TelegramClient {
       this._sender._disconnected = true;
       this._sender.isReconnecting = false;
       this._sender.userDisconnected = true;
-
-      if (this._sender._connection) {
-        this._sender._connection.close();
-      }
     }
+
+    this._destryed = true;
   }
 
   getSender() {
