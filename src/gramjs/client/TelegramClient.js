@@ -241,8 +241,7 @@ ERROR: ${error.message}`);
       try {
         if (!this._sender) {
           this._onError(`💀 MAIN_CONNECTION_NOT_INITED 💀
-ACCOUNT ID: ${this._accountId}
-ERROR: ${e.message}`);
+ACCOUNT ID: ${this._accountId}`);
           throw new Error('MAIN_CONNECTION_NOT_INITED');
         }
 
