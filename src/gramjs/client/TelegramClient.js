@@ -22,7 +22,8 @@ class TelegramClient {
     prefix,
     specialdcId,
     proxy,
-    onError
+    onError,
+    onTraffic
   ) {
     if (
       typeof acountId !== 'string' ||
@@ -48,6 +49,7 @@ class TelegramClient {
     this._retryDelay = 1000;
     this._connection = ConnectionTCPObfuscated;
     this._onError = onError;
+    this._onTraffic = onTraffic;
     this._initTime = 0;
     this._endTime = 0;
     this._destryed = false;
@@ -95,6 +97,7 @@ class TelegramClient {
         working: this.session._working,
         onReconnect: this.reconnect.bind(this),
         onError: this._onError,
+        onTraffic: this._onTraffic,
         onErrorCount: () => {
           this._connectErrorCounts += 1;
         },
@@ -113,7 +116,9 @@ class TelegramClient {
       this.session.dcId,
       this._accountId,
       this._proxy,
-      this._onError
+      this.reconnect.bind(this),
+      this._onError,
+      this._onTraffic
     );
 
     await this._sender.connect(connection, undefined);
@@ -130,17 +135,42 @@ class TelegramClient {
 
   async reconnect() {
     if (!this._isReconnecting) {
+      console.log({
+        accountId: this._accountId,
+        prefix: this._prefix,
+        message: `[RECONNECT INIT]`,
+      });
       this._reconnectCounts += 1;
       this._isReconnecting = true;
       const pendingTasks = [...this._sender._pending_state.values()];
 
+      console.log({
+        accountId: this._accountId,
+        prefix: this._prefix,
+        message: `[DISCONNECTING...]`,
+      });
       await this.disconnect();
+      console.log({
+        accountId: this._accountId,
+        prefix: this._prefix,
+        message: `[DISCONNECTED]`,
+      });
       this._sender = undefined;
 
+      console.log({
+        accountId: this._accountId,
+        prefix: this._prefix,
+        message: `[CONNECTING...]`,
+      });
       await this.connect();
       this._sender._send_queue.prepend(pendingTasks);
 
       this._isReconnecting = false;
+      console.log({
+        accountId: this._accountId,
+        prefix: this._prefix,
+        message: `[CONNECTED]`,
+      });
     }
   }
 
@@ -202,8 +232,13 @@ class TelegramClient {
 
     let attempt = 0;
     for (attempt = 0; attempt < this._requestRetries; attempt++) {
-      this._sender.addStateToQueue(state);
       try {
+        if (!this._sender) {
+          throw new Error('MAIN_CONNECTION_NOT_INITED');
+        }
+
+        this._sender.addStateToQueue(state);
+
         const result = await Promise.race([
           state.promise,
           new Promise((_, r) =>
@@ -266,6 +301,8 @@ ERROR: ${e.message}`
           await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {
+          await this.reconnect();
+        } else if (e.message === 'MAIN_CONNECTION_NOT_INITED') {
           await this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (

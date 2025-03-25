@@ -2,17 +2,15 @@ const { HttpsProxyAgent } = require('https-proxy-agent');
 const { WebSocket } = require('ws');
 
 const closeError = new Error('WEBSOCKET_CLOSED');
-const CONNECTION_TIMEOUT = 15000;
-const MAX_TIMEOUT = 45000;
 
 class PromisedWebSockets {
-  constructor(accountId, proxy, disconnectCallback) {
-    this._accountId = accountId;
-    this._proxy = proxy;
+  constructor(accountId, proxy, onDisconnect, onTraffic) {
     this.client = undefined;
     this.closed = true;
-    this.disconnectCallback = disconnectCallback;
-    this.timeout = CONNECTION_TIMEOUT;
+    this._accountId = accountId;
+    this._proxy = proxy;
+    this._onDisconnect = onDisconnect;
+    this._onTraffic = onTraffic;
   }
 
   async readExactly(number) {
@@ -80,27 +78,15 @@ class PromisedWebSockets {
         if (timeout) clearTimeout(timeout);
       };
       this.client.onerror = (error) => {
-        console.warn({
-          accountId: this._accountId,
-          prefix: 'WEBSOCKET',
-          message: `[WEBSOCKET_ERROR]`,
-          error,
-        });
         reject(error);
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
       };
       this.client.onclose = (event) => {
-        console.warn({
-          accountId: this._accountId,
-          prefix: 'WEBSOCKET',
-          message: `[WEBSOCKET_CLOSED]`,
-          event,
-        });
         this.resolveRead?.(false);
         this.closed = true;
-        if (this.disconnectCallback) {
-          this.disconnectCallback();
+        if (this._onDisconnect) {
+          this._onDisconnect();
         }
         hasResolved = true;
         if (timeout) clearTimeout(timeout);
@@ -111,15 +97,13 @@ class PromisedWebSockets {
 
         this.resolveRead?.(false);
         this.closed = true;
-        if (this.disconnectCallback) {
-          this.disconnectCallback();
+        if (this._onDisconnect) {
+          this._onDisconnect();
         }
         this.client?.close();
 
-        this.timeout *= 2;
-        this.timeout = Math.min(this.timeout, MAX_TIMEOUT);
         timeout = undefined;
-      }, this.timeout);
+      }, 45000);
     });
   }
 
@@ -129,17 +113,29 @@ class PromisedWebSockets {
     }
 
     this.client?.send(data);
+
+    if (this._onTraffic) {
+      this._onTraffic('sent', data.length);
+    }
   }
 
   async close() {
     await this.client?.close();
+    this.client = undefined;
     this.closed = true;
   }
 
   receive() {
     this.client.onmessage = async (message) => {
-      this.stream = Buffer.concat([this.stream, Buffer.from(message.data)]);
+      const data = Buffer.from(message.data);
+      const dataSize = data.length;
+
+      this.stream = Buffer.concat([this.stream, data]);
       this.resolveRead?.(true);
+
+      if (this._onTraffic) {
+        this._onTraffic('received', dataSize);
+      }
     };
   }
 }

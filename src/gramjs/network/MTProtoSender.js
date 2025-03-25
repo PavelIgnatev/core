@@ -48,6 +48,7 @@ class MTProtoSender {
     delay: 0,
     authKeyCallback: undefined,
     updateCallback: undefined,
+    onTraffic: undefined,
   };
 
   /**
@@ -70,6 +71,7 @@ class MTProtoSender {
     this._working = args.working;
     this._onReconnect = args.onReconnect;
     this._onErrorCount = args.onErrorCount;
+    this._onTraffic = args.onTraffic;
 
     /**
      * whether we disconnected ourself or telegram did it.

@@ -21,7 +21,8 @@ declare class TelegramClient {
     prefix: string,
     specialDcId: number | null,
     proxy: string,
-    onError: (error: any) => void)
+    onError: (error: any) => void,
+    onTraffic?: (type: 'sent' | 'received', bytes: number) => void)
   async start();
 
   async invoke<R extends Api.AnyRequest>(request: R): Promise<R['__response']>;

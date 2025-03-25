@@ -61,7 +61,8 @@ async function init(
           account.prefix,
           dcId,
           proxy,
-          onError
+          onError,
+          () => {}
         )
       : new TelegramClient(
           session,
@@ -76,7 +77,8 @@ async function init(
           account.prefix,
           dcId,
           proxy,
-          onError
+          onError,
+          () => {}
         );
 
   if (!client) {

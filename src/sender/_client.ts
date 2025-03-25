@@ -55,12 +55,13 @@ async function init(
           '',
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
-          onError
+          onError,
+          () => {}
         )
       : new TelegramClient(
           session,
           nextApiId,
-          'Desktop',
+          'Desktop',  
           'Windows 11',
           '6.8.2 x64',
           'en',
@@ -70,7 +71,8 @@ async function init(
           '',
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
-          onError
+          onError,
+          () => {}
         );
 
   if (!client) {
