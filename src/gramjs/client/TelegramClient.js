@@ -234,7 +234,7 @@ ERROR: ${error.message}`);
     const maxTimeout =
       request.className === 'PingDelayDisconnect' ||
       request.className === 'account.UpdateStatus'
-        ? 10000
+        ? 20000
         : 150000;
     const state = new RequestState(request);
 
