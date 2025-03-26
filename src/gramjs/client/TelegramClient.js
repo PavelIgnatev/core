@@ -133,8 +133,8 @@ class TelegramClient {
 
   async reconnect() {
     if (!this._isReconnecting) {
-      this._reconnectCounts += 1;
       this._isReconnecting = true;
+      this._reconnectCounts += 1;
 
       const MAX_ATTEMPTS = 3;
 
@@ -242,11 +242,9 @@ ERROR: ${error.message}`);
     for (attempt = 0; attempt < this._requestRetries; attempt++) {
       try {
         if (!this._sender) {
-          this._onError(`💀 MAIN_CONNECTION_NOT_INITED 💀
-ACCOUNT ID: ${this._accountId}`);
           es.push('MAIN_CONNECTION_NOT_INITED');
           await this.reconnect();
-          await sleep(10000)
+          await sleep(10000);
           continue;
         }
 
