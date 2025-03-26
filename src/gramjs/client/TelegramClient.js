@@ -311,9 +311,8 @@ ERROR: ${e.message}`
         } else if (e.message === 'CONNECTION_NOT_INITED') {
           await this.reconnect();
         } else if (e.message === 'MAIN_CONNECTION_NOT_INITED') {
-          await sleep(10000);
-
-          await this.reconnect();
+          state.finished.resolve();
+          throw e;
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (
             !(
