@@ -141,7 +141,9 @@ class TelegramClient {
       let attemptCount = 0;
       let reconnected = false;
 
-      const pendingTasks = [...this._sender._pending_state.values()];
+      const pendingTasks = this._sender
+        ? [...this._sender._pending_state.values()]
+        : [];
 
       while (attemptCount < MAX_ATTEMPTS && !reconnected) {
         attemptCount++;
@@ -308,11 +310,11 @@ ERROR: ${e.message}`
         } else if (e instanceof errors.MsgWaitError) {
           await state.isReady();
           state.after = undefined;
-        } else if (e.message === 'CONNECTION_NOT_INITED') {
+        } else if (
+          e.message === 'CONNECTION_NOT_INITED' ||
+          e.message === 'MAIN_CONNECTION_NOT_INITED'
+        ) {
           await this.reconnect();
-        } else if (e.message === 'MAIN_CONNECTION_NOT_INITED') {
-          state.finished.resolve();
-          throw e;
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (
             !(

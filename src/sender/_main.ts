@@ -267,11 +267,10 @@ PROMISE: ${JSON.stringify(promise)}`);
   return {
     endTime: getTimeString(startTime),
     clients: clients.filter(isTelegramClient).map((client) => {
-      const sender = client._sender;
       const stats = client.getConnectionStats();
 
       return {
-        accountId: sender._accountId,
+        accountId: client._accountId,
         initTime: client._initTime,
         endTime: client._endTime,
         ...stats,
