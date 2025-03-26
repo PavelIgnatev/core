@@ -246,6 +246,7 @@ ERROR: ${error.message}`);
 ACCOUNT ID: ${this._accountId}`);
           es.push('MAIN_CONNECTION_NOT_INITED');
           await this.reconnect();
+          await sleep(10000)
           continue;
         }
 
