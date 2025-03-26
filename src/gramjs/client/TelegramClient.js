@@ -153,7 +153,7 @@ class TelegramClient {
             new Promise((_, r) =>
               setTimeout(() => {
                 r(new Error('RECONNECT_TIMEOUT'));
-              }, 20000)
+              }, 35000)
             ),
           ]);
           reconnected = true;

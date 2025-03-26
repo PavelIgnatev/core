@@ -100,7 +100,7 @@ class PromisedWebSockets {
 
         this._onError(`** CONNECTION_FAILED **
 ID: ${accountId}`);
-      }, 15000);
+      }, 30000);
     });
   }
 
