@@ -244,7 +244,8 @@ ERROR: ${error.message}`);
         if (!this._sender) {
           this._onError(`💀 MAIN_CONNECTION_NOT_INITED 💀
 ACCOUNT ID: ${this._accountId}`);
-          throw new Error('MAIN_CONNECTION_NOT_INITED');
+          es.push('MAIN_CONNECTION_NOT_INITED');
+          continue;
         }
 
         this._sender.addStateToQueue(state);
@@ -310,10 +311,7 @@ ERROR: ${e.message}`
         } else if (e instanceof errors.MsgWaitError) {
           await state.isReady();
           state.after = undefined;
-        } else if (
-          e.message === 'CONNECTION_NOT_INITED' ||
-          e.message === 'MAIN_CONNECTION_NOT_INITED'
-        ) {
+        } else if (e.message === 'CONNECTION_NOT_INITED') {
           await this.reconnect();
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (
