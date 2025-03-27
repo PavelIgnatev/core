@@ -54,12 +54,11 @@ class TelegramClient {
     this._endTime = 0;
     this._destryed = false;
 
-    // Счетчики соединений
     this._connectCounts = 0;
     this._reconnectCounts = 0;
     this._disconnectCounts = 0;
     this._connectErrorCounts = 0;
-    this._reconnectHistory = []; // Массив для хранения истории реконнектов
+    this._reconnectHistory = [];
 
     if (!this.session._working) {
       this._initWith = (x) => {
@@ -138,7 +137,7 @@ class TelegramClient {
       this._reconnectCounts += 1;
 
       const reconnectInfo = {
-        timestamp:  new Date(),
+        timestamp: new Date(),
         accountId: this._accountId,
       };
 
