@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 
 class CustomFile {
   name: string;
@@ -15,8 +16,26 @@ class CustomFile {
   }
 }
 
+async function cropImageBuffer(imageBuffer: Buffer): Promise<Buffer> {
+  try {
+    const image = sharp(imageBuffer);
+    const metadata = await image.metadata();
+
+    return await image
+      .extract({
+        left: 0,
+        top: 0,
+        width: metadata.width || 0,
+        height: Math.floor((metadata.height || 0) / 2),
+      })
+      .toBuffer();
+  } catch {
+    return imageBuffer;
+  }
+}
+
 export const getProfileFiles = (
-  prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino'
+  prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino' | 'onlik'
 ) => {
   let files: string[] = [];
   let folderName = '';
@@ -36,17 +55,27 @@ export const getProfileFiles = (
   }
 
   const customFiles = files.map((fileName) => {
+    const filePath = path.join(
+      __dirname,
+      `/images/${prefix}/${folderName}/${fileName}`
+    );
+    const originalBuffer = fs.readFileSync(filePath);
+
     return new CustomFile(
       fileName,
-      fs.statSync(
-        path.join(__dirname, `/images/${prefix}/${folderName}/${fileName}`)
-      ).size,
-      path.join(__dirname, `/images/${prefix}/${folderName}/${fileName}`),
-      fs.readFileSync(
-        path.join(__dirname, `/images/${prefix}/${folderName}/${fileName}`)
-      )
+      fs.statSync(filePath).size,
+      filePath,
+      originalBuffer
     );
   });
 
-  return customFiles;
+  return Promise.all(
+    customFiles.map(async (file) => {
+      if (file.buffer) {
+        file.buffer = await cropImageBuffer(file.buffer);
+        file.size = file.buffer.length;
+      }
+      return file;
+    })
+  );
 };

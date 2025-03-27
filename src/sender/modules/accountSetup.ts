@@ -256,9 +256,18 @@ ID: ${accountId}`);
   const isAdult = accountId.includes('adult');
   const isVasilisa = accountId.includes('vasilisa');
   const isCasino = accountId.includes('casino');
+  const isOnlik = accountId.includes('onlik');
 
-  const files = getProfileFiles(
-    isAdult ? 'adult' : isVasilisa ? 'vasilisa' : isCasino ? 'casino' : gender
+  const files = await getProfileFiles(
+    isAdult
+      ? 'adult'
+      : isVasilisa
+        ? 'vasilisa'
+        : isCasino
+          ? 'casino'
+          : isOnlik
+            ? 'onlik'
+            : gender
   );
   for (const file of files) {
     const isUF = await invokeRequest(
@@ -300,8 +309,7 @@ FILE_NAME: ${file.name}`);
           username,
           randomElseUsername: '',
         };
-      }
-      if (accountId.includes('vasilisa')) {
+      } else if (accountId.includes('vasilisa')) {
         const username = `iamvasilisa${Math.floor(Math.random() * 10000)}`;
         await invokeRequest(
           client,
@@ -318,6 +326,27 @@ FILE_NAME: ${file.name}`);
 
         user = {
           firstName: 'Василиса',
+          lastName: '',
+          username,
+          randomElseUsername: '',
+        };
+      } else if (accountId.includes('onlik')) {
+        const username = `anastangle${Math.floor(Math.random() * 10000)}`;
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
+
+        await updateProfile(client, {
+          firstName: 'Anastangle',
+          lastName: `${adultEmojis[Math.floor(Math.random() * adultEmojis.length)]}`,
+          about: '',
+        });
+
+        user = {
+          firstName: 'Anastangle',
           lastName: '',
           username,
           randomElseUsername: '',
