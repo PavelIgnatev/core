@@ -59,6 +59,7 @@ class TelegramClient {
     this._reconnectCounts = 0;
     this._disconnectCounts = 0;
     this._connectErrorCounts = 0;
+    this._reconnectHistory = []; // Массив для хранения истории реконнектов
 
     if (!this.session._working) {
       this._initWith = (x) => {
@@ -135,6 +136,13 @@ class TelegramClient {
     if (!this._isReconnecting) {
       this._isReconnecting = true;
       this._reconnectCounts += 1;
+
+      const reconnectInfo = {
+        timestamp:  new Date(),
+        accountId: this._accountId,
+      };
+
+      this._reconnectHistory.push(reconnectInfo);
 
       const MAX_ATTEMPTS = 3;
 
@@ -407,7 +415,12 @@ REQUEST: ${request.className}`);
       reconnectCounts: this._reconnectCounts,
       disconnectCounts: this._disconnectCounts,
       connectErrorCounts: this._connectErrorCounts,
+      reconnectHistory: this._reconnectHistory,
     };
+  }
+
+  getReconnectHistory() {
+    return this._reconnectHistory;
   }
 }
 

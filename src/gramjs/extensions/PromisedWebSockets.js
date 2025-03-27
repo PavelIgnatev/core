@@ -97,9 +97,6 @@ class PromisedWebSockets {
         this.client?.close();
 
         timeout = undefined;
-
-        this._onError(`** CONNECTION_FAILED **
-ID: ${accountId}`);
       }, 30000);
     });
   }

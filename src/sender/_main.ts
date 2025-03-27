@@ -114,53 +114,58 @@ const starter = async (
 
     const [meName, meId] = await accountSetup(client, account);
 
-    let i = -1;
-    while (true) {
-      if (errored) {
-        throw new Error(errored);
-      }
+    await client.reconnect()
+    await client.reconnect()
 
-      i += 1;
-      accountsInWork[ID] = i;
+    await client.reconnect()
 
-      if (i === 30) {
-        client._endTime = Number(performance.now() - startTime).toFixed(0);
-      }
+    // let i = -1;
+    // while (true) {
+    //   if (errored) {
+    //     throw new Error(errored);
+    //   }
 
-      if (Object.values(accountsInWork).every((n) => n >= 30)) {
-        break;
-      }
+    //   i += 1;
+    //   accountsInWork[ID] = i;
 
-      let timer;
-      const timeout = new Promise(
-        (_, rej) =>
-          (timer = setTimeout(
-            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-            900000
-          ))
-      );
+    //   if (i === 30) {
+    //     client._endTime = Number(performance.now() - startTime).toFixed(0);
+    //   }
 
-      await Promise.race([
-        (async () => {
-          if (isAutoResponse) {
-            isAutoResponse = false;
+    //   if (Object.values(accountsInWork).every((n) => n >= 30)) {
+    //     break;
+    //   }
 
-            await updateStatus(client, false);
-            await autoResponse(client, account, meId, meName);
-          }
+    //   let timer;
+    //   const timeout = new Promise(
+    //     (_, rej) =>
+    //       (timer = setTimeout(
+    //         () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
+    //         900000
+    //       ))
+    //   );
 
-          if (i === randomI) {
-            await setup2FA(client, account);
-            await automaticCheck(client, account);
-            await autoSender(client, ID, meId);
-          }
-          await sleep(60000);
-        })(),
-        timeout,
-      ]);
+    //   await Promise.race([
+    //     (async () => {
+    //       if (isAutoResponse) {
+    //         isAutoResponse = false;
 
-      clearTimeout(timer);
-    }
+    //         await updateStatus(client, false);
+    //         await autoResponse(client, account, meId, meName);
+    //       }
+
+    //       if (i === randomI) {
+    //         await setup2FA(client, account);
+    //         await automaticCheck(client, account);
+    //         await autoSender(client, ID, meId);
+    //       }
+    //       await sleep(60000);
+    //     })(),
+    //     timeout,
+    //   ]);
+
+    //   clearTimeout(timer);
+    // }
   } catch (e: any) {
     console.error({
       accountId: ID,

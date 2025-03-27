@@ -9,6 +9,10 @@ type ClientData = {
   connectErrorCounts: number;
   disconnectCounts: number;
   reconnectCounts: number;
+  reconnectHistory?: Array<{
+    timestamp: Date;
+    accountId: string;
+  }>;
 };
 
 type ClientsData = {
@@ -30,7 +34,10 @@ type WorkerSuccessData = {
   endTime: string;
 };
 
-export const makeMetricsAll = async (promises: WorkerSuccessData[]) => {
+export const makeMetricsAll = async (
+  promises: WorkerSuccessData[],
+  startTime: number = Date.now()
+) => {
   const globalMetrics = {
     clients: [] as ClientData[],
     clientsData: {
@@ -58,11 +65,17 @@ export const makeMetricsAll = async (promises: WorkerSuccessData[]) => {
       if (key === 'allTimings') {
         globalMetrics.clientsData.allTimings.push(...clientsData.allTimings);
       } else {
-        const target = globalMetrics.clientsData[key as keyof Omit<ClientsData, 'allTimings'>];
-        const source = clientsData[key as keyof Omit<ClientsData, 'allTimings'>];
+        const target =
+          globalMetrics.clientsData[
+            key as keyof Omit<ClientsData, 'allTimings'>
+          ];
+        const source =
+          clientsData[key as keyof Omit<ClientsData, 'allTimings'>];
         if (typeof target === 'object' && target !== null) {
           for (const k in source) {
-            (target as Record<string, number>)[k] = ((target as Record<string, number>)[k] || 0) + (source as Record<string, number>)[k];
+            (target as Record<string, number>)[k] =
+              ((target as Record<string, number>)[k] || 0) +
+              (source as Record<string, number>)[k];
           }
         }
       }
@@ -168,6 +181,46 @@ export const makeMetricsAll = async (promises: WorkerSuccessData[]) => {
     totalClients: globalMetrics.clients.length,
   });
 
+  const reconnectDistribution: Record<string, number> = {};
+
+  for (const client of globalMetrics.clients) {
+    const count = client.reconnectCounts;
+    const key = count.toString();
+    reconnectDistribution[key] = (reconnectDistribution[key] || 0) + 1;
+  }
+
+  const sortedKeys = Object.keys(reconnectDistribution)
+    .map(Number)
+    .sort((a, b) => a - b);
+
+  function getWordForm(number: number, wordForms: string[]): string {
+    const cases = [2, 0, 1, 1, 1, 2];
+    return wordForms[
+      number % 100 > 4 && number % 100 < 20
+        ? 2
+        : cases[Math.min(number % 10, 5)]
+    ];
+  }
+
+  let reconnectStats = '';
+  if (sortedKeys.length > 0) {
+    const statsLines = sortedKeys.map((key) => {
+      const count = reconnectDistribution[key.toString()];
+      const accountWord = getWordForm(count, [
+        'аккаунт',
+        'аккаунта',
+        'аккаунтов',
+      ]);
+      const reconnectSuffix = getWordForm(key, ['', 'А', 'ОВ']);
+
+      return `▪️ ${key === 0 ? 'БЕЗ РЕКОННЕКТОВ' : `${key} РЕКОННЕКТ${reconnectSuffix}`}: ${count} ${accountWord}`;
+    });
+
+    reconnectStats = statsLines.join('\n');
+  } else {
+    reconnectStats = 'Нет данных о реконнектах';
+  }
+
   await sendToMainBot(`💥 ALL CHUNKS DONE 💥
 
 * ВРЕМЯ ВЫПОЛНЕНИЯ ЧАНКОВ *
@@ -183,7 +236,10 @@ ${chunkTimesStats}
 REQUEST_COUNT: ${globalMetrics.clientsData.allTimings.length}
 RESPONSE_TIME: ${Number(
     (
-      globalMetrics.clientsData.allTimings.reduce((acc, num) => acc + Number(num), 0) /
+      globalMetrics.clientsData.allTimings.reduce(
+        (acc, num) => acc + Number(num),
+        0
+      ) /
       globalMetrics.clientsData.allTimings.length /
       1000
     ).toFixed(2)
@@ -201,8 +257,73 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
     Object.keys(globalMetrics.clientsData.aiReqest).length > 0
       ? `\n\n* ИИ *
 ${Object.keys(globalMetrics.clientsData.aiReqest)
-  .map((r) => `${r}: ${globalMetrics.clientsData.aiReqest[r]} requests, ${globalMetrics.clientsData.aiRetryError[r] || 0} errors`)
+  .map(
+    (r) =>
+      `${r}: ${globalMetrics.clientsData.aiReqest[r]} requests, ${globalMetrics.clientsData.aiRetryError[r] || 0} errors`
+  )
   .join('\n')}`
       : ''
   }`);
+
+  const allReconnectHistory: Array<{
+    timestamp: Date;
+    accountId: string;
+  }> = [];
+
+  for (const client of globalMetrics.clients) {
+    if (client.reconnectHistory && client.reconnectHistory.length > 0) {
+      allReconnectHistory.push(...client.reconnectHistory);
+    }
+  }
+
+  let minuteStatsText = '';
+  let startDate: Date | null = null;
+
+  if (allReconnectHistory.length > 0) {
+    startDate = new Date(startTime);
+
+    const minuteDistribution: Record<number, number> = {};
+
+    for (const reconnect of allReconnectHistory) {
+      const diffMinutes = Math.floor(
+        (reconnect.timestamp.getTime() - startDate.getTime()) / (1000 * 60)
+      );
+      minuteDistribution[diffMinutes] =
+        (minuteDistribution[diffMinutes] || 0) + 1;
+    }
+
+    const normalizedMinutes: Record<number, number> = {};
+    const sortedMinutes = Object.keys(minuteDistribution)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    sortedMinutes.forEach((originalMinute, index) => {
+      const normalizedMinute = index + 1;
+      normalizedMinutes[normalizedMinute] = minuteDistribution[originalMinute];
+    });
+
+    const minuteStats = Object.keys(normalizedMinutes)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map((minute) => {
+        const count = normalizedMinutes[minute];
+        const reconnectWord = getWordForm(count, [
+          'аккаунт  ',
+          'аккаунта',
+          'аккаунтов',
+        ]);
+
+        return `▫️ ${minute}-АЯ МИНУТА: ${count} ${reconnectWord}`;
+      });
+
+    if (minuteStats.length > 0) {
+      minuteStatsText = minuteStats.join('\n');
+    }
+  }
+
+  await sendToMainBot(`📊 СТАТИСТИКА РЕКОННЕКТОВ 📊
+
+РАСПРЕДЕЛЕНИЕ ПО РЕКОННЕКТАМ
+${reconnectStats}
+${minuteStatsText ? `\nРАСПРЕДЕЛЕНИЕ ПО МИНУТАМ\n${minuteStatsText}` : ''}`);
 };

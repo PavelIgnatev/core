@@ -114,6 +114,8 @@ run();`,
 const main = async () => {
   await Promise.all([coreDB(), logsDB()]);
 
+  const appStartTime = Date.now();
+
   const chunks = await getAccountCreationDate();
   console.log({
     message: '💥 ITERATION INIT 💥',
@@ -143,7 +145,7 @@ CHUNK_ID: ${promise.chunkId}`);
   }
 
   if (successPromises.length > 0) {
-    await makeMetricsAll(successPromises);
+    await makeMetricsAll(successPromises, appStartTime);
   }
 
   process.exit(1);

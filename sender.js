@@ -52483,7 +52483,7 @@ var getAccountCreationDate = async () => {
 };
 
 // src/sender/helpers/makeMetricsAll.ts
-var makeMetricsAll = async (promises) => {
+var makeMetricsAll = async (promises, startTime = Date.now()) => {
   const globalMetrics = {
     clients: [],
     clientsData: {
@@ -52591,6 +52591,33 @@ var makeMetricsAll = async (promises) => {
     totalChunks: promises.length,
     totalClients: globalMetrics.clients.length
   });
+  const reconnectDistribution = {};
+  for (const client of globalMetrics.clients) {
+    const count = client.reconnectCounts;
+    const key = count.toString();
+    reconnectDistribution[key] = (reconnectDistribution[key] || 0) + 1;
+  }
+  const sortedKeys = Object.keys(reconnectDistribution).map(Number).sort((a, b) => a - b);
+  function getWordForm(number, wordForms) {
+    const cases = [2, 0, 1, 1, 1, 2];
+    return wordForms[number % 100 > 4 && number % 100 < 20 ? 2 : cases[Math.min(number % 10, 5)]];
+  }
+  let reconnectStats = "";
+  if (sortedKeys.length > 0) {
+    const statsLines = sortedKeys.map((key) => {
+      const count = reconnectDistribution[key.toString()];
+      const accountWord = getWordForm(count, [
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442",
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430",
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442\u043E\u0432"
+      ]);
+      const reconnectSuffix = getWordForm(key, ["", "\u0410", "\u041E\u0412"]);
+      return `\u25AA\uFE0F ${key === 0 ? "\u0411\u0415\u0417 \u0420\u0415\u041A\u041E\u041D\u041D\u0415\u041A\u0422\u041E\u0412" : `${key} \u0420\u0415\u041A\u041E\u041D\u041D\u0415\u041A\u0422${reconnectSuffix}`}: ${count} ${accountWord}`;
+    });
+    reconnectStats = statsLines.join("\n");
+  } else {
+    reconnectStats = "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \u043E \u0440\u0435\u043A\u043E\u043D\u043D\u0435\u043A\u0442\u0430\u0445";
+  }
   await sendToMainBot(`\u{1F4A5} ALL CHUNKS DONE \u{1F4A5}
 
 * \u0412\u0420\u0415\u041C\u042F \u0412\u042B\u041F\u041E\u041B\u041D\u0415\u041D\u0418\u042F \u0427\u0410\u041D\u041A\u041E\u0412 *
@@ -52605,7 +52632,10 @@ ${chunkTimesStats}
 * \u0421\u0422\u0410\u0411\u0418\u041B\u042C\u041D\u041E\u0421\u0422\u042C *
 REQUEST_COUNT: ${globalMetrics.clientsData.allTimings.length}
 RESPONSE_TIME: ${Number(
-    (globalMetrics.clientsData.allTimings.reduce((acc, num) => acc + Number(num), 0) / globalMetrics.clientsData.allTimings.length / 1e3).toFixed(2)
+    (globalMetrics.clientsData.allTimings.reduce(
+      (acc, num) => acc + Number(num),
+      0
+    ) / globalMetrics.clientsData.allTimings.length / 1e3).toFixed(2)
   )}ms
 CONNECT: ${totalConnectCounts} (mid: ${midConnectCounts}, max: ${maxConnectCounts.value})
 RECONNECT: ${totalReconnectCounts} (mid: ${midReconnectCounts}, max: ${maxReconnectCounts.value})
@@ -52619,7 +52649,52 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
 \u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041A\u0410 \u041F\u041E\u0418\u0421\u041A\u0410 \u041F\u041E \u041D\u041E\u041C\u0415\u0420\u0423: ${Object.keys(globalMetrics.clientsData.phoneSearchError).length}${Object.keys(globalMetrics.clientsData.aiReqest).length > 0 ? `
 
 * \u0418\u0418 *
-${Object.keys(globalMetrics.clientsData.aiReqest).map((r) => `${r}: ${globalMetrics.clientsData.aiReqest[r]} requests, ${globalMetrics.clientsData.aiRetryError[r] || 0} errors`).join("\n")}` : ""}`);
+${Object.keys(globalMetrics.clientsData.aiReqest).map(
+    (r) => `${r}: ${globalMetrics.clientsData.aiReqest[r]} requests, ${globalMetrics.clientsData.aiRetryError[r] || 0} errors`
+  ).join("\n")}` : ""}`);
+  const allReconnectHistory = [];
+  for (const client of globalMetrics.clients) {
+    if (client.reconnectHistory && client.reconnectHistory.length > 0) {
+      allReconnectHistory.push(...client.reconnectHistory);
+    }
+  }
+  let minuteStatsText = "";
+  let startDate = null;
+  if (allReconnectHistory.length > 0) {
+    startDate = new Date(startTime);
+    const minuteDistribution = {};
+    for (const reconnect of allReconnectHistory) {
+      const diffMinutes = Math.floor(
+        (reconnect.timestamp.getTime() - startDate.getTime()) / (1e3 * 60)
+      );
+      minuteDistribution[diffMinutes] = (minuteDistribution[diffMinutes] || 0) + 1;
+    }
+    const normalizedMinutes = {};
+    const sortedMinutes = Object.keys(minuteDistribution).map(Number).sort((a, b) => a - b);
+    sortedMinutes.forEach((originalMinute, index) => {
+      const normalizedMinute = index + 1;
+      normalizedMinutes[normalizedMinute] = minuteDistribution[originalMinute];
+    });
+    const minuteStats = Object.keys(normalizedMinutes).map(Number).sort((a, b) => a - b).map((minute) => {
+      const count = normalizedMinutes[minute];
+      const reconnectWord = getWordForm(count, [
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442  ",
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442\u0430",
+        "\u0430\u043A\u043A\u0430\u0443\u043D\u0442\u043E\u0432"
+      ]);
+      return `\u25AB\uFE0F ${minute}-\u0410\u042F \u041C\u0418\u041D\u0423\u0422\u0410: ${count} ${reconnectWord}`;
+    });
+    if (minuteStats.length > 0) {
+      minuteStatsText = minuteStats.join("\n");
+    }
+  }
+  await sendToMainBot(`\u{1F4CA} \u0421\u0422\u0410\u0422\u0418\u0421\u0422\u0418\u041A\u0410 \u0420\u0415\u041A\u041E\u041D\u041D\u0415\u041A\u0422\u041E\u0412 \u{1F4CA}
+
+\u0420\u0410\u0421\u041F\u0420\u0415\u0414\u0415\u041B\u0415\u041D\u0418\u0415 \u041F\u041E \u0420\u0415\u041A\u041E\u041D\u041D\u0415\u041A\u0422\u0410\u041C
+${reconnectStats}
+${minuteStatsText ? `
+\u0420\u0410\u0421\u041F\u0420\u0415\u0414\u0415\u041B\u0415\u041D\u0418\u0415 \u041F\u041E \u041C\u0418\u041D\u0423\u0422\u0410\u041C
+${minuteStatsText}` : ""}`);
 };
 
 // src/sender/index.ts
@@ -52688,6 +52763,7 @@ run();`,
 };
 var main = async () => {
   await Promise.all([coreDB(), logsDB()]);
+  const appStartTime = Date.now();
   const chunks = await getAccountCreationDate();
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
@@ -52710,7 +52786,7 @@ CHUNK_ID: ${promise.chunkId}`);
     }
   }
   if (successPromises.length > 0) {
-    await makeMetricsAll(successPromises);
+    await makeMetricsAll(successPromises, appStartTime);
   }
   process.exit(1);
 };
