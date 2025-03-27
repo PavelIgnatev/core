@@ -93,7 +93,7 @@ const starter = async (
           client._isReconnecting ||
           errored
         ) {
-          setTimeout(updateLoop, 20000);
+          setTimeout(updateLoop, 60000);
           return;
         }
 
@@ -103,12 +103,12 @@ const starter = async (
           await pingDelayDisconnect(client);
         }
 
-        setTimeout(updateLoop, 20000);
+        setTimeout(updateLoop, 60000);
       } catch (err: any) {
         errored = err.message;
       }
     };
-    setTimeout(updateLoop, 20000);
+    setTimeout(updateLoop, 60000);
 
     await clearAuthorizations(client);
     await personalChannel(account, client);
