@@ -13,6 +13,12 @@ type ClientData = {
     timestamp: Date;
     accountId: string;
   }>;
+  metrics?: {
+    sent: number;
+    received: number;
+    sentSize: number;
+    receivedSize: number;
+  };
 };
 
 type ClientsData = {
@@ -326,4 +332,164 @@ ${Object.keys(globalMetrics.clientsData.aiReqest)
 РАСПРЕДЕЛЕНИЕ ПО РЕКОННЕКТАМ
 ${reconnectStats}
 ${minuteStatsText ? `\nРАСПРЕДЕЛЕНИЕ ПО МИНУТАМ\n${minuteStatsText}` : ''}`);
+
+  // Отправляем отдельное сообщение с метриками трафика
+  await sendToMainBot(`📊 СТАТИСТИКА СЕТЕВОГО ТРАФИКА 📊
+
+${getTrafficReport(globalMetrics.clients)}`);
 };
+
+function getTrafficReport(clients: ClientData[]): string {
+  // Фильтруем клиентов с метриками
+  const clientsWithMetrics = clients.filter((client) => client.metrics);
+  
+  if (clientsWithMetrics.length === 0) {
+    return 'Нет данных о трафике';
+  }
+
+  // Рассчитываем общее количество и размер
+  const totalSent = clientsWithMetrics.reduce((acc, client) => acc + (client.metrics?.sent || 0), 0);
+  const totalReceived = clientsWithMetrics.reduce((acc, client) => acc + (client.metrics?.received || 0), 0);
+  const totalSentSize = clientsWithMetrics.reduce((acc, client) => acc + (client.metrics?.sentSize || 0), 0);
+  const totalReceivedSize = clientsWithMetrics.reduce((acc, client) => acc + (client.metrics?.receivedSize || 0), 0);
+
+  // Рассчитываем средние значения
+  const avgSent = totalSent / clientsWithMetrics.length;
+  const avgReceived = totalReceived / clientsWithMetrics.length;
+  const avgSentSize = totalSentSize / clientsWithMetrics.length;
+  const avgReceivedSize = totalReceivedSize / clientsWithMetrics.length;
+
+  // Форматируем байты в более читабельный формат
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 Б';
+    const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  };
+
+  // Создаем функцию для форматирования топов
+  const formatTop = (list: Array<{ id: string; value: number }>, isByteSize = false): string => {
+    return list
+      .map((item, index) => {
+        const value = isByteSize ? formatBytes(item.value) : item.value.toFixed(0);
+        return `${index + 1}. ${item.id}: ${value}`;
+      })
+      .join('\n');
+  };
+
+  // Топ 5 по количеству отправленных пакетов
+  const topBySentPackets = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: client.metrics?.sent || 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 по количеству полученных пакетов
+  const topByReceivedPackets = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: client.metrics?.received || 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 по размеру отправленных данных
+  const topBySentSize = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: client.metrics?.sentSize || 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 по размеру полученных данных
+  const topByReceivedSize = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: client.metrics?.receivedSize || 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 по среднему размеру отправленного пакета
+  const topByAvgSentPacketSize = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: (client.metrics?.sent || 0) > 0 
+        ? (client.metrics?.sentSize || 0) / (client.metrics?.sent || 1) 
+        : 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 по среднему размеру полученного пакета
+  const topByAvgReceivedPacketSize = clientsWithMetrics
+    .map((client) => ({
+      id: client.accountId,
+      value: (client.metrics?.received || 0) > 0 
+        ? (client.metrics?.receivedSize || 0) / (client.metrics?.received || 1) 
+        : 0,
+    }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  // Топ 5 с наименьшим средним размером отправленного пакета
+  const bottomByAvgSentPacketSize = clientsWithMetrics
+    .filter((client) => (client.metrics?.sent || 0) > 0)
+    .map((client) => ({
+      id: client.accountId,
+      value: (client.metrics?.sentSize || 0) / (client.metrics?.sent || 1),
+    }))
+    .sort((a, b) => a.value - b.value)
+    .slice(0, 5);
+
+  // Топ 5 с наименьшим средним размером полученного пакета
+  const bottomByAvgReceivedPacketSize = clientsWithMetrics
+    .filter((client) => (client.metrics?.received || 0) > 0)
+    .map((client) => ({
+      id: client.accountId,
+      value: (client.metrics?.receivedSize || 0) / (client.metrics?.received || 1),
+    }))
+    .sort((a, b) => a.value - b.value)
+    .slice(0, 5);
+
+  return `ВСЕГО ОТПРАВЛЕНО ПАКЕТОВ: ${totalSent} (${formatBytes(totalSentSize)})
+ВСЕГО ПОЛУЧЕНО ПАКЕТОВ: ${totalReceived} (${formatBytes(totalReceivedSize)})
+ВСЕГО ТРАФИКА: ${formatBytes(totalSentSize + totalReceivedSize)}
+
+СРЕДНЕЕ ОТПРАВЛЕНО: ${avgSent.toFixed(2)} пакетов (${formatBytes(avgSentSize)})
+СРЕДНЕЕ ПОЛУЧЕНО: ${avgReceived.toFixed(2)} пакетов (${formatBytes(avgReceivedSize)})
+СРЕДНИЙ ТРАФИК НА АККАУНТ: ${formatBytes(avgSentSize + avgReceivedSize)}
+
+СРЕДНИЙ РАЗМЕР ПАКЕТА (ОТПРАВКА): ${formatBytes(totalSent > 0 ? totalSentSize / totalSent : 0)}
+СРЕДНИЙ РАЗМЕР ПАКЕТА (ПОЛУЧЕНИЕ): ${formatBytes(totalReceived > 0 ? totalReceivedSize / totalReceived : 0)}
+
+* ТОП ПО КОЛИЧЕСТВУ ПАКЕТОВ *
+ОТПРАВЛЕНО:
+${formatTop(topBySentPackets)}
+
+ПОЛУЧЕНО:
+${formatTop(topByReceivedPackets)}
+
+* ТОП ПО ОБЪЕМУ ДАННЫХ *
+ОТПРАВЛЕНО:
+${formatTop(topBySentSize, true)}
+
+ПОЛУЧЕНО:
+${formatTop(topByReceivedSize, true)}
+
+* ТОП ПО СРЕДНЕМУ РАЗМЕРУ ПАКЕТА *
+САМЫЕ БОЛЬШИЕ (ОТПРАВКА):
+${formatTop(topByAvgSentPacketSize, true)}
+
+САМЫЕ БОЛЬШИЕ (ПОЛУЧЕНИЕ):
+${formatTop(topByAvgReceivedPacketSize, true)}
+
+САМЫЕ МАЛЕНЬКИЕ (ОТПРАВКА):
+${formatTop(bottomByAvgSentPacketSize, true)}
+
+САМЫЕ МАЛЕНЬКИЕ (ПОЛУЧЕНИЕ):
+${formatTop(bottomByAvgReceivedPacketSize, true)}`;
+}

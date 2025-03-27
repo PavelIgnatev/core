@@ -3,6 +3,7 @@ import UserAgent from 'user-agents';
 import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
+import { updateTrafficMetrics } from './metrics';
 
 async function init(
   account: {
@@ -20,7 +21,7 @@ async function init(
   onError: (error: any) => void
 ) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId, accountId } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -37,6 +38,10 @@ async function init(
   const session = new CallbackSession(sessionData, () => {}, true);
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
+
+  const onTraffic = (type: 'sent' | 'received', size: number) => {
+    updateTrafficMetrics(accountId, type, size);
+  };
 
   const client =
     nextApiId === 2496
@@ -56,12 +61,12 @@ async function init(
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
-          () => {}
+          onTraffic
         )
       : new TelegramClient(
           session,
           nextApiId,
-          'Desktop',  
+          'Desktop',
           'Windows 11',
           '6.8.2 x64',
           'en',
@@ -72,7 +77,7 @@ async function init(
           null,
           'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
-          () => {}
+          onTraffic
         );
 
   if (!client) {

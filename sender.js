@@ -52695,7 +52695,147 @@ ${reconnectStats}
 ${minuteStatsText ? `
 \u0420\u0410\u0421\u041F\u0420\u0415\u0414\u0415\u041B\u0415\u041D\u0418\u0415 \u041F\u041E \u041C\u0418\u041D\u0423\u0422\u0410\u041C
 ${minuteStatsText}` : ""}`);
+  await sendToMainBot(`\u{1F4CA} \u0421\u0422\u0410\u0422\u0418\u0421\u0422\u0418\u041A\u0410 \u0421\u0415\u0422\u0415\u0412\u041E\u0413\u041E \u0422\u0420\u0410\u0424\u0418\u041A\u0410 \u{1F4CA}
+
+${getTrafficReport(globalMetrics.clients)}`);
 };
+function getTrafficReport(clients) {
+  const clientsWithMetrics = clients.filter((client) => client.metrics);
+  if (clientsWithMetrics.length === 0) {
+    return "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \u043E \u0442\u0440\u0430\u0444\u0438\u043A\u0435";
+  }
+  const totalSent = clientsWithMetrics.reduce((acc, client) => {
+    var _a;
+    return acc + (((_a = client.metrics) == null ? void 0 : _a.sent) || 0);
+  }, 0);
+  const totalReceived = clientsWithMetrics.reduce((acc, client) => {
+    var _a;
+    return acc + (((_a = client.metrics) == null ? void 0 : _a.received) || 0);
+  }, 0);
+  const totalSentSize = clientsWithMetrics.reduce((acc, client) => {
+    var _a;
+    return acc + (((_a = client.metrics) == null ? void 0 : _a.sentSize) || 0);
+  }, 0);
+  const totalReceivedSize = clientsWithMetrics.reduce((acc, client) => {
+    var _a;
+    return acc + (((_a = client.metrics) == null ? void 0 : _a.receivedSize) || 0);
+  }, 0);
+  const avgSent = totalSent / clientsWithMetrics.length;
+  const avgReceived = totalReceived / clientsWithMetrics.length;
+  const avgSentSize = totalSentSize / clientsWithMetrics.length;
+  const avgReceivedSize = totalReceivedSize / clientsWithMetrics.length;
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return "0 \u0411";
+    const sizes = ["\u0411", "\u041A\u0411", "\u041C\u0411", "\u0413\u0411"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+  };
+  const formatTop = (list, isByteSize = false) => {
+    return list.map((item, index) => {
+      const value = isByteSize ? formatBytes(item.value) : item.value.toFixed(0);
+      return `${index + 1}. ${item.id}: ${value}`;
+    }).join("\n");
+  };
+  const topBySentPackets = clientsWithMetrics.map((client) => {
+    var _a;
+    return {
+      id: client.accountId,
+      value: ((_a = client.metrics) == null ? void 0 : _a.sent) || 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topByReceivedPackets = clientsWithMetrics.map((client) => {
+    var _a;
+    return {
+      id: client.accountId,
+      value: ((_a = client.metrics) == null ? void 0 : _a.received) || 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topBySentSize = clientsWithMetrics.map((client) => {
+    var _a;
+    return {
+      id: client.accountId,
+      value: ((_a = client.metrics) == null ? void 0 : _a.sentSize) || 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topByReceivedSize = clientsWithMetrics.map((client) => {
+    var _a;
+    return {
+      id: client.accountId,
+      value: ((_a = client.metrics) == null ? void 0 : _a.receivedSize) || 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topByAvgSentPacketSize = clientsWithMetrics.map((client) => {
+    var _a, _b, _c;
+    return {
+      id: client.accountId,
+      value: (((_a = client.metrics) == null ? void 0 : _a.sent) || 0) > 0 ? (((_b = client.metrics) == null ? void 0 : _b.sentSize) || 0) / (((_c = client.metrics) == null ? void 0 : _c.sent) || 1) : 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const topByAvgReceivedPacketSize = clientsWithMetrics.map((client) => {
+    var _a, _b, _c;
+    return {
+      id: client.accountId,
+      value: (((_a = client.metrics) == null ? void 0 : _a.received) || 0) > 0 ? (((_b = client.metrics) == null ? void 0 : _b.receivedSize) || 0) / (((_c = client.metrics) == null ? void 0 : _c.received) || 1) : 0
+    };
+  }).sort((a, b) => b.value - a.value).slice(0, 5);
+  const bottomByAvgSentPacketSize = clientsWithMetrics.filter((client) => {
+    var _a;
+    return (((_a = client.metrics) == null ? void 0 : _a.sent) || 0) > 0;
+  }).map((client) => {
+    var _a, _b;
+    return {
+      id: client.accountId,
+      value: (((_a = client.metrics) == null ? void 0 : _a.sentSize) || 0) / (((_b = client.metrics) == null ? void 0 : _b.sent) || 1)
+    };
+  }).sort((a, b) => a.value - b.value).slice(0, 5);
+  const bottomByAvgReceivedPacketSize = clientsWithMetrics.filter((client) => {
+    var _a;
+    return (((_a = client.metrics) == null ? void 0 : _a.received) || 0) > 0;
+  }).map((client) => {
+    var _a, _b;
+    return {
+      id: client.accountId,
+      value: (((_a = client.metrics) == null ? void 0 : _a.receivedSize) || 0) / (((_b = client.metrics) == null ? void 0 : _b.received) || 1)
+    };
+  }).sort((a, b) => a.value - b.value).slice(0, 5);
+  return `\u0412\u0421\u0415\u0413\u041E \u041E\u0422\u041F\u0420\u0410\u0412\u041B\u0415\u041D\u041E \u041F\u0410\u041A\u0415\u0422\u041E\u0412: ${totalSent} (${formatBytes(totalSentSize)})
+\u0412\u0421\u0415\u0413\u041E \u041F\u041E\u041B\u0423\u0427\u0415\u041D\u041E \u041F\u0410\u041A\u0415\u0422\u041E\u0412: ${totalReceived} (${formatBytes(totalReceivedSize)})
+\u0412\u0421\u0415\u0413\u041E \u0422\u0420\u0410\u0424\u0418\u041A\u0410: ${formatBytes(totalSentSize + totalReceivedSize)}
+
+\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u041E\u0422\u041F\u0420\u0410\u0412\u041B\u0415\u041D\u041E: ${avgSent.toFixed(2)} \u043F\u0430\u043A\u0435\u0442\u043E\u0432 (${formatBytes(avgSentSize)})
+\u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u041F\u041E\u041B\u0423\u0427\u0415\u041D\u041E: ${avgReceived.toFixed(2)} \u043F\u0430\u043A\u0435\u0442\u043E\u0432 (${formatBytes(avgReceivedSize)})
+\u0421\u0420\u0415\u0414\u041D\u0418\u0419 \u0422\u0420\u0410\u0424\u0418\u041A \u041D\u0410 \u0410\u041A\u041A\u0410\u0423\u041D\u0422: ${formatBytes(avgSentSize + avgReceivedSize)}
+
+\u0421\u0420\u0415\u0414\u041D\u0418\u0419 \u0420\u0410\u0417\u041C\u0415\u0420 \u041F\u0410\u041A\u0415\u0422\u0410 (\u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0410): ${formatBytes(totalSent > 0 ? totalSentSize / totalSent : 0)}
+\u0421\u0420\u0415\u0414\u041D\u0418\u0419 \u0420\u0410\u0417\u041C\u0415\u0420 \u041F\u0410\u041A\u0415\u0422\u0410 (\u041F\u041E\u041B\u0423\u0427\u0415\u041D\u0418\u0415): ${formatBytes(totalReceived > 0 ? totalReceivedSize / totalReceived : 0)}
+
+* \u0422\u041E\u041F \u041F\u041E \u041A\u041E\u041B\u0418\u0427\u0415\u0421\u0422\u0412\u0423 \u041F\u0410\u041A\u0415\u0422\u041E\u0412 *
+\u041E\u0422\u041F\u0420\u0410\u0412\u041B\u0415\u041D\u041E:
+${formatTop(topBySentPackets)}
+
+\u041F\u041E\u041B\u0423\u0427\u0415\u041D\u041E:
+${formatTop(topByReceivedPackets)}
+
+* \u0422\u041E\u041F \u041F\u041E \u041E\u0411\u042A\u0415\u041C\u0423 \u0414\u0410\u041D\u041D\u042B\u0425 *
+\u041E\u0422\u041F\u0420\u0410\u0412\u041B\u0415\u041D\u041E:
+${formatTop(topBySentSize, true)}
+
+\u041F\u041E\u041B\u0423\u0427\u0415\u041D\u041E:
+${formatTop(topByReceivedSize, true)}
+
+* \u0422\u041E\u041F \u041F\u041E \u0421\u0420\u0415\u0414\u041D\u0415\u041C\u0423 \u0420\u0410\u0417\u041C\u0415\u0420\u0423 \u041F\u0410\u041A\u0415\u0422\u0410 *
+\u0421\u0410\u041C\u042B\u0415 \u0411\u041E\u041B\u042C\u0428\u0418\u0415 (\u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0410):
+${formatTop(topByAvgSentPacketSize, true)}
+
+\u0421\u0410\u041C\u042B\u0415 \u0411\u041E\u041B\u042C\u0428\u0418\u0415 (\u041F\u041E\u041B\u0423\u0427\u0415\u041D\u0418\u0415):
+${formatTop(topByAvgReceivedPacketSize, true)}
+
+\u0421\u0410\u041C\u042B\u0415 \u041C\u0410\u041B\u0415\u041D\u042C\u041A\u0418\u0415 (\u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0410):
+${formatTop(bottomByAvgSentPacketSize, true)}
+
+\u0421\u0410\u041C\u042B\u0415 \u041C\u0410\u041B\u0415\u041D\u042C\u041A\u0418\u0415 (\u041F\u041E\u041B\u0423\u0427\u0415\u041D\u0418\u0415):
+${formatTop(bottomByAvgReceivedPacketSize, true)}`;
+}
 
 // src/sender/index.ts
 var WORKER_TIMEOUT_MS = 90 * 60 * 1e3;

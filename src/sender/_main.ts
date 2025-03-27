@@ -28,6 +28,7 @@ import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
+import { getMetricsAll, getMetricsByAccountId } from './metrics';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
@@ -270,11 +271,18 @@ PROMISE: ${JSON.stringify(promise)}`);
     endTime: getTimeString(startTime),
     clients: clients.filter(isTelegramClient).map((client) => {
       const stats = client.getConnectionStats();
+      const clientMetrics = getMetricsByAccountId(client._accountId);
 
       return {
         accountId: client._accountId,
         initTime: client._initTime,
         endTime: client._endTime,
+        metrics: clientMetrics?.traffic || {
+          sent: 0,
+          received: 0,
+          sentSize: 0,
+          receivedSize: 0,
+        },
         ...stats,
       };
     }),
