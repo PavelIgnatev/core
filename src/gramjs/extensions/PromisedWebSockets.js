@@ -109,7 +109,7 @@ class PromisedWebSockets {
     this.client?.send(data);
 
     if (this._onTraffic) {
-      this._onTraffic('sent', data.length);
+      this._onTraffic('sent', data.length, Date.now());
     }
   }
 
@@ -127,7 +127,7 @@ class PromisedWebSockets {
       this.resolveRead?.(true);
 
       if (this._onTraffic) {
-        this._onTraffic('received', dataSize);
+        this._onTraffic('received', dataSize, Date.now());
       }
     };
   }

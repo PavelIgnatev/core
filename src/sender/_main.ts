@@ -114,11 +114,6 @@ const starter = async (
 
     const [meName, meId] = await accountSetup(client, account);
 
-    await client.reconnect()
-    await client.reconnect()
-
-    await client.reconnect()
-
     let i = -1;
     while (true) {
       if (errored) {
