@@ -196,6 +196,7 @@ class MTProtoSender {
             'AUTH_KEY_DUPLICATED',
             'AUTH_KEY_PERM_EMPTY',
             'SESSION_PASSWORD_NEEDED',
+            'CONNECTION_NOT_INITED'
           ].includes(err.message)
         ) {
           throw new Error(err.message);
