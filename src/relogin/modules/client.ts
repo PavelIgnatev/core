@@ -45,7 +45,7 @@ async function init(
   const proxy =
     Number(dcId) === 2
       ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
-      : 'http://159c4d2ca2a19f963330__cr.al,dz,ad,ar,am,au,at,bs,bh,bd,by,be,bm,bt,bo,ba,br,bg,kh,ca,ky,cl,cn,co,cr,hr,cu,cy,cz,cd,dk,do,ec,eg,ee,fj,fi,fr,ge,de,gh,gr,gl,gu,gt,hn,hk,hu,is,in,ir,iq,ie,im,il,it,ci,jm,jp,jo,kz,lt,my,mx,nl,ng,no,pl,ro,sg,kr,es,ch,th,tr,ua,gb,us:8093d55b69102050@gw.dataimpulse.com:823';
+      : 'http://159c4d2ca2a19f963330__cr.us:8093d55b69102050@gw.dataimpulse.com:823';
 
   const client =
     account.apiId === 2496
