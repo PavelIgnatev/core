@@ -319,7 +319,7 @@ ERROR: ${e.message}`
           await state.isReady();
           state.after = undefined;
         } else if (e.message === 'CONNECTION_NOT_INITED') {
-          await this.reconnect();
+          throw new Error('CONNECTION_NOT_INITED');
         } else if (e.message === 'TIMEOUT_ERROR') {
           if (
             !(

