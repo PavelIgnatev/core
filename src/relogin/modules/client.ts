@@ -45,7 +45,7 @@ async function init(
   const proxy =
     Number(dcId) === 2
       ? 'http://d29ad8225a7bcefc1603__cr.ru:d70bbed32f60a10d@gw.dataimpulse.com:823'
-      : 'http://159c4d2ca2a19f963330__cr.us:8093d55b69102050@gw.dataimpulse.com:823';
+      : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959';
 
   const client =
     account.apiId === 2496
