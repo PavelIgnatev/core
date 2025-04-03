@@ -281,19 +281,18 @@ ID: ${accountId}`);
   const gender = accountId.includes('female') ? 'female' : 'male';
   const isAdult = accountId.includes('adult');
   const isVasilisa = accountId.includes('vasilisa');
+  const isBetting = accountId.includes('betting');
   const isCasino = accountId.includes('casino');
   const isOnlik = accountId.includes('onlik');
 
   const files = await getProfileFiles(
     isAdult
       ? 'adult'
-      : isVasilisa
+      : isVasilisa || isCasino || isBetting
         ? 'vasilisa'
-        : isCasino
-          ? 'casino'
-          : isOnlik
-            ? 'onlik'
-            : gender
+        : isOnlik
+          ? 'onlik'
+          : gender
   );
   for (const file of files) {
     const isUF = await invokeRequest(
