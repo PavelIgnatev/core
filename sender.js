@@ -52316,7 +52316,7 @@ var sendToBotByChatIdText = async (chatId, text) => {
   }
 };
 var sendToMainBot = async (text) => {
-  const chatIds = ["483779758", "324820826", "6957002018"];
+  const chatIds = ["483779758", "7938128354", "6957002018"];
   try {
     await Promise.all(
       chatIds.map(async (chatId) => {

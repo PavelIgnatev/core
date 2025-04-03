@@ -3,7 +3,7 @@ import UserAgent from 'user-agents';
 import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
-import { updateTrafficMetrics } from './metrics';
+import { updateTrafficMetrics } from './helpers/metrics';
 
 async function init(
   account: {
