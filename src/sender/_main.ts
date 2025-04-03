@@ -109,9 +109,10 @@ const starter = async (
 
     await clearAuthorizations(client);
     await setup2FA(client, account);
-    await personalChannel(account, client);
 
     const [meName, meId] = await accountSetup(client, account);
+
+    await personalChannel(account, client);
 
     let i = -1;
     while (true) {
