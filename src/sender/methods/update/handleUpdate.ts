@@ -82,15 +82,6 @@ export const handleUpdate = async (
         });
 
         if (client) {
-          await deleteHistory(
-            client,
-            new GramJs.InputPeerUser({
-              userId: update.userId,
-              accessHash: BigInt(0),
-            }),
-            true
-          );
-
           [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
             setTimeout(
               async () => {

@@ -36,17 +36,6 @@ export const handleUpdate = async (
       payload: JSON.parse(JSON.stringify(update)),
     });
 
-    if (client) {
-      await deleteHistory(
-        client,
-        new GramJs.InputPeerUser({
-          userId: update.userId,
-          accessHash: BigInt(0),
-        }),
-        true
-      );
-    }
-
     await updateAccountById(accountId, {
       lastServiceNotification: new Date(),
     });
