@@ -20,13 +20,19 @@ async function cropImageBuffer(imageBuffer: Buffer): Promise<Buffer> {
   try {
     const image = sharp(imageBuffer);
     const metadata = await image.metadata();
-
+    
+    if (!metadata.width || !metadata.height) return imageBuffer;
+    
+    const size = Math.min(metadata.width, metadata.height);
+    const left = Math.floor((metadata.width - size) / 2);
+    const top = Math.floor((metadata.height - size) / 2);
+    
     return await image
       .extract({
-        left: 0,
-        top: 0,
-        width: metadata.width || 0,
-        height: Math.floor((metadata.height || 0) / 2),
+        left,
+        top,
+        width: size,
+        height: size,
       })
       .toBuffer();
   } catch {

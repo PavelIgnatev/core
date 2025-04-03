@@ -122,10 +122,10 @@ const main = async () => {
   });
 
   // 7564095141-prefix-aisender
-  // const workers = [
-  //   createWorker(0, ['+79923039584-256-after-lolz-new-19-sep-prefix-aisender']),
-  // ];
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = [
+    createWorker(0, ['+79923039584-256-after-lolz-new-19-sep-prefix-aisender']),
+  ];
+  // const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
