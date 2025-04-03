@@ -28,7 +28,7 @@ import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
-import { getMetricsAll, getMetricsByAccountId } from './metrics';
+import { getMetricsByAccountId } from './metrics';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
