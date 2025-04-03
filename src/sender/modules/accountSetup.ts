@@ -297,6 +297,7 @@ ID: ${accountId}`);
           ? 'onlik'
           : gender
   );
+
   for (const file of files) {
     const isUF = await invokeRequest(
       client,
@@ -415,7 +416,6 @@ FILE_NAME: ${file.name}`);
     ...fullUser,
     id: meId,
     banned: false,
-    personalChannel: null,
     messageCount: messageCount || 0,
   });
 
