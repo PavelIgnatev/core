@@ -214,6 +214,32 @@ ID: ${accountId}`);
     })
   );
 
+  const adminedPublicChannels = await invokeRequest(
+    client,
+    new GramJs.channels.GetAdminedPublicChannels({})
+  );
+
+  if (!adminedPublicChannels) {
+    throw new Error('ADMINED_PUBLIC_CHANNELS_NOT_FOUND');
+  }
+
+  for (const chat of adminedPublicChannels.chats) {
+    if (!chat || !(chat instanceof GramJs.Channel) || !chat.accessHash) {
+      throw new Error('CHANNEL_NOT_DEFINED');
+    }
+
+    await invokeRequest(
+      client,
+      new GramJs.channels.DeleteChannel({
+        channel: new GramJs.InputChannel({
+          channelId: chat.id,
+          accessHash: chat.accessHash,
+        }),
+      }),
+      { shouldIgnoreErrors: true }
+    );
+  }
+
   const photos = await invokeRequest(
     client,
     new GramJs.photos.GetUserPhotos({
@@ -387,6 +413,7 @@ FILE_NAME: ${file.name}`);
     ...fullUser,
     id: meId,
     banned: false,
+    personalChannel: null,
     messageCount: messageCount || 0,
   });
 
