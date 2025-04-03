@@ -31,7 +31,7 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
 };
 
 export const sendToNameBot = async (text: string) => {
-  const chatIds = ['483779758', '324820826'];
+  const chatIds = ['483779758', '7938128354'];
 
   try {
     await Promise.all(

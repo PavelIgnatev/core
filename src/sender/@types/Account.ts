@@ -28,6 +28,8 @@ export interface Account {
   spamBlockInitDate?: Date;
   spamBlockDays?: number;
 
+  status?: 'sender' | 'commenting';
+
   historySpamBlocks?: Array<{
     spamBlockDate: Date | 'INFINITY';
     spamBlockDays: number;
@@ -44,7 +46,6 @@ export interface Account {
   }>;
 
   personalChannel?: string;
-
   banned?: boolean;
   setuped?: boolean;
 

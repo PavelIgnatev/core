@@ -1,5 +1,5 @@
 const sendToBotByChatIdText = async (chatId: string, text: string) => {
-  const token = '7543085285:AAEQl5VAP184ern27d6MCNPX3f2nHrJJsQk';
+  const token = '7355977933:AAEdFNt3cI917_gLm4PNyvty0ji7A6TpJ4E';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
   const splitTextIntoChunks = (text: string, chunkSize = 4096) => {
@@ -31,7 +31,7 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
 };
 
 export const sendToErrorGenerateBot = async (text: string) => {
-  const chatIds = ['483779758', '324820826'];
+  const chatIds = ['483779758', '7938128354'];
 
   try {
     await Promise.all(

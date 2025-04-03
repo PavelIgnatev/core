@@ -31,7 +31,7 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
 };
 
 export const sendToFormBot = async (text: string) => {
-  const chatIds = ['483779758', '324820826', '6957002018'];
+  const chatIds = ['483779758', '7938128354', '6957002018'];
 
   try {
     await Promise.all(

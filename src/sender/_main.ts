@@ -22,13 +22,14 @@ import {
   startSender,
   withoutRecipientError,
 } from './helpers/helpers';
+import { isTelegramClient } from './helpers/isTelegramClient';
+import { getMetricsByAccountId } from './helpers/metrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
-import { getMetricsByAccountId } from './metrics';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
@@ -37,10 +38,6 @@ import { personalChannel } from './modules/personalChannel';
 import { setup2FA } from './modules/setup2FA';
 
 const exec = util.promisify(childExec);
-
-function isTelegramClient<T>(value: T | null | undefined): value is T {
-  return value !== null && value !== undefined && Boolean(value);
-}
 
 const starter = async (
   ID: string,
@@ -111,6 +108,7 @@ const starter = async (
     setTimeout(updateLoop, 20000);
 
     await clearAuthorizations(client);
+    await setup2FA(client, account);
     await personalChannel(account, client);
 
     const [meName, meId] = await accountSetup(client, account);
@@ -143,18 +141,18 @@ const starter = async (
 
       await Promise.race([
         (async () => {
+          // if (account.status === 'commenting') {
+          // } else {
           if (isAutoResponse) {
             isAutoResponse = false;
-
-            await updateStatus(client, false);
             await autoResponse(client, account, meId, meName);
           }
 
           if (i === randomI) {
-            await setup2FA(client, account);
             await automaticCheck(client, account);
             await autoSender(client, ID, meId);
           }
+          // }
           await sleep(60000);
         })(),
         timeout,
