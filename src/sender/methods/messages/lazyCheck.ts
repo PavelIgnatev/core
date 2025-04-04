@@ -4,9 +4,11 @@ import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
 import { updateAccountById } from '../../db/accounts';
+import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { invokeRequest } from '../../modules/invokeRequest';
 import { deleteContacts } from '../contacts/deleteContacts';
 import { getContacts } from '../contacts/getContacts';
+import { resolveUsername } from '../contacts/resolveUsername';
 import { editFolders } from '../folders/editFolders';
 import { buildInputPeer } from '../peer/buildInputPeer';
 import { getDialogs } from '../users/getDialogs';
@@ -31,7 +33,24 @@ export const lazyCheck = async (client: TelegramClient, account: Account) => {
     return;
   }
 
-  const { accountId } = account;
+  const { accountId, personalChannel } = account;
+
+  if (!personalChannel) {
+    await invokeRequest(
+      client,
+      new GramJs.account.UpdatePersonalChannel({
+        channel: new GramJs.InputChannelEmpty(),
+      })
+    );
+  } else {
+    const channel = await resolveUsername(client, personalChannel);
+
+    if (!channel) {
+      await sendToMainBot(
+        `[${accountId}] Personal channel not found: ${personalChannel}`
+      );
+    }
+  }
 
   const folderPeers = [];
   const archiveDialogs = await getDialogs(client, account.accountId, 1);

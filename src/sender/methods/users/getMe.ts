@@ -1,12 +1,8 @@
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
-import { Account } from '../../@types/Account';
-import { updateAccountById } from '../../db/accounts';
 import { invokeRequest } from '../../modules/invokeRequest';
 
-export const getMe = async (client: TelegramClient, account: Account) => {
-  const { accountId, id } = account;
-
+export const getMe = async (client: TelegramClient) => {
   const me = await invokeRequest(
     client,
     new GramJs.users.GetFullUser({
