@@ -152,7 +152,10 @@ ${addedInformation}`
 Current date and time: ${getDateNow()}`;
 
       if (personalChannel) {
-        systemPrompt = systemPrompt.replace(pattern, `t.me/${personalChannel}.`);
+        systemPrompt = systemPrompt.replace(
+          pattern,
+          `t.me/${personalChannel}.`
+        );
       }
 
       const replyMessage = await makeRequestGpt(
