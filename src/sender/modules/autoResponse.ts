@@ -78,7 +78,7 @@ export const autoResponse = async (
       const stage = Math.ceil(step / 2);
       const parted =
         stage === 2 && personalChannel
-          ? `t.me/${personalChannel}`
+          ? `t.me/${personalChannel}.`
           : stage === 2 && part
             ? part.trim()
             : '';
@@ -152,7 +152,7 @@ ${addedInformation}`
 Current date and time: ${getDateNow()}`;
 
       if (personalChannel) {
-        systemPrompt = systemPrompt.replace(pattern, `t.me/${personalChannel}`);
+        systemPrompt = systemPrompt.replace(pattern, `t.me/${personalChannel}.`);
       }
 
       const replyMessage = await makeRequestGpt(
@@ -392,7 +392,7 @@ ${pingMessage}`);
       if (managerMessage) {
         const nativeManagerMessage = generateRandomString(
           managerMessage
-        ).replace(/\$link/g, `t.me/${personalChannel}`);
+        ).replace(/\$link/g, `t.me/${personalChannel}.`);
 
         const sentManagerMessage = await sendMessage(
           client,
