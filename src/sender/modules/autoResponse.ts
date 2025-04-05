@@ -78,7 +78,7 @@ export const autoResponse = async (
       const stage = Math.ceil(step / 2);
       const parted =
         stage === 2 && personalChannel
-          ? `t.me/${personalChannel}.`
+          ? `t.me/${personalChannel}`
           : stage === 2 && part
             ? part.trim()
             : '';
