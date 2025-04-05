@@ -154,7 +154,7 @@ Current date and time: ${getDateNow()}`;
       if (personalChannel) {
         systemPrompt = systemPrompt.replace(
           pattern,
-          `t.me/${personalChannel}.`
+          `t.me/${personalChannel}`
         );
       }
 
@@ -395,7 +395,7 @@ ${pingMessage}`);
       if (managerMessage) {
         const nativeManagerMessage = generateRandomString(
           managerMessage
-        ).replace(/\$link/g, `t.me/${personalChannel}.`);
+        ).replace(/\$link/g, `t.me/${personalChannel}`);
 
         const sentManagerMessage = await sendMessage(
           client,
