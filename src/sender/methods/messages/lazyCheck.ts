@@ -3,8 +3,7 @@ import BigInt from 'big-integer';
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
-import { updateAccountById } from '../../db/accounts';
-import { sendToMainBot } from '../../helpers/sendToMainBot';
+import { unsetAccountById, updateAccountById } from '../../db/accounts';
 import { invokeRequest } from '../../modules/invokeRequest';
 import { deleteContacts } from '../contacts/deleteContacts';
 import { getContacts } from '../contacts/getContacts';
@@ -46,9 +45,9 @@ export const lazyCheck = async (client: TelegramClient, account: Account) => {
     const channel = await resolveUsername(client, personalChannel);
 
     if (!channel) {
-      await sendToMainBot(
-        `[${accountId}] Personal channel not found: ${personalChannel}`
-      );
+      await unsetAccountById(accountId, {
+        personalChannel: null,
+      });
     }
   }
 
