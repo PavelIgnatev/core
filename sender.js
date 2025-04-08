@@ -52348,7 +52348,7 @@ var logsDB = async () => {
     try {
       const client = new import_mongodb.MongoClient(process.env.DATABASE_SENDER_URI || "");
       const connect = await client.connect();
-      logsDb = connect.db("logs");
+      logsDb = connect.db("core_logs");
       break;
     } catch {
       await sendToMainBot("DB not inited. Dangerous mistake. Retry.");
