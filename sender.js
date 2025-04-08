@@ -52333,7 +52333,7 @@ var logsDb;
 var coreDB = async () => {
   while (!coreDb) {
     try {
-      const client = new import_mongodb.MongoClient(process.env.DATABASE_SENDER_URI || "");
+      const client = new import_mongodb.MongoClient(process.env.DATABASE_MAIN_URI || "");
       const connect = await client.connect();
       coreDb = connect.db("core");
       break;
@@ -52346,7 +52346,7 @@ var coreDB = async () => {
 var logsDB = async () => {
   while (!logsDb) {
     try {
-      const client = new import_mongodb.MongoClient(process.env.DATABASE_SENDER_URI || "");
+      const client = new import_mongodb.MongoClient(process.env.DATABASE_MAIN_URI || "");
       const connect = await client.connect();
       logsDb = connect.db("core_logs");
       break;

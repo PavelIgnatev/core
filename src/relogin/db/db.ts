@@ -8,9 +8,9 @@ let logsDb: Db;
 export const coreDB = async () => {
   while (!coreDb) {
     try {
-      const client = new MongoClient(process.env.DATABASE_FUCKER_URI || '');
+      const client = new MongoClient(process.env.DATABASE_MAIN_URI || '');
       const connect = await client.connect();
-      coreDb = connect.db('core');
+      coreDb = connect.db('fucker');
       break;
     } catch {
       await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
@@ -23,9 +23,9 @@ export const coreDB = async () => {
 export const logsDB = async () => {
   while (!logsDb) {
     try {
-      const client = new MongoClient(process.env.DATABASE_FUCKER_URI || '');
+      const client = new MongoClient(process.env.DATABASE_MAIN_URI || '');
       const connect = await client.connect();
-      logsDb = connect.db('logs');
+      logsDb = connect.db('fucker_logs');
       break;
     } catch {
       await sendToMainBot('DB not inited. Dangerous mistake. Retry.');
