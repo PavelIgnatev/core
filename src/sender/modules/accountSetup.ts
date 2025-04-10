@@ -370,7 +370,6 @@ FILE_NAME: ${file.name}`);
         await updateProfile(client, {
           firstName: genFirstName,
           lastName: `${lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
-          about: generateRandomString(`{tw|inst|fb}: @${randomElseUsername}`),
         });
         user = genUser;
       }
