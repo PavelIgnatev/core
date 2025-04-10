@@ -13,9 +13,6 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
-// START_BOT_CONTROLLER_MESSAGES_NOT_FOUND - 27
-// START_NEW_BOT_FATHER_MESSAGES_NOT_FOUND4 - 714
-
 const fiveMinutes = 300000; // 300000
 const twoMinutes = 120000; // 120000
 const halfMinute = 30000; // 30000
@@ -61,7 +58,7 @@ export const personalChannel = async (
 
     const { channel, updatePersonalChannel = true } = prefixChannel;
 
-    if (!/^[a-zA-Z0-9]+$/.test(channel)) {
+    if (!/^[a-zA-Z0-9_]+$/.test(channel)) {
       throw new Error('CHANNEL_NOT_VALID');
     }
 
@@ -1689,6 +1686,55 @@ export const personalChannel = async (
         throw new Error('SENDED_MESSAGE_MESSAGES_NOT_FOUND');
       }
     }
+
+    const historyNewChannel = await invokeRequest(
+      client,
+      new GramJs.messages.GetHistory({
+        peer: new GramJs.InputPeerChannel({
+          channelId: newChannel.id,
+          accessHash: newChannel.accessHash,
+        }),
+        addOffset: -1,
+        minId: 0,
+      })
+    );
+
+    if (
+      !historyNewChannel ||
+      historyNewChannel instanceof GramJs.messages.MessagesNotModified
+    ) {
+      throw new Error('PARENT_CHANNEL_HISTORY_NOT_FOUND');
+    }
+
+    const historyNewChannelMessages = historyNewChannel.messages.filter(
+      (m) => m instanceof GramJs.Message
+    );
+
+    if (!historyNewChannelMessages.length) {
+      throw new Error('MINIMAL_MESSAGES_NOT_FOUND');
+    }
+
+    await invokeRequest(
+      client,
+      new GramJs.messages.UpdatePinnedMessage({
+        peer: new GramJs.InputPeerChannel({
+          channelId: newChannel.id,
+          accessHash: newChannel.accessHash,
+        }),
+        id: historyNewChannelMessages[0].id,
+      })
+    );
+
+    await invokeRequest(
+      client,
+      new GramJs.channels.DeleteMessages({
+        channel: new GramJs.InputChannel({
+          channelId: newChannel.id,
+          accessHash: newChannel.accessHash,
+        }),
+        id: [historyNewChannelMessages[0].id + 1],
+      })
+    );
 
     const availableReactions = await invokeRequest(
       client,
