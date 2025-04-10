@@ -236,6 +236,7 @@ export const checkSpamBlock = async (
     await unsetAccountById(accountId, {
       isProblemSpamBlock: null,
       spamBlockDate: null,
+      spamBlockReasons: null
     });
     await deleteHistory(
       client,
