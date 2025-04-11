@@ -1479,7 +1479,9 @@ export const personalChannel = async (
         false,
         false,
         false,
-        lastMessage.entities
+        lastMessage.entities?.filter(
+          (e) => e instanceof GramJs.MessageEntityCustomEmoji
+        )
       );
 
       await sleep(halfMinute);

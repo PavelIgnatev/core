@@ -8,7 +8,7 @@ let logsDb: Db;
 export const coreDB = async () => {
   while (!coreDb) {
     try {
-      const client = new MongoClient(process.env.DATABASE_PARSER_URI || '');
+      const client = new MongoClient(process.env.DATABASE_MAIN_URI || '');
       const connect = await client.connect();
       coreDb = connect.db('parser');
       break;
@@ -23,7 +23,7 @@ export const coreDB = async () => {
 export const logsDB = async () => {
   while (!logsDb) {
     try {
-      const client = new MongoClient(process.env.DATABASE_PARSER_URI || '');
+      const client = new MongoClient(process.env.DATABASE_MAIN_URI || '');
       const connect = await client.connect();
       logsDb = connect.db('parser_logs');
       break;
