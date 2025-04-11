@@ -1480,7 +1480,7 @@ export const personalChannel = async (
         false,
         false,
         lastMessage.entities?.filter(
-          (e) => e instanceof GramJs.MessageEntityCustomEmoji
+          (e) => e instanceof GramJs.MessageEntityTextUrl
         )
       );
 
