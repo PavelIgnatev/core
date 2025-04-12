@@ -5,7 +5,6 @@ import { uploadFile } from '../../gramjs/client/uploadFile';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
-import { generateRandomString } from '../helpers/generateRandomString';
 import { generateUser } from '../helpers/generateUser';
 import { getProfileFiles } from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';

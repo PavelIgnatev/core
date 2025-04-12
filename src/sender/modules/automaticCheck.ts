@@ -28,7 +28,7 @@ export const automaticCheck = async (
   const { accountId } = account;
 
   try {
-    await lazyCheck(client, account);
+    await lazyCheck(client, accountId);
 
     const accountDialogs = await getAccountDialogs(accountId);
 

@@ -3,7 +3,11 @@ import BigInt from 'big-integer';
 import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { Account } from '../../@types/Account';
-import { unsetAccountById, updateAccountById } from '../../db/accounts';
+import {
+  getAccountById,
+  unsetAccountById,
+  updateAccountById,
+} from '../../db/accounts';
 import { invokeRequest } from '../../modules/invokeRequest';
 import { deleteContacts } from '../contacts/deleteContacts';
 import { getContacts } from '../contacts/getContacts';
@@ -27,12 +31,14 @@ const isLazyCheck = (account: Account) => {
   return days >= 1;
 };
 
-export const lazyCheck = async (client: TelegramClient, account: Account) => {
+export const lazyCheck = async (client: TelegramClient, accountId: string) => {
+  const account = await getAccountById(accountId);
+
   if (!isLazyCheck(account)) {
     return;
   }
 
-  const { accountId, personalChannel } = account;
+  const { personalChannel } = account;
 
   if (!personalChannel) {
     await invokeRequest(
@@ -47,6 +53,8 @@ export const lazyCheck = async (client: TelegramClient, account: Account) => {
     if (!channel) {
       await unsetAccountById(accountId, {
         personalChannel: null,
+        personalChannelDate: null,
+        personalChannelError: null,
       });
     }
   }
