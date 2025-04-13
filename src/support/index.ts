@@ -39,6 +39,13 @@ const reChecker = async () => {
   });
 };
 
+const reBlockLogin = async () => {
+  const accounts = await getAccounts();
+  if (!accounts.length) {
+    return;
+  }
+};
+
 const main = async () => {
   await Promise.all([reChecker(), sleep(60000)]);
 

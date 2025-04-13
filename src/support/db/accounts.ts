@@ -24,6 +24,19 @@ export const getAccounts = async () => {
   return accounts;
 };
 
+export const getPhones = async () => {
+  const accountCollection = await getAccountCollection();
+
+  const phones = await accountCollection.distinct('phone', {
+    stable: true,
+    banned: { $ne: true },
+    stopped: { $ne: true },
+    parentAccountId: { $ne: null },
+  });
+
+  return phones;
+};
+
 export const getAccountById = async (accountId: string) => {
   const accountCollection = await getAccountCollection();
 
