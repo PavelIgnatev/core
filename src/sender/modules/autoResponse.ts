@@ -441,106 +441,106 @@ ${pingMessage}`);
     }
   }
 
-  for (const dialog of unreadFirstDialogs) {
-    const { recipientId, recipientAccessHash, messages, pings = [] } = dialog;
+  // for (const dialog of unreadFirstDialogs) {
+  //   const { recipientId, recipientAccessHash, messages, pings = [] } = dialog;
 
-    try {
-      const recipientFull = await getFullUser(
-        client,
-        recipientId,
-        recipientAccessHash
-      );
-      if (!recipientFull) {
-        continue;
-      }
+  //   try {
+  //     const recipientFull = await getFullUser(
+  //       client,
+  //       recipientId,
+  //       recipientAccessHash
+  //     );
+  //     if (!recipientFull) {
+  //       continue;
+  //     }
 
-      const [firstMessage, secondMessage] = messages;
+  //     const [firstMessage, secondMessage] = messages;
 
-      const checkPeerFlood = await invokeRequest(
-        client,
-        new GramJs.messages.SendMessage({
-          message: firstMessage.text,
-          clearDraft: true,
-          peer: new GramJs.InputPeerUser({
-            userId: BigInt(recipientId),
-            accessHash: BigInt(recipientAccessHash),
-          }),
-          randomId: BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10),
-        }),
-        { shouldIgnoreErrors: true }
-      );
+  //     const checkPeerFlood = await invokeRequest(
+  //       client,
+  //       new GramJs.messages.SendMessage({
+  //         message: firstMessage.text,
+  //         clearDraft: true,
+  //         peer: new GramJs.InputPeerUser({
+  //           userId: BigInt(recipientId),
+  //           accessHash: BigInt(recipientAccessHash),
+  //         }),
+  //         randomId: BigInt(Math.floor(Math.random() * 10 ** 10) + 10 ** 10),
+  //       }),
+  //       { shouldIgnoreErrors: true }
+  //     );
 
-      if (!checkPeerFlood) {
-        return;
-      }
+  //     if (!checkPeerFlood) {
+  //       return;
+  //     }
 
-      await deleteHistory(
-        client,
-        new GramJs.InputPeerUser({
-          userId: BigInt(recipientId),
-          accessHash: BigInt(recipientAccessHash),
-        }),
-        true
-      );
+  //     await deleteHistory(
+  //       client,
+  //       new GramJs.InputPeerUser({
+  //         userId: BigInt(recipientId),
+  //         accessHash: BigInt(recipientAccessHash),
+  //       }),
+  //       true
+  //     );
 
-      await sleep(5000);
-      const sentFirstMessage = await sendMessage(
-        client,
-        String(recipientId),
-        String(recipientAccessHash),
-        firstMessage.text,
-        accountId,
-        false,
-        false
-      );
-      const sentSecondMessage = await sendMessage(
-        client,
-        String(recipientId),
-        String(recipientAccessHash),
-        secondMessage.text,
-        accountId,
-        false,
-        false
-      );
+  //     await sleep(5000);
+  //     const sentFirstMessage = await sendMessage(
+  //       client,
+  //       String(recipientId),
+  //       String(recipientAccessHash),
+  //       firstMessage.text,
+  //       accountId,
+  //       false,
+  //       false
+  //     );
+  //     const sentSecondMessage = await sendMessage(
+  //       client,
+  //       String(recipientId),
+  //       String(recipientAccessHash),
+  //       secondMessage.text,
+  //       accountId,
+  //       false,
+  //       false
+  //     );
 
-      await saveRecipient(
-        accountId,
-        recipientId,
-        recipientAccessHash,
-        recipientFull,
-        dialog,
-        [
-          {
-            id: sentFirstMessage.id,
-            text: firstMessage.text,
-            fromId: String(meId),
-            date: Math.round(Date.now() / 1000),
-          },
-          {
-            id: sentSecondMessage.id,
-            text: secondMessage.text,
-            fromId: String(meId),
-            date: Math.round(Date.now() / 1000),
-          },
-        ],
-        'update',
-        {
-          pings: [
-            ...pings,
-            { title: 'unread-first-message-ping', date: new Date() },
-          ],
-        }
-      );
-    } catch (error: any) {
-      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-        throw new Error(error.message);
-      }
+  //     await saveRecipient(
+  //       accountId,
+  //       recipientId,
+  //       recipientAccessHash,
+  //       recipientFull,
+  //       dialog,
+  //       [
+  //         {
+  //           id: sentFirstMessage.id,
+  //           text: firstMessage.text,
+  //           fromId: String(meId),
+  //           date: Math.round(Date.now() / 1000),
+  //         },
+  //         {
+  //           id: sentSecondMessage.id,
+  //           text: secondMessage.text,
+  //           fromId: String(meId),
+  //           date: Math.round(Date.now() / 1000),
+  //         },
+  //       ],
+  //       'update',
+  //       {
+  //         pings: [
+  //           ...pings,
+  //           { title: 'unread-first-message-ping', date: new Date() },
+  //         ],
+  //       }
+  //     );
+  //   } catch (error: any) {
+  //     if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
+  //       throw new Error(error.message);
+  //     }
 
-      await updateAutomaticDialogue(
-        accountId,
-        recipientId,
-        'automatic:allow-payment-required'
-      );
-    }
-  }
+  //     await updateAutomaticDialogue(
+  //       accountId,
+  //       recipientId,
+  //       'automatic:allow-payment-required'
+  //     );
+  //   }
+  // }
 };

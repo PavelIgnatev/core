@@ -8,9 +8,8 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 export const makeMetrics = async (clients: any[], startParserTime: number) => {
   if (!clients.filter(Boolean).length) {
     console.log({
-      message: `💥 PARSER ITERATION DONE (${getTimeString(startParserTime)}) 💥`,
-      prefix: 'GLOBAL_METRICS',
-      accountId: `GLOBAL_METRICS_PARSER`,
+      message: `💥 PARSER ${clients[0]._accountId} ITERATION DONE (${getTimeString(startParserTime)}) 💥`,
+      prefix: 'GLOBAL_METRICS_PARSER',
       initTimings: [],
       endTimings: [],
       connectCounts: [],
@@ -19,7 +18,7 @@ export const makeMetrics = async (clients: any[], startParserTime: number) => {
       connectErrorCounts: [],
     });
 
-    await sendToMainBot(`💥 PARSER ITERATION DONE (${getTimeString(startParserTime)}) 💥
+    await sendToMainBot(`💥 PARSER ${clients[0]._accountId} ITERATION DONE (${getTimeString(startParserTime)}) 💥
 
 * АККАУНТЫ * 
 В РАБОТЕ: 0
@@ -128,8 +127,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
 
   console.log({
     message: `💥 CHECKER ITERATION DONE (${getTimeString(startParserTime)}) 💥`,
-    prefix: 'GLOBAL_METRICS',
-    accountId: `GLOBAL_METRICS_PARSER`,
+    prefix: 'GLOBAL_METRICS_PARSER',
     initTimings,
     endTimings,
     connectCounts,
@@ -138,7 +136,7 @@ NETWORK_ERRORS: 0 (mid: 0, max: 0)`);
     connectErrorCounts,
   });
 
-  await sendToMainBot(`💥 PARSER ITERATION DONE (${getTimeString(startParserTime)}) 💥
+  await sendToMainBot(`💥 PARSER ${clients[0]._accountId} ITERATION DONE (${getTimeString(startParserTime)}) 💥
   
 * АККАУНТЫ * 
 В РАБОТЕ: ${clients.length}

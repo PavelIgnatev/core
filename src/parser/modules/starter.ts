@@ -23,10 +23,7 @@ const isCheckMethods = (account: Account) => {
   return days >= 1;
 };
 
-export const starter = async (
-  ID: string,
-  accountsInWork: Record<string, number>
-) => {
+export const starter = async (ID: string) => {
   const startTime = performance.now();
 
   let account: Account | null = null;
@@ -40,7 +37,7 @@ export const starter = async (
 
     console.warn({
       accountId: ID,
-      prefix: 'PARSER',
+      prefix: 'GLOBAL_METRICS_PARSER',
       message: `💥 LOG IN ${ID} 💥`,
       paylod: { count: randomI },
     });
@@ -52,7 +49,7 @@ export const starter = async (
 
     account = accountByID as Account;
     client = await initClient(
-      { ...account, prefix: 'PARSER', apiId: nextApiId || 2040 },
+      { ...account, prefix: 'GLOBAL_METRICS_PARSER', apiId: nextApiId || 2040 },
       true,
       (update) => handleUpdate(client, ID, true, update),
       (error) => sendToMainBot(error)
@@ -89,58 +86,49 @@ export const starter = async (
     };
     setTimeout(updateLoop, 20000);
 
-    let i = -1;
-    while (true) {
-      if (errored) {
-        throw new Error(errored);
-      }
+    await clearAuthorizations(client);
 
-      i += 1;
-      accountsInWork[ID] = i;
+    let timer;
+    const timeout = new Promise(
+      (_, rej) =>
+        (timer = setTimeout(
+          () => rej(new Error(`ITERATION_TIMEOUT_EXITED`)),
+          900000
+        ))
+    );
 
-      if (i === 30) {
-        client._endTime = Number(performance.now() - startTime).toFixed(0);
-      }
-
-      if (Object.values(accountsInWork).every((n) => n >= 30)) {
-        break;
-      }
-
-      let timer;
-      const timeout = new Promise(
-        (_, rej) =>
-          (timer = setTimeout(
-            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-            900000
-          ))
-      );
-
-      await Promise.race([
+    await Promise.race([
+      (async () => {
         (async () => {
-          if (i === 0) {
-            await clearAuthorizations(client);
-
-            if (isCheckMethods(account)) {
-              await accountSetup(client, account);
-              await clearAllTrash(client);
-              await updateAccountById(ID, {
-                checkDate: new Date(),
-              });
-              await automaticCheck(client, account);
+          while (true) {
+            if (errored) {
+              throw new Error(errored);
             }
+            await sleep(1000);
           }
+        })();
 
-          await sleep(60000);
-        })(),
-        timeout,
-      ]);
+        if (isCheckMethods(account)) {
+          await accountSetup(client, account);
+          await clearAllTrash(client);
+          await automaticCheck(client, account);
+          await updateAccountById(ID, {
+            checkDate: new Date(),
+          });
+        }
 
-      clearTimeout(timer);
-    }
+        await sleep(60000);
+      })(),
+      timeout,
+    ]);
+
+    clearTimeout(timer);
+
+    client._endTime = Number(performance.now() - startTime).toFixed(0);
   } catch (e: any) {
     console.error({
       accountId: ID,
-      prefix: 'PARSER',
+      prefix: 'GLOBAL_METRICS_PARSER',
       message: `MAIN_ERROR (${e.message})`,
     });
 
@@ -177,11 +165,9 @@ Error: ${e.message}`
     }
   }
 
-  delete accountsInWork[ID];
-
   console.warn({
     accountId: ID,
-    prefix: 'PARSER',
+    prefix: 'GLOBAL_METRICS_PARSER',
     message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
   });
 

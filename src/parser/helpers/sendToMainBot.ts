@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const sendToBotByChatIdText = async (chatId: string, text: string) => {
-  const token = '7840198142:AAGUDSeXRjSCePUHCYYujCXDvfK70Tvw7JE';
+  const token = '7565638382:AAEnkq9g5ucdvTGVXy0NObOy5iYHt2KvzxA';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
   const splitTextIntoChunks = (text: string, chunkSize = 4096) => {
@@ -27,7 +27,7 @@ const sendToBotByChatIdText = async (chatId: string, text: string) => {
 };
 
 export const sendToMainBot = async (text: string) => {
-  const chatIds = ['483779758', '5647716917'];
+  const chatIds = ['483779758'];
 
   try {
     await Promise.all(

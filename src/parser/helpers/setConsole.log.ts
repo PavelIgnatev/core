@@ -1,4 +1,4 @@
-import { coreDB } from '../db/db';
+import { logsDB } from '../db/db';
 import { sleep } from './helpers';
 import { sendToMainBot } from './sendToMainBot';
 
@@ -21,7 +21,7 @@ const getNextLogTime = () => {
 const insertLog = async (data: any) => {
   for (let i = 0; i < 5; i++) {
     try {
-      const database = await coreDB();
+      const database = await logsDB();
       log(JSON.stringify(data));
       await database.collection('logs').insertOne(data);
       return;
@@ -46,10 +46,6 @@ const mongoLog = async (level: string, ...args: any[]) => {
 
       if (!args[0].prefix) {
         throw new Error('LOG_NOT_HAVE_PREFIX');
-      }
-
-      if (!args[0].accountId) {
-        throw new Error('LOG_NOT_HAVE_ACCOUNT_ID');
       }
 
       const timestamp = getNextLogTime();

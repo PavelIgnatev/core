@@ -1,50 +1,35 @@
 import 'dotenv/config';
 import './helpers/errors';
 
-import { getAccounts } from './db/accounts';
 import { sleep } from './helpers/helpers';
 import { makeMetrics } from './helpers/makeMetrics';
+import { sendToMainBot } from './helpers/sendToMainBot';
 import { waitConsole } from './helpers/setConsole.log';
 import { starter } from './modules/starter';
 
 const _main = async () => {
-  const accounts = await getAccounts();
-  if (!accounts.length) {
+  const id = process.env.ID;
+
+  if (!id) {
+    await sendToMainBot('ID NOT FOUND');
+    await sleep(60000);
     return;
   }
+
   console.log({
-    message: '💥 PARSER ITERATION INIT 💥',
-    prefix: 'GLOBAL_METRICS',
-    accountId: 'GLOBAL_METRICS_PARSER',
-    payload: accounts,
+    message: `💥 PARSER_${id}_INIT 💥`,
+    prefix: 'GLOBAL_METRICS_PARSER',
+    payload: { id },
   });
+
   const startParserTime = performance.now();
-  const parserPromises: Promise<any>[] = [];
-  const parserAccounts: Record<string, number> = {};
-  accounts.forEach((accountId: string) => {
-    parserPromises.push(starter(accountId, parserAccounts));
-  });
+  const account = await starter(id);
 
-  setInterval(() => {
-    console.log({
-      message: `PARSER ITERATION IN PROGRESS (${Object.keys(parserAccounts).length})`,
-      prefix: 'GLOBAL_METRICS',
-      accountId: 'GLOBAL_METRICS_PARSER',
-      parserAccounts,
-    });
-  }, 60000);
-
-  await Promise.all(parserPromises).then(async (clients) => {
-    await makeMetrics(clients, startParserTime);
-  });
+  await makeMetrics([account], startParserTime);
 
   console.log({
-    message: '💥 PARSER ITERATION DONE 💥',
-    prefix: 'GLOBAL_METRICS',
-    accountId: 'GLOBAL_METRICS_PARSER',
-    payload: {
-      parserAccounts,
-    },
+    message: `💥 PARSER_${id}_DONE 💥`,
+    prefix: 'GLOBAL_METRICS_PARSER',
   });
 };
 
