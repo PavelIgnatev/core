@@ -11,6 +11,7 @@ import { handleUpdate } from '../methods/update/handleUpdate';
 import { accountSetup } from './accountSetup';
 import { automaticCheck } from './automaticCheck';
 import { initClient } from './client';
+import { parser } from './parser';
 
 const isCheckMethods = (account: Account) => {
   if (!account.checkDate) {
@@ -116,6 +117,8 @@ export const starter = async (ID: string) => {
             checkDate: new Date(),
           });
         }
+
+        await parser(client);
 
         await sleep(60000);
       })(),
