@@ -487,7 +487,6 @@ export const getProfileFiles = async (
         file.name = tempFileName;
         file.size = file.buffer.length;
       }
-      console.log(file)
       return file;
     })
   );
