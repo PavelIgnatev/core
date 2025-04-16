@@ -102,6 +102,9 @@ const starter = async (
 
         setTimeout(updateLoop, 20000);
       } catch (err: any) {
+        await sendToMainBot(`** UPDATE_LOOP_ERROR **
+ID: ${ID};
+ERROR: ${err.message}`);
         errored = err.message;
       }
     };
