@@ -49,6 +49,32 @@ export const personalChannel = async (
     return;
   }
 
+  const channels = await invokeRequest(
+    client,
+    new GramJs.channels.GetAdminedPublicChannels({})
+  );
+
+  if (!channels) {
+    throw new Error('CHANNELS_NOT_FOUND');
+  }x``
+
+  for (const chat of channels.chats) {
+    if (!chat || !(chat instanceof GramJs.Channel) || !chat.accessHash) {
+      throw new Error('CHANNEL_NOT_DEFINED');
+    }
+
+    await invokeRequest(
+      client,
+      new GramJs.channels.DeleteChannel({
+        channel: new GramJs.InputChannel({
+          channelId: chat.id,
+          accessHash: chat.accessHash,
+        }),
+      }),
+      { shouldIgnoreErrors: true }
+    );
+  }
+
   try {
     const prefixChannel = await getChannel(prefix);
 
@@ -100,32 +126,6 @@ export const personalChannel = async (
       !(chatPhoto instanceof GramJs.Photo)
     ) {
       throw new Error('CHANNEL_DATA_NOT_FOUND');
-    }
-
-    const channels = await invokeRequest(
-      client,
-      new GramJs.channels.GetAdminedPublicChannels({})
-    );
-
-    if (!channels) {
-      throw new Error('CHANNELS_NOT_FOUND');
-    }
-
-    for (const chat of channels.chats) {
-      if (!chat || !(chat instanceof GramJs.Channel) || !chat.accessHash) {
-        throw new Error('CHANNEL_NOT_DEFINED');
-      }
-
-      await invokeRequest(
-        client,
-        new GramJs.channels.DeleteChannel({
-          channel: new GramJs.InputChannel({
-            channelId: chat.id,
-            accessHash: chat.accessHash,
-          }),
-        }),
-        { shouldIgnoreErrors: true }
-      );
     }
 
     const fullChannel = await invokeRequest(
