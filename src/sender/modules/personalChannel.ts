@@ -56,7 +56,7 @@ export const personalChannel = async (
 
   if (!channels) {
     throw new Error('CHANNELS_NOT_FOUND');
-  }x``
+  }
 
   for (const chat of channels.chats) {
     if (!chat || !(chat instanceof GramJs.Channel) || !chat.accessHash) {
@@ -74,6 +74,7 @@ export const personalChannel = async (
       { shouldIgnoreErrors: true }
     );
   }
+  
 
   try {
     const prefixChannel = await getChannel(prefix);
