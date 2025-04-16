@@ -226,6 +226,12 @@ ERROR: ${error.message}`);
     }
 
     this._destryed = true;
+
+    console.warn({
+      accountId: this._accountId,
+      prefix: this._prefix,
+      message: '[CLIENT_DESTROYED]',
+    });
   }
 
   getSender() {
