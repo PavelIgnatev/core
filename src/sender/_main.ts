@@ -108,11 +108,11 @@ const starter = async (
     setTimeout(updateLoop, 20000);
 
     await clearAuthorizations(client);
-    // await setup2FA(client, account);
+    await setup2FA(client, account);
 
-    // const [meName, meId] = await accountSetup(client, account);
+    const [meName, meId] = await accountSetup(client, account);
 
-    // await personalChannel(account, client);
+    await personalChannel(account, client);
 
     let i = -1;
     while (true) {
@@ -148,7 +148,7 @@ const starter = async (
           // }
 
           if (i === randomI) {
-            // await automaticCheck(client, account);
+            await automaticCheck(client, account);
             // await autoSender(client, ID, meId);
           }
           await sleep(60000);
