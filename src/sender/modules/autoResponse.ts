@@ -378,68 +378,68 @@ ${replyMessage}`);
 //     }
 //   }
 
-  // for (const dialog of manualDialogs) {
-  //   const { recipientId, recipientAccessHash, messages, managerMessage } =
-  //     dialog;
+  for (const dialog of manualDialogs) {
+    const { recipientId, recipientAccessHash, messages, managerMessage } =
+      dialog;
 
-  //   try {
-  //     const recipientFull = await getFullUser(
-  //       client,
-  //       recipientId,
-  //       recipientAccessHash
-  //     );
-  //     if (!recipientFull) {
-  //       continue;
-  //     }
+    try {
+      const recipientFull = await getFullUser(
+        client,
+        recipientId,
+        recipientAccessHash
+      );
+      if (!recipientFull) {
+        continue;
+      }
 
-  //     if (managerMessage) {
-  //       const nativeManagerMessage = generateRandomString(
-  //         managerMessage
-  //       ).replace(/\$link/g, `t.me/${personalChannel}`);
+      if (managerMessage) {
+        const nativeManagerMessage = generateRandomString(
+          managerMessage
+        ).replace(/\$link/g, `t.me/${personalChannel}`);
 
-  //       const sentManagerMessage = await sendMessage(
-  //         client,
-  //         recipientId,
-  //         recipientAccessHash,
-  //         nativeManagerMessage,
-  //         accountId,
-  //         false,
-  //         true
-  //       );
+        const sentManagerMessage = await sendMessage(
+          client,
+          recipientId,
+          recipientAccessHash,
+          nativeManagerMessage,
+          accountId,
+          false,
+          true
+        );
 
-  //       messages.push({
-  //         id: sentManagerMessage.id,
-  //         text: nativeManagerMessage,
-  //         fromId: meId,
-  //         date: Math.round(Date.now() / 1000),
-  //       });
-  //     }
+        messages.push({
+          id: sentManagerMessage.id,
+          text: nativeManagerMessage,
+          fromId: meId,
+          date: Math.round(Date.now() / 1000),
+        });
+      }
 
-  //     await saveRecipient(
-  //       accountId,
-  //       recipientId,
-  //       recipientAccessHash,
-  //       recipientFull,
-  //       dialog,
-  //       messages,
-  //       'update',
-  //       {
-  //         managerMessage: null,
-  //         viewed: false,
-  //       }
-  //     );
-  //   } catch (error: any) {
-  //     if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-  //       throw new Error(error.message);
-  //     }
+      await saveRecipient(
+        accountId,
+        recipientId,
+        recipientAccessHash,
+        recipientFull,
+        dialog,
+        messages,
+        'update',
+        {
+          managerMessage: null,
+          viewed: false,
+        }
+      );
+    } catch (error: any) {
+      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
+        throw new Error(error.message);
+      }
 
-  //     await updateAutomaticDialogue(
-  //       accountId,
-  //       recipientId,
-  //       'automatic:allow-payment-required'
-  //     );
-  //   }
-  // }
+      await updateAutomaticDialogue(
+        accountId,
+        recipientId,
+        'automatic:allow-payment-required'
+      );
+    }
+  }
 
   // for (const dialog of unreadFirstDialogs) {
   //   const { recipientId, recipientAccessHash, messages, pings = [] } = dialog;
