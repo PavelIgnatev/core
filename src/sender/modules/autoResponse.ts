@@ -29,7 +29,7 @@ export const autoResponse = async (
 ) => {
   const { accountId, personalChannel } = account;
 
-  const [dialogs, pingDialogs, manualDialogs, unreadFirstDialogs] =
+  const [dialogs, pingDialogs, manualDialogs] =
     await getClassifiedDialogs(client, accountId, meId);
 
   for (const dialog of dialogs) {
