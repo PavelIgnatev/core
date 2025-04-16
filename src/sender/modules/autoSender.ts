@@ -32,6 +32,7 @@ export const autoSender = async (
     return;
   }
 
+  return
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
