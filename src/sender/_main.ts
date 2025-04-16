@@ -142,15 +142,15 @@ const starter = async (
 
       await Promise.race([
         (async () => {
-          // if (isAutoResponse) {
-          //   isAutoResponse = false;
-          //   await autoResponse(client, account, meId, meName);
-          // }
+          if (isAutoResponse) {
+            isAutoResponse = false;
+            await autoResponse(client, account, meId, meName);
+          }
 
-          // if (i === randomI) {
-          //   await automaticCheck(client, account);
-          //   // await autoSender(client, ID, meId);
-          // }
+          if (i === randomI) {
+            await automaticCheck(client, account);
+            // await autoSender(client, ID, meId);
+          }
           await sleep(60000);
         })(),
         timeout,
