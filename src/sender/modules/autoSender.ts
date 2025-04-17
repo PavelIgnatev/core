@@ -32,11 +32,14 @@ export const autoSender = async (
     return;
   }
 
-  return
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
   if (currentUTCHours < 5 || currentUTCHours > 14) {
+    return;
+  }
+
+  if (accountId.includes('prefix')) {
     return;
   }
 

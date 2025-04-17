@@ -266,117 +266,121 @@ ${replyMessage}`);
     }
   }
 
-//   for (const dialog of pingDialogs) {
-//     const {
-//       recipientId,
-//       recipientAccessHash,
-//       messages,
-//       groupId: dialogGroupId,
-//       aiName,
-//       aiGender,
-//     } = dialog;
+  for (const dialog of pingDialogs) {
+    const {
+      recipientId,
+      recipientAccessHash,
+      messages,
+      groupId: dialogGroupId,
+      aiName,
+      aiGender,
+    } = dialog;
 
-//     try {
-//       const groupId = await getGroupId(dialogGroupId);
-//       if (!groupId) {
-//         continue;
-//       }
+    if(accountId.includes('prefix')){
+      return
+    }
 
-//       const recipientFull = await getFullUser(
-//         client,
-//         recipientId,
-//         recipientAccessHash
-//       );
-//       if (!recipientFull) {
-//         continue;
-//       }
+    try {
+      const groupId = await getGroupId(dialogGroupId);
+      if (!groupId) {
+        continue;
+      }
 
-//       const { language: gLanguage } = groupId;
-//       const language = gLanguage || 'RUSSIAN';
+      const recipientFull = await getFullUser(
+        client,
+        recipientId,
+        recipientAccessHash
+      );
+      if (!recipientFull) {
+        continue;
+      }
 
-//       const pingMessage = await makeRequestGpt(
-//         accountId,
-//         [
-//           {
-//             role: 'system',
-//             content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
-//           },
-//           {
-//             role: 'user',
-//             content: `## STYLE GUIDE
-// Maximum length of reminder message 100 characters
+      const { language: gLanguage } = groupId;
+      const language = gLanguage || 'RUSSIAN';
 
-// ## USER DATA
-// ${aiName ? `\nNAME: ${aiName};\nGENDER: ${aiGender}` : ''}
-// Today's date is ${getDateNow()};
+      const pingMessage = await makeRequestGpt(
+        accountId,
+        [
+          {
+            role: 'system',
+            content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
+          },
+          {
+            role: 'user',
+            content: `## STYLE GUIDE
+Maximum length of reminder message 100 characters
+
+## USER DATA
+${aiName ? `\nNAME: ${aiName};\nGENDER: ${aiGender}` : ''}
+Today's date is ${getDateNow()};
       
-// ## DIALOG
-// ${messages
-//   .map((m) => ({
-//     role: m.fromId === String(recipientId) ? 'USER' : 'CHATBOT',
-//     message: m.text,
-//   }))
-//   .slice(-15)
-//   .map((chat) => `${chat.role}: ${chat.message}`)
-//   .join('\n')}`,
-//           },
-//         ],
-//         '',
-//         'ANY',
-//         false,
-//         false,
-//         1,
-//         false,
-//         dialogGroupId,
-//         { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
-//       );
+## DIALOG
+${messages
+  .map((m) => ({
+    role: m.fromId === String(recipientId) ? 'USER' : 'CHATBOT',
+    message: m.text,
+  }))
+  .slice(-15)
+  .map((chat) => `${chat.role}: ${chat.message}`)
+  .join('\n')}`,
+          },
+        ],
+        '',
+        'ANY',
+        false,
+        false,
+        1,
+        false,
+        dialogGroupId,
+        { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
+      );
 
-//       const sentPingMessage = await sendMessage(
-//         client,
-//         recipientId,
-//         recipientAccessHash,
-//         pingMessage,
-//         accountId,
-//         true,
-//         true
-//       );
+      const sentPingMessage = await sendMessage(
+        client,
+        recipientId,
+        recipientAccessHash,
+        pingMessage,
+        accountId,
+        true,
+        true
+      );
 
-//       messages.push({
-//         id: sentPingMessage.id,
-//         text: pingMessage,
-//         fromId: meId,
-//         date: Math.round(Date.now() / 1000),
-//       });
+      messages.push({
+        id: sentPingMessage.id,
+        text: pingMessage,
+        fromId: meId,
+        date: Math.round(Date.now() / 1000),
+      });
 
-//       await sendToFormBot(`**** PING MESSAGE (${language}) ****
-// ID: ${accountId}
-// GID: ${dialogGroupId}
-// ${pingMessage}`);
+      await sendToFormBot(`**** PING MESSAGE (${language}) ****
+ID: ${accountId}
+GID: ${dialogGroupId}
+${pingMessage}`);
 
-//       await saveRecipient(
-//         accountId,
-//         recipientId,
-//         recipientAccessHash,
-//         recipientFull,
-//         dialog,
-//         messages,
-//         'update',
-//         {
-//           ping: true,
-//         }
-//       );
-//     } catch (error: any) {
-//       if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-//         throw new Error(error.message);
-//       }
+      await saveRecipient(
+        accountId,
+        recipientId,
+        recipientAccessHash,
+        recipientFull,
+        dialog,
+        messages,
+        'update',
+        {
+          ping: true,
+        }
+      );
+    } catch (error: any) {
+      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
+        throw new Error(error.message);
+      }
 
-//       await updateAutomaticDialogue(
-//         accountId,
-//         recipientId,
-//         'automatic:allow-payment-required'
-//       );
-//     }
-//   }
+      await updateAutomaticDialogue(
+        accountId,
+        recipientId,
+        'automatic:allow-payment-required'
+      );
+    }
+  }
 
   for (const dialog of manualDialogs) {
     const { recipientId, recipientAccessHash, messages, managerMessage } =
