@@ -39,7 +39,11 @@ export const autoSender = async (
     return;
   }
 
-  if (accountId.includes('prefix')) {
+  if (
+    accountId.includes('prefix-female-casino')
+      ? false
+      : accountId.includes('prefix')
+  ) {
     return;
   }
 
