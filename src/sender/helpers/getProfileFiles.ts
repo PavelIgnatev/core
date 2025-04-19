@@ -408,7 +408,14 @@ async function modifyImageAdvanced(
 }
 
 export const getProfileFiles = async (
-  prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino' | 'onlik'
+  prefix:
+    | 'male'
+    | 'female'
+    | 'adult'
+    | 'vasilisa'
+    | 'casino'
+    | 'onlik'
+    | 'wellside'
 ) => {
   let files: string[] = [];
   let folderName = '';
@@ -428,10 +435,7 @@ export const getProfileFiles = async (
   }
 
   const uniqueId = crypto.randomBytes(8).toString('hex');
-  const tempDir = path.join(
-    os.tmpdir(),
-    `${uniqueId}-${Date.now()}`
-  );
+  const tempDir = path.join(os.tmpdir(), `${uniqueId}-${Date.now()}`);
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }

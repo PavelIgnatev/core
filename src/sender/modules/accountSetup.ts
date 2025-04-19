@@ -222,6 +222,7 @@ ID: ${accountId}`);
       maxId: BigInt('0'),
     })
   );
+
   if (!photos) {
     await sendToMainBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
 ID: ${accountId}`);
@@ -257,15 +258,18 @@ ID: ${accountId}`);
   const isBetting = accountId.includes('betting');
   const isCasino = accountId.includes('casino');
   const isOnlik = accountId.includes('onlik');
+  const isWellside = accountId.includes('wellside');
 
   const files = await getProfileFiles(
-    isAdult
-      ? 'adult'
-      : isVasilisa || isCasino || isBetting
-        ? 'vasilisa'
+    isVasilisa || isCasino || isBetting
+      ? 'vasilisa'
+      : isAdult
+        ? 'adult'
         : isOnlik
           ? 'onlik'
-          : gender
+          : isWellside
+            ? 'wellside'
+            : gender
   );
 
   for (const file of files) {
@@ -308,6 +312,24 @@ FILE_NAME: ${file.name}`);
           username,
           randomElseUsername: '',
         };
+      } else if (accountId.includes('wellside')) {
+        const username = `wellside${Math.floor(Math.random() * 10000)}`;
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
+
+        const genUser = generateUser('female');
+
+        await updateProfile(client, {
+          firstName: genUser.firstName,
+          lastName: `${lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
+          about: 'Элитная недвижимость Москвы | Закрытые сделки',
+        });
+
+        user = { ...genUser, username };
       } else if (accountId.includes('vasilisa')) {
         const username = `iamvasilisa${Math.floor(Math.random() * 10000)}`;
         await invokeRequest(
@@ -352,12 +374,7 @@ FILE_NAME: ${file.name}`);
         };
       } else {
         const genUser = generateUser(gender);
-        const {
-          firstName: genFirstName,
-          lastName,
-          username,
-          randomElseUsername,
-        } = genUser;
+        const { firstName: genFirstName, lastName, username } = genUser;
 
         await invokeRequest(
           client,
