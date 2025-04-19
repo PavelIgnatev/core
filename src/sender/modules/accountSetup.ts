@@ -325,7 +325,7 @@ FILE_NAME: ${file.name}`);
 
         await updateProfile(client, {
           firstName: genUser.firstName,
-          lastName: `${lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
+          lastName: `${genUser.lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
           about: 'Элитная недвижимость Москвы | Закрытые сделки',
         });
 

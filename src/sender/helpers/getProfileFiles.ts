@@ -430,7 +430,7 @@ export const getProfileFiles = async (
       .filter((file) => /\.(png|jpg|jpeg)$/i.test(file));
   };
 
-  while (files.length < 3) {
+  while (!files.length) {
     getFilesFromFolder();
   }
 
