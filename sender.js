@@ -52460,6 +52460,7 @@ var getAccountCreationDate = async () => {
   const accountCollection = await getAccountCollection();
   const accounts = await accountCollection.find(
     {
+      accountId: RegExp("aisender"),
       banned: { $ne: true },
       stopped: { $ne: true }
     },
@@ -52908,7 +52909,9 @@ var main = async () => {
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
   });
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = [chunks[0].slice(0, 50)].map(
+    (chunk, i) => createWorker(i + 1, chunk)
+  );
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
