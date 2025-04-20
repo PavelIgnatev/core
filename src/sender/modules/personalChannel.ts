@@ -55,7 +55,7 @@ export const personalChannel = async (
   );
 
   if (!channels) {
-    throw new Error('CHANNELS_NOT_FOUND');
+    throw new Error('ADMINED_CHANNELS_NOT_FOUND');
   }
 
   for (const chat of channels.chats) {
@@ -74,7 +74,6 @@ export const personalChannel = async (
       { shouldIgnoreErrors: true }
     );
   }
-  
 
   try {
     const prefixChannel = await getChannel(prefix);
