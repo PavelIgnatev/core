@@ -283,7 +283,7 @@ export const personalChannel = async (
       }
     }
 
-    while (processedCount < 4 && currentIndex < anotherMessages.length) {
+    while (processedCount < 10 && currentIndex < anotherMessages.length) {
       const message = anotherMessages[currentIndex];
       currentIndex++;
 
