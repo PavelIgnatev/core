@@ -39,13 +39,15 @@ export const autoSender = async (
     return;
   }
 
-  if (
-    accountId.includes('aisender') || accountId.includes('casino') || accountId.includes('stomcenter')
-      ? false
-      : accountId.includes('prefix')
-  ) {
-    return;
-  }
+  // if (
+  //   accountId.includes('aisender') ||
+  //   accountId.includes('casino') ||
+  //   accountId.includes('stomcenter')
+  //     ? false
+  //     : accountId.includes('prefix')
+  // ) {
+  //   return;
+  // }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
