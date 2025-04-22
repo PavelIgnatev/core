@@ -40,7 +40,7 @@ export const autoSender = async (
   }
 
   if (
-    accountId.includes('aisender') || accountId.includes('casino')
+    accountId.includes('aisender') || accountId.includes('casino') || accountId.includes('stomcenter')
       ? false
       : accountId.includes('prefix')
   ) {
