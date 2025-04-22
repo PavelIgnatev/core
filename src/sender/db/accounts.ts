@@ -24,7 +24,6 @@ export const getAccountCreationDate = async () => {
   const accounts = await accountCollection
     .find<Account>(
       {
-        username: null,
         banned: { $ne: true },
         stopped: { $ne: true },
       },
@@ -32,7 +31,7 @@ export const getAccountCreationDate = async () => {
     )
     .toArray();
 
-  const accountsWithTimestamp = accounts.slice(0, 500).map((account) => ({
+  const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
     accountId: account.accountId,
     timestamp: account._id.getTimestamp(),
