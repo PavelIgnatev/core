@@ -21,6 +21,7 @@ export interface Account {
   username?: string;
   messageCount?: number;
   aiContactCount?: number;
+  phone?: string
 
   nextApiId?: number;
 
