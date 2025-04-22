@@ -14,7 +14,7 @@ export const getAccounts = async () => {
     stopped: { $ne: true },
   })
 
-  return accounts.slice(0, 500)
+  return accounts.slice(0, 100)
 };
 
 export const getAccountById = async (accountId: string) => {
