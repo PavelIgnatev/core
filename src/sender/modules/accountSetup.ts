@@ -358,7 +358,7 @@ FILE_NAME: ${file.name}`);
           about: 'Українські документи з будь-якої точки світу, швидко',
         });
 
-        user = { ...genUser, username };
+        user = { ...genUser, lastName: '', username };
       } else if (accountId.includes('vasilisa')) {
         const username = `iamvasilisa${Math.floor(Math.random() * 10000)}`;
         await invokeRequest(
