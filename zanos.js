@@ -9318,7 +9318,7 @@ const zanos = async () => {
       data[`dc${account.dcId}`] = account[`dc${account.dcId}`];
 
       console.log(id, data);
-      await insertAccount(data);
+      // await insertAccount(data);
     }
     console.log('VSE');
   } catch (error) {
