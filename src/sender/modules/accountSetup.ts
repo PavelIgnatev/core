@@ -58,6 +58,8 @@ const defaultEmojis = [
   '🌔',
 ];
 
+const ukraineEmojis = ['🇺🇦'];
+
 export const accountSetup = async (
   client: TelegramClient,
   account: Account
@@ -336,6 +338,24 @@ FILE_NAME: ${file.name}`);
           firstName: genUser.firstName,
           lastName: `${genUser.lastName} ${defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)]}`,
           about: 'Элитная недвижимость Москвы | Закрытые сделки',
+        });
+
+        user = { ...genUser, username };
+      } else if (accountId.includes('ukraine-documents')) {
+        const username = `documents_in_Ukraine_${Math.floor(Math.random() * 10000)}`;
+        await invokeRequest(
+          client,
+          new GramJs.account.UpdateUsername({
+            username,
+          })
+        );
+
+        const genUser = generateUser('male');
+
+        await updateProfile(client, {
+          firstName: genUser.firstName,
+          lastName: `${ukraineEmojis[Math.floor(Math.random() * ukraineEmojis.length)]}`,
+          about: 'Українські документи з будь-якої точки світу, швидко',
         });
 
         user = { ...genUser, username };
