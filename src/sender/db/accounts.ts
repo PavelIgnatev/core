@@ -11,7 +11,6 @@ export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
   const accounts = await accountCollection.distinct('accountId', {
-    username: null,
     banned: { $ne: true },
     stopped: { $ne: true },
   });
@@ -25,6 +24,7 @@ export const getAccountCreationDate = async () => {
   const accounts = await accountCollection
     .find<Account>(
       {
+        username: null,
         banned: { $ne: true },
         stopped: { $ne: true },
       },
