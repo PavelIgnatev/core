@@ -121,11 +121,10 @@ export const personalChannel = async (
     }
 
     const { title } = parentChannelChat;
-    const { chatPhoto, about } = fullParentChannel.fullChat;
+    const { chatPhoto, about = "" } = fullParentChannel.fullChat;
 
     if (
       !title ||
-      !about ||
       !chatPhoto ||
       !(chatPhoto instanceof GramJs.Photo)
     ) {
