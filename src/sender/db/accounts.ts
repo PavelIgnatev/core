@@ -24,7 +24,6 @@ export const getAccountCreationDate = async () => {
   const accounts = await accountCollection
     .find<Account>(
       {
-        username: null,
         banned: { $ne: true },
         stopped: { $ne: true },
       },
