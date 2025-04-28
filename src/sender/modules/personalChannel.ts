@@ -45,7 +45,7 @@ export const personalChannel = async (
     ? accountId.split('-prefix-')[1]
     : null;
 
-  if (!pc || !prefix) {
+  if (!pc) {
     return;
   }
 
@@ -73,6 +73,10 @@ export const personalChannel = async (
       }),
       { shouldIgnoreErrors: true }
     );
+  }
+
+  if (!prefix) {
+    return;
   }
 
   try {
