@@ -118,7 +118,7 @@ export const starter = async (ID: string) => {
           });
         }
 
-        await parser(client);
+        await parser(ID, client);
 
         await sleep(60000);
       })(),

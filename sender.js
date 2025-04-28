@@ -102,7 +102,7 @@ var require_main = __commonJS({
     var fs = require("fs");
     var path = require("path");
     var os = require("os");
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var packageJson = require_package();
     var version = packageJson.version;
     var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
@@ -298,7 +298,7 @@ var require_main = __commonJS({
       const authTag = ciphertext.subarray(-16);
       ciphertext = ciphertext.subarray(12, -16);
       try {
-        const aesgcm = crypto.createDecipheriv("aes-256-gcm", key, nonce);
+        const aesgcm = crypto2.createDecipheriv("aes-256-gcm", key, nonce);
         aesgcm.setAuthTag(authTag);
         return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
       } catch (error) {
@@ -690,10 +690,10 @@ var require_bson = __commonJS({
     }
     var webRandomBytes = (() => {
       var _a2;
-      const { crypto } = globalThis;
-      if (crypto != null && typeof crypto.getRandomValues === "function") {
+      const { crypto: crypto2 } = globalThis;
+      if (crypto2 != null && typeof crypto2.getRandomValues === "function") {
         return (byteLength) => {
-          return crypto.getRandomValues(webByteUtils.allocate(byteLength));
+          return crypto2.getRandomValues(webByteUtils.allocate(byteLength));
         };
       } else {
         if (isReactNative()) {
@@ -3953,10 +3953,10 @@ var require_bson = __commonJS({
           }
         }
       } else if (object instanceof Map || isMap(object)) {
-        const iterator = object.entries();
+        const iterator2 = object.entries();
         let done = false;
         while (!done) {
-          const entry = iterator.next();
+          const entry = iterator2.next();
           done = !!entry.done;
           if (done)
             continue;
@@ -7015,7 +7015,7 @@ var require_utils = __commonJS({
     exports2.csotMin = csotMin;
     exports2.noop = noop2;
     exports2.decorateDecryptionResult = decorateDecryptionResult;
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var fs_1 = require("fs");
     var http2 = require("http");
     var timers_1 = require("timers");
@@ -7178,7 +7178,7 @@ var require_utils = __commonJS({
       }
     }
     function uuidV4() {
-      const result = crypto.randomBytes(16);
+      const result = crypto2.randomBytes(16);
       result[6] = result[6] & 15 | 64;
       result[8] = result[8] & 63 | 128;
       return result;
@@ -7773,7 +7773,7 @@ var require_utils = __commonJS({
     function squashError(_error) {
       return;
     }
-    exports2.randomBytes = (0, util_1.promisify)(crypto.randomBytes);
+    exports2.randomBytes = (0, util_1.promisify)(crypto2.randomBytes);
     async function once(ee, name) {
       const { promise, resolve, reject } = promiseWithResolvers();
       const onEvent = (data) => resolve(data);
@@ -22233,12 +22233,12 @@ var require_URLSearchParams = __commonJS({
     exports2.createDefaultIterator = (globalObject, target, kind) => {
       const ctorRegistry = globalObject[ctorRegistrySymbol];
       const iteratorPrototype = ctorRegistry["URLSearchParams Iterator"];
-      const iterator = Object.create(iteratorPrototype);
-      Object.defineProperty(iterator, utils.iterInternalSymbol, {
+      const iterator2 = Object.create(iteratorPrototype);
+      Object.defineProperty(iterator2, utils.iterInternalSymbol, {
         value: { target, kind, index: 0 },
         configurable: true
       });
-      return iterator;
+      return iterator2;
     };
     function makeWrapper(globalObject, newTarget) {
       let proto;
@@ -24553,12 +24553,12 @@ var require_crypto_callbacks = __commonJS({
     exports2.sha256Hook = sha256Hook;
     exports2.makeHmacHook = makeHmacHook;
     exports2.signRsaSha256Hook = signRsaSha256Hook;
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     function makeAES256Hook(method, mode) {
       return function(key, iv, input, output) {
         let result;
         try {
-          const cipher = crypto[method](mode, key, iv);
+          const cipher = crypto2[method](mode, key, iv);
           cipher.setAutoPadding(false);
           result = cipher.update(input);
           const final = cipher.final();
@@ -24574,7 +24574,7 @@ var require_crypto_callbacks = __commonJS({
     }
     function randomHook(buffer, count) {
       try {
-        crypto.randomFillSync(buffer, 0, count);
+        crypto2.randomFillSync(buffer, 0, count);
       } catch (e) {
         return e;
       }
@@ -24583,7 +24583,7 @@ var require_crypto_callbacks = __commonJS({
     function sha256Hook(input, output) {
       let result;
       try {
-        result = crypto.createHash("sha256").update(input).digest();
+        result = crypto2.createHash("sha256").update(input).digest();
       } catch (e) {
         return e;
       }
@@ -24594,7 +24594,7 @@ var require_crypto_callbacks = __commonJS({
       return (key, input, output) => {
         let result;
         try {
-          result = crypto.createHmac(algorithm, key).update(input).digest();
+          result = crypto2.createHmac(algorithm, key).update(input).digest();
         } catch (e) {
           return e;
         }
@@ -24605,7 +24605,7 @@ var require_crypto_callbacks = __commonJS({
     function signRsaSha256Hook(key, input, output) {
       let result;
       try {
-        const signer = crypto.createSign("sha256WithRSAEncryption");
+        const signer = crypto2.createSign("sha256WithRSAEncryption");
         const privateKey = Buffer.from(`-----BEGIN PRIVATE KEY-----
 ${key.toString("base64")}
 -----END PRIVATE KEY-----
@@ -28084,7 +28084,7 @@ var require_on_data = __commonJS({
       const unconsumedPromises = new utils_1.List();
       let error = null;
       let finished = false;
-      const iterator = {
+      const iterator2 = {
         next() {
           const value = unconsumedEvents.shift();
           if (value != null) {
@@ -28117,7 +28117,7 @@ var require_on_data = __commonJS({
       const timeoutForSocketRead = timeoutContext == null ? void 0 : timeoutContext.timeoutForSocketRead;
       timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.throwIfExpired();
       timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.then(void 0, errorHandler);
-      return iterator;
+      return iterator2;
       function eventHandler(value) {
         const promise = unconsumedPromises.shift();
         if (promise != null)
@@ -32849,7 +32849,7 @@ var require_scram = __commonJS({
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ScramSHA256 = exports2.ScramSHA1 = void 0;
     var saslprep_1 = require_node();
-    var crypto = require("crypto");
+    var crypto2 = require("crypto");
     var bson_1 = require_bson2();
     var error_1 = require_error();
     var utils_1 = require_utils();
@@ -33002,9 +33002,9 @@ var require_scram = __commonJS({
       }
       let md5;
       try {
-        md5 = crypto.createHash("md5");
+        md5 = crypto2.createHash("md5");
       } catch (err) {
-        if (crypto.getFips()) {
+        if (crypto2.getFips()) {
           throw new Error("Auth mechanism SCRAM-SHA-1 is not supported in FIPS mode");
         }
         throw err;
@@ -33027,10 +33027,10 @@ var require_scram = __commonJS({
       return Buffer.from(res).toString("base64");
     }
     function H(method, text) {
-      return crypto.createHash(method).update(text).digest();
+      return crypto2.createHash(method).update(text).digest();
     }
     function HMAC(method, key, text) {
-      return crypto.createHmac(method, key).update(text).digest();
+      return crypto2.createHmac(method, key).update(text).digest();
     }
     var _hiCache = {};
     var _hiCacheCount = 0;
@@ -33047,7 +33047,7 @@ var require_scram = __commonJS({
       if (_hiCache[key] != null) {
         return _hiCache[key];
       }
-      const saltedData = crypto.pbkdf2Sync(data, salt, iterations, hiLengthMap[cryptoMethod], cryptoMethod);
+      const saltedData = crypto2.pbkdf2Sync(data, salt, iterations, hiLengthMap[cryptoMethod], cryptoMethod);
       if (_hiCacheCount >= 200) {
         _hiCachePurge();
       }
@@ -33059,8 +33059,8 @@ var require_scram = __commonJS({
       if (lhs.length !== rhs.length) {
         return false;
       }
-      if (typeof crypto.timingSafeEqual === "function") {
-        return crypto.timingSafeEqual(lhs, rhs);
+      if (typeof crypto2.timingSafeEqual === "function") {
+        return crypto2.timingSafeEqual(lhs, rhs);
       }
       let result = 0;
       for (let i = 0; i < lhs.length; i++) {
@@ -35436,12 +35436,12 @@ var require_abstract_cursor = __commonJS({
        * @param iterator - The iteration callback.
        * @deprecated - Will be removed in a future release. Use for await...of instead.
        */
-      async forEach(iterator) {
-        if (typeof iterator !== "function") {
+      async forEach(iterator2) {
+        if (typeof iterator2 !== "function") {
           throw new error_1.MongoInvalidArgumentError('Argument "iterator" must be a function');
         }
         for await (const document2 of this) {
-          const result = iterator(document2);
+          const result = iterator2(document2);
           if (result === false) {
             break;
           }
@@ -46402,9 +46402,9 @@ var require_iterate = __commonJS({
     var async = require_async();
     var abort = require_abort();
     module2.exports = iterate;
-    function iterate(list, iterator, state, callback) {
+    function iterate(list, iterator2, state, callback) {
       var key = state["keyedList"] ? state["keyedList"][state.index] : state.index;
-      state.jobs[key] = runJob(iterator, key, list[key], function(error, output) {
+      state.jobs[key] = runJob(iterator2, key, list[key], function(error, output) {
         if (!(key in state.jobs)) {
           return;
         }
@@ -46417,12 +46417,12 @@ var require_iterate = __commonJS({
         callback(error, state.results);
       });
     }
-    function runJob(iterator, key, item, callback) {
+    function runJob(iterator2, key, item, callback) {
       var aborter;
-      if (iterator.length == 2) {
-        aborter = iterator(item, async(callback));
+      if (iterator2.length == 2) {
+        aborter = iterator2(item, async(callback));
       } else {
-        aborter = iterator(item, key, async(callback));
+        aborter = iterator2(item, key, async(callback));
       }
       return aborter;
     }
@@ -46475,10 +46475,10 @@ var require_parallel = __commonJS({
     var initState = require_state();
     var terminator = require_terminator();
     module2.exports = parallel;
-    function parallel(list, iterator, callback) {
+    function parallel(list, iterator2, callback) {
       var state = initState(list);
       while (state.index < (state["keyedList"] || list).length) {
-        iterate(list, iterator, state, function(error, result) {
+        iterate(list, iterator2, state, function(error, result) {
           if (error) {
             callback(error, result);
             return;
@@ -46504,16 +46504,16 @@ var require_serialOrdered = __commonJS({
     module2.exports = serialOrdered;
     module2.exports.ascending = ascending;
     module2.exports.descending = descending;
-    function serialOrdered(list, iterator, sortMethod, callback) {
+    function serialOrdered(list, iterator2, sortMethod, callback) {
       var state = initState(list, sortMethod);
-      iterate(list, iterator, state, function iteratorHandler(error, result) {
+      iterate(list, iterator2, state, function iteratorHandler(error, result) {
         if (error) {
           callback(error, result);
           return;
         }
         state.index++;
         if (state.index < (state["keyedList"] || list).length) {
-          iterate(list, iterator, state, iteratorHandler);
+          iterate(list, iterator2, state, iteratorHandler);
           return;
         }
         callback(null, state.results);
@@ -46534,8 +46534,8 @@ var require_serial = __commonJS({
   "node_modules/asynckit/serial.js"(exports2, module2) {
     var serialOrdered = require_serialOrdered();
     module2.exports = serial;
-    function serial(list, iterator, callback) {
-      return serialOrdered(list, iterator, null, callback);
+    function serial(list, iterator2, callback) {
+      return serialOrdered(list, iterator2, null, callback);
     }
   }
 });
@@ -47292,23 +47292,23 @@ var require_es_set_tostringtag = __commonJS({
     var hasToStringTag = require_shams2()();
     var hasOwn = require_hasown();
     var $TypeError = require_type();
-    var toStringTag = hasToStringTag ? Symbol.toStringTag : null;
+    var toStringTag2 = hasToStringTag ? Symbol.toStringTag : null;
     module2.exports = function setToStringTag(object, value) {
       var overrideIfSet = arguments.length > 2 && !!arguments[2] && arguments[2].force;
       var nonConfigurable = arguments.length > 2 && !!arguments[2] && arguments[2].nonConfigurable;
       if (typeof overrideIfSet !== "undefined" && typeof overrideIfSet !== "boolean" || typeof nonConfigurable !== "undefined" && typeof nonConfigurable !== "boolean") {
         throw new $TypeError("if provided, the `overrideIfSet` and `nonConfigurable` options must be booleans");
       }
-      if (toStringTag && (overrideIfSet || !hasOwn(object, toStringTag))) {
+      if (toStringTag2 && (overrideIfSet || !hasOwn(object, toStringTag2))) {
         if ($defineProperty) {
-          $defineProperty(object, toStringTag, {
+          $defineProperty(object, toStringTag2, {
             configurable: !nonConfigurable,
             enumerable: false,
             value,
             writable: false
           });
         } else {
-          object[toStringTag] = value;
+          object[toStringTag2] = value;
         }
       }
     };
@@ -49017,6 +49017,7 @@ function bind(fn, thisArg) {
 // node_modules/axios/lib/utils.js
 var { toString } = Object.prototype;
 var { getPrototypeOf } = Object;
+var { iterator, toStringTag } = Symbol;
 var kindOf = /* @__PURE__ */ ((cache) => (thing) => {
   const str = toString.call(thing);
   return cache[str] || (cache[str] = str.slice(8, -1).toLowerCase());
@@ -49051,7 +49052,7 @@ var isPlainObject = (val) => {
     return false;
   }
   const prototype3 = getPrototypeOf(val);
-  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(Symbol.toStringTag in val) && !(Symbol.iterator in val);
+  return (prototype3 === null || prototype3 === Object.prototype || Object.getPrototypeOf(prototype3) === null) && !(toStringTag in val) && !(iterator in val);
 };
 var isDate = kindOfTest("Date");
 var isFile = kindOfTest("File");
@@ -49198,10 +49199,10 @@ var isTypedArray = /* @__PURE__ */ ((TypedArray) => {
   };
 })(typeof Uint8Array !== "undefined" && getPrototypeOf(Uint8Array));
 var forEachEntry = (obj, fn) => {
-  const generator = obj && obj[Symbol.iterator];
-  const iterator = generator.call(obj);
+  const generator = obj && obj[iterator];
+  const _iterator = generator.call(obj);
   let result;
-  while ((result = iterator.next()) && !result.done) {
+  while ((result = _iterator.next()) && !result.done) {
     const pair = result.value;
     fn.call(obj, pair[0], pair[1]);
   }
@@ -49270,23 +49271,8 @@ var noop = () => {
 var toFiniteNumber = (value, defaultValue) => {
   return value != null && Number.isFinite(value = +value) ? value : defaultValue;
 };
-var ALPHA = "abcdefghijklmnopqrstuvwxyz";
-var DIGIT = "0123456789";
-var ALPHABET = {
-  DIGIT,
-  ALPHA,
-  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
-};
-var generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
-  let str = "";
-  const { length } = alphabet;
-  while (size--) {
-    str += alphabet[Math.random() * length | 0];
-  }
-  return str;
-};
 function isSpecCompliantForm(thing) {
-  return !!(thing && isFunction(thing.append) && thing[Symbol.toStringTag] === "FormData" && thing[Symbol.iterator]);
+  return !!(thing && isFunction(thing.append) && thing[toStringTag] === "FormData" && thing[iterator]);
 }
 var toJSONObject = (obj) => {
   const stack = new Array(10);
@@ -49332,6 +49318,7 @@ var _setImmediate = ((setImmediateSupported, postMessageSupported) => {
   isFunction(_global.postMessage)
 );
 var asap = typeof queueMicrotask !== "undefined" ? queueMicrotask.bind(_global) : typeof process !== "undefined" && process.nextTick || _setImmediate;
+var isIterable = (thing) => thing != null && isFunction(thing[iterator]);
 var utils_default = {
   isArray,
   isArrayBuffer,
@@ -49383,14 +49370,13 @@ var utils_default = {
   findKey,
   global: _global,
   isContextDefined,
-  ALPHABET,
-  generateString,
   isSpecCompliantForm,
   toJSONObject,
   isAsyncFn,
   isThenable,
   setImmediate: _setImmediate,
-  asap
+  asap,
+  isIterable
 };
 
 // node_modules/axios/lib/core/AxiosError.js
@@ -49719,11 +49705,31 @@ var transitional_default = {
   clarifyTimeoutError: false
 };
 
+// node_modules/axios/lib/platform/node/index.js
+var import_crypto = __toESM(require("crypto"), 1);
+
 // node_modules/axios/lib/platform/node/classes/URLSearchParams.js
 var import_url = __toESM(require("url"), 1);
 var URLSearchParams_default = import_url.default.URLSearchParams;
 
 // node_modules/axios/lib/platform/node/index.js
+var ALPHA = "abcdefghijklmnopqrstuvwxyz";
+var DIGIT = "0123456789";
+var ALPHABET = {
+  DIGIT,
+  ALPHA,
+  ALPHA_DIGIT: ALPHA + ALPHA.toUpperCase() + DIGIT
+};
+var generateString = (size = 16, alphabet = ALPHABET.ALPHA_DIGIT) => {
+  let str = "";
+  const { length } = alphabet;
+  const randomValues = new Uint32Array(size);
+  import_crypto.default.randomFillSync(randomValues);
+  for (let i = 0; i < size; i++) {
+    str += alphabet[randomValues[i] % length];
+  }
+  return str;
+};
 var node_default = {
   isNode: true,
   classes: {
@@ -49731,6 +49737,8 @@ var node_default = {
     FormData: FormData_default,
     Blob: typeof Blob !== "undefined" && Blob || null
   },
+  ALPHABET,
+  generateString,
   protocols: ["http", "https", "file", "data"]
 };
 
@@ -50051,10 +50059,15 @@ var AxiosHeaders = class {
       setHeaders(header, valueOrRewrite);
     } else if (utils_default.isString(header) && (header = header.trim()) && !isValidHeaderName(header)) {
       setHeaders(parseHeaders_default(header), valueOrRewrite);
-    } else if (utils_default.isHeaders(header)) {
-      for (const [key, value] of header.entries()) {
-        setHeader(value, key, rewrite);
+    } else if (utils_default.isObject(header) && utils_default.isIterable(header)) {
+      let obj = {}, dest, key;
+      for (const entry of header) {
+        if (!utils_default.isArray(entry)) {
+          throw TypeError("Object iterator must return a key-value pair");
+        }
+        obj[key = entry[0]] = (dest = obj[key]) ? utils_default.isArray(dest) ? [...dest, entry[1]] : [dest, entry[1]] : entry[1];
       }
+      setHeaders(obj, valueOrRewrite);
     } else {
       header != null && setHeader(valueOrRewrite, header, rewrite);
     }
@@ -50158,6 +50171,9 @@ var AxiosHeaders = class {
   toString() {
     return Object.entries(this.toJSON()).map(([header, value]) => header + ": " + value).join("\n");
   }
+  getSetCookie() {
+    return this.get("set-cookie") || [];
+  }
   get [Symbol.toStringTag]() {
     return "AxiosHeaders";
   }
@@ -50254,8 +50270,9 @@ function combineURLs(baseURL, relativeURL) {
 }
 
 // node_modules/axios/lib/core/buildFullPath.js
-function buildFullPath(baseURL, requestedURL) {
-  if (baseURL && !isAbsoluteURL(requestedURL)) {
+function buildFullPath(baseURL, requestedURL, allowAbsoluteUrls) {
+  let isRelativeUrl = !isAbsoluteURL(requestedURL);
+  if (baseURL && (isRelativeUrl || allowAbsoluteUrls == false)) {
     return combineURLs(baseURL, requestedURL);
   }
   return requestedURL;
@@ -50270,7 +50287,7 @@ var import_follow_redirects = __toESM(require_follow_redirects(), 1);
 var import_zlib = __toESM(require("zlib"), 1);
 
 // node_modules/axios/lib/env/data.js
-var VERSION = "1.7.9";
+var VERSION = "1.9.0";
 
 // node_modules/axios/lib/helpers/parseProtocol.js
 function parseProtocol(url2) {
@@ -50448,7 +50465,7 @@ var readBlob = async function* (blob) {
 var readBlob_default = readBlob;
 
 // node_modules/axios/lib/helpers/formDataToStream.js
-var BOUNDARY_ALPHABET = utils_default.ALPHABET.ALPHA_DIGIT + "-_";
+var BOUNDARY_ALPHABET = platform_default.ALPHABET.ALPHA_DIGIT + "-_";
 var textEncoder = typeof TextEncoder === "function" ? new TextEncoder() : new import_util.default.TextEncoder();
 var CRLF = "\r\n";
 var CRLF_BYTES = textEncoder.encode(CRLF);
@@ -50491,7 +50508,7 @@ var formDataToStream = (form, headersHandler, options) => {
   const {
     tag = "form-data-boundary",
     size = 25,
-    boundary = tag + "-" + utils_default.generateString(size, BOUNDARY_ALPHABET)
+    boundary = tag + "-" + platform_default.generateString(size, BOUNDARY_ALPHABET)
   } = options || {};
   if (!utils_default.isFormData(form)) {
     throw TypeError("FormData instance required");
@@ -50500,7 +50517,7 @@ var formDataToStream = (form, headersHandler, options) => {
     throw Error("boundary must be 10-70 characters long");
   }
   const boundaryBytes = textEncoder.encode("--" + boundary + CRLF);
-  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF + CRLF);
+  const footerBytes = textEncoder.encode("--" + boundary + "--" + CRLF);
   let contentLength = footerBytes.byteLength;
   const parts = Array.from(form.entries()).map(([name, value]) => {
     const part = new FormDataPart(name, value);
@@ -50807,7 +50824,7 @@ var http_default = isHttpAdapterSupported && function httpAdapter(config) {
         config.signal.aborted ? abort() : config.signal.addEventListener("abort", abort);
       }
     }
-    const fullPath = buildFullPath(config.baseURL, config.url);
+    const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
     const parsed = new URL(fullPath, platform_default.hasBrowserEnv ? platform_default.origin : void 0);
     const protocol = parsed.protocol || supportedProtocols[0];
     if (protocol === "data:") {
@@ -51297,7 +51314,7 @@ var resolveConfig_default = (config) => {
   const newConfig = mergeConfig({}, config);
   let { data, withXSRFToken, xsrfHeaderName, xsrfCookieName, headers, auth } = newConfig;
   newConfig.headers = headers = AxiosHeaders_default.from(headers);
-  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url), config.params, config.paramsSerializer);
+  newConfig.url = buildURL(buildFullPath(newConfig.baseURL, newConfig.url, newConfig.allowAbsoluteUrls), config.params, config.paramsSerializer);
   if (auth) {
     headers.set(
       "Authorization",
@@ -51527,7 +51544,7 @@ var readStream = async function* (stream4) {
   }
 };
 var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
-  const iterator = readBytes(stream4, chunkSize);
+  const iterator2 = readBytes(stream4, chunkSize);
   let bytes = 0;
   let done;
   let _onFinish = (e) => {
@@ -51539,7 +51556,7 @@ var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
   return new ReadableStream({
     async pull(controller) {
       try {
-        const { done: done2, value } = await iterator.next();
+        const { done: done2, value } = await iterator2.next();
         if (done2) {
           _onFinish();
           controller.close();
@@ -51558,7 +51575,7 @@ var trackStream = (stream4, chunkSize, onProgress, onFinish) => {
     },
     cancel(reason) {
       _onFinish(reason);
-      return iterator.return();
+      return iterator2.return();
     }
   }, {
     highWaterMark: 2
@@ -51717,7 +51734,7 @@ var fetch_default = isFetchSupported && (async (config) => {
     });
   } catch (err) {
     unsubscribe && unsubscribe();
-    if (err && err.name === "TypeError" && /fetch/i.test(err.message)) {
+    if (err && err.name === "TypeError" && /Load failed|fetch/i.test(err.message)) {
       throw Object.assign(
         new AxiosError_default("Network Error", AxiosError_default.ERR_NETWORK, config, request),
         {
@@ -51896,7 +51913,7 @@ var validator_default = {
 var validators2 = validator_default.validators;
 var Axios = class {
   constructor(instanceConfig) {
-    this.defaults = instanceConfig;
+    this.defaults = instanceConfig || {};
     this.interceptors = {
       request: new InterceptorManager_default(),
       response: new InterceptorManager_default()
@@ -51957,6 +51974,12 @@ var Axios = class {
           serialize: validators2.function
         }, true);
       }
+    }
+    if (config.allowAbsoluteUrls !== void 0) {
+    } else if (this.defaults.allowAbsoluteUrls !== void 0) {
+      config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
+    } else {
+      config.allowAbsoluteUrls = true;
     }
     validator_default.assertOptions(config, {
       baseUrl: validators2.spelling("baseURL"),
@@ -52028,7 +52051,7 @@ var Axios = class {
   }
   getUri(config) {
     config = mergeConfig(this.defaults, config);
-    const fullPath = buildFullPath(config.baseURL, config.url);
+    const fullPath = buildFullPath(config.baseURL, config.url, config.allowAbsoluteUrls);
     return buildURL(fullPath, config.params, config.paramsSerializer);
   }
 };
