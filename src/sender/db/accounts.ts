@@ -11,6 +11,7 @@ export const getAccounts = async () => {
   const accountCollection = await getAccountCollection();
 
   const accounts = await accountCollection.distinct('accountId', {
+    username: null,
     banned: { $ne: true },
     stopped: { $ne: true },
   });
@@ -100,3 +101,32 @@ export const incrementMessageCount = async (accountId: string) => {
     }
   );
 };
+
+// export const updateAccountsWithPrefixBls = async () => {
+//   const accountCollection = await getAccountCollection();
+
+//   const result = await accountCollection.updateMany(
+//     // { accountId: { $regex: 'prefix-bls$' }, banned: { $ne: true } },
+//     [
+//       {
+//         $set: {
+//           accountId: {
+//             $replaceOne: {
+//               input: '$accountId',
+//               find: 'prefix-bls',
+//               replacement: 'prefix-female-dmp1',
+//             },
+//           },
+//           dateUpdated: new Date(),
+//         },
+//       },
+//     ]
+//   );
+
+//   return {
+//     matchedCount: result.matchedCount,
+//     modifiedCount: result.modifiedCount,
+//   };
+// };
+
+// updateAccountsWithPrefixBls();
