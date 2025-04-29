@@ -254,6 +254,12 @@ export async function makeRequestGpt(
   const errors: string[] = [];
   aiReqest[groupId] = (aiReqest[groupId] || 0) + 1;
 
+  const model =
+    groupId === '13228671259-prefix-aisender' ||
+    groupId === '18758930078-prefix-aisender'
+      ? 'command-a-03-2025'
+      : 'command-r-plus-08-2024';
+
   console.log({
     accountId,
     message: `[AI_REQUEST]`,
@@ -267,6 +273,7 @@ export async function makeRequestGpt(
       isRemoveGreetings,
       aiParams,
       messages,
+      model,
     },
   });
 
@@ -283,11 +290,6 @@ export async function makeRequestGpt(
 ${errors.map((error) => `- **${error}**`).join('\n')}`,
         };
       });
-      const model =
-        groupId === '13228671259-prefix-aisender' ||
-        groupId === '18758930078-prefix-aisender'
-          ? 'command-a-03-2025'
-          : 'command-r-plus-08-2024';
 
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
