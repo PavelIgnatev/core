@@ -288,7 +288,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         groupId === '18758930078-prefix-aisender'
           ? 'command-a-03-2025'
           : 'command-r-plus-08-2024';
-      console.log(model);
 
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
