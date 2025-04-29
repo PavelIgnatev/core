@@ -24,11 +24,13 @@ export const getAccountCreationDate = async () => {
   const accounts = await accountCollection
     .find<Account>(
       {
+        username: null,
         banned: { $ne: true },
         stopped: { $ne: true },
       },
       { projection: { accountId: 1 } }
     )
+    .limit(333)
     .toArray();
 
   const accountsWithTimestamp = accounts.map((account) => ({
