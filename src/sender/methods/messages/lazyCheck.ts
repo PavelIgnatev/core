@@ -59,6 +59,30 @@ export const lazyCheck = async (client: TelegramClient, accountId: string) => {
     }
   }
 
+  const stories = await invokeRequest(
+    client,
+    new GramJs.stories.GetPinnedStories({
+      peer: new GramJs.InputPeerSelf(),
+    })
+  );
+
+  if (stories) {
+    const ids = stories.stories.map((story) => story.id);
+
+    if (ids.length) {
+      for (let i = 0; i < ids.length; i += 100) {
+        const id = ids.slice(i, i + 100);
+        await invokeRequest(
+          client,
+          new GramJs.stories.DeleteStories({
+            peer: new GramJs.InputPeerSelf(),
+            id,
+          })
+        );
+      }
+    }
+  }
+
   const folderPeers = [];
   const archiveDialogs = await getDialogs(client, account.accountId, 1);
   for (const archiveDialog of archiveDialogs) {
