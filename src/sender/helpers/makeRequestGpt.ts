@@ -288,7 +288,11 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         'http://91.198.220.234/chatv2',
         {
           ...aiParams,
-          model: 'command-r-plus-08-2024',
+          model:
+            groupId === '13228671259-prefix-aisender' ||
+            groupId === '18758930078-prefix-aisender'
+              ? 'command-a-03-2025'
+              : 'command-r-plus-08-2024',
           messages: fixedMessages,
         }
       );
