@@ -1,3 +1,6 @@
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { TelegramClient } from '../../gramjs';
 import GramJs from '../../gramjs/tl/api';
 import { fetchTelegramChatLink } from '../helpers/linkFetcher';
@@ -5,8 +8,6 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { getPeer } from '../methods/peer/getPeer';
 import { invokeRequest } from './invokeRequest';
-import * as fs from 'fs';
-import * as path from 'path';
 
 export const parser = async (accountId: string, client: TelegramClient) => {
   const chatLink = await fetchTelegramChatLink();
@@ -79,34 +80,40 @@ USERNAME: ${chatUsername}`);
     for (const chat of chats) {
       if (!(chat instanceof GramJs.Channel) || !chat.accessHash) {
         await sendToMainBot(`** SUB_CHAT_NOT_INSTANCEOF_CHANNEL **
-ID: ${accountId}
-LINK: ${chatLink}
-USERNAME: ${chatUsername}`);
+  ID: ${accountId}
+  LINK: ${chatLink}
+  USERNAME: ${chatUsername}`);
         return;
       }
 
-      const users = await invokeRequest(
+      const participants = await invokeRequest(
         client,
         new GramJs.channels.GetParticipants({
           channel: new GramJs.InputPeerChannel({
             channelId: chat.id,
             accessHash: chat.accessHash,
           }),
-          filter: new GramJs.ChannelParticipantsSearch({ q: "" }),
-          limit: 500,
-          offset: 9500
-          //   filter: new GramJs.ChannelParticipantsSearch({
-          //     q: '',
-          //   }),
+          filter: new GramJs.ChannelParticipantsSearch({ q: '' }),
+          limit: 400,
+          offset: 0,
         })
       );
-      
-      // Сохраняем данные в JSON файл
-      const outputPath = path.join(__dirname, `users_data_${chat.id}.json`);
-      fs.writeFileSync(outputPath, JSON.stringify(users, null, 2));
-      
-      //@ts-ignore
-      console.log(chat, users.count);
+
+      if (
+        !participants ||
+        participants instanceof GramJs.channels.ChannelParticipantsNotModified
+      ) {
+        await sendToMainBot(`** PARTICIPANTS_NOT_DEFINED **
+ID: ${accountId}
+LINK: ${chatLink}
+USERNAME: ${chatUsername}
+IS_P: ${Boolean(participants)}`);
+        return;
+      }
+
+      const { users } = participants;
+
+      console.log(users.length, participants.count);
     }
   }
 };

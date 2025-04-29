@@ -183,7 +183,7 @@ ERROR: ${err.message}`);
       await sendToMainBot(`💀 AUTH_KEY_DUPLICATED 💀
 ID: ${ID}`);
 
-      // await exec('pm2 kill');
+      await exec('pm2 kill');
     } else if (
       [
         'USER_DEACTIVATED_BAN',
