@@ -256,7 +256,8 @@ export async function makeRequestGpt(
 
   const model =
     groupId === '13228671259-prefix-aisender' ||
-    groupId === '18758930078-prefix-aisender'
+    groupId === '18758930078-prefix-aisender' ||
+    groupId === '18591991414-prefix-female-senderok'
       ? 'command-a-03-2025'
       : 'command-r-plus-08-2024';
 
