@@ -295,7 +295,8 @@ ERROR: ${error.message}`);
               request.className === 'messages.DeleteChatUser' ||
               request.className === 'account.UpdatePasswordSettings' ||
               request.className === 'channels.UpdateUsername' ||
-              request.className === 'channels.CreateChannel'
+              request.className === 'channels.CreateChannel' ||
+              request.className === 'auth.ResetAuthorizations'
             ) {
               state.finished.resolve();
               throw e;
