@@ -254,12 +254,7 @@ export async function makeRequestGpt(
   const errors: string[] = [];
   aiReqest[groupId] = (aiReqest[groupId] || 0) + 1;
 
-  const model =
-    groupId === '13228671259-prefix-aisender' ||
-    groupId === '18758930078-prefix-aisender' ||
-    groupId === '18591991414-prefix-female-senderok'
-      ? 'command-a-03-2025'
-      : 'command-r-plus-08-2024';
+  const model = 'command-a-03-2025'
 
   console.log({
     accountId,
