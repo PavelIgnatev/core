@@ -35,7 +35,10 @@ export const autoSender = async (
   const currentTime = new Date();
   const currentUTCHours = currentTime.getUTCHours();
 
-  if (currentUTCHours < 5 || currentUTCHours > 14) {
+  if (
+    !(accountId.includes('auto') || accountId.includes('bls')) &&
+    (currentUTCHours < 5 || currentUTCHours > 14)
+  ) {
     return;
   }
 
