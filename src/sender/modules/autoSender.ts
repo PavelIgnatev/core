@@ -222,10 +222,8 @@ const trySend = async (
       await updateSendMessage(recipient.username, recipient.groupId, {
         p: null,
       });
-    }
-
-    if (!['PEER_FLOOD', 'MESSAGE_ERROR'].includes(e.message)) {
-      await sendToMainBot(`** AUTO SENDER ERROR **
+    } else {
+      await sendToMainBot(`** AUTO_SENDER_ERROR **
 USER_DATA: ${recipient.username}
 GROUP_ID: ${recipient.groupId}
 ERROR: ${e.message}`);
