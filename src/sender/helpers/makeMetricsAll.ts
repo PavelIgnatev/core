@@ -25,12 +25,12 @@ type ClientsData = {
   aiReqest: Record<string, number>;
   aiRetryError: Record<string, number>;
   allTimings: Array<number>;
-  endSender: Record<string, number>;
   errorSender: Record<string, number>;
   peerFloods: Record<string, number>;
   phoneSearchError: Record<string, number>;
   startSender: Record<string, number>;
   withoutRecipientError: Record<string, number>;
+  messageStats?: Record<string, { single: boolean; double: boolean }>;
 };
 
 type WorkerSuccessData = {
@@ -50,12 +50,12 @@ export const makeMetricsAll = async (
       aiReqest: {},
       aiRetryError: {},
       allTimings: [] as number[],
-      endSender: {},
       errorSender: {},
       peerFloods: {},
       phoneSearchError: {},
       startSender: {},
       withoutRecipientError: {},
+      messageStats: {},
     } as ClientsData,
   };
 
@@ -227,6 +227,45 @@ export const makeMetricsAll = async (
     reconnectStats = 'Нет данных о реконнектах';
   }
 
+  let totalSingleSends = 0;
+  let totalDoubleSends = 0;
+  let totalCompletedSends = 0;
+  
+  const mergedMessageStats: Record<string, { single: boolean; double: boolean }> = {};
+  
+  for (const promise of promises) {
+    const { clientsData } = promise;
+    
+    if (clientsData.messageStats) {
+      for (const accountId in clientsData.messageStats) {
+        const metrics = clientsData.messageStats[accountId];
+        
+        if (!mergedMessageStats[accountId]) {
+          mergedMessageStats[accountId] = { single: false, double: false };
+        }
+        
+        if (metrics?.single) {
+          mergedMessageStats[accountId].single = true;
+          totalSingleSends++;
+        }
+        
+        if (metrics?.double) {
+          mergedMessageStats[accountId].double = true;
+          totalDoubleSends++;
+          if (metrics?.single) {
+            totalSingleSends--;
+          }
+        }
+        
+        if (metrics?.single || metrics?.double) {
+          totalCompletedSends++;
+        }
+      }
+    }
+  }
+  
+  globalMetrics.clientsData.messageStats = mergedMessageStats;
+
   await sendToMainBot(`💥 ALL CHUNKS DONE 💥
 
 * ВРЕМЯ ВЫПОЛНЕНИЯ ЧАНКОВ *
@@ -257,7 +296,9 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
 
 * ОТПРАВКИ *
 ИНИЦИИРОВАНО: ${Object.keys(globalMetrics.clientsData.startSender).length}
-ПОДТВЕРЖДЕНО: ${Object.keys(globalMetrics.clientsData.endSender).length}
+ПОДТВЕРЖДЕНО (ВСЕГО): ${totalCompletedSends}
+ПОДТВЕРЖДЕНО (ОДИНАРНЫХ): ${totalSingleSends}
+ПОДТВЕРЖДЕНО (ДВОЙНЫХ): ${totalDoubleSends}
 ОШИБОК: ${Object.keys(globalMetrics.clientsData.errorSender).length} ${Object.keys(globalMetrics.clientsData.peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(globalMetrics.clientsData.peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(globalMetrics.clientsData.withoutRecipientError).length})` : ''}
 БЛОКИРОВКА ПОИСКА ПО НОМЕРУ: ${Object.keys(globalMetrics.clientsData.phoneSearchError).length}${
     Object.keys(globalMetrics.clientsData.aiReqest).length > 0

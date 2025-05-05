@@ -52513,12 +52513,12 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
       aiReqest: {},
       aiRetryError: {},
       allTimings: [],
-      endSender: {},
       errorSender: {},
       peerFloods: {},
       phoneSearchError: {},
       startSender: {},
-      withoutRecipientError: {}
+      withoutRecipientError: {},
+      messageStats: {}
     }
   };
   for (const promise of promises) {
@@ -52641,6 +52641,36 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
   } else {
     reconnectStats = "\u041D\u0435\u0442 \u0434\u0430\u043D\u043D\u044B\u0445 \u043E \u0440\u0435\u043A\u043E\u043D\u043D\u0435\u043A\u0442\u0430\u0445";
   }
+  let totalSingleSends = 0;
+  let totalDoubleSends = 0;
+  let totalCompletedSends = 0;
+  const mergedMessageStats = {};
+  for (const promise of promises) {
+    const { clientsData } = promise;
+    if (clientsData.messageStats) {
+      for (const accountId in clientsData.messageStats) {
+        const metrics = clientsData.messageStats[accountId];
+        if (!mergedMessageStats[accountId]) {
+          mergedMessageStats[accountId] = { single: false, double: false };
+        }
+        if (metrics == null ? void 0 : metrics.single) {
+          mergedMessageStats[accountId].single = true;
+          totalSingleSends++;
+        }
+        if (metrics == null ? void 0 : metrics.double) {
+          mergedMessageStats[accountId].double = true;
+          totalDoubleSends++;
+          if (metrics == null ? void 0 : metrics.single) {
+            totalSingleSends--;
+          }
+        }
+        if ((metrics == null ? void 0 : metrics.single) || (metrics == null ? void 0 : metrics.double)) {
+          totalCompletedSends++;
+        }
+      }
+    }
+  }
+  globalMetrics.clientsData.messageStats = mergedMessageStats;
   await sendToMainBot(`\u{1F4A5} ALL CHUNKS DONE \u{1F4A5}
 
 * \u0412\u0420\u0415\u041C\u042F \u0412\u042B\u041F\u041E\u041B\u041D\u0415\u041D\u0418\u042F \u0427\u0410\u041D\u041A\u041E\u0412 *
@@ -52667,7 +52697,9 @@ NETWORK_ERRORS: ${totalConnectErrorCounts} (mid: ${midConnectErrorCounts}, max: 
 
 * \u041E\u0422\u041F\u0420\u0410\u0412\u041A\u0418 *
 \u0418\u041D\u0418\u0426\u0418\u0418\u0420\u041E\u0412\u0410\u041D\u041E: ${Object.keys(globalMetrics.clientsData.startSender).length}
-\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E: ${Object.keys(globalMetrics.clientsData.endSender).length}
+\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E (\u0412\u0421\u0415\u0413\u041E): ${totalCompletedSends}
+\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E (\u041E\u0414\u0418\u041D\u0410\u0420\u041D\u042B\u0425): ${totalSingleSends}
+\u041F\u041E\u0414\u0422\u0412\u0415\u0420\u0416\u0414\u0415\u041D\u041E (\u0414\u0412\u041E\u0419\u041D\u042B\u0425): ${totalDoubleSends}
 \u041E\u0428\u0418\u0411\u041E\u041A: ${Object.keys(globalMetrics.clientsData.errorSender).length} ${Object.keys(globalMetrics.clientsData.peerFloods).length > 0 ? `(PEER_FLOOD: ${Object.keys(globalMetrics.clientsData.peerFloods).length}, WITHOUT_RECIPIENT: ${Object.keys(globalMetrics.clientsData.withoutRecipientError).length})` : ""}
 \u0411\u041B\u041E\u041A\u0418\u0420\u041E\u0412\u041A\u0410 \u041F\u041E\u0418\u0421\u041A\u0410 \u041F\u041E \u041D\u041E\u041C\u0415\u0420\u0423: ${Object.keys(globalMetrics.clientsData.phoneSearchError).length}${Object.keys(globalMetrics.clientsData.aiReqest).length > 0 ? `
 

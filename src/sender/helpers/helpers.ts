@@ -1,12 +1,12 @@
 export const startSender: Record<string, number> = {};
 export const phoneSearchError: Record<string, number> = {};
-export const endSender: Record<string, number> = {};
 export const errorSender: Record<string, number> = {};
 export const withoutRecipientError: Record<string, number> = {};
 export const aiReqest: Record<string, number> = {};
 export const aiRetryError: Record<string, number> = {};
 export const peerFloods: Record<string, number> = {};
 export const allTimings: Array<number> = [];
+export const messageStats: Record<string, { single: boolean; double: boolean }> = {}; 
 
 export function reduceSpaces(string: string) {
   return string.replace(/\s+/g, ' ').trim();

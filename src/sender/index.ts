@@ -29,12 +29,12 @@ type WorkerMessageSuccess = {
     aiReqest: Record<string, number>;
     aiRetryError: Record<string, number>;
     allTimings: Array<number>;
-    endSender: Record<string, number>;
     errorSender: Record<string, number>;
     peerFloods: Record<string, number>;
     phoneSearchError: Record<string, number>;
     startSender: Record<string, number>;
     withoutRecipientError: Record<string, number>;
+    messageStats?: Record<string, { single: boolean; double: boolean }>;
   };
   endTime: string;
   chunkId: number;
