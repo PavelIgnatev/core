@@ -194,6 +194,7 @@ ID: ${ID}`);
         'SESSION_EXPIRED',
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
+        'ACCOUNT_FROZEN'
       ].includes(e.message)
     ) {
       await updateAccountById(ID, {
