@@ -195,6 +195,7 @@ const trySend = async (
     }
 
     if (
+      e.message.includes('ALLOW_PAYMENT_REQUIRED') ||
       [
         'PHONE_NOT_OCCUPIED',
         'USERNAME_NOT_OCCUPIED',
@@ -205,7 +206,6 @@ const trySend = async (
         'CONTACT_USERS_LENGTH',
         'USER_SPECIAL_PARAMS',
         'DIALOG_DUPLICATE',
-        'ALLOW_PAYMENT_REQUIRED',
       ].includes(e.message)
     ) {
       await updateFailedMessage(

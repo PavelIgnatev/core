@@ -251,8 +251,8 @@ ${replyMessage}`);
         }
       );
     } catch (error: any) {
-      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-        throw new Error(error.message);
+      if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
       await updateAutomaticDialogue(
@@ -367,8 +367,8 @@ ${pingMessage}`);
         }
       );
     } catch (error: any) {
-      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-        throw new Error(error.message);
+      if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
       await updateAutomaticDialogue(
@@ -430,8 +430,8 @@ ${pingMessage}`);
         }
       );
     } catch (error: any) {
-      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-        throw new Error(error.message);
+      if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
       await updateAutomaticDialogue(
@@ -533,8 +533,8 @@ ${pingMessage}`);
         }
       );
     } catch (error: any) {
-      if (error.message !== 'ALLOW_PAYMENT_REQUIRED') {
-        throw new Error(error.message);
+      if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
       await updateAutomaticDialogue(

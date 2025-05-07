@@ -142,7 +142,7 @@ export const sendMessage = async (
 
     return messageUpdate;
   } catch (error: any) {
-    if (error.message === 'ALLOW_PAYMENT_REQUIRED') {
+    if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
       throw new Error('ALLOW_PAYMENT_REQUIRED');
     }
 
