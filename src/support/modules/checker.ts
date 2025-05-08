@@ -169,6 +169,7 @@ export const checker = async (
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
         'AUTH_KEY_DUPLICATED',
+        'ACCOUNT_FROZEN'
       ].includes(e.message)
     ) {
       await client?.destroy();
