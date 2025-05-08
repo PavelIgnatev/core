@@ -4,6 +4,31 @@ import { updateAccountById } from '../../db/accounts';
 import { invokeRequest } from '../../modules/invokeRequest';
 
 export const getMe = async (client: TelegramClient, accountId: string) => {
+  const appConfig = await invokeRequest(
+    client,
+    new GramJs.help.GetAppConfig({})
+  );
+
+  if (
+    !appConfig ||
+    appConfig instanceof GramJs.help.AppConfigNotModified ||
+    appConfig.config instanceof GramJs.JsonNull
+  ) {
+    throw new Error('APP_CONFIG_NOT_DEFINED');
+  }
+
+  const {
+    config: { value },
+  } = appConfig;
+
+  const isFrozen = Boolean(
+    value.find((k: any) => ({ ...k }).key === 'freeze_until_date')
+  );
+
+  if (isFrozen) {
+    throw new Error('ACCOUNT_FROZEN');
+  }
+
   const me = await invokeRequest(
     client,
     new GramJs.users.GetFullUser({
