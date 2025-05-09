@@ -129,8 +129,8 @@ export const checker = async (
             await clearAuthorizations(client);
 
             if (isCheckMethods(account)) {
-              await setup2FA(client, account);
               await accountSetup(client, account, setuped);
+              await setup2FA(client, account);
               await clearAllTrash(client);
               await updateAccountById(ID, {
                 checkDate: new Date(),
