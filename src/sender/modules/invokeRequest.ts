@@ -84,6 +84,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       err.message !== 'PASSWORD_EMPTY' &&
       err.message !== 'USERNAME_INVALID' &&
       err.message !== 'USERNAME_OCCUPIED' &&
+      err.message !== 'PHONE_PASSWORD_FLOOD' &&
       err.message !== 'CHANNELS_ADMIN_PUBLIC_TOO_MUCH' &&
       !err.message.includes('ALLOW_PAYMENT_REQUIRED') &&
       !err.message.includes('auth.SendCode') &&

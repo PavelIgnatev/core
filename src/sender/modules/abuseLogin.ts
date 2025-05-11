@@ -126,6 +126,8 @@ API_ID: ${nextApiId}`);
 
           await sleep(seconds * 1000);
         }
+      } else if (reason === 'PHONE_PASSWORD_FLOOD') {
+        return;
       } else {
         await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
 ID: ${accountId}
