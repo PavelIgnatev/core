@@ -52487,7 +52487,7 @@ var getAccountCreationDate = async () => {
       stopped: { $ne: true }
     },
     { projection: { accountId: 1 } }
-  ).toArray();
+  ).limit(150).toArray();
   const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
     accountId: account.accountId,

@@ -51,7 +51,7 @@ async function sendCodeRequest(
     },
     () => {},
     (e) => sendToMainBot(e),
-    true
+    true,
   );
 
   try {

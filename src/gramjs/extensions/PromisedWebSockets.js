@@ -53,7 +53,7 @@ class PromisedWebSockets {
   }
 
   connect(port, ip, accountId) {
-    if (typeof accountId !== 'string' || typeof this._proxy !== 'string') {
+    if (typeof accountId !== 'string') {
       throw new Error('PROXY_INDEX_NOT_DEFINED');
     }
 
@@ -64,9 +64,15 @@ class PromisedWebSockets {
     this.closed = false;
     this.website = this.getWebSocketLink(ip, port);
 
-    this.client = new WebSocket(this.website, 'binary', {
-      agent: new HttpsProxyAgent(this._proxy),
-    });
+    this.client = new WebSocket(
+      this.website,
+      'binary',
+      this._proxy
+        ? {
+            agent: new HttpsProxyAgent(this._proxy),
+          }
+        : {}
+    );
 
     return new Promise((resolve, reject) => {
       let hasResolved = false;

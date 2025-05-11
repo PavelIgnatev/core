@@ -63,7 +63,9 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          empty
+            ? null
+            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
           onTraffic
         )
@@ -79,7 +81,9 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          empty
+            ? null
+            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
           onTraffic
         );

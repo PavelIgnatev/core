@@ -25,11 +25,7 @@ class TelegramClient {
     onError,
     onTraffic
   ) {
-    if (
-      typeof acountId !== 'string' ||
-      typeof onError !== 'function' ||
-      typeof proxy !== 'string'
-    ) {
+    if (typeof acountId !== 'string' || typeof onError !== 'function') {
       throw new Error('DATA_NOT_CORRECT');
     }
 
