@@ -76,11 +76,9 @@ export const accountSetup = async (
 
   const { me, id: meId } = await getMe(client);
 
-  const { phone: mePhone } = me;
-
-  if (`+${mePhone}` !== phone) {
+  if (`+${me.phone}` !== phone) {
     await updateAccountById(accountId, {
-      phone: `+${mePhone}`,
+      phone: `+${me.phone}`,
     });
   }
 

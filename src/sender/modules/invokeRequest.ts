@@ -86,6 +86,7 @@ export async function invokeRequest<T extends GramJs.AnyRequest>(
       err.message !== 'USERNAME_OCCUPIED' &&
       err.message !== 'CHANNELS_ADMIN_PUBLIC_TOO_MUCH' &&
       !err.message.includes('ALLOW_PAYMENT_REQUIRED') &&
+      !err.message.includes('auth.SendCode') &&
       request.className !== 'messages.DeleteChatUser'
     ) {
       await sendToMainBot(`💀 REQUEST ERROR (${request.className}) 💀

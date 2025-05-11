@@ -1,5 +1,3 @@
-import { ObjectId } from 'mongodb';
-
 import { Account } from '../@types/Account';
 import { coreDB } from './db';
 
@@ -29,6 +27,7 @@ export const getAccountCreationDate = async () => {
       },
       { projection: { accountId: 1 } }
     )
+    .limit(500)
     .toArray();
 
   const accountsWithTimestamp = accounts.map((account) => ({

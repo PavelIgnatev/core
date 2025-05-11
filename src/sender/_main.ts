@@ -13,9 +13,9 @@ import {
   aiReqest,
   aiRetryError,
   allTimings,
-  messageStats,
   errorSender,
   getTimeString,
+  messageStats,
   peerFloods,
   phoneSearchError,
   sleep,
@@ -30,6 +30,7 @@ import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
+import { abuseLogin } from './modules/abuseLogin';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
@@ -110,6 +111,7 @@ ERROR: ${err.message}`);
     };
     setTimeout(updateLoop, 20000);
 
+    abuseLogin(ID);
     await clearAuthorizations(client);
     await setup2FA(client, account);
 
@@ -194,7 +196,7 @@ ID: ${ID}`);
         'SESSION_EXPIRED',
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
-        'ACCOUNT_FROZEN'
+        'ACCOUNT_FROZEN',
       ].includes(e.message)
     ) {
       await updateAccountById(ID, {

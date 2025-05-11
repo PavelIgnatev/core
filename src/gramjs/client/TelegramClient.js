@@ -296,7 +296,8 @@ ERROR: ${error.message}`);
               request.className === 'account.UpdatePasswordSettings' ||
               request.className === 'channels.UpdateUsername' ||
               request.className === 'channels.CreateChannel' ||
-              request.className === 'auth.ResetAuthorizations'
+              request.className === 'auth.ResetAuthorizations' ||
+              request.className === 'auth.SendCode'
             ) {
               state.finished.resolve();
               throw e;
