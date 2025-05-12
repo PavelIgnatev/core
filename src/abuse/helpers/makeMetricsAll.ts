@@ -221,10 +221,6 @@ export const makeMetricsAll = async (
     }
   };
 
-  console.log({
-    message: '💥 ABUSE LOGIN COMPLETE 💥',
-  });
-
   await sendToMainBot(`💥 ABUSE LOGIN COMPLETE 💥
 
 * АККАУНТЫ * 

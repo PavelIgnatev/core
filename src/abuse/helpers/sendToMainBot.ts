@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const sendToBotByChatIdText = async (chatId: string, text: string) => {
-  const token = '6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo';
+  const token = '7983269303:AAEBn8pGLk3LrMS2hpX9FDhurEsEa20RGPc';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
   const splitTextIntoChunks = (text: string, chunkSize = 4096) => {

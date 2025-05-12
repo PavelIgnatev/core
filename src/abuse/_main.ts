@@ -48,8 +48,8 @@ export const main = async (chunkId: number, accountIds: string[]) => {
 
   await Promise.all([coreDB(), logsDB()]);
 
-  for (const accountId of accountIds) {
-    promises.push(starter(accountId));
+  if (accountIds.length > 0) {
+    promises.push(starter(accountIds[2]));
   }
 
   process.on('uncaughtException', async (err) => {
