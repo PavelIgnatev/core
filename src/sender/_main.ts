@@ -111,7 +111,7 @@ ERROR: ${err.message}`);
     };
     setTimeout(updateLoop, 20000);
 
-    abuseLogin(ID);
+    // abuseLogin(ID);
     await clearAuthorizations(client);
     await setup2FA(client, account);
 
