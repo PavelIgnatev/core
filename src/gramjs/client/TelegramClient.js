@@ -209,7 +209,7 @@ ERROR: ${error.message}`);
     }
   }
 
-  async destroy() {
+  async destroy(force = false) {
     await this.disconnect();
 
     if (this._sender) {
@@ -228,6 +228,20 @@ ERROR: ${error.message}`);
       prefix: this._prefix,
       message: '[CLIENT_DESTROYED]',
     });
+
+    if (force) {
+      for (const key in this) {
+        if (Object.prototype.hasOwnProperty.call(this, key)) {
+          delete this[key];
+        }
+      }
+
+      if (global.gc) {
+        try {
+          global.gc();
+        } catch {}
+      }
+    }
   }
 
   getSender() {

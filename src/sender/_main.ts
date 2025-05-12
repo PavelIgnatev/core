@@ -30,7 +30,6 @@ import { clearAuthorizations } from './methods/account/clearAuthorizations';
 import { updateStatus } from './methods/account/updateStatus';
 import { pingDelayDisconnect } from './methods/requests/pingDelayDisconnect';
 import { handleUpdate } from './methods/update/handleUpdate';
-import { abuseLogin } from './modules/abuseLogin';
 import { accountSetup } from './modules/accountSetup';
 import { automaticCheck } from './modules/automaticCheck';
 import { autoResponse } from './modules/autoResponse';
@@ -111,7 +110,6 @@ ERROR: ${err.message}`);
     };
     setTimeout(updateLoop, 20000);
 
-    // abuseLogin(ID);
     await clearAuthorizations(client);
     await setup2FA(client, account);
 

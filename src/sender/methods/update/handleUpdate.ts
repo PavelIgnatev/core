@@ -7,7 +7,6 @@ import {
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
-import { isCodeRequestActive } from '../../modules/abuseLogin';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
 
@@ -75,8 +74,7 @@ export const handleUpdate = async (
       if (
         client &&
         update instanceof GramJs.UpdateShortMessage &&
-        String(userId) === '777000' &&
-        !isCodeRequestActive(accountId)
+        String(userId) === '777000'
       ) {
         console.warn({
           accountId,
