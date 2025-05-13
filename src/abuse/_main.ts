@@ -48,7 +48,7 @@ export const main = async (chunkId: number, accountIds: string[]) => {
 
   await Promise.all([coreDB(), logsDB()]);
 
-  for (const accountId of accountIds) {
+  for (const accountId of accountIds.slice(0, 10)) {
     promises.push(starter(accountId));
   }
 
