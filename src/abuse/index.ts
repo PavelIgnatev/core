@@ -39,7 +39,7 @@ type WorkerMessageSuccess = {
 
 type WorkerMessage = WorkerMessageSuccess | WorkerMessageError;
 
-const WORKER_TIMEOUT_MS = 45 * 60 * 1000;
+const WORKER_TIMEOUT_MS = 35 * 60 * 1000;
 
 const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
@@ -129,9 +129,11 @@ const main = async () => {
   const successPromises = [];
   for (const promise of promises) {
     if (promise.type === 'error') {
-      await sendToMainBot(`** ABUSE WORKER_ERROR **
+      if (!promise.error.includes('WORKER_TIMEOUT_ERROR')) {
+        await sendToMainBot(`** ABUSE WORKER_ERROR **
 ERROR: ${promise.error}
 CHUNK_ID: ${promise.chunkId}`);
+      }
     } else {
       successPromises.push(promise);
     }

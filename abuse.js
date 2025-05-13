@@ -52592,7 +52592,7 @@ function calculateAverageTime(promises) {
 }
 
 // src/abuse/index.ts
-var WORKER_TIMEOUT_MS = 45 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 35 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
@@ -52665,9 +52665,11 @@ var main = async () => {
   const successPromises = [];
   for (const promise of promises) {
     if (promise.type === "error") {
-      await sendToMainBot(`** ABUSE WORKER_ERROR **
+      if (!promise.error.includes("WORKER_TIMEOUT_ERROR")) {
+        await sendToMainBot(`** ABUSE WORKER_ERROR **
 ERROR: ${promise.error}
 CHUNK_ID: ${promise.chunkId}`);
+      }
     } else {
       successPromises.push(promise);
     }
