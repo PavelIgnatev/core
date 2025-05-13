@@ -105,8 +105,6 @@ API_ID: ${nextApiId}`);
     };
   }
 
-  const client = await getClient(dcId, nextApiId, accountId);
-
   let totalConnectCounts = 0;
   let totalConnectErrorCounts = 0;
   let totalDisconnectCounts = 0;
@@ -115,6 +113,7 @@ API_ID: ${nextApiId}`);
   try {
     while (true) {
       try {
+        const client = await getClient(dcId, nextApiId, accountId);
         const result = await sendCodeRequest(
           client,
           accountId,
@@ -123,10 +122,9 @@ API_ID: ${nextApiId}`);
           phone
         );
 
+        await client.destroy();
+
         if (!result.error) {
-          // for (let i = 0; i < 10; i++) {
-          //   await sendCodeRequest(client, accountId, nextApiId, apiHash, phone);
-          // }
           continue;
         }
 
