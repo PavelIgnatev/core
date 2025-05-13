@@ -63,7 +63,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          null,
+          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
           onError,
           onTraffic
         )
@@ -79,7 +79,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          null,
+          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
           onError,
           onTraffic
         );
