@@ -49005,8 +49005,6 @@ var require_follow_redirects = __commonJS({
 })();
 
 // src/abuse/helpers/setConsole.log.ts
-console.log = async (...args) => {
-};
 console.error = async (...args) => {
 };
 console.warn = async (...args) => {

@@ -1,4 +1,4 @@
-console.log = async (...args: any[]) => {};
+// console.log = async (...args: any[]) => {};
 
 console.error = async (...args: any[]) => {};
 
