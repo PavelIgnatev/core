@@ -130,16 +130,22 @@ API_ID: ${nextApiId}`);
         if (secondsMatch) {
           const seconds = parseInt(secondsMatch[0], 10);
 
-          if (seconds > 2000) {
+          if (seconds > 30 * 60) {
             break;
           }
 
-          await sendToMainBot(`💀 ABUSE_LOGIN_CODE_REQUEST_SLEEP 💀
+          if (seconds > 295 && seconds < 305) {
+            await sendToMainBot(`💀 ABUSE_LOGIN_ERRRORORORORO_SLEEEP 💀
 ID: ${accountId}
 SECONDS: ${seconds}`);
-          await sleep(seconds * 1000);
-
-          client = await getClient(dcId, nextApiId, accountId);
+            client = await getClient(dcId, nextApiId, accountId);
+          } else {
+            await sendToMainBot(`💀 ABUSE_LOGIN_CODE_REQUEST_SLEEP 💀
+ID: ${accountId}
+SECONDS: ${seconds}`);
+            await sleep(seconds * 1000);
+            client = await getClient(dcId, nextApiId, accountId);
+          }
         }
       } else if (reason === 'PHONE_PASSWORD_FLOOD') {
         break;

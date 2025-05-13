@@ -39,7 +39,7 @@ type WorkerMessageSuccess = {
 
 type WorkerMessage = WorkerMessageSuccess | WorkerMessageError;
 
-const WORKER_TIMEOUT_MS = 90 * 60 * 1000;
+const WORKER_TIMEOUT_MS = 45 * 60 * 1000;
 
 const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
@@ -122,7 +122,7 @@ const main = async () => {
   // ];
 
   const workers = chunks
-    .slice(0, 45)
+    .slice(0, 30)
     .map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 

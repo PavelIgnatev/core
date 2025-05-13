@@ -52592,7 +52592,7 @@ function calculateAverageTime(promises) {
 }
 
 // src/abuse/index.ts
-var WORKER_TIMEOUT_MS = 90 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 45 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
@@ -52660,7 +52660,7 @@ var main = async () => {
   console.log({
     message: "\u{1F4A5} ABUSE LOGIN INIT \u{1F4A5}"
   });
-  const workers = chunks.slice(0, 45).map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks.slice(0, 30).map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
