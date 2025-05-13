@@ -52614,7 +52614,10 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
       return `${remainingSeconds}s`;
     }
   };
-  await sendToMainBot(`\u{1F4A5} ABUSE LOGIN COMPLETE \u{1F4A5}
+  console.log({
+    message: "\u{1F4A5} ABUSE COMPLETE \u{1F4A5}"
+  });
+  await sendToMainBot(`\u{1F4A5} ABUSE COMPLETE \u{1F4A5}
 
 * \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
 \u0412\u0421\u0415\u0413\u041E \u0427\u0410\u041D\u041A\u041E\u0412: ${sortedPromises.length}

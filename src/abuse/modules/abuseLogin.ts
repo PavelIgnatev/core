@@ -6,6 +6,7 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { invokeRequest } from './invokeRequest';
 
 const activeCodeRequests: Record<string, boolean> = {};
+const clientsCache: Record<string, any> = {};
 
 export const isCodeRequestActive = (accountId: string): boolean =>
   activeCodeRequests[accountId];
@@ -34,25 +35,14 @@ const API_PAIRS: Record<number, string> = {
   611335: 'd524b414d21f4d37f08684c1df41ac9c',
 };
 
-async function sendCodeRequest(
-  dcId: number,
+const sendCodeRequest = async (
+  client: any,
   accountId: string,
   apiId: number,
   apiHash: string,
   phoneNumber: string
-) {
+) => {
   setCodeRequestActive(accountId, true);
-
-  const client = await initClient(
-    {
-      dcId,
-      nextApiId: apiId,
-      accountId,
-    },
-    () => {},
-    (e) => sendToMainBot(e),
-    true
-  );
 
   try {
     await invokeRequest(
@@ -65,32 +55,34 @@ async function sendCodeRequest(
       })
     );
 
-    const stats = client.getConnectionStats
-      ? client.getConnectionStats()
-      : {
-          connectCounts: 0,
-          connectErrorCounts: 0,
-          disconnectCounts: 0,
-          reconnectCounts: 0,
-        };
-
-    await client.destroy(true);
-    return { error: false, stats };
+    return { error: false };
   } catch (error: any) {
-    const stats = client.getConnectionStats
-      ? client.getConnectionStats()
-      : {
-          connectCounts: 0,
-          connectErrorCounts: 0,
-          disconnectCounts: 0,
-          reconnectCounts: 0,
-        };
-
-    await client.destroy(true);
-
-    return { error, stats };
+    return { error };
   }
-}
+};
+
+export const getClient = async (
+  dcId: number,
+  nextApiId: number,
+  accountId: string
+): Promise<any> => {
+  const cacheKey = `${dcId}_${nextApiId}`;
+
+  if (!clientsCache[cacheKey]) {
+    clientsCache[cacheKey] = await initClient(
+      {
+        dcId,
+        nextApiId,
+        accountId,
+      },
+      () => {},
+      (e) => sendToMainBot(e),
+      true
+    );
+  }
+
+  return clientsCache[cacheKey];
+};
 
 export const abuseLogin = async (accountId: string) => {
   const { dcId, nextApiId, phone } = await getAccountById(accountId);
@@ -118,100 +110,78 @@ API_ID: ${nextApiId}`);
     };
   }
 
-  // Для аккумуляции статистики подключений
+  const client = await getClient(dcId, nextApiId, accountId);
+
   let totalConnectCounts = 0;
   let totalConnectErrorCounts = 0;
   let totalDisconnectCounts = 0;
   let totalReconnectCounts = 0;
 
-  while (true) {
-    try {
-      const result = await sendCodeRequest(
-        dcId,
-        accountId,
-        nextApiId,
-        apiHash,
-        phone
-      );
+  try {
+    while (true) {
+      try {
+        const result = await sendCodeRequest(
+          client,
+          accountId,
+          nextApiId,
+          apiHash,
+          phone
+        );
 
-      if (result.stats) {
-        totalConnectCounts += result.stats.connectCounts || 0;
-        totalConnectErrorCounts += result.stats.connectErrorCounts || 0;
-        totalDisconnectCounts += result.stats.disconnectCounts || 0;
-        totalReconnectCounts += result.stats.reconnectCounts || 0;
-      }
-
-      if (!result.error) {
-        const requests = Array(10)
-          .fill(null)
-          .map(() =>
-            sendCodeRequest(dcId, accountId, nextApiId, apiHash, phone)
-          );
-
-        const results = await Promise.all(requests);
-
-        for (const parallelResult of results) {
-          if (parallelResult.stats) {
-            totalConnectCounts += parallelResult.stats.connectCounts || 0;
-            totalConnectErrorCounts +=
-              parallelResult.stats.connectErrorCounts || 0;
-            totalDisconnectCounts += parallelResult.stats.disconnectCounts || 0;
-            totalReconnectCounts += parallelResult.stats.reconnectCounts || 0;
+        if (!result.error) {
+          // Делаем последовательные запросы с одного клиента
+          for (let i = 0; i < 10; i++) {
+            await sendCodeRequest(client, accountId, nextApiId, apiHash, phone);
           }
+          continue;
         }
 
-        continue;
-      }
+        setCodeRequestActive(accountId, false);
 
-      setCodeRequestActive(accountId, false);
+        const reason = result.error.message;
+        if (reason.includes('seconds is required (caused by auth.SendCode)')) {
+          const secondsMatch = reason.match(/\d+/);
 
-      const reason = result.error.message;
-      if (reason.includes('seconds is required (caused by auth.SendCode)')) {
-        const secondsMatch = reason.match(/\d+/);
+          if (secondsMatch) {
+            const seconds = parseInt(secondsMatch[0], 10);
 
-        if (secondsMatch) {
-          const seconds = parseInt(secondsMatch[0], 10);
+            if (seconds > 2000) {
+              break;
+            }
 
-          if (seconds > 2000) {
-            return {
-              connectCounts: totalConnectCounts,
-              connectErrorCounts: totalConnectErrorCounts,
-              disconnectCounts: totalDisconnectCounts,
-              reconnectCounts: totalReconnectCounts,
-            };
+            await sleep(seconds * 1000);
           }
-
-          await sleep(seconds * 1000);
-        }
-      } else if (reason === 'PHONE_PASSWORD_FLOOD') {
-        return {
-          connectCounts: totalConnectCounts,
-          connectErrorCounts: totalConnectErrorCounts,
-          disconnectCounts: totalDisconnectCounts,
-          reconnectCounts: totalReconnectCounts,
-        };
-      } else {
-        await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
+        } else if (reason === 'PHONE_PASSWORD_FLOOD') {
+          break;
+        } else {
+          await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
 ID: ${accountId}
 REASON: ${reason}`);
-        return {
-          connectCounts: totalConnectCounts,
-          connectErrorCounts: totalConnectErrorCounts,
-          disconnectCounts: totalDisconnectCounts,
-          reconnectCounts: totalReconnectCounts,
-        };
-      }
-    } catch (error: any) {
-      setCodeRequestActive(accountId, false);
-      await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
+          break;
+        }
+      } catch (error: any) {
+        setCodeRequestActive(accountId, false);
+        await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
 ID: ${accountId}
 REASON: ${error.message}`);
-      return {
-        connectCounts: totalConnectCounts,
-        connectErrorCounts: totalConnectErrorCounts,
-        disconnectCounts: totalDisconnectCounts,
-        reconnectCounts: totalReconnectCounts,
-      };
+        break;
+      }
+    }
+  } finally {
+    // Получаем статистику, клиент не уничтожается
+    if (client.getConnectionStats) {
+      const stats = client.getConnectionStats();
+      totalConnectCounts = stats.connectCounts || 0;
+      totalConnectErrorCounts = stats.connectErrorCounts || 0;
+      totalDisconnectCounts = stats.disconnectCounts || 0;
+      totalReconnectCounts = stats.reconnectCounts || 0;
     }
   }
+
+  return {
+    connectCounts: totalConnectCounts,
+    connectErrorCounts: totalConnectErrorCounts,
+    disconnectCounts: totalDisconnectCounts,
+    reconnectCounts: totalReconnectCounts,
+  };
 };

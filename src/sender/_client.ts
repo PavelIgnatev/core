@@ -4,6 +4,7 @@ import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
 import { updateTrafficMetrics } from './helpers/metrics';
+import { sendToMainBot } from './helpers/sendToMainBot';
 
 async function init(
   account: {
@@ -150,6 +151,7 @@ export const initClient = async (
         accountId: account.accountId,
         message: '[CLIENT_TIMEOUT_RECONNECT]',
       });
+      await sendToMainBot(`[CLIENT_TIMEOUT_RECONNECT] ${account.accountId}`);
       return await initClient(account, onUpdate, onError);
     }
 
