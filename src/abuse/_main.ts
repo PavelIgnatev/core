@@ -1,11 +1,9 @@
 import 'dotenv/config';
-import './helpers/setConsole.log';
 
 import { coreDB, logsDB } from './db/db';
 import { allTimings, getTimeString } from './helpers/helpers';
 import { getMetricsByAccountId } from './helpers/metrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
-import { waitConsole } from './helpers/setConsole.log';
 import { abuseLogin } from './modules/abuseLogin';
 
 const starter = async (accountId: string) => {
@@ -53,7 +51,6 @@ export const main = async (chunkId: number, accountIds: string[]) => {
   }
 
   process.on('uncaughtException', async (err) => {
-    await waitConsole();
     await sendToMainBot(`** UNCAUGHT_EXCEPTION **
 CHUNK_ID: ${chunkId}
 ERROR: ${err.message}`);
@@ -61,7 +58,6 @@ ERROR: ${err.message}`);
   });
 
   process.on('unhandledRejection', async (reason, promise) => {
-    await waitConsole();
     await sendToMainBot(`** UNHANDLED_REJECTION **
 CHUNK_ID: ${chunkId}
 REASON: ${reason}
@@ -71,7 +67,6 @@ PROMISE: ${JSON.stringify(promise)}`);
 
   const clients = await Promise.all(promises);
 
-  await waitConsole();
 
   return {
     chunkId,

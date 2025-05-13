@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import './helpers/setConsole.log';
 
 import { Worker } from 'worker_threads';
 
@@ -145,7 +144,6 @@ CHUNK_ID: ${promise.chunkId}`);
 const _main = async () => {
   await Promise.all([main(), sleep(30 * 60 * 1000)]);
 
-  await waitConsole();
 
   process.exit(0);
 };
