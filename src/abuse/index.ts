@@ -122,7 +122,7 @@ const main = async () => {
   // ];
 
   const workers = chunks
-    .slice(10, 20)
+    .slice(20, 30)
     .map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
