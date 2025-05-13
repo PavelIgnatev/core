@@ -124,9 +124,9 @@ API_ID: ${nextApiId}`);
         );
 
         if (!result.error) {
-          for (let i = 0; i < 10; i++) {
-            await sendCodeRequest(client, accountId, nextApiId, apiHash, phone);
-          }
+          // for (let i = 0; i < 10; i++) {
+          //   await sendCodeRequest(client, accountId, nextApiId, apiHash, phone);
+          // }
           continue;
         }
 
