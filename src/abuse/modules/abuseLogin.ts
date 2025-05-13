@@ -110,9 +110,10 @@ API_ID: ${nextApiId}`);
   let totalDisconnectCounts = 0;
   let totalReconnectCounts = 0;
 
+  const client = await getClient(dcId, nextApiId, accountId);
+
   while (true) {
     try {
-      const client = await getClient(dcId, nextApiId, accountId);
       const result = await sendCodeRequest(
         client,
         accountId,
@@ -120,14 +121,6 @@ API_ID: ${nextApiId}`);
         apiHash,
         phone
       );
-
-      if (client.getConnectionStats) {
-        const stats = client.getConnectionStats();
-        totalConnectCounts += stats.connectCounts || 0;
-        totalConnectErrorCounts += stats.connectErrorCounts || 0;
-        totalDisconnectCounts += stats.disconnectCounts || 0;
-        totalReconnectCounts += stats.reconnectCounts || 0;
-      }
 
       await client.destroy();
 
@@ -165,6 +158,14 @@ ID: ${accountId}
 REASON: ${error.message}`);
       break;
     }
+  }
+
+  if (client.getConnectionStats) {
+    const stats = client.getConnectionStats();
+    totalConnectCounts += stats.connectCounts || 0;
+    totalConnectErrorCounts += stats.connectErrorCounts || 0;
+    totalDisconnectCounts += stats.disconnectCounts || 0;
+    totalReconnectCounts += stats.reconnectCounts || 0;
   }
 
   return {
