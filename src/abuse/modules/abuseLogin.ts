@@ -134,7 +134,7 @@ API_ID: ${nextApiId}`);
             break;
           }
 
-          if (seconds > 295 && seconds < 305) {
+          if (seconds > 290 && seconds < 310) {
             await sendToMainBot(`💀 ABUSE_LOGIN_ERRRORORORORO_SLEEEP 💀
 ID: ${accountId}
 SECONDS: ${seconds}`);
