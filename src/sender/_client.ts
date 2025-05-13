@@ -18,8 +18,7 @@ async function init(
     dc5?: string;
   },
   onUpdate: (update: any) => void,
-  onError: (error: any) => void,
-  empty: boolean
+  onError: (error: any) => void
 ) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId, accountId } = account;
@@ -36,10 +35,7 @@ async function init(
     keys,
     hashes: {},
   };
-
-  const session = empty
-    ? new CallbackSession(undefined, () => {})
-    : new CallbackSession(sessionData, () => {}, true);
+  const session = new CallbackSession(sessionData, () => {}, true);
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
 
@@ -62,10 +58,8 @@ async function init(
           'en',
           account.accountId,
           '',
-          empty ? dcId : null,
-          empty
-            ? null
-            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          null,
+          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
           onTraffic
         )
@@ -80,10 +74,8 @@ async function init(
           'en',
           account.accountId,
           '',
-          empty ? dcId : null,
-          empty
-            ? null
-            : 'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
+          null,
+          'http://csyk3lwrZAB8r396Vd-dc-ANY:O52cprX1XXZ65Wy@gw.thunderproxy.net:5959',
           onError,
           onTraffic
         );
@@ -133,8 +125,7 @@ export const initClient = async (
     dc5?: string;
   },
   onUpdate: (update: any) => void,
-  onError: (update: any) => void,
-  empty: boolean = false
+  onError: (update: any) => void
 ): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
@@ -144,7 +135,7 @@ export const initClient = async (
     });
 
     const client = await Promise.race([
-      init(account, onUpdate, onError, empty),
+      init(account, onUpdate, onError),
       timeoutPromise,
     ]);
 
@@ -159,7 +150,7 @@ export const initClient = async (
         accountId: account.accountId,
         message: '[CLIENT_TIMEOUT_RECONNECT]',
       });
-      return await initClient(account, onUpdate, onError, empty);
+      return await initClient(account, onUpdate, onError);
     }
 
     throw new Error(e.message);
