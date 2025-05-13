@@ -5,17 +5,6 @@ import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { invokeRequest } from './invokeRequest';
 
-const activeCodeRequests: Record<string, boolean> = {};
-
-export const isCodeRequestActive = (accountId: string): boolean =>
-  activeCodeRequests[accountId];
-export const setCodeRequestActive = (
-  accountId: string,
-  active: boolean
-): void => {
-  activeCodeRequests[accountId] = active;
-};
-
 export const getClient = async (
   dcId: number,
   nextApiId: number,
@@ -60,8 +49,6 @@ async function sendCodeRequest(
   apiHash: string,
   phoneNumber: string
 ) {
-  setCodeRequestActive(accountId, true);
-
   try {
     await invokeRequest(
       client,
@@ -110,9 +97,10 @@ API_ID: ${nextApiId}`);
   let totalDisconnectCounts = 0;
   let totalReconnectCounts = 0;
 
+  let client = await getClient(dcId, nextApiId, accountId);
+
   while (true) {
     try {
-      const client = await getClient(dcId, nextApiId, accountId);
       const result = await sendCodeRequest(
         client,
         accountId,
@@ -129,13 +117,11 @@ API_ID: ${nextApiId}`);
         totalReconnectCounts += stats.reconnectCounts || 0;
       }
 
-      await client.destroy();
-
       if (!result.error) {
         continue;
       }
 
-      setCodeRequestActive(accountId, false);
+      await client.destroy();
 
       const reason = result.error.message;
       if (reason.includes('seconds is required (caused by auth.SendCode)')) {
@@ -149,6 +135,8 @@ API_ID: ${nextApiId}`);
           }
 
           await sleep(seconds * 1000);
+
+          client = await getClient(dcId, nextApiId, accountId);
         }
       } else if (reason === 'PHONE_PASSWORD_FLOOD') {
         break;
@@ -159,7 +147,8 @@ REASON: ${reason}`);
         break;
       }
     } catch (error: any) {
-      setCodeRequestActive(accountId, false);
+      await client.destroy();
+
       await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
 ID: ${accountId}
 REASON: ${error.message}`);
