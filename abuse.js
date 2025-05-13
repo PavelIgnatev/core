@@ -52592,7 +52592,7 @@ function calculateAverageTime(promises) {
 }
 
 // src/abuse/index.ts
-var WORKER_TIMEOUT_MS = 45 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 35 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(

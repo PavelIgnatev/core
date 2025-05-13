@@ -39,7 +39,7 @@ type WorkerMessageSuccess = {
 
 type WorkerMessage = WorkerMessageSuccess | WorkerMessageError;
 
-const WORKER_TIMEOUT_MS = 45 * 60 * 1000;
+const WORKER_TIMEOUT_MS = 35 * 60 * 1000;
 
 const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
