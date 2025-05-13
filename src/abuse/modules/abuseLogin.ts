@@ -134,6 +134,9 @@ API_ID: ${nextApiId}`);
             break;
           }
 
+          await sendToMainBot(`💀 ABUSE_LOGIN_CODE_REQUEST_SLEEP 💀
+ID: ${accountId}
+SECONDS: ${seconds}`);
           await sleep(seconds * 1000);
 
           client = await getClient(dcId, nextApiId, accountId);
