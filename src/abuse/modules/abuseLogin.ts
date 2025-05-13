@@ -6,7 +6,6 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { invokeRequest } from './invokeRequest';
 
 const activeCodeRequests: Record<string, boolean> = {};
-const clientsCache: Record<string, any> = {};
 
 export const isCodeRequestActive = (accountId: string): boolean =>
   activeCodeRequests[accountId];
@@ -15,6 +14,25 @@ export const setCodeRequestActive = (
   active: boolean
 ): void => {
   activeCodeRequests[accountId] = active;
+};
+
+export const getClient = async (
+  dcId: number,
+  nextApiId: number,
+  accountId: string
+): Promise<any> => {
+  const client = await initClient(
+    {
+      dcId,
+      nextApiId,
+      accountId,
+    },
+    () => {},
+    (e) => sendToMainBot(e),
+    true
+  );
+
+  return client;
 };
 
 const API_PAIRS: Record<number, string> = {
@@ -35,13 +53,13 @@ const API_PAIRS: Record<number, string> = {
   611335: 'd524b414d21f4d37f08684c1df41ac9c',
 };
 
-const sendCodeRequest = async (
+async function sendCodeRequest(
   client: any,
   accountId: string,
   apiId: number,
   apiHash: string,
   phoneNumber: string
-) => {
+) {
   setCodeRequestActive(accountId, true);
 
   try {
@@ -59,30 +77,7 @@ const sendCodeRequest = async (
   } catch (error: any) {
     return { error };
   }
-};
-
-export const getClient = async (
-  dcId: number,
-  nextApiId: number,
-  accountId: string
-): Promise<any> => {
-  const cacheKey = `${dcId}_${nextApiId}`;
-
-  if (!clientsCache[cacheKey]) {
-    clientsCache[cacheKey] = await initClient(
-      {
-        dcId,
-        nextApiId,
-        accountId,
-      },
-      () => {},
-      (e) => sendToMainBot(e),
-      true
-    );
-  }
-
-  return clientsCache[cacheKey];
-};
+}
 
 export const abuseLogin = async (accountId: string) => {
   const { dcId, nextApiId, phone } = await getAccountById(accountId);
@@ -129,7 +124,6 @@ API_ID: ${nextApiId}`);
         );
 
         if (!result.error) {
-          // Делаем последовательные запросы с одного клиента
           for (let i = 0; i < 10; i++) {
             await sendCodeRequest(client, accountId, nextApiId, apiHash, phone);
           }
@@ -168,7 +162,6 @@ REASON: ${error.message}`);
       }
     }
   } finally {
-    // Получаем статистику, клиент не уничтожается
     if (client.getConnectionStats) {
       const stats = client.getConnectionStats();
       totalConnectCounts = stats.connectCounts || 0;
