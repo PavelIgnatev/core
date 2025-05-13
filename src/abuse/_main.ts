@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './helpers/setConsole.log';
 
 import { coreDB, logsDB } from './db/db';
 import { allTimings, getTimeString } from './helpers/helpers';

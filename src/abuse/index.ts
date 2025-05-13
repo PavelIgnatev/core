@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './helpers/setConsole.log';
 
 import { Worker } from 'worker_threads';
 
@@ -7,7 +8,6 @@ import { coreDB, logsDB } from './db/db';
 import { sleep } from './helpers/helpers';
 import { makeMetricsAll } from './helpers/makeMetricsAll';
 import { sendToMainBot } from './helpers/sendToMainBot';
-import { waitConsole } from './helpers/setConsole.log';
 
 type WorkerMessageError = {
   type: 'error';
@@ -122,7 +122,9 @@ const main = async () => {
   //   createWorker(0, ['ACCOUNT_ID']),
   // ];
 
-  const workers = chunks.slice(0, 10).map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks
+    .slice(0, 10)
+    .map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
@@ -143,7 +145,6 @@ CHUNK_ID: ${promise.chunkId}`);
 
 const _main = async () => {
   await Promise.all([main(), sleep(30 * 60 * 1000)]);
-
 
   process.exit(0);
 };
