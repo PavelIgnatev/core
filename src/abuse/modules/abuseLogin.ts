@@ -110,62 +110,60 @@ API_ID: ${nextApiId}`);
   let totalDisconnectCounts = 0;
   let totalReconnectCounts = 0;
 
-  try {
-    while (true) {
-      try {
-        const client = await getClient(dcId, nextApiId, accountId);
-        const result = await sendCodeRequest(
-          client,
-          accountId,
-          nextApiId,
-          apiHash,
-          phone
-        );
+  while (true) {
+    try {
+      const client = await getClient(dcId, nextApiId, accountId);
+      const result = await sendCodeRequest(
+        client,
+        accountId,
+        nextApiId,
+        apiHash,
+        phone
+      );
 
-        await client.destroy();
+      if (client.getConnectionStats) {
+        const stats = client.getConnectionStats();
+        totalConnectCounts += stats.connectCounts || 0;
+        totalConnectErrorCounts += stats.connectErrorCounts || 0;
+        totalDisconnectCounts += stats.disconnectCounts || 0;
+        totalReconnectCounts += stats.reconnectCounts || 0;
+      }
 
-        if (!result.error) {
-          continue;
-        }
+      await client.destroy();
 
-        setCodeRequestActive(accountId, false);
+      if (!result.error) {
+        continue;
+      }
 
-        const reason = result.error.message;
-        if (reason.includes('seconds is required (caused by auth.SendCode)')) {
-          const secondsMatch = reason.match(/\d+/);
+      setCodeRequestActive(accountId, false);
 
-          if (secondsMatch) {
-            const seconds = parseInt(secondsMatch[0], 10);
+      const reason = result.error.message;
+      if (reason.includes('seconds is required (caused by auth.SendCode)')) {
+        const secondsMatch = reason.match(/\d+/);
 
-            if (seconds > 2000) {
-              break;
-            }
+        if (secondsMatch) {
+          const seconds = parseInt(secondsMatch[0], 10);
 
-            await sleep(seconds * 1000);
+          if (seconds > 2000) {
+            break;
           }
-        } else if (reason === 'PHONE_PASSWORD_FLOOD') {
-          break;
-        } else {
-          await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
+
+          await sleep(seconds * 1000);
+        }
+      } else if (reason === 'PHONE_PASSWORD_FLOOD') {
+        break;
+      } else {
+        await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
 ID: ${accountId}
 REASON: ${reason}`);
-          break;
-        }
-      } catch (error: any) {
-        setCodeRequestActive(accountId, false);
-        await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
-ID: ${accountId}
-REASON: ${error.message}`);
         break;
       }
-    }
-  } finally {
-    if (client.getConnectionStats) {
-      const stats = client.getConnectionStats();
-      totalConnectCounts = stats.connectCounts || 0;
-      totalConnectErrorCounts = stats.connectErrorCounts || 0;
-      totalDisconnectCounts = stats.disconnectCounts || 0;
-      totalReconnectCounts = stats.reconnectCounts || 0;
+    } catch (error: any) {
+      setCodeRequestActive(accountId, false);
+      await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
+ID: ${accountId}
+REASON: ${error.message}`);
+      break;
     }
   }
 
