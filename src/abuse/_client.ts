@@ -1,9 +1,39 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import UserAgent from 'user-agents';
 
 import TelegramClient from '../gramjs/client/TelegramClient';
 import CallbackSession from '../gramjs/sessions/CallbackSession';
 import GramJs from '../gramjs/tl/api';
 import { updateTrafficMetrics } from './helpers/metrics';
+import { sendToMainBot } from './helpers/sendToMainBot';
+
+const getRandomProxy = async (): Promise<string | null> => {
+  try {
+    const proxyFilePath = path.resolve(__dirname, 'proxys.txt');
+    const proxyContent = fs.readFileSync(proxyFilePath, 'utf-8');
+    const proxyList = proxyContent
+      .split('\n')
+      .filter((line) => line.trim().length > 0);
+
+    if (proxyList.length === 0) {
+      await sendToMainBot(`** ABUSE_WORKER_ERROR **
+ERROR: PROXY_LIST_EMPTY`);
+      return null;
+    }
+
+    const randomIndex = Math.floor(Math.random() * proxyList.length);
+    const proxyData = proxyList[randomIndex];
+
+    return `http://${proxyData}`;
+  } catch (error) {
+    await sendToMainBot(
+      `** ABUSE_WORKER_ERROR **
+ERROR: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return null;
+  }
+};
 
 async function init(
   account: {
@@ -47,6 +77,8 @@ async function init(
     updateTrafficMetrics(accountId, type, size);
   };
 
+  const proxy = await getRandomProxy();
+
   const client =
     nextApiId === 2496
       ? new TelegramClient(
@@ -63,7 +95,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
+          proxy,
           onError,
           onTraffic
         )
@@ -79,7 +111,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
+          proxy,
           onError,
           onTraffic
         );
@@ -160,4 +192,4 @@ export const initClient = async (
 
     throw new Error(e.message);
   }
-}; 
+};
