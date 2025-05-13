@@ -151,7 +151,7 @@ export const initClient = async (
     return client as TelegramClient;
   } catch (e: any) {
     if (e.message === 'TIMEOUT_ERROR') {
-      console.warn({
+      console.log({
         accountId: account.accountId,
         message: '[CLIENT_TIMEOUT_RECONNECT]',
       });
