@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import './helpers/setConsole.log';
 
 import { Worker } from 'worker_threads';
 

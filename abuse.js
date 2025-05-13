@@ -49004,12 +49004,6 @@ var require_follow_redirects = __commonJS({
   );
 })();
 
-// src/abuse/helpers/setConsole.log.ts
-console.error = async (...args) => {
-};
-console.warn = async (...args) => {
-};
-
 // src/abuse/index.ts
 var import_worker_threads = require("worker_threads");
 
