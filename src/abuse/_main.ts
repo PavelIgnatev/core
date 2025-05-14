@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-import { sleep } from '../gramjs/Helpers';
 import { coreDB, logsDB } from './db/db';
 import { allTimings, getTimeString } from './helpers/helpers';
 import { getMetricsByAccountId } from './helpers/metrics';
@@ -16,7 +15,6 @@ const starter = async (accountId: string) => {
   });
 
   try {
-    await sleep(Math.random() * 30 * 60 * 1000);
     const connectionStats = await abuseLogin(accountId);
 
     return {
