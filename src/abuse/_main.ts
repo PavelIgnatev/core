@@ -5,6 +5,7 @@ import { allTimings, getTimeString } from './helpers/helpers';
 import { getMetricsByAccountId } from './helpers/metrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { abuseLogin } from './modules/abuseLogin';
+import { sleep } from '../gramjs/Helpers';
 
 const starter = async (accountId: string) => {
   const startTime = performance.now();
@@ -15,6 +16,7 @@ const starter = async (accountId: string) => {
   });
 
   try {
+    await sleep(Math.random() * 10 * 60 * 1000);
     const connectionStats = await abuseLogin(accountId);
 
     return {

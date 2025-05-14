@@ -134,17 +134,14 @@ API_ID: ${nextApiId}`);
             break;
           }
 
-          if (seconds > 290 && seconds < 310) {
-            await sendToMainBot(`💀 EROROROROROROOROR 💀
-ID: ${accountId}
-SECONDS: ${seconds}`);
+          if (seconds > 275 && seconds < 325) {
           } else {
             await sendToMainBot(`💀 ABUSE_LOGIN_CODE_REQUEST_SLEEP 💀
 ID: ${accountId}
 SECONDS: ${seconds}`);
             await sleep(seconds * 1000);
           }
-          
+
           client = await getClient(dcId, nextApiId, accountId);
         }
       } else if (reason === 'PHONE_PASSWORD_FLOOD') {
