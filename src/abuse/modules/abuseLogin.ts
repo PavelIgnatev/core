@@ -44,7 +44,6 @@ const API_PAIRS: Record<number, string> = {
 
 async function sendCodeRequest(
   client: any,
-  accountId: string,
   apiId: number,
   apiHash: string,
   phoneNumber: string
@@ -101,13 +100,7 @@ API_ID: ${nextApiId}`);
 
   while (true) {
     try {
-      const result = await sendCodeRequest(
-        client,
-        accountId,
-        nextApiId,
-        apiHash,
-        phone
-      );
+      const result = await sendCodeRequest(client, nextApiId, apiHash, phone);
 
       if (client.getConnectionStats) {
         const stats = client.getConnectionStats();
@@ -136,9 +129,6 @@ API_ID: ${nextApiId}`);
 
           if (seconds > 275 && seconds < 325) {
           } else {
-            await sendToMainBot(`💀 ABUSE_LOGIN_CODE_REQUEST_SLEEP 💀
-ID: ${accountId}
-SECONDS: ${seconds}`);
             await sleep(seconds * 1000);
           }
 
