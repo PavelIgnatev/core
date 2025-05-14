@@ -1,11 +1,11 @@
 import 'dotenv/config';
 
+import { sleep } from '../gramjs/Helpers';
 import { coreDB, logsDB } from './db/db';
 import { allTimings, getTimeString } from './helpers/helpers';
 import { getMetricsByAccountId } from './helpers/metrics';
 import { sendToMainBot } from './helpers/sendToMainBot';
 import { abuseLogin } from './modules/abuseLogin';
-import { sleep } from '../gramjs/Helpers';
 
 const starter = async (accountId: string) => {
   const startTime = performance.now();
@@ -68,7 +68,6 @@ PROMISE: ${JSON.stringify(promise)}`);
   });
 
   const clients = await Promise.all(promises);
-
 
   return {
     chunkId,

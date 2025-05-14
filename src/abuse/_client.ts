@@ -49,7 +49,8 @@ async function init(
   },
   onUpdate: (update: any) => void,
   onError: (error: any) => void,
-  empty: boolean
+  empty: boolean,
+  working: boolean
 ) {
   const startTime = performance.now();
   const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId, accountId } = account;
@@ -69,7 +70,7 @@ async function init(
 
   const session = empty
     ? new CallbackSession(undefined, () => {})
-    : new CallbackSession(sessionData, () => {}, true);
+    : new CallbackSession(sessionData, () => {}, working);
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
 
@@ -95,7 +96,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
+          'http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823',
           onError,
           onTraffic
         )
@@ -111,7 +112,7 @@ async function init(
           account.accountId,
           '',
           empty ? dcId : null,
-          "http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823",
+          'http://159c4d2ca2a19f963330:8093d55b69102050@gw.dataimpulse.com:823',
           onError,
           onTraffic
         );
@@ -162,7 +163,8 @@ export const initClient = async (
   },
   onUpdate: (update: any) => void,
   onError: (update: any) => void,
-  empty: boolean = false
+  empty: boolean = false,
+  working: boolean = true
 ): Promise<TelegramClient> => {
   try {
     const timeoutPromise = new Promise((_, reject) => {
@@ -172,7 +174,7 @@ export const initClient = async (
     });
 
     const client = await Promise.race([
-      init(account, onUpdate, onError, empty),
+      init(account, onUpdate, onError, empty, working),
       timeoutPromise,
     ]);
 
@@ -187,7 +189,7 @@ export const initClient = async (
         accountId: account.accountId,
         message: '[CLIENT_TIMEOUT_RECONNECT]',
       });
-      return await initClient(account, onUpdate, onError, empty);
+      return await initClient(account, onUpdate, onError, empty, working);
     }
 
     throw new Error(e.message);
