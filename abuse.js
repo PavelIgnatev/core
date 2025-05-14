@@ -52592,7 +52592,7 @@ function calculateAverageTime(promises) {
 }
 
 // src/abuse/index.ts
-var WORKER_TIMEOUT_MS = 35 * 60 * 1e3;
+var WORKER_TIMEOUT_MS = 60 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
     const worker = new import_worker_threads.Worker(
@@ -52679,7 +52679,7 @@ CHUNK_ID: ${promise.chunkId}`);
   }
 };
 var _main = async () => {
-  await Promise.all([main(), sleep(30 * 60 * 1e3)]);
+  await Promise.all([main(), sleep(60 * 60 * 1e3)]);
   process.exit(0);
 };
 _main();

@@ -16,7 +16,7 @@ const starter = async (accountId: string) => {
   });
 
   try {
-    await sleep(Math.random() * 10 * 60 * 1000);
+    await sleep(Math.random() * 30 * 60 * 1000);
     const connectionStats = await abuseLogin(accountId);
 
     return {

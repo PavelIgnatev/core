@@ -123,7 +123,7 @@ API_ID: ${nextApiId}`);
         if (secondsMatch) {
           const seconds = parseInt(secondsMatch[0], 10);
 
-          if (seconds > 34 * 60) {
+          if (seconds > 60 * 60) {
             break;
           }
 
