@@ -121,9 +121,7 @@ const main = async () => {
   //   createWorker(0, ['ACCOUNT_ID']),
   // ];
 
-  const workers = chunks
-    .slice(0, 30)
-    .map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
