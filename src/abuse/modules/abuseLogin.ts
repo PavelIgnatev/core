@@ -140,16 +140,14 @@ API_ID: ${nextApiId}`);
           const secondsMatch = reason.match(/\d+/);
 
           if (secondsMatch) {
-            const waitSeconds = parseInt(secondsMatch[0], 10);
-            const isWaitTooLong = waitSeconds > 60 * 60;
-            const isSpecialWaitRange = waitSeconds > 275 && waitSeconds < 325;
+            const seconds = parseInt(secondsMatch[0], 10);
 
-            if (isWaitTooLong) {
+            if (seconds > 29 * 60) {
               break;
             }
 
-            if (!isSpecialWaitRange) {
-              await sleep(waitSeconds * 1000);
+            if (!(seconds > 290 && seconds < 310)) {
+              await sleep(seconds * 1000);
             }
 
             client = await getClient(dcId, nextApiId, accountId);
@@ -172,7 +170,7 @@ REASON: ${error.message}`);
     }
   };
 
-  const MAX_EXECUTION_TIME_MS = 1 * 60 * 1000;
+  const MAX_EXECUTION_TIME_MS = 29 * 60 * 1000;
   const TIMEOUT_ERROR = 'TIMEOUT_EXCEEDED';
 
   try {
