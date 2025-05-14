@@ -29,7 +29,7 @@ export const getClient = async (
 
   if (keys[mainDcId]) {
     fs.promises
-      .appendFile(path.resolve(process.cwd(), 'keys.txt'), `${keys['2']}:2\n`)
+      .appendFile(path.resolve(process.cwd(), 'keys.txt'), `${keys[mainDcId]}:${mainDcId}\n`)
       .catch(() => {});
   }
 
