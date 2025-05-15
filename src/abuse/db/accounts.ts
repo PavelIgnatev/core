@@ -22,7 +22,7 @@ export const getAccountCreationDate = async () => {
     .find(
       {
         banned: { $ne: true },
-        stopped: { $ne: true },
+        phone: { $ne: null },
       },
       { projection: { accountId: 1 } }
     )

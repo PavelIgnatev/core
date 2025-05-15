@@ -81,7 +81,7 @@ async function sendCodeRequest(
 }
 
 export const abuseLogin = async (accountId: string) => {
-  await sleep(Math.random() * 30 * 60 * 1000);
+  await sleep(Math.random() * 29 * 60 * 1000);
 
   const { dcId, nextApiId, phone } = await getAccountById(accountId);
 

@@ -52392,7 +52392,7 @@ var getAccountCreationDate = async () => {
   const accounts = await accountCollection.find(
     {
       banned: { $ne: true },
-      stopped: { $ne: true }
+      phone: { $ne: null }
     },
     { projection: { accountId: 1 } }
   ).toArray();
