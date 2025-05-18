@@ -88,7 +88,6 @@ export async function makeRequestAnalysis(
       const { data: resultData } = await axios.post(
         'http://91.198.220.234/chatv2',
         {
-          maxTimeoutRequest: 5000,
           temperature: 0.1,
           k: 1,
           model: 'command-a-03-2025',
