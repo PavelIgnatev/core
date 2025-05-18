@@ -33,25 +33,24 @@ export const autoSender = async (
   }
 
   const currentTime = new Date();
-  const currentUTCHours = currentTime.getUTCHours();
-
-  if (
-    !(
-      accountId.includes('auto') ||
-      accountId.includes('bls') ||
-      accountId.includes('sender')
-    ) &&
-    (currentUTCHours < 5 || currentUTCHours > 14)
-  ) {
-    return;
-  }
+  // const currentUTCHours = currentTime.getUTCHours();
+  // if (
+  //   !(
+  //     accountId.includes('auto') ||
+  //     accountId.includes('bls') ||
+  //     accountId.includes('sender')
+  //   ) &&
+  //   (currentUTCHours < 5 || currentUTCHours > 14)
+  // ) {
+  //   return;
+  // }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
 
     const firstSendResult = await trySend(client, accountId, telegramId);
 
-    if (accountId.includes('sender') && firstSendResult) {
+    if (accountId.includes('prefix') && firstSendResult) {
       await trySend(client, accountId, telegramId, true);
     }
   }
