@@ -9,8 +9,10 @@ import { converterName } from '../helpers/converterName';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
 import { generateRandomString } from '../helpers/generateRandomString';
 import { getDateNow, sleep } from '../helpers/helpers';
+import { makeRequestAnalysis } from '../helpers/makeRequestAnalys';
 import { makeRequestGpt } from '../helpers/makeRequestGpt';
 import { sendToFormBot } from '../helpers/sendToFormBot';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { saveRecipient } from '../methods/recipient/saveRecipient';
@@ -82,6 +84,14 @@ export const autoResponse = async (
           : stage === 2 && part
             ? part.trim()
             : '';
+
+      const analysis = await makeRequestAnalysis(
+        accountId,
+        messages.map((m) => ({
+          role: m.fromId === String(recipientId) ? 'user' : 'assistant',
+          content: m.text,
+        }))
+      );
 
       let systemPrompt = `You are "${myName}" (role assistant, role <ASSISTANT>, ${gender} gender), acting as role "${aiRole}". Your name: ${myName}. Your gender: ${gender}. Fully adopt this identity as a real person whose task is to deeply engage the user within the context of ASSISTANT_COMPANY_DESCRIPTION. You have initiated the conversation with the user with the intention of immersing them into the context of ASSISTANT_COMPANY_DESCRIPTION.${
         stage >= 2 && goal ? `\n!IMPORTANT INSTRUCTION!: **${goal}**` : ''
@@ -248,18 +258,24 @@ ${replyMessage}`);
         'update',
         {
           viewed: false,
+          extra: analysis,
         }
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        await updateAutomaticDialogue(
+          accountId,
+          recipientId,
+          'automatic:allow-payment-required'
+        );
+
         throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
-      await updateAutomaticDialogue(
-        accountId,
-        recipientId,
-        'automatic:allow-payment-required'
-      );
+      await sendToMainBot(`💀 AUTO RESPONSE ERROR (${accountId}) 💀
+ID: ${accountId}
+RID: ${recipientId}
+ERROR: ${error.message}`);
     }
   }
 
@@ -368,14 +384,19 @@ ${pingMessage}`);
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        await updateAutomaticDialogue(
+          accountId,
+          recipientId,
+          'automatic:allow-payment-required'
+        );
+
         throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
-      await updateAutomaticDialogue(
-        accountId,
-        recipientId,
-        'automatic:allow-payment-required'
-      );
+      await sendToMainBot(`💀 PING ERROR (${accountId}) 💀
+ID: ${accountId}
+RID: ${recipientId}
+ERROR: ${error.message}`);
     }
   }
 
@@ -431,14 +452,19 @@ ${pingMessage}`);
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        await updateAutomaticDialogue(
+          accountId,
+          recipientId,
+          'automatic:allow-payment-required'
+        );
+
         throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
-      await updateAutomaticDialogue(
-        accountId,
-        recipientId,
-        'automatic:allow-payment-required'
-      );
+      await sendToMainBot(`💀 MANUAL ERROR (${accountId}) 💀
+ID: ${accountId}
+RID: ${recipientId}
+ERROR: ${error.message}`);
     }
   }
 
@@ -534,14 +560,19 @@ ${pingMessage}`);
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
+        await updateAutomaticDialogue(
+          accountId,
+          recipientId,
+          'automatic:allow-payment-required'
+        );
+
         throw new Error('ALLOW_PAYMENT_REQUIRED');
       }
 
-      await updateAutomaticDialogue(
-        accountId,
-        recipientId,
-        'automatic:allow-payment-required'
-      );
+      await sendToMainBot(`💀 UNREAD FIRST MESSAGE ERROR (${accountId}) 💀
+ID: ${accountId}
+RID: ${recipientId}
+ERROR: ${error.message}`);
     }
   }
 };
