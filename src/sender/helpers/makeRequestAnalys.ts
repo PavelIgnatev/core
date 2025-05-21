@@ -90,6 +90,7 @@ export async function makeRequestAnalysis(
         {
           k: 1,
           temperature: 0.1,
+          maxTimeoutRequest: 7500,
           model: 'command-a-03-2025',
           response_format: {
             type: 'json_object',
