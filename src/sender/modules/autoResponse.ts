@@ -79,7 +79,7 @@ export const autoResponse = async (
       const myName = language === 'RUSSIAN' ? converterName(meName) : meName;
       const stage = Math.ceil(step / 2);
       const parted =
-        stage === 2 && personalChannel
+        stage === 2 && part && personalChannel
           ? `t.me/${personalChannel}`
           : stage === 2 && part
             ? part.trim()
