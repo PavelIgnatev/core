@@ -85,17 +85,17 @@ export const autoResponse = async (
             ? part.trim()
             : '';
 
-      const analysis = await makeRequestAnalysis(
-        accountId,
-        messages.map((m) => ({
-          role: m.fromId === String(recipientId) ? 'user' : 'assistant',
-          content: m.text,
-        }))
-      );
+      // const analysis = await makeRequestAnalysis(
+      //   accountId,
+      //   messages.map((m) => ({
+      //     role: m.fromId === String(recipientId) ? 'user' : 'assistant',
+      //     content: m.text,
+      //   }))
+      // );
 
       let systemPrompt = `
       <ASSISTANT_IDENTITY>
-  [NAME]${meName}[/NAME]
+  [NAME]${myName}[/NAME]
   [GENDER] ${gender}[/GENDER]
   [ROLE] ${aiRole}[/ROLE]
   [IMPORTANT_GOAL] ** generate response, according to the format: main part (**${Math.round(
@@ -265,7 +265,7 @@ ${replyMessage}`);
         'update',
         {
           viewed: false,
-          extra: analysis,
+          // extra: analysis,
         }
       );
     } catch (error: any) {
