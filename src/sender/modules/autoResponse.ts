@@ -93,8 +93,7 @@ export const autoResponse = async (
       //   }))
       // );
 
-      let systemPrompt = `
-      <ASSISTANT_IDENTITY>
+      let systemPrompt = `<ASSISTANT_IDENTITY>
   [NAME]${myName}[/NAME]
   [GENDER] ${gender}[/GENDER]
   [ROLE] ${aiRole}[/ROLE]
