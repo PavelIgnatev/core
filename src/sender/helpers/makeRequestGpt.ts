@@ -16,23 +16,6 @@ function trimmer(str: string) {
   return str;
 }
 
-function hasConsecutiveQuestionSentences(text: string): boolean {
-  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-  let previousWasQuestion = false;
-  for (const sentence of sentences) {
-    const trimmedSentence = sentence.trim();
-    if (trimmedSentence.endsWith('?')) {
-      if (previousWasQuestion) {
-        return true;
-      }
-      previousWasQuestion = true;
-    } else {
-      previousWasQuestion = false;
-    }
-  }
-  return false;
-}
-
 function containsIdeographicOrArabic(str: string) {
   const ideographicAndArabicRegex =
     /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
@@ -254,7 +237,7 @@ export async function makeRequestGpt(
   const errors: string[] = [];
   aiReqest[groupId] = (aiReqest[groupId] || 0) + 1;
 
-  const model = 'command-a-03-2025'
+  const model = 'command-a-03-2025';
 
   console.log({
     accountId,
@@ -360,12 +343,6 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
-      if (mandatoryQuestion && hasConsecutiveQuestionSentences(message)) {
-        throw new Error(
-          'An answer should contain no more than one question. The use of multiple or consecutive questions in a single answer is strictly prohibited.'
-        );
-      }
-
       const varMessage = capitalizeFirstLetter(
         addSpaceAfterPunctuation(message)
       );
@@ -376,9 +353,9 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
         );
       }
 
-      if (mandatoryQuestion && varMessage.length < 200) {
+      if (mandatoryQuestion && varMessage.length < 130) {
         throw new Error(
-          'Minimum reply length 200 characters. Make a reply of at least 3 sentences.'
+          'Minimum reply length 200 characters.'
         );
       }
 
