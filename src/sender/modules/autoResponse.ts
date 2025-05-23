@@ -85,13 +85,13 @@ export const autoResponse = async (
             ? part.trim()
             : '';
 
-      // const analysis = await makeRequestAnalysis(
-      //   accountId,
-      //   messages.map((m) => ({
-      //     role: m.fromId === String(recipientId) ? 'user' : 'assistant',
-      //     content: m.text,
-      //   }))
-      // );
+      const analysis = await makeRequestAnalysis(
+        accountId,
+        messages.map((m) => ({
+          role: m.fromId === String(recipientId) ? 'user' : 'assistant',
+          content: m.text,
+        }))
+      );
 
       let systemPrompt = `<ASSISTANT_IDENTITY>
   [NAME]${myName}[/NAME]
@@ -264,7 +264,7 @@ ${replyMessage}`);
         'update',
         {
           viewed: false,
-          // extra: analysis,
+          extra: analysis,
         }
       );
     } catch (error: any) {

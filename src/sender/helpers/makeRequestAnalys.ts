@@ -4,72 +4,45 @@ import { sleep } from './helpers';
 import { sendToFormBot } from './sendToFormBot';
 import { sendToMainBot } from './sendToMainBot';
 
-function extractStatusAndReason(
-  input: any
-): { status: string; reason: string } | null {
+function extractStatusAndReason(input: string) {
   if (!input) return null;
 
-  if (typeof input === 'object' && input.text) {
-    return extractStatusAndReason(input.text);
+  try {
+    const cleanedInput = input
+      .replace(/```json\n?/g, '')
+      .replace(/```[a-zA-Z]*\n?/g, '')
+      .replace(/```/g, '')
+      .replace(/^\s+|\s+$/g, '')
+      .replace(/\n/g, ' ')
+      .replace(/\r/g, '')
+      .replace(/\t/g, ' ')
+      .replace(/\s+/g, ' ')
+      .replace(/\\n/g, ' ')
+      .replace(/\\r/g, '')
+      .replace(/\\t/g, ' ')
+      .replace(/\s+(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ' ')
+      .trim();
+
+    const jsonObject = JSON.parse(cleanedInput);
+
+    if (!jsonObject || typeof jsonObject !== 'object') return null;
+    if (!jsonObject.status || !jsonObject.reason) return null;
+    if (
+      typeof jsonObject.status !== 'string' ||
+      typeof jsonObject.reason !== 'string'
+    )
+      return null;
+
+    const status = jsonObject.status.toLowerCase() as string;
+    if (!['stop', 'normal', 'interesting'].includes(status)) return null;
+
+    return {
+      status,
+      reason: jsonObject.reason,
+    };
+  } catch {
+    return null;
   }
-
-  if (typeof input !== 'string') return null;
-
-  const cleanInput = input.trim();
-  let status = '';
-  let reason = '';
-
-  const statusMatches = cleanInput.match(
-    /["']?status["']?\s*[=:]\s*["']?(stop|nurture|lead)["']?/i
-  );
-  if (statusMatches && statusMatches[1]) {
-    status = statusMatches[1].toLowerCase();
-  }
-
-  const reasonKeyIndex = cleanInput.indexOf('"reason"');
-  if (reasonKeyIndex !== -1) {
-    const colonIndex = cleanInput.indexOf(':', reasonKeyIndex);
-    if (colonIndex !== -1) {
-      const startQuoteIndex = cleanInput.indexOf('"', colonIndex);
-      if (startQuoteIndex !== -1) {
-        let endQuoteIndex = -1;
-        let searchIndex = startQuoteIndex + 1;
-
-        while (searchIndex < cleanInput.length) {
-          const nextQuote = cleanInput.indexOf('"', searchIndex);
-          if (nextQuote === -1) break;
-
-          if (cleanInput[nextQuote - 1] !== '\\') {
-            endQuoteIndex = nextQuote;
-            break;
-          }
-
-          searchIndex = nextQuote + 1;
-        }
-
-        if (endQuoteIndex !== -1) {
-          reason = cleanInput.substring(startQuoteIndex + 1, endQuoteIndex);
-        }
-      }
-    }
-  }
-
-  if (!reason) {
-    const reasonMatches = cleanInput.match(
-      /["']?reason["']?\s*[=:]\s*["']?(.*?)["']\s*}/i
-    );
-    if (reasonMatches && reasonMatches[1]) {
-      reason = reasonMatches[1];
-    }
-  }
-
-  if (!status) {
-    if (cleanInput.includes('stop')) status = 'stop';
-    else if (cleanInput.includes('nurture')) status = 'nurture';
-    else if (cleanInput.includes('lead')) status = 'lead';
-  }
-
-  return status ? { status, reason: reason || 'No reason provided' } : null;
 }
 
 export async function makeRequestAnalysis(
@@ -90,70 +63,48 @@ export async function makeRequestAnalysis(
         {
           k: 1,
           temperature: 0.1,
-          maxTimeoutRequest: 7500,
+
           model: 'command-a-03-2025',
-          response_format: {
-            type: 'json_object',
-            schema: {
-              type: 'object',
-              properties: {
-                status: {
-                  type: 'string',
-                  description: `
-  ** Current status of the dialog relative to the "user" messages **
-  
-  - **STOP** (Immediate termination): If the user displays swearing or insults, explicit negativity, or 3+ consecutive negative responses.
-  - **NURTURE** (Continue nurturing): Engage with neutral or uncertain responses, general clarifying questions, passive agreement, or less than 2 consecutive neutral or positive responses.
-  - **LEAD** (Potential client): Respond to commercial proposal requests, deal terms or discounts inquiries, contact details sharing, product or terms-related questions, or demo or presentation requests.`,
-                  enum: ['stop', 'nurture', 'lead'],
-                },
-                reason: {
-                  type: 'string',
-                  description: `- Reason must contain:
-    * Detected trigger type
-    * Brief action assessment for next steps`,
-                },
-              },
-              required: ['status', 'reason'],
-            },
-          },
           messages: [
             {
               role: 'system',
-              content: `Your main goal is to determine the user's interaction status based on their latest response in order to optimize conversion. Here are the specific steps you need to follow:
+              content: `You are an AI conversation analyst. Your objective is to analyze the entire conversation context and determine the user's engagement status. Follow these instructions precisely:
   
-  1. **Tonal Analysis**: Pay attention to emotional coloring (positive or negative or neutral), lexical markers (slang, formality, emojis), response length (detailed vs monosyllabic), explicit objections, neutral or positive responses, general clarifying questions, and potential misunderstandings.
+  1. **Emotional & Linguistic Analysis**  
+     Evaluate tone (positive, neutral, negative), style (formal, informal, slang, emojis), message length, explicit objections, clarifying questions, or misunderstandings across all messages.
   
-  2. **Semantic Triggers**:
-  - * Positive Signals * : Respond to product or terms-related questions, detail clarification, demo or presentation requests, neutral or positive responses, and general clarifying questions.
-  - * Negative Signals * : Address rudeness or sarcasm, explicit negativity, ignoring questions or 2+ consecutive neutral responses.
+  2. **Engagement Triggers**  
+     - **Positive Interest**: User shows curiosity about product details, pricing, demos, meetings, or requests clarifications.  
+     - **Negative Signals**: Hostility, insults, explicit refusal, or strong objections.  
+     - **Neutral or Other**: No clear interest or hostility.
   
-  3. **Status Classification**:
-  - **STOP** (Immediate termination): If the user displays swearing or insults, explicit negativity, or 3+ consecutive negative responses.
-  - **NURTURE** (Continue nurturing): Engage with neutral or uncertain responses, general clarifying questions, passive agreement, or less than 2 consecutive neutral or positive responses.
-  - **LEAD** (Potential client): Respond to commercial proposal requests, deal terms or discounts inquiries, contact details sharing, product or terms-related questions, or demo or presentation requests.
+  3. **Interaction Status Classification**  
+     Assign one of:  
+     - **STOP**: Clear hostile language or explicit rejection.  
+     - **INTERESTING**: User demonstrates positive interest. Once INTERESTING, status remains so regardless of subsequent neutral messages.  
+     - **NORMAL**: All other scenarios.
   
-  4. **Processing Algorithm**:
-  - Analyze all user messages cumulatively, focusing on the last 2 messages.
-  - Check for trigger phrases.
-  - Identify behavioral patterns.
+  4. **Structured JSON Response**  
+     Reply ONLY with JSON:
+  {
+  "status": "stop" | "interesting" | "normal",
+  "reason": "<Key trigger detected, exact quotes, classification rationale, next action suggestion>"
+  }
   
-  **Output Requirements**:
-  - Each field must strictly adhere to the schema
-  - Reason must contain:
-    * Detected trigger type
-    * Brief action assessment for next steps
-  - Strict response format: {
-    "status": "stop|nurture|lead",
-    "reason": "..."
-  }`,
+  
+  5. **Analysis Criteria**  
+  - Reference specific messages or exact phrases.  
+  - Link tone and context to your classification.  
+  - Provide a concise next step: end chat, share information, ask a question, or propose a demo.
+  
+  Apply these rules consistently to optimize engagement and conversion potential.`,
             },
             ...messages,
           ],
         }
       );
       const parsedData = extractStatusAndReason(
-        resultData?.message?.content?.[0]
+        resultData?.message?.content?.[0]?.text
       );
 
       if (!parsedData || !parsedData.status || !parsedData.reason) {
