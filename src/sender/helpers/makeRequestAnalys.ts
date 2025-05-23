@@ -108,6 +108,9 @@ export async function makeRequestAnalysis(
       );
 
       if (!parsedData || !parsedData.status || !parsedData.reason) {
+        await sendToFormBot(`[NO_DATA]
+ID: ${accountId}
+JSON: ${resultData?.message?.content?.[0]?.text}`);
         throw new Error(`NO_DATA:${resultData?.message?.content?.[0]?.text}`);
       }
 
