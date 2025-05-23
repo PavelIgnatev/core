@@ -18,7 +18,7 @@ function trimmer(str: string) {
 
 function containsIdeographicOrArabic(str: string) {
   const ideographicAndArabicRegex =
-    /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    /[\u4E00-\u9FFF\u3400-\u4DBF\uF900-\uFAFF\uAC00-\uD7AF\u1100-\u11FF\u3130-\u318F\uA960-\uA97F\uD7B0-\uD7FF\u3040-\u309F\u30A0-\u30FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
   return ideographicAndArabicRegex.test(str);
 }
 
@@ -354,9 +354,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
       }
 
       if (mandatoryQuestion && varMessage.length < 130) {
-        throw new Error(
-          'Minimum reply length 200 characters.'
-        );
+        throw new Error('Minimum reply length 200 characters.');
       }
 
       if (minimalProposalLength > countSentences(varMessage)) {
