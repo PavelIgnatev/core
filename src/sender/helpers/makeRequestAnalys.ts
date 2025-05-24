@@ -55,7 +55,7 @@ export async function makeRequestAnalysis(
   const errors: string[] = [];
   let retryCount = 0;
   const maxRetries = 5;
-  console.log(messages);
+
   while (retryCount < maxRetries) {
     try {
       const { data: resultData } = await axios.post(
