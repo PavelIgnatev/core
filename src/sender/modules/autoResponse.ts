@@ -282,6 +282,7 @@ ${replyMessage}`);
 ID: ${accountId}
 RID: ${recipientId}
 ERROR: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -403,6 +404,7 @@ ${pingMessage}`);
 ID: ${accountId}
 RID: ${recipientId}
 ERROR: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -471,6 +473,7 @@ ERROR: ${error.message}`);
 ID: ${accountId}
 RID: ${recipientId}
 ERROR: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 
@@ -579,6 +582,7 @@ ERROR: ${error.message}`);
 ID: ${accountId}
 RID: ${recipientId}
 ERROR: ${error.message}`);
+      throw new Error(error.message);
     }
   }
 };

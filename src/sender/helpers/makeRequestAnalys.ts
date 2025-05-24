@@ -55,7 +55,7 @@ export async function makeRequestAnalysis(
   const errors: string[] = [];
   let retryCount = 0;
   const maxRetries = 5;
-
+  console.log(messages);
   while (retryCount < maxRetries) {
     try {
       const { data: resultData } = await axios.post(
@@ -63,9 +63,9 @@ export async function makeRequestAnalysis(
         {
           k: 1,
           temperature: 0.1,
-
           model: 'command-a-03-2025',
           messages: [
+            ...messages,
             {
               role: 'system',
               content: `You are an AI conversation analyst. Your objective is to analyze the entire conversation context and determine the user's engagement status. Follow these instructions precisely:
@@ -91,15 +91,20 @@ export async function makeRequestAnalysis(
   "reason": "<Key trigger detected, exact quotes, classification rationale, next action suggestion>"
   }
   
-  
   5. **Analysis Criteria**  
   - Reference specific messages or exact phrases.  
   - Link tone and context to your classification.  
   - Provide a concise next step: end chat, share information, ask a question, or propose a demo.
   
-  Apply these rules consistently to optimize engagement and conversion potential.`,
+  Apply these rules consistently to optimize engagement and conversion potential.
+  
+  **Structured JSON Response**  
+     Reply ONLY with JSON:
+  {
+  "status": "stop" | "interesting" | "normal",
+  "reason": "<Key trigger detected, exact quotes, classification rationale, next action suggestion>"
+  }`,
             },
-            ...messages,
           ],
         }
       );
