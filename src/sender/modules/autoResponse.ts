@@ -17,6 +17,7 @@ import { deleteHistory } from '../methods/messages/deleteHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { saveRecipient } from '../methods/recipient/saveRecipient';
 import { getFullUser } from '../methods/users/getFullUser';
+import { crmSender } from './crmSender';
 import { getClassifiedDialogs } from './getClassifiedDialogs';
 import { invokeRequest } from './invokeRequest';
 
@@ -254,6 +255,10 @@ ${replyMessage}`);
         });
       }
 
+      if (analysis.status === 'interesting') {
+        await crmSender(accountId, recipientId, messages, analysis);
+      }
+
       await saveRecipient(
         accountId,
         recipientId,
@@ -264,7 +269,6 @@ ${replyMessage}`);
         'update',
         {
           viewed: false,
-          extra: analysis,
         }
       );
     } catch (error: any) {

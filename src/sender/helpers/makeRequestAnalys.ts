@@ -4,7 +4,9 @@ import { sleep } from './helpers';
 import { sendToFormBot } from './sendToFormBot';
 import { sendToMainBot } from './sendToMainBot';
 
-function extractStatusAndReason(input: string) {
+type Status = 'stop' | 'normal' | 'interesting';
+
+function extractStatusAndReason(input: string): { status: Status; reason: string } | null {
   if (!input) return null;
 
   try {
@@ -33,8 +35,9 @@ function extractStatusAndReason(input: string) {
     )
       return null;
 
-    const status = jsonObject.status.toLowerCase() as string;
-    if (!['stop', 'normal', 'interesting'].includes(status)) return null;
+    const status = jsonObject.status.toLowerCase();
+    
+    if (!isValidStatus(status)) return null;
 
     return {
       status,
@@ -45,13 +48,17 @@ function extractStatusAndReason(input: string) {
   }
 }
 
+function isValidStatus(status: string): status is Status {
+  return ['stop', 'normal', 'interesting'].includes(status);
+}
+
 export async function makeRequestAnalysis(
   accountId: string,
   messages: {
     role: 'assistant' | 'system' | 'user';
     content: string;
   }[]
-) {
+): Promise<{ status: Status; reason: string }> {
   const errors: string[] = [];
   let retryCount = 0;
   const maxRetries = 5;

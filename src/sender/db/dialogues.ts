@@ -282,3 +282,17 @@ export const hasDialog4HoursAgo = async (accountId: string) => {
 
   return Boolean(dialogue);
 };
+
+export const getDialogueCrm = async (
+  accountId: string,
+  recipientId: string
+) => {
+  const dialoguesCollection = await getDialoguesCollection();
+
+  const crmData = await dialoguesCollection.findOne<Dialogue>({
+    accountId,
+    recipientId,
+  });
+
+  return crmData;
+};

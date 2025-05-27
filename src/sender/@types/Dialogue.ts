@@ -25,6 +25,11 @@ export interface Dialogue {
   deletedAndBlocked?: boolean;
 
   pings?: Array<{ title: string; date: Date }>;
+  extra?: {
+    status: 'interesting' | 'normal' | 'stop';
+    reason: string;
+    crmId?: string;
+  };
 
   dateLastOnline?: Date;
   dateLastRead?: Date;
