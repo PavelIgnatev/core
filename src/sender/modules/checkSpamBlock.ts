@@ -139,8 +139,15 @@ const fileComplaint = async (
     const h3 = await getHistory(client, userId, accessHash, s3.id);
     const m3 = h3[0]?.message;
 
-    if (!m3 || !m3.includes('what went wrong')) {
+    if (
+      !m3 ||
+      !(m3.includes('what went wrong') || m3.includes('verify you are a human'))
+    ) {
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+    }
+
+    if (m3.includes('verify you are a human')) {
+      return;
     }
 
     const reason = await getSpamBotReason(accountId);
@@ -179,9 +186,9 @@ export const checkSpamBlock = async (
     messageCount = 0,
   } = account;
 
-  await new Promise((r) =>
-    setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
-  );
+  // await new Promise((r) =>
+  //   setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+  // );
 
   const result = await resolveUsername(client, 'spambot');
 
