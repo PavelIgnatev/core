@@ -1,4 +1,4 @@
-import { BitrixCrm } from '../@types/Crm';
+import { BitrixCrm, Crm } from '../@types/Crm';
 import { coreDB } from './db';
 
 const getCrmCollection = async () => {
@@ -8,7 +8,7 @@ const getCrmCollection = async () => {
 export const getCrm = async (prefix: string) => {
   const crmCollection = await getCrmCollection();
 
-  const result = await crmCollection.findOne<BitrixCrm>({
+  const result = await crmCollection.findOne<Crm>({
     prefix,
   });
 
