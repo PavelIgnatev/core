@@ -52484,11 +52484,10 @@ var getAccountCreationDate = async () => {
   const accounts = await accountCollection.find(
     {
       banned: { $ne: true },
-      stopped: { $ne: true },
-      username: null
+      stopped: { $ne: true }
     },
     { projection: { accountId: 1 } }
-  ).limit(450).toArray();
+  ).toArray();
   const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
     accountId: account.accountId,
