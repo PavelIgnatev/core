@@ -50,7 +50,7 @@ export const autoSender = async (
 
     const firstSendResult = await trySend(client, accountId, telegramId);
 
-    if (accountId.includes('prefix') && firstSendResult) {
+    if (firstSendResult) {
       await trySend(client, accountId, telegramId, true);
     }
   }
