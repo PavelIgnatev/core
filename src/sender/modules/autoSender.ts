@@ -32,6 +32,10 @@ export const autoSender = async (
     return;
   }
 
+  if (!accountId.includes('prefix')) {
+    return;
+  }
+
   const currentTime = new Date();
   // const currentUTCHours = currentTime.getUTCHours();
   // if (
