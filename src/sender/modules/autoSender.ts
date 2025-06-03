@@ -31,6 +31,7 @@ export const autoSender = async (
   if (spamBlockDate) {
     return;
   }
+  return
 
   const currentTime = new Date();
   // const currentUTCHours = currentTime.getUTCHours();
