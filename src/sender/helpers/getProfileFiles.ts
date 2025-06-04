@@ -286,119 +286,172 @@ function generateRandomMetadata(): Record<string, string> {
   };
 }
 
+function generateExtendedMetadata(): Record<string, any> {
+  const baseMetadata = generateRandomMetadata();
+  
+  // Добавляем GPS данные с минимальными вариациями
+  const baseLatitude = 55.7558 + (Math.random() - 0.5) * 0.0001;
+  const baseLongitude = 37.6173 + (Math.random() - 0.5) * 0.0001;
+  
+  // Генерируем уникальные настройки камеры
+  const cameraSettings = {
+    ISO: Math.floor(100 + Math.random() * 900),
+    ShutterSpeed: `1/${Math.floor(100 + Math.random() * 900)}`,
+    Aperture: `f/${(2 + Math.random() * 14).toFixed(1)}`,
+    FocalLength: `${Math.floor(24 + Math.random() * 176)}mm`,
+    SerialNumber: crypto.randomBytes(8).toString('hex').toUpperCase(),
+  };
+
+  // Добавляем XMP-подобные метаданные
+  const xmpData = {
+    DocumentID: `xmp.did:${crypto.randomBytes(16).toString('hex')}`,
+    InstanceID: `xmp.iid:${crypto.randomBytes(16).toString('hex')}`,
+    ModifyDate: new Date().toISOString(),
+    MetadataDate: new Date().toISOString(),
+    CreatorTool: `CustomImageProcessor-${crypto.randomBytes(4).toString('hex')}`,
+  };
+
+  return {
+    ...baseMetadata,
+    GPSLatitude: `${baseLatitude}`,
+    GPSLongitude: `${baseLongitude}`,
+    ...cameraSettings,
+    ...xmpData,
+  };
+}
+
+function createUniqueNoisePattern(width: number, height: number, seed: string): Uint8Array {
+  const rand = createRandomGenerator(seed);
+  const pattern = new Uint8Array(width * height * 4);
+  
+  for (let i = 0; i < pattern.length; i += 4) {
+    // Очень слабые изменения для RGB каналов
+    pattern[i] = Math.floor(rand() * 2);     // R: 0 или 1
+    pattern[i + 1] = Math.floor(rand() * 2); // G: 0 или 1
+    pattern[i + 2] = Math.floor(rand() * 2); // B: 0 или 1
+    pattern[i + 3] = 0;                      // Альфа: без изменений
+  }
+  
+  return pattern;
+}
+
+function applySubtlePatterns(
+  data: Uint8Array,
+  width: number,
+  height: number,
+  params: ModifyParams
+): Uint8Array {
+  const result = Buffer.from(data);
+  const noisePattern = createUniqueNoisePattern(width, height, params.metadata.id);
+  
+  // Паттерн 1: Изменение каждого N-го пикселя
+  const skipPattern = params.forceChange.copyIndex + 5;
+  
+  // Паттерн 2: Шахматный паттерн
+  const chessSize = params.forceChange.copyIndex + 3;
+  
+  // Паттерн 3: Диагональные линии
+  const diagonalStep = params.forceChange.copyIndex + 7;
+  
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const idx = (y * width + x) * 4;
+      
+      // Проверяем различные паттерны
+      const isSkipPixel = (x + y) % skipPattern === 0;
+      const isChessPixel = Math.floor(x / chessSize) % 2 === Math.floor(y / chessSize) % 2;
+      const isDiagonalPixel = (x + y) % diagonalStep === 0;
+      
+      if (isSkipPixel || isChessPixel || isDiagonalPixel) {
+        // Применяем очень слабые изменения
+        for (let c = 0; c < 3; c++) {
+          const noise = noisePattern[idx + c];
+          const currentValue = result[idx + c];
+          
+          // Меняем значение на ±1 в зависимости от шума
+          if (noise === 1 && currentValue < 255) {
+            result[idx + c] = currentValue + 1;
+          } else if (noise === 0 && currentValue > 0) {
+            result[idx + c] = currentValue - 1;
+          }
+        }
+      }
+      
+      // Добавляем уникальный "водяной знак" в углах изображения
+      const cornerSize = 3;
+      if (
+        (x < cornerSize && y < cornerSize) || // Верхний левый
+        (x >= width - cornerSize && y < cornerSize) || // Верхний правый
+        (x < cornerSize && y >= height - cornerSize) || // Нижний левый
+        (x >= width - cornerSize && y >= height - cornerSize) // Нижний правый
+      ) {
+        const cornerPattern = (x + y + params.forceChange.copyIndex) % 2;
+        if (cornerPattern === 1) {
+          result[idx] = Math.max(0, Math.min(255, result[idx] + 1));
+          result[idx + 1] = Math.max(0, Math.min(255, result[idx + 1] - 1));
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+
 async function modifyImageAdvanced(
   imageBuffer: Buffer,
   params: ModifyParams
 ): Promise<Buffer> {
   try {
     const originalBuffer = Buffer.from(imageBuffer);
-
     const sourceImage = await sharp(imageBuffer)
       .raw()
       .toBuffer({ resolveWithObject: true });
 
     const { data: sourceData, info: sourceInfo } = sourceImage;
-
-    let pipeline = sharp(imageBuffer);
-
-    if (params.blur > 0) {
-      pipeline = pipeline.blur(params.blur);
-    }
-
-    if (params.flip) {
-      pipeline = pipeline.flop();
-    }
-
-    pipeline = pipeline
-      .modulate({
-        brightness: params.brightness,
-        saturation: params.saturation,
-        hue: params.hue,
-      })
-      .recomb(params.colorMatrix)
-      .sharpen(params.sharpen.sigma, 1, params.sharpen.strength);
-
-    pipeline = pipeline.linear(
-      1.005 + params.forceChange.copyIndex * 0.001,
-      params.forceChange.rShift / 100
-    );
-
-    let buffer = await pipeline.toBuffer();
-
-    const processedImage = await sharp(buffer)
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-
-    const { data: processedData, info: processedInfo } = processedImage;
-
-    const finalData = Buffer.from(processedData);
-    const channels = processedInfo.channels;
-
-    const seededRand = createRandomGenerator(params.metadata.id);
-    const pattern = params.forceChange.shiftPattern;
-
-    for (let y = 0; y < processedInfo.height; y++) {
-      for (let x = 0; x < processedInfo.width; x++) {
-        const idx = (y * processedInfo.width + x) * channels;
-
-        let pixelChanged = false;
-        for (let c = 0; c < 3; c++) {
-          if (
-            idx + c < sourceData.length &&
-            sourceData[idx + c] !== processedData[idx + c]
-          ) {
-            pixelChanged = true;
-            break;
-          }
-        }
-
-        const patternIdx =
-          (x + y + params.forceChange.copyIndex) % pattern.length;
-        const shift = pattern[patternIdx];
-
-        for (let c = 0; c < 3; c++) {
-          if (!pixelChanged || x % 3 === params.forceChange.copyIndex) {
-            let channelShift = shift;
-
-            if (c === 0) channelShift += params.forceChange.rShift % 2;
-            if (c === 1) channelShift += params.forceChange.gShift % 2;
-            if (c === 2) channelShift += params.forceChange.bShift % 2;
-
-            finalData[idx + c] = Math.max(
-              0,
-              Math.min(255, finalData[idx + c] + channelShift)
-            );
-          } else if ((x + y) % (params.forceChange.copyIndex + 2) === 0) {
-            finalData[idx + c] = Math.max(
-              0,
-              Math.min(255, finalData[idx + c] + (seededRand() < 0.5 ? 1 : -1))
-            );
-          }
-        }
-      }
-    }
-
-    const guaranteedData = guaranteeAllPixelsChanged(
+    
+    // Применяем тонкие изменения пикселей
+    const modifiedData = applySubtlePatterns(
       sourceData,
-      finalData,
-      channels
+      sourceInfo.width,
+      sourceInfo.height,
+      params
     );
 
-    const randomMetadata = generateRandomMetadata();
+    // Генерируем уникальные GPS координаты
+    const baseLatitude = 55.7558 + (Math.random() - 0.5) * 0.0001;
+    const baseLongitude = 37.6173 + (Math.random() - 0.5) * 0.0001;
 
-    const resultBuffer = await sharp(guaranteedData, {
+    // Генерируем уникальное имя создателя
+    const creatorTool = `ImageProcessor-${crypto.randomBytes(4).toString('hex')}`;
+
+    const resultBuffer = await sharp(modifiedData, {
       raw: {
-        width: processedInfo.width,
-        height: processedInfo.height,
-        channels: processedInfo.channels,
+        width: sourceInfo.width,
+        height: sourceInfo.height,
+        channels: sourceInfo.channels,
       },
     })
       .withMetadata({
         exif: {
-          IFD0: randomMetadata,
-        },
+          IFD0: {
+            GPSLatitudeRef: 'N',
+            GPSLatitude: baseLatitude.toString(),
+            GPSLongitudeRef: 'E',
+            GPSLongitude: baseLongitude.toString(),
+            UserComment: `Custom-${crypto.randomBytes(16).toString('hex')}`,
+            ImageUniqueID: crypto.randomBytes(32).toString('hex'),
+            DocumentName: `Doc-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`,
+            ImageDescription: `${creatorTool}-${Date.now()}`,
+            Software: `${creatorTool}-v${crypto.randomBytes(4).toString('hex')}`,
+            ModifyDate: new Date().toISOString(),
+          }
+        }
       })
-      .jpeg({ quality: 95 })
+      .jpeg({ 
+        quality: 95,
+        force: true,
+        chromaSubsampling: '4:4:4',
+      })
       .toBuffer();
 
     return resultBuffer;
