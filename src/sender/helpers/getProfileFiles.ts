@@ -49,11 +49,11 @@ async function cropImageBuffer(imageBuffer: Buffer): Promise<Buffer> {
 }
 
 function generateUniqueHash(input: string): string {
-  return crypto.createHash('md5').update(input).digest('hex');
+  return crypto.createHash('sha256').update(input).digest('hex');
 }
 
 function createRandomGenerator(hash: string): () => number {
-  let state = parseInt(hash.substring(0, 8), 16);
+  let state = parseInt(hash.substring(0, 12), 16);
 
   return function () {
     state = (state * 1664525 + 1013904223) % 4294967296;
@@ -96,107 +96,52 @@ function generateModificationParams(
   const folderRand = createRandomGenerator(folderHash);
   const timestamp = Date.now() % 1000;
 
-  const strategyVariant = Math.floor(folderRand() * 5) + 1;
+  // Упрощенная стратегия с минимальными визуальными изменениями
+  const strategyVariant = Math.floor(folderRand() * 3) + 1;
+  
+  // Минимальные цветовые корректировки
+  const hueShift = folderRand() * 0.2 - 0.1; // ±0.1 градуса
+  
+  // Мягкая цветовая матрица
+  const colorMatrix: Matrix3x3 = [
+    [1 + (folderRand() * 0.004 - 0.002), folderRand() * 0.001, folderRand() * 0.001],
+    [folderRand() * 0.001, 1 + (folderRand() * 0.004 - 0.002), folderRand() * 0.001],
+    [folderRand() * 0.001, folderRand() * 0.001, 1 + (folderRand() * 0.004 - 0.002)],
+  ];
 
-  const hueShift =
-    strategyVariant === 1
-      ? Math.floor(folderRand() * 5) - 2
-      : Math.floor(folderRand() * 3) - 1;
-
-  const blur = strategyVariant === 3 ? 0.3 + folderRand() * 0.4 : 0;
-
-  const flip = strategyVariant === 4;
-
-  let colorMatrix: Matrix3x3;
-  switch (strategyVariant) {
-    case 1:
-      colorMatrix = [
-        [1.03 + folderRand() * 0.05, folderRand() * 0.02, folderRand() * 0.02],
-        [folderRand() * 0.01, 0.95 + folderRand() * 0.04, folderRand() * 0.01],
-        [folderRand() * 0.01, folderRand() * 0.01, 0.96 + folderRand() * 0.03],
-      ];
-      break;
-    case 2:
-      colorMatrix = [
-        [0.95 + folderRand() * 0.03, folderRand() * 0.01, folderRand() * 0.01],
-        [folderRand() * 0.02, 1.03 + folderRand() * 0.05, folderRand() * 0.02],
-        [folderRand() * 0.01, folderRand() * 0.01, 0.96 + folderRand() * 0.03],
-      ];
-      break;
-    case 3:
-      colorMatrix = [
-        [0.96 + folderRand() * 0.03, folderRand() * 0.01, folderRand() * 0.01],
-        [folderRand() * 0.01, 0.97 + folderRand() * 0.02, folderRand() * 0.01],
-        [folderRand() * 0.02, folderRand() * 0.02, 1.03 + folderRand() * 0.05],
-      ];
-      break;
-    case 4:
-      colorMatrix = [
-        [
-          1.02 + folderRand() * 0.04,
-          -0.01 - folderRand() * 0.01,
-          -0.01 - folderRand() * 0.01,
-        ],
-        [
-          -0.01 - folderRand() * 0.01,
-          1.02 + folderRand() * 0.04,
-          -0.01 - folderRand() * 0.01,
-        ],
-        [
-          -0.01 - folderRand() * 0.01,
-          -0.01 - folderRand() * 0.01,
-          1.02 + folderRand() * 0.04,
-        ],
-      ];
-      break;
-    default:
-      colorMatrix = [
-        [0.98 + folderRand() * 0.04, folderRand() * 0.02, folderRand() * 0.02],
-        [folderRand() * 0.02, 0.98 + folderRand() * 0.04, folderRand() * 0.02],
-        [folderRand() * 0.02, folderRand() * 0.02, 0.98 + folderRand() * 0.04],
-      ];
-  }
-
+  // Генерация уникального паттерна изменений
   const uniqueShiftPattern = [];
-  for (let i = 0; i < 16; i++) {
-    uniqueShiftPattern.push(Math.floor(rand() * 3) - 1);
+  for (let i = 0; i < 64; i++) {
+    uniqueShiftPattern.push(Math.floor(rand() * 3) - 1); // -1, 0, или 1
   }
 
-  const indexSpecificShift = {
-    r: ((index % 3) - 1) * 2,
-    g: (((index + 1) % 3) - 1) * 2,
-    b: (((index + 2) % 3) - 1) * 2,
-  };
-
-  const uniqueData = Buffer.from(hash + timestamp.toString())
-    .toString('base64')
-    .substring(0, 20);
+  const uniqueData = crypto.randomBytes(12).toString('hex');
 
   return {
-    brightness: 1 + (folderRand() * 0.1 - 0.05) + index * 0.01,
-    saturation: 1 + (folderRand() * 0.06 - 0.03) - index * 0.005,
+    brightness: 1 + (folderRand() * 0.01 - 0.005),
+    saturation: 1 + (folderRand() * 0.01 - 0.005),
     hue: hueShift,
 
     sharpen: {
-      sigma: 0.7 + folderRand() * 0.6 + index * 0.05,
-      strength: 0.8 + folderRand() * 0.4,
+      sigma: 0.1 + folderRand() * 0.2,
+      strength: 0.2 + folderRand() * 0.2,
     },
 
-    blur: blur,
-    flip: flip,
+    blur: 0,
+    flip: false,
 
     colorMatrix: colorMatrix,
 
     forceChange: {
-      rShift: Math.ceil(rand() * 2) + indexSpecificShift.r,
-      gShift: Math.ceil(rand() * 2) + indexSpecificShift.g,
-      bShift: Math.ceil(rand() * 2) + indexSpecificShift.b,
+      rShift: 0,
+      gShift: 0,
+      bShift: 0,
       shiftPattern: uniqueShiftPattern,
       copyIndex: index,
     },
 
     metadata: {
-      id: hash.substring(0, 10) + timestamp + index,
+      id: hash.substring(0, 12) + timestamp + index,
       timestamp: Date.now(),
       variant: strategyVariant,
       uniqueData: uniqueData,
@@ -204,255 +149,128 @@ function generateModificationParams(
   };
 }
 
-function guaranteeAllPixelsChanged(
+function guaranteePixelUniqueness(
   originalData: Uint8Array | Buffer,
   modifiedData: Uint8Array | Buffer,
-  channels: number
+  channels: number,
+  hash: string,
+  width: number,
+  height: number
 ): Buffer {
   const result = Buffer.from(modifiedData);
-
+  const rand = createRandomGenerator(hash);
+  
+  // Создаем карту изменений для соседних пикселей
+  const changeMap = new Float32Array(width * height * 3).fill(0);
+  const kernel = [
+    [0.11, 0.15, 0.11],
+    [0.15, 0.20, 0.15],
+    [0.11, 0.15, 0.11]
+  ];
+  
+  // Функция для вычисления индекса
+  const idx = (x: number, y: number, c: number) => 
+    (y * width + x) * channels + c;
+  
+  // Применяем согласованные изменения по областям
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      // Вычисляем разницу с оригиналом
+      const diffR = modifiedData[idx(x, y, 0)] - originalData[idx(x, y, 0)];
+      const diffG = modifiedData[idx(x, y, 1)] - originalData[idx(x, y, 1)];
+      const diffB = modifiedData[idx(x, y, 2)] - originalData[idx(x, y, 2)];
+      
+      // Распространяем разницу на соседние пиксели
+      for (let ky = -1; ky <= 1; ky++) {
+        for (let kx = -1; kx <= 1; kx++) {
+          const weight = kernel[ky+1][kx+1];
+          const pos = idx(x+kx, y+ky, 0);
+          
+          changeMap[pos]   += diffR * weight;
+          changeMap[pos+1] += diffG * weight;
+          changeMap[pos+2] += diffB * weight;
+        }
+      }
+    }
+  }
+  
+  // Применяем адаптивные изменения
   for (let i = 0; i < originalData.length; i += channels) {
-    let pixelChanged = false;
-
+    const pixelIndex = Math.floor(i / channels);
+    const x = pixelIndex % width;
+    const y = Math.floor(pixelIndex / width);
+    
+    // Только для RGB каналов
+    for (let c = 0; c < 3; c++) {
+      // Вычисляем базовое изменение
+      let change = changeMap[i + c];
+      
+      // Добавляем уникальное шумоподобное изменение
+      const noise = Math.sin(x * 0.1 + y * 0.1 + c) * 0.3 + 
+                   Math.cos(x * 0.07 - y * 0.05) * 0.4;
+      
+      // Финальная коррекция
+      const correction = change * 0.8 + noise * 0.2;
+      
+      // Применяем с ограничениями
+      const newValue = originalData[i + c] + correction;
+      result[i + c] = Math.max(0, Math.min(255, Math.round(newValue)));
+    }
+  }
+  
+  // Гарантируем минимальные изменения в каждом пикселе
+  for (let i = 0; i < originalData.length; i += channels) {
+    let changed = false;
+    
     for (let c = 0; c < 3; c++) {
       if (originalData[i + c] !== result[i + c]) {
-        pixelChanged = true;
+        changed = true;
         break;
       }
     }
-
-    if (!pixelChanged) {
-      result[i] = originalData[i] ^ 1;
-      result[i + 1] = originalData[i + 1] ^ 1;
-      result[i + 2] = originalData[i + 2] ^ 1;
-    }
-  }
-
-  return result;
-}
-
-function generateRandomMetadata(): Record<string, string> {
-  const randomWords = [
-    'image',
-    'photo',
-    'pic',
-    'snapshot',
-    'camera',
-    'lens',
-    'view',
-    'moment',
-    'memory',
-    'capture',
-    'scene',
-    'portrait',
-    'frame',
-    'shot',
-    'panorama',
-    'digital',
-    'pixel',
-    'color',
-    'light',
-    'shadow',
-    'focus',
-    'visual',
-    'artwork',
-  ];
-
-  const getRandomWord = () =>
-    randomWords[Math.floor(Math.random() * randomWords.length)];
-
-  const randomString = (length: number) => {
-    return crypto.randomBytes(length).toString('hex').substring(0, length);
-  };
-
-  const randomDate = () => {
-    const start = new Date(2018, 0, 1).getTime();
-    const end = new Date().getTime();
-    const randomTimestamp = start + Math.random() * (end - start);
-    return new Date(randomTimestamp)
-      .toISOString()
-      .split('T')[0]
-      .replace(/-/g, ':');
-  };
-
-  return {
-    ImageDescription: `${getRandomWord()}-${getRandomWord()}-${randomString(8)}`,
-    Copyright: `${randomString(4)}-${randomString(6)}-${randomString(4)}`,
-    Software: `${getRandomWord()}${randomString(5)}`,
-    Artist: `${randomString(8)}`,
-    DateTime: randomDate(),
-    Make: `${getRandomWord()}${randomString(3)}`,
-    Model: `${getRandomWord()}-${randomString(4)}`,
-  };
-}
-
-function generateExtendedMetadata(): Record<string, any> {
-  const baseMetadata = generateRandomMetadata();
-  
-  // Добавляем GPS данные с минимальными вариациями
-  const baseLatitude = 55.7558 + (Math.random() - 0.5) * 0.0001;
-  const baseLongitude = 37.6173 + (Math.random() - 0.5) * 0.0001;
-  
-  // Генерируем уникальные настройки камеры
-  const cameraSettings = {
-    ISO: Math.floor(100 + Math.random() * 900),
-    ShutterSpeed: `1/${Math.floor(100 + Math.random() * 900)}`,
-    Aperture: `f/${(2 + Math.random() * 14).toFixed(1)}`,
-    FocalLength: `${Math.floor(24 + Math.random() * 176)}mm`,
-    SerialNumber: crypto.randomBytes(8).toString('hex').toUpperCase(),
-  };
-
-  // Добавляем XMP-подобные метаданные
-  const xmpData = {
-    DocumentID: `xmp.did:${crypto.randomBytes(16).toString('hex')}`,
-    InstanceID: `xmp.iid:${crypto.randomBytes(16).toString('hex')}`,
-    ModifyDate: new Date().toISOString(),
-    MetadataDate: new Date().toISOString(),
-    CreatorTool: `CustomImageProcessor-${crypto.randomBytes(4).toString('hex')}`,
-  };
-
-  return {
-    ...baseMetadata,
-    GPSLatitude: `${baseLatitude}`,
-    GPSLongitude: `${baseLongitude}`,
-    ...cameraSettings,
-    ...xmpData,
-  };
-}
-
-function createUniqueNoisePattern(width: number, height: number, seed: string): Uint8Array {
-  const rand = createRandomGenerator(seed);
-  const pattern = new Uint8Array(width * height * 4);
-  
-  for (let i = 0; i < pattern.length; i += 4) {
-    // Очень слабые изменения для RGB каналов
-    pattern[i] = Math.floor(rand() * 2);     // R: 0 или 1
-    pattern[i + 1] = Math.floor(rand() * 2); // G: 0 или 1
-    pattern[i + 2] = Math.floor(rand() * 2); // B: 0 или 1
-    pattern[i + 3] = 0;                      // Альфа: без изменений
-  }
-  
-  return pattern;
-}
-
-function createComplexNoisePattern(
-  width: number,
-  height: number,
-  seed: string,
-  index: number
-): Uint8Array {
-  const rand = createRandomGenerator(seed + index);
-  const pattern = new Uint8Array(width * height * 4);
-  
-  // Создаем базовый шум с разной интенсивностью
-  for (let i = 0; i < pattern.length; i += 4) {
-    pattern[i] = Math.floor(rand() * 3) - 1;     // R: -1, 0, или 1
-    pattern[i + 1] = Math.floor(rand() * 3) - 1; // G: -1, 0, или 1
-    pattern[i + 2] = Math.floor(rand() * 3) - 1; // B: -1, 0, или 1
-    pattern[i + 3] = 0;                          // Альфа: без изменений
-  }
-  
-  return pattern;
-}
-
-function applySubtlePatterns(
-  data: Uint8Array,
-  width: number,
-  height: number,
-  params: ModifyParams
-): Uint8Array {
-  const result = Buffer.from(data);
-  const noisePattern = createComplexNoisePattern(width, height, params.metadata.id, params.forceChange.copyIndex);
-  
-  // Паттерн 1: Сложный шахматный паттерн с разными размерами клеток
-  const chessSize1 = params.forceChange.copyIndex + 3;
-  const chessSize2 = params.forceChange.copyIndex + 5;
-  
-  // Паттерн 2: Множественные диагональные линии
-  const diagonalStep1 = params.forceChange.copyIndex + 7;
-  const diagonalStep2 = params.forceChange.copyIndex + 11;
-  
-  // Паттерн 3: Волновой паттерн
-  const waveLength = params.forceChange.copyIndex + 13;
-  const waveAmplitude = params.forceChange.copyIndex + 17;
-  
-  // Паттерн 4: Спиральный паттерн
-  const spiralStep = params.forceChange.copyIndex + 19;
-  
-  // Паттерн 5: Радиальный градиент
-  const centerX = width / 2;
-  const centerY = height / 2;
-  
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const idx = (y * width + x) * 4;
-      
-      // Проверяем различные паттерны
-      const isChessPixel1 = Math.floor(x / chessSize1) % 2 === Math.floor(y / chessSize1) % 2;
-      const isChessPixel2 = Math.floor(x / chessSize2) % 2 === Math.floor(y / chessSize2) % 2;
-      const isDiagonalPixel1 = (x + y) % diagonalStep1 === 0;
-      const isDiagonalPixel2 = (x + y) % diagonalStep2 === 0;
-      
-      // Волновой паттерн
-      const waveValue = Math.sin(x / waveLength) * Math.cos(y / waveLength) * waveAmplitude;
-      const isWavePixel = Math.abs(waveValue - Math.round(waveValue)) < 0.2;
-      
-      // Спиральный паттерн
-      const angle = Math.atan2(y - centerY, x - centerX);
-      const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-      const isSpiralPixel = (angle * distance / spiralStep) % 1 < 0.1;
-      
-      // Радиальный градиент
-      const normalizedDistance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2) / Math.sqrt(centerX ** 2 + centerY ** 2);
-      const isGradientPixel = normalizedDistance % 0.1 < 0.02;
-      
-      if (isChessPixel1 || isChessPixel2 || isDiagonalPixel1 || isDiagonalPixel2 || 
-          isWavePixel || isSpiralPixel || isGradientPixel) {
-        // Применяем более сложные изменения
-        for (let c = 0; c < 3; c++) {
-          const noise = noisePattern[idx + c];
-          const currentValue = result[idx + c];
-          
-          // Добавляем микроскопические изменения на основе всех паттернов
-          let change = noise;
-          if (isChessPixel1) change += (x + y) % 2 ? 1 : -1;
-          if (isDiagonalPixel1) change += (x * y) % 2 ? 1 : -1;
-          if (isWavePixel) change += Math.sign(waveValue);
-          if (isSpiralPixel) change += Math.sign(angle);
-          if (isGradientPixel) change += Math.sign(normalizedDistance - 0.5);
-          
-          // Нормализуем изменения до ±1
-          change = Math.sign(change);
-          
-          result[idx + c] = Math.max(0, Math.min(255, currentValue + change));
-        }
-      }
-      
-      // Добавляем уникальные маркеры в разных частях изображения
-      const markerSize = 2;
-      const markerPositions = [
-        [markerSize, markerSize],                        // Верхний левый
-        [width - markerSize, markerSize],                // Верхний правый
-        [markerSize, height - markerSize],               // Нижний левый
-        [width - markerSize, height - markerSize],       // Нижний правый
-        [width / 2, markerSize],                         // Верхний центр
-        [width / 2, height - markerSize],                // Нижний центр
-        [markerSize, height / 2],                        // Левый центр
-        [width - markerSize, height / 2],                // Правый центр
+    
+    if (!changed) {
+      const pattern = [
+        (rand() > 0.5 ? 1 : -1),
+        (rand() > 0.5 ? 1 : -1),
+        (rand() > 0.5 ? 1 : -1)
       ];
       
-      for (const [markerX, markerY] of markerPositions) {
-        if (Math.abs(x - markerX) < markerSize && Math.abs(y - markerY) < markerSize) {
-          const markerPattern = (x * y + params.forceChange.copyIndex) % 3 - 1;
-          result[idx] = Math.max(0, Math.min(255, result[idx] + markerPattern));
-          result[idx + 1] = Math.max(0, Math.min(255, result[idx + 1] - markerPattern));
-          result[idx + 2] = Math.max(0, Math.min(255, result[idx + 2] + markerPattern));
-        }
+      for (let c = 0; c < 3; c++) {
+        result[i + c] = Math.max(0, Math.min(255, 
+          originalData[i + c] + pattern[c]
+        ));
       }
     }
   }
   
   return result;
+}
+
+function generatePlausibleMetadata(hash: string): Record<string, string> {
+  const rand = createRandomGenerator(hash);
+  const devices = [
+    { make: 'Canon', model: 'EOS R5', software: 'Adobe Photoshop 25.0' },
+    { make: 'Nikon', model: 'D850', software: 'Adobe Photoshop 24.7' },
+    { make: 'Sony', model: 'ILCE-7M4', software: 'Capture One 23' },
+    { make: 'Fujifilm', model: 'X-T5', software: 'Lightroom Classic 12.3' }
+  ];
+  
+  const device = devices[Math.floor(rand() * devices.length)];
+  const date = new Date(Date.now() - Math.floor(rand() * 31536000000))
+    .toISOString().replace('T', ' ').substring(0, 19);
+  
+  return {
+    Make: device.make,
+    Model: device.model,
+    Software: device.software,
+    DateTime: date,
+    DateTimeOriginal: date,
+    DateTimeDigitized: date,
+    Copyright: `Copyright © ${new Date().getFullYear()}`,
+    Artist: `User${Math.floor(rand() * 10000)}`,
+    ImageDescription: `IMG_${Math.floor(rand() * 10000).toString().padStart(4, '0')}`
+  };
 }
 
 async function modifyImageAdvanced(
@@ -461,57 +279,54 @@ async function modifyImageAdvanced(
 ): Promise<Buffer> {
   try {
     const originalBuffer = Buffer.from(imageBuffer);
-    const sourceImage = await sharp(imageBuffer)
+    const { data: sourceData, info: sourceInfo } = await sharp(imageBuffer)
       .raw()
       .toBuffer({ resolveWithObject: true });
 
-    const { data: sourceData, info: sourceInfo } = sourceImage;
-    
-    // Применяем тонкие изменения пикселей
-    const modifiedData = applySubtlePatterns(
-      sourceData,
-      sourceInfo.width,
-      sourceInfo.height,
-      params
-    );
-
-    // Генерируем уникальные GPS координаты
-    const baseLatitude = 55.7558 + (Math.random() - 0.5) * 0.0001;
-    const baseLongitude = 37.6173 + (Math.random() - 0.5) * 0.0001;
-
-    // Генерируем уникальное имя создателя
-    const creatorTool = `ImageProcessor-${crypto.randomBytes(4).toString('hex')}`;
-
-    const resultBuffer = await sharp(modifiedData, {
-      raw: {
-        width: sourceInfo.width,
-        height: sourceInfo.height,
-        channels: sourceInfo.channels,
-      },
-    })
-      .withMetadata({
-        exif: {
-          IFD0: {
-            GPSLatitudeRef: 'N',
-            GPSLatitude: baseLatitude.toString(),
-            GPSLongitudeRef: 'E',
-            GPSLongitude: baseLongitude.toString(),
-            UserComment: `Custom-${crypto.randomBytes(16).toString('hex')}`,
-            ImageUniqueID: crypto.randomBytes(32).toString('hex'),
-            DocumentName: `Doc-${Date.now()}-${crypto.randomBytes(8).toString('hex')}`,
-            ImageDescription: `${creatorTool}-${Date.now()}`,
-            Software: `${creatorTool}-v${crypto.randomBytes(4).toString('hex')}`,
-            ModifyDate: new Date().toISOString(),
-          }
-        }
+    // Минимальные глобальные корректировки
+    let buffer = await sharp(imageBuffer)
+      .modulate({
+        brightness: params.brightness,
+        saturation: params.saturation,
+        hue: params.hue
       })
-      .jpeg({ 
-        quality: 95,
-        force: true,
-        chromaSubsampling: '4:4:4',
-      })
+      .recomb(params.colorMatrix)
+      .sharpen(params.sharpen.sigma, 1, params.sharpen.strength)
       .toBuffer();
-
+    
+    const { data: modifiedData, info: modifiedInfo } = await sharp(buffer)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    
+    // Применяем улучшенную уникализацию пикселей
+    const finalData = guaranteePixelUniqueness(
+      sourceData,
+      modifiedData,
+      modifiedInfo.channels,
+      params.metadata.id,
+      modifiedInfo.width,
+      modifiedInfo.height
+    );
+    
+    // Сохраняем с улучшенным сжатием
+    const resultBuffer = await sharp(finalData, {
+      raw: {
+        width: modifiedInfo.width,
+        height: modifiedInfo.height,
+        channels: modifiedInfo.channels
+      }
+    })
+    .jpeg({ 
+      quality: 95,
+      mozjpeg: true,
+      trellisQuantisation: true,
+      overshootDeringing: true
+    })
+    .withMetadata({
+      exif: generatePlausibleMetadata(params.metadata.id)
+    })
+    .toBuffer();
+    
     return resultBuffer;
   } catch (error) {
     return imageBuffer;
@@ -579,20 +394,18 @@ export const getProfileFiles = async (
           file.path,
           fileIndex.toString(),
           Date.now().toString(),
-          Math.random().toString(),
           crypto.randomBytes(16).toString('hex'),
         ].join('_');
-
+        
         const uniqueHash = generateUniqueHash(entropy);
-
         const params = generateModificationParams(
           uniqueHash,
           folderHash,
           fileIndex
         );
-
+        
         file.buffer = await modifyImageAdvanced(file.buffer, params);
-
+        
         const tempFileName = `${uniqueHash}-${crypto.randomBytes(4).toString('hex')}${path.extname(file.name)}`;
         const tempFilePath = path.join(tempDir, tempFileName);
 
