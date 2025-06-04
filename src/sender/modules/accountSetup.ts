@@ -281,21 +281,21 @@ ID: ${accountId}`);
             : gender
   );
 
-  for (const file of files) {
-    const isUF = await invokeRequest(
-      client,
-      new GramJs.photos.UploadProfilePhoto({
-        file: await uploadFile(client, file),
-      })
-    );
+//   for (const file of files) {
+//     const isUF = await invokeRequest(
+//       client,
+//       new GramJs.photos.UploadProfilePhoto({
+//         file: await uploadFile(client, file),
+//       })
+//     );
 
-    if (!isUF) {
-      await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
-ID: ${accountId}
-FILE_NAME: ${file.name}`);
-      throw new Error('GLOBAL_ERROR');
-    }
-  }
+//     if (!isUF) {
+//       await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
+// ID: ${accountId}
+// FILE_NAME: ${file.name}`);
+//       throw new Error('GLOBAL_ERROR');
+//     }
+//   }
 
   let user;
   while (true) {

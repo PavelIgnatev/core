@@ -335,6 +335,26 @@ function createUniqueNoisePattern(width: number, height: number, seed: string): 
   return pattern;
 }
 
+function createComplexNoisePattern(
+  width: number,
+  height: number,
+  seed: string,
+  index: number
+): Uint8Array {
+  const rand = createRandomGenerator(seed + index);
+  const pattern = new Uint8Array(width * height * 4);
+  
+  // Создаем базовый шум с разной интенсивностью
+  for (let i = 0; i < pattern.length; i += 4) {
+    pattern[i] = Math.floor(rand() * 3) - 1;     // R: -1, 0, или 1
+    pattern[i + 1] = Math.floor(rand() * 3) - 1; // G: -1, 0, или 1
+    pattern[i + 2] = Math.floor(rand() * 3) - 1; // B: -1, 0, или 1
+    pattern[i + 3] = 0;                          // Альфа: без изменений
+  }
+  
+  return pattern;
+}
+
 function applySubtlePatterns(
   data: Uint8Array,
   width: number,
@@ -342,53 +362,91 @@ function applySubtlePatterns(
   params: ModifyParams
 ): Uint8Array {
   const result = Buffer.from(data);
-  const noisePattern = createUniqueNoisePattern(width, height, params.metadata.id);
+  const noisePattern = createComplexNoisePattern(width, height, params.metadata.id, params.forceChange.copyIndex);
   
-  // Паттерн 1: Изменение каждого N-го пикселя
-  const skipPattern = params.forceChange.copyIndex + 5;
+  // Паттерн 1: Сложный шахматный паттерн с разными размерами клеток
+  const chessSize1 = params.forceChange.copyIndex + 3;
+  const chessSize2 = params.forceChange.copyIndex + 5;
   
-  // Паттерн 2: Шахматный паттерн
-  const chessSize = params.forceChange.copyIndex + 3;
+  // Паттерн 2: Множественные диагональные линии
+  const diagonalStep1 = params.forceChange.copyIndex + 7;
+  const diagonalStep2 = params.forceChange.copyIndex + 11;
   
-  // Паттерн 3: Диагональные линии
-  const diagonalStep = params.forceChange.copyIndex + 7;
+  // Паттерн 3: Волновой паттерн
+  const waveLength = params.forceChange.copyIndex + 13;
+  const waveAmplitude = params.forceChange.copyIndex + 17;
+  
+  // Паттерн 4: Спиральный паттерн
+  const spiralStep = params.forceChange.copyIndex + 19;
+  
+  // Паттерн 5: Радиальный градиент
+  const centerX = width / 2;
+  const centerY = height / 2;
   
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const idx = (y * width + x) * 4;
       
       // Проверяем различные паттерны
-      const isSkipPixel = (x + y) % skipPattern === 0;
-      const isChessPixel = Math.floor(x / chessSize) % 2 === Math.floor(y / chessSize) % 2;
-      const isDiagonalPixel = (x + y) % diagonalStep === 0;
+      const isChessPixel1 = Math.floor(x / chessSize1) % 2 === Math.floor(y / chessSize1) % 2;
+      const isChessPixel2 = Math.floor(x / chessSize2) % 2 === Math.floor(y / chessSize2) % 2;
+      const isDiagonalPixel1 = (x + y) % diagonalStep1 === 0;
+      const isDiagonalPixel2 = (x + y) % diagonalStep2 === 0;
       
-      if (isSkipPixel || isChessPixel || isDiagonalPixel) {
-        // Применяем очень слабые изменения
+      // Волновой паттерн
+      const waveValue = Math.sin(x / waveLength) * Math.cos(y / waveLength) * waveAmplitude;
+      const isWavePixel = Math.abs(waveValue - Math.round(waveValue)) < 0.2;
+      
+      // Спиральный паттерн
+      const angle = Math.atan2(y - centerY, x - centerX);
+      const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+      const isSpiralPixel = (angle * distance / spiralStep) % 1 < 0.1;
+      
+      // Радиальный градиент
+      const normalizedDistance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2) / Math.sqrt(centerX ** 2 + centerY ** 2);
+      const isGradientPixel = normalizedDistance % 0.1 < 0.02;
+      
+      if (isChessPixel1 || isChessPixel2 || isDiagonalPixel1 || isDiagonalPixel2 || 
+          isWavePixel || isSpiralPixel || isGradientPixel) {
+        // Применяем более сложные изменения
         for (let c = 0; c < 3; c++) {
           const noise = noisePattern[idx + c];
           const currentValue = result[idx + c];
           
-          // Меняем значение на ±1 в зависимости от шума
-          if (noise === 1 && currentValue < 255) {
-            result[idx + c] = currentValue + 1;
-          } else if (noise === 0 && currentValue > 0) {
-            result[idx + c] = currentValue - 1;
-          }
+          // Добавляем микроскопические изменения на основе всех паттернов
+          let change = noise;
+          if (isChessPixel1) change += (x + y) % 2 ? 1 : -1;
+          if (isDiagonalPixel1) change += (x * y) % 2 ? 1 : -1;
+          if (isWavePixel) change += Math.sign(waveValue);
+          if (isSpiralPixel) change += Math.sign(angle);
+          if (isGradientPixel) change += Math.sign(normalizedDistance - 0.5);
+          
+          // Нормализуем изменения до ±1
+          change = Math.sign(change);
+          
+          result[idx + c] = Math.max(0, Math.min(255, currentValue + change));
         }
       }
       
-      // Добавляем уникальный "водяной знак" в углах изображения
-      const cornerSize = 3;
-      if (
-        (x < cornerSize && y < cornerSize) || // Верхний левый
-        (x >= width - cornerSize && y < cornerSize) || // Верхний правый
-        (x < cornerSize && y >= height - cornerSize) || // Нижний левый
-        (x >= width - cornerSize && y >= height - cornerSize) // Нижний правый
-      ) {
-        const cornerPattern = (x + y + params.forceChange.copyIndex) % 2;
-        if (cornerPattern === 1) {
-          result[idx] = Math.max(0, Math.min(255, result[idx] + 1));
-          result[idx + 1] = Math.max(0, Math.min(255, result[idx + 1] - 1));
+      // Добавляем уникальные маркеры в разных частях изображения
+      const markerSize = 2;
+      const markerPositions = [
+        [markerSize, markerSize],                        // Верхний левый
+        [width - markerSize, markerSize],                // Верхний правый
+        [markerSize, height - markerSize],               // Нижний левый
+        [width - markerSize, height - markerSize],       // Нижний правый
+        [width / 2, markerSize],                         // Верхний центр
+        [width / 2, height - markerSize],                // Нижний центр
+        [markerSize, height / 2],                        // Левый центр
+        [width - markerSize, height / 2],                // Правый центр
+      ];
+      
+      for (const [markerX, markerY] of markerPositions) {
+        if (Math.abs(x - markerX) < markerSize && Math.abs(y - markerY) < markerSize) {
+          const markerPattern = (x * y + params.forceChange.copyIndex) % 3 - 1;
+          result[idx] = Math.max(0, Math.min(255, result[idx] + markerPattern));
+          result[idx + 1] = Math.max(0, Math.min(255, result[idx + 1] - markerPattern));
+          result[idx + 2] = Math.max(0, Math.min(255, result[idx + 2] + markerPattern));
         }
       }
     }
