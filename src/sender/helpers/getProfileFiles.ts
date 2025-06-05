@@ -1,79 +1,33 @@
 import crypto from 'crypto';
-import fs from 'fs';
+import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
 import sharp from 'sharp';
 
-type Matrix3x3 = [
-  [number, number, number],
-  [number, number, number],
-  [number, number, number],
-];
+type Matrix3x3 = [[number, number, number], [number, number, number], [number, number, number]];
 
 class CustomFile {
   name: string;
   size: number;
-  path: string;
+  filePath: string;
   buffer?: Buffer;
 
-  constructor(name: string, size: number, path: string, buffer?: Buffer) {
+  constructor(name: string, size: number, filePath: string, buffer?: Buffer) {
     this.name = name;
     this.size = size;
-    this.path = path;
+    this.filePath = filePath;
     this.buffer = buffer;
   }
-}
-
-async function cropImageBuffer(imageBuffer: Buffer): Promise<Buffer> {
-  try {
-    const image = sharp(imageBuffer);
-    const metadata = await image.metadata();
-
-    if (!metadata.width || !metadata.height) return imageBuffer;
-
-    const size = Math.min(metadata.width, metadata.height);
-    const left = Math.floor((metadata.width - size) / 2);
-    const top = Math.floor((metadata.height - size) / 2);
-
-    return await image
-      .extract({
-        left,
-        top,
-        width: size,
-        height: size,
-      })
-      .toBuffer();
-  } catch {
-    return imageBuffer;
-  }
-}
-
-function generateUniqueHash(input: string): string {
-  return crypto.createHash('sha512').update(input).digest('hex');
-}
-
-function createRandomGenerator(hash: string): () => number {
-  let state = parseInt(hash.substring(0, 16), 16);
-  const mixer = parseInt(hash.substring(16, 24), 16) || 0x9E3779B9;
-
-  return function () {
-    state = (state ^ (state >>> 30)) * mixer;
-    state = (state ^ (state >>> 27)) * 0x94D049BB133111EB;
-    return (state ^ (state >>> 31)) / 18446744073709551616;
-  };
 }
 
 interface ModifyParams {
   brightness: number;
   saturation: number;
-  hue: number;
-  sharpen: {
-    sigma: number;
-    strength: number;
-  };
+  hue: number; // degrees (0–360)
+  sharpen: { sigma: number; strength: number };
   colorMatrix: Matrix3x3;
-  blur: number;
-  flip: boolean;
+  blurRadius: number;
+  flipHorizontal: boolean;
   forceChange: {
     rShift: number;
     gShift: number;
@@ -87,511 +41,324 @@ interface ModifyParams {
     variant: number;
     uniqueData: string;
   };
-  noiseProfile: {
-    amplitude: number;
-    frequency: number;
-    phaseShift: number;
-  };
-  steganography: {
-    density: number;
-    payload: Buffer;
-  };
-  geometric: {
-    rotation: number;
-    perspective: [number, number, number, number];
-  };
-  quantization: {
-    dithering: number;
-    palette: boolean;
+}
+
+/** Сгенерировать SHA-256 хэш (hex) по строке */
+function generateUniqueHash(input: string): string {
+  return crypto.createHash('sha256').update(input).digest('hex');
+}
+
+/** Создать псевдо-случайный генератор на основе первых 12 символов hex-хэша */
+function createRandomGenerator(hash: string): () => number {
+  let state = parseInt(hash.substring(0, 12), 16) >>> 0;
+  return (): number => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
   };
 }
 
+/** Обрезать буфер изображения в центрированный квадрат */
+async function cropToSquare(imageBuffer: Buffer): Promise<Buffer> {
+  const image = sharp(imageBuffer);
+  const metadata = await image.metadata();
+  if (!metadata.width || !metadata.height) return imageBuffer;
+  const size = Math.min(metadata.width, metadata.height);
+  const left = Math.floor((metadata.width - size) / 2);
+  const top = Math.floor((metadata.height - size) / 2);
+  return await image.extract({ left, top, width: size, height: size }).toBuffer();
+}
+
+/** Сгенерировать параметры модификации для одного изображения */
 function generateModificationParams(
-  hash: string,
+  imageHash: string,
   folderHash: string,
   index: number
 ): ModifyParams {
-  const rand = createRandomGenerator(hash);
+  const rand = createRandomGenerator(imageHash);
   const folderRand = createRandomGenerator(folderHash);
   const timestamp = Date.now() % 1000;
+  const variant = Math.floor(folderRand() * 3) + 1;
 
-  // Глубокие параметры уникализации
-  const strategyVariant = Math.floor(folderRand() * 7) + 1;
-  
-  // Цветовые корректировки с индивидуальными характеристиками
-  const hueShift = folderRand() * 360; // [0, 360] градусов
-  
-  // Уникальная цветовая матрица для каждого изображения
+  // Hue shift: случайно в диапазоне [-36°, +36°]
+  const hueShiftFraction = folderRand() * 0.2 - 0.1;
+  const hueDegrees = Math.round(hueShiftFraction * 360);
+
   const colorMatrix: Matrix3x3 = [
-    [
-      1 + (folderRand() * 0.02 - 0.01),
-      folderRand() * 0.005 - 0.0025,
-      folderRand() * 0.005 - 0.0025,
-    ],
-    [
-      folderRand() * 0.005 - 0.0025,
-      1 + (folderRand() * 0.02 - 0.01),
-      folderRand() * 0.005 - 0.0025,
-    ],
-    [
-      folderRand() * 0.005 - 0.0025,
-      folderRand() * 0.005 - 0.0025,
-      1 + (folderRand() * 0.02 - 0.01),
-    ],
+    [1 + (folderRand() * 0.004 - 0.002), folderRand() * 0.001, folderRand() * 0.001],
+    [folderRand() * 0.001, 1 + (folderRand() * 0.004 - 0.002), folderRand() * 0.001],
+    [folderRand() * 0.001, folderRand() * 0.001, 1 + (folderRand() * 0.004 - 0.002)],
   ];
 
-  // Уникальный паттерн изменений высокой сложности
-  const uniqueShiftPattern = [];
-  for (let i = 0; i < 256; i++) {
-    uniqueShiftPattern.push(Math.floor(rand() * 7) - 3);
-  }
-
-  // Профиль шума для уникализации
-  const noiseProfile = {
-    amplitude: 0.5 + rand() * 1.5,
-    frequency: 0.02 + rand() * 0.08,
-    phaseShift: rand() * Math.PI * 2,
-  };
-
-  // Стеганографические данные
-  const stegoPayload = crypto.randomBytes(128);
-  
-  // Геометрические искажения
-  const rotation = (rand() - 0.5) * 0.25;
-  const perspective: [number, number, number, number] = [
-    (rand() - 0.5) * 0.02,
-    (rand() - 0.5) * 0.02,
-    (rand() - 0.5) * 0.02,
-    (rand() - 0.5) * 0.02,
-  ];
-
-  // Квантование и дизеринг
-  const quantization = {
-    dithering: rand() > 0.7 ? 0.5 + rand() * 0.5 : 0,
-    palette: rand() > 0.8,
-  };
+  const shiftPattern: number[] = Array.from({ length: 64 }, () => Math.floor(rand() * 3) - 1);
+  const uniqueData = crypto.randomBytes(12).toString('hex');
+  const id = `${imageHash.substring(0, 12)}${timestamp}${index}`;
 
   return {
-    brightness: 1 + (folderRand() * 0.04 - 0.02),
-    saturation: 1 + (folderRand() * 0.04 - 0.02),
-    hue: hueShift,
-
-    sharpen: {
-      sigma: 0.1 + folderRand() * 0.4,
-      strength: 0.2 + folderRand() * 0.4,
-    },
-
-    blur: rand() > 0.8 ? 0.1 + rand() * 0.3 : 0,
-    flip: rand() > 0.85,
-
+    brightness: 1 + (folderRand() * 0.01 - 0.005),
+    saturation: 1 + (folderRand() * 0.01 - 0.005),
+    hue: hueDegrees,
+    sharpen: { sigma: 0.1 + folderRand() * 0.2, strength: 0.2 + folderRand() * 0.2 },
     colorMatrix,
-
+    blurRadius: 0,
+    flipHorizontal: false,
     forceChange: {
-      rShift: Math.floor(rand() * 5) - 2,
-      gShift: Math.floor(rand() * 5) - 2,
-      bShift: Math.floor(rand() * 5) - 2,
-      shiftPattern: uniqueShiftPattern,
+      rShift: 0,
+      gShift: 0,
+      bShift: 0,
+      shiftPattern,
       copyIndex: index,
     },
-
     metadata: {
-      id: hash.substring(0, 24) + timestamp + index,
+      id,
       timestamp: Date.now(),
-      variant: strategyVariant,
-      uniqueData: crypto.randomBytes(32).toString('hex'),
+      variant,
+      uniqueData,
     },
-    
-    noiseProfile,
-    
-    steganography: {
-      density: 0.1 + rand() * 0.15,
-      payload: stegoPayload,
-    },
-    
-    geometric: {
-      rotation,
-      perspective,
-    },
-    
-    quantization,
   };
 }
 
-function applySteganography(
-  imageData: Uint8Array | Buffer,
-  width: number,
-  height: number,
-  channels: number,
-  payload: Buffer,
-  density: number
-): Buffer {
-  const result = Buffer.from(imageData);
-  const bitLength = payload.length * 8;
-  const totalPixels = width * height;
-  
-  // Конвертируем полезную нагрузку в биты
-  const bits: number[] = [];
-  for (const byte of payload) {
-    for (let i = 0; i < 8; i++) {
-      bits.push((byte >> i) & 1);
-    }
-  }
-  
-  // Внедряем данные в случайные пиксели с псевдослучайным распределением
-  let bitIndex = 0;
-  const pixelStride = Math.max(1, Math.floor(1 / density));
-  const seed = payload.readUInt32LE(0);
-  let position = seed % (width * height);
-  
-  while (bitIndex < bits.length) {
-    const x = position % width;
-    const y = Math.floor(position / width);
-    
-    if (y < height) {
-      const pixelIndex = (y * width + x) * channels;
-      const channel = (x + y) % 3;
-      
-      if (pixelIndex + channel < result.length) {
-        // Меняем младший бит
-        result[pixelIndex + channel] = 
-          (result[pixelIndex + channel] & 0xFE) | bits[bitIndex];
-        bitIndex++;
-      }
-    }
-    
-    // Псевдослучайное перемещение
-    position = (position * 1664525 + 1013904223) % (width * height);
-  }
-  
-  return result;
-}
-
+/**
+ * Обеспечить уникальность пикселей: плавно «распространить» разницу с оригиналом,
+ * добавить небольшую шумовую компоненту и скорректировать младшие биты.
+ */
 function guaranteePixelUniqueness(
-  originalData: Uint8Array | Buffer,
-  modifiedData: Uint8Array | Buffer,
+  originalData: Uint8Array,
+  modifiedData: Uint8Array,
   channels: number,
   hash: string,
   width: number,
-  height: number,
-  noiseProfile: {
-    amplitude: number;
-    frequency: number;
-    phaseShift: number;
-  }
+  height: number
 ): Buffer {
   const result = Buffer.from(modifiedData);
   const rand = createRandomGenerator(hash);
-  
-  // Многоканальный шумовой профиль
-  const noiseAmplitudes = [
-    noiseProfile.amplitude * (0.8 + rand() * 0.4),
-    noiseProfile.amplitude * (0.8 + rand() * 0.4),
-    noiseProfile.amplitude * (0.8 + rand() * 0.4),
+  const totalPixels = width * height;
+  const changeMap = new Float32Array(totalPixels * 3).fill(0);
+  const kernel = [
+    [0.11, 0.15, 0.11],
+    [0.15, 0.20, 0.15],
+    [0.11, 0.15, 0.11],
   ];
-  
-  const noiseFrequencies = [
-    noiseProfile.frequency * (0.7 + rand() * 0.6),
-    noiseProfile.frequency * (0.7 + rand() * 0.6),
-    noiseProfile.frequency * (0.7 + rand() * 0.6),
-  ];
-  
-  const noisePhases = [
-    noiseProfile.phaseShift + rand() * Math.PI,
-    noiseProfile.phaseShift + rand() * Math.PI,
-    noiseProfile.phaseShift + rand() * Math.PI,
-  ];
-  
-  // Функция для вычисления индекса
-  const idx = (x: number, y: number, c: number) => 
-    (y * width + x) * channels + c;
-  
-  // Применяем адаптивные изменения с уникальным шумом
-  for (let y = 0; y < height; y++) {
-    for (let x = 0; x < width; x++) {
-      const pixelIndex = (y * width + x) * channels;
-      
-      for (let c = 0; c < 3; c++) {
-        if (c >= channels) continue;
-        
-        // Генерируем уникальный шум для каждого канала
-        const fractalNoise = 
-          Math.sin(x * noiseFrequencies[c] + noisePhases[c]) * 0.5 +
-          Math.sin(x * noiseFrequencies[c] * 2.3 + y * noiseFrequencies[c] * 1.7) * 0.3 +
-          Math.sin(x * noiseFrequencies[c] * 4.1 + y * noiseFrequencies[c] * 3.3) * 0.2;
-        
-        const noiseValue = fractalNoise * noiseAmplitudes[c];
-        
-        // Случайное смещение на основе хеша
-        const hashShift = (rand() - 0.5) * 1.5;
-        
-        // Финальная коррекция с защитой от клиппинга
-        const newValue = result[pixelIndex + c] + noiseValue + hashShift;
-        result[pixelIndex + c] = Math.max(0, Math.min(255, Math.round(newValue)));
+
+  // Сформировать карту изменений через ядро 3×3
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const baseIndex = (y * width + x) * channels;
+      const diffR = modifiedData[baseIndex] - originalData[baseIndex];
+      const diffG = modifiedData[baseIndex + 1] - originalData[baseIndex + 1];
+      const diffB = modifiedData[baseIndex + 2] - originalData[baseIndex + 2];
+
+      for (let ky = -1; ky <= 1; ky++) {
+        for (let kx = -1; kx <= 1; kx++) {
+          const weight = kernel[ky + 1][kx + 1];
+          const neighborIdx = ((y + ky) * width + (x + kx)) * channels;
+          changeMap[neighborIdx] += diffR * weight;
+          changeMap[neighborIdx + 1] += diffG * weight;
+          changeMap[neighborIdx + 2] += diffB * weight;
+        }
       }
     }
   }
-  
-  // Гарантированное изменение каждого пикселя
-  const pattern = [
-    (rand() > 0.5 ? 1 : -1) * (0.5 + rand()),
-    (rand() > 0.5 ? 1 : -1) * (0.5 + rand()),
-    (rand() > 0.5 ? 1 : -1) * (0.5 + rand()),
-  ];
-  
-  for (let i = 0; i < originalData.length; i += channels) {
+
+  // Применить плавные корректировки + шум
+  for (let i = 0; i < totalPixels; i++) {
+    const x = i % width;
+    const y = Math.floor(i / width);
+    const baseIndex = i * channels;
+
     for (let c = 0; c < 3; c++) {
-      if (c >= channels) continue;
-      
-      // Добавляем микро-сдвиг для гарантии уникальности
-      result[i + c] = Math.max(0, Math.min(255, 
-        result[i + c] + pattern[c]
-      ));
+      const change = changeMap[baseIndex + c];
+      const noise = Math.sin(x * 0.1 + y * 0.1 + c) * 0.3 + Math.cos(x * 0.07 - y * 0.05) * 0.4;
+      const correction = change * 0.8 + noise * 0.2;
+      const newValue = originalData[baseIndex + c] + correction;
+      result[baseIndex + c] = Math.max(0, Math.min(255, Math.round(newValue)));
     }
   }
-  
+
+  // Если пиксель остался точно таким же, перевернуть один младший бит
+  const lsbRand = createRandomGenerator(hash);
+  for (let i = 0; i < totalPixels; i++) {
+    const baseIndex = i * channels;
+    let identical = true;
+    for (let c = 0; c < 3; c++) {
+      if (originalData[baseIndex + c] !== result[baseIndex + c]) {
+        identical = false;
+        break;
+      }
+    }
+    if (identical) {
+      const channelToFlip = Math.floor(lsbRand() * 3);
+      result[baseIndex + channelToFlip] =
+        (result[baseIndex + channelToFlip] & 0xfe) | (lsbRand() > 0.5 ? 1 : 0);
+    }
+  }
+
+  // Добавить по всему изображению случайные младшие биты
+  for (let i = 0; i < totalPixels; i++) {
+    const baseIndex = i * channels;
+    for (let c = 0; c < 3; c++) {
+      const bit = lsbRand() > 0.5 ? 1 : 0;
+      result[baseIndex + c] = (result[baseIndex + c] & 0xfe) | bit;
+    }
+  }
+
   return result;
 }
 
-function generatePlausibleMetadata(hash: string): Record<string, string> {
-  const rand = createRandomGenerator(hash);
-  const devices = [
-    { make: 'Canon', model: 'EOS R5', software: 'Adobe Photoshop 25.0' },
-    { make: 'Nikon', model: 'D850', software: 'Adobe Photoshop 24.7' },
-    { make: 'Sony', model: 'ILCE-7M4', software: 'Capture One 23' },
-    { make: 'Fujifilm', model: 'X-T5', software: 'Lightroom Classic 12.3' },
-    { make: 'Panasonic', model: 'LUMIX S1R', software: 'DxO PhotoLab 6' },
-    { make: 'Leica', model: 'M11', software: 'Darktable 4.2' },
-  ];
-  
-  const lenses = [
-    'EF 24-70mm f/2.8L II USM',
-    'NIKKOR Z 24-70mm f/2.8 S',
-    'FE 24-70mm f/2.8 GM II',
-    'XF 23mm f/1.4 R LM WR',
-    'DG 50mm f/1.4 HSM | A',
-    'APO-Summicron-M 50mm f/2 ASPH',
-  ];
-  
-  const device = devices[Math.floor(rand() * devices.length)];
-  const lens = lenses[Math.floor(rand() * lenses.length)];
-  const date = new Date(Date.now() - Math.floor(rand() * 31536000000))
-    .toISOString().replace('T', ' ').substring(0, 19);
-  
-  const serial = `000${Math.floor(rand() * 1000000)}`.slice(-6);
-  const exposure = `1/${Math.floor(100 + rand() * 500)}`;
-  const fNumber = `f/${(1.8 + rand() * 4).toFixed(1)}`;
-  const iso = `${Math.floor(100 + rand() * 2000)}`;
-  
-  return {
-    Make: device.make,
-    Model: device.model,
-    Software: device.software,
-    DateTime: date,
-    DateTimeOriginal: date,
-    DateTimeDigitized: date,
-    Copyright: `Copyright © ${new Date().getFullYear()}`,
-    Artist: `User${Math.floor(rand() * 10000)}`,
-    ImageDescription: `IMG_${Math.floor(rand() * 10000).toString().padStart(4, '0')}`,
-    SerialNumber: serial,
-    LensModel: lens,
-    GPSLatitude: (rand() * 180 - 90).toFixed(6),
-    GPSLongitude: (rand() * 360 - 180).toFixed(6),
-    ExposureTime: exposure,
-    FNumber: fNumber,
-    ISOSpeedRatings: iso,
-    Rating: `${Math.floor(rand() * 5)}`,
-    Creator: `Photographer${Math.floor(rand() * 100)}`,
-    Keywords: `portrait,${device.make.toLowerCase()},${lens.split(' ')[0].toLowerCase()}`,
-  };
-}
-
+/**
+ * Модифицировать один буфер изображения с учётом глобального фактора яркости (globalFactor),
+ * затем пер-пиксельно уникализировать, применить глобальный и локальный затемняющие фильтры.
+ */
 async function modifyImageAdvanced(
   imageBuffer: Buffer,
-  params: ModifyParams
+  params: ModifyParams,
+  globalFactor: number
 ): Promise<Buffer> {
-  try {
-    const originalBuffer = Buffer.from(imageBuffer);
-    const { data: sourceData, info: sourceInfo } = await sharp(imageBuffer)
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+  const { data: sourceData } = await sharp(imageBuffer)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
 
-    // Первичная обработка изображения
-    let buffer = await sharp(imageBuffer)
-      .rotate(params.geometric.rotation, {
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
-      .modulate({
-        brightness: params.brightness,
-        saturation: params.saturation,
-        hue: params.hue // Теперь всегда в [0, 360]
-      })
-      .recomb(params.colorMatrix)
-      .sharpen(params.sharpen.sigma, 1, params.sharpen.strength)
-      .blur(params.blur)
-      .toBuffer();
-    
-    const { data: modifiedData, info: modifiedInfo } = await sharp(buffer)
-      .raw()
-      .toBuffer({ resolveWithObject: true });
-    
-    // Применяем улучшенную уникализацию пикселей
-    let finalData = guaranteePixelUniqueness(
-      sourceData,
-      modifiedData,
-      modifiedInfo.channels,
-      params.metadata.id,
-      modifiedInfo.width,
-      modifiedInfo.height,
-      params.noiseProfile
-    );
-    
-    // Применяем стеганографию
-    finalData = applySteganography(
-      finalData,
-      modifiedInfo.width,
-      modifiedInfo.height,
-      modifiedInfo.channels,
-      params.steganography.payload,
-      params.steganography.density
-    );
-    
-    // Финальная обработка и сжатие
-    const pipeline = sharp(finalData, {
-      raw: {
-        width: modifiedInfo.width,
-        height: modifiedInfo.height,
-        channels: modifiedInfo.channels
-      }
-    });
-    
-    // Расширенные параметры кодирования
-    if (params.quantization.palette) {
-      pipeline.png({
-        quality: 90,
-        progressive: true,
-        palette: true,
-        dither: params.quantization.dithering
-      });
-    } else {
-      pipeline.jpeg({ 
-        quality: 90 + Math.floor(Math.random() * 8),
-        mozjpeg: true,
-        trellisQuantisation: true,
-        overshootDeringing: true,
-        optimiseScans: true,
-        quantisationTable: Math.floor(Math.random() * 8)
-      });
-    }
-    
-    const resultBuffer = await pipeline
-      .withMetadata({
-        exif: generatePlausibleMetadata(params.metadata.id),
-        orientation: params.flip ? 8 : undefined
-      })
-      .toBuffer();
-    
-    return resultBuffer;
-  } catch (error) {
-    return imageBuffer;
+  // 1. Цветовые преобразования через sharp.modulate и recomb
+  let intermediate = sharp(imageBuffer).modulate({
+    brightness: params.brightness,
+    saturation: params.saturation,
+    hue: params.hue,
+  });
+  intermediate = intermediate.recomb(params.colorMatrix);
+
+  if (params.sharpen.sigma > 0) {
+    intermediate = intermediate.sharpen(params.sharpen.sigma, 1, params.sharpen.strength);
   }
+  if (params.blurRadius > 0) {
+    intermediate = intermediate.blur(params.blurRadius);
+  }
+  if (params.flipHorizontal) {
+    intermediate = intermediate.flip();
+  }
+
+  const bufferAfterMod = await intermediate.toBuffer();
+  const { data: modifiedData, info: modifiedInfo } = await sharp(bufferAfterMod)
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  // 2. Пер-пиксельная уникализация (smoothing + noise + LSB)
+  let uniquePixelsBuffer = guaranteePixelUniqueness(
+    sourceData,
+    modifiedData,
+    modifiedInfo.channels,
+    params.metadata.id,
+    modifiedInfo.width,
+    modifiedInfo.height
+  );
+
+  // 3. Глобальный фильтр яркости/темноты (один раз для всего изображения)
+  for (let i = 0; i < uniquePixelsBuffer.length; i++) {
+    uniquePixelsBuffer[i] = Math.max(
+      0,
+      Math.min(255, Math.round(uniquePixelsBuffer[i] * globalFactor))
+    );
+  }
+
+  // 4. Локальное (пер-пиксельное) затемнение до 15%
+  const randPerPixel = createRandomGenerator(params.metadata.id + 'perpixel');
+  for (let i = 0; i < uniquePixelsBuffer.length; i++) {
+    const dimFactor = 1 - randPerPixel() * 0.15; // [0.85, 1.0]
+    uniquePixelsBuffer[i] = Math.max(
+      0,
+      Math.min(255, Math.round(uniquePixelsBuffer[i] * dimFactor))
+    );
+  }
+
+  // 5. Перекодировать в JPEG
+  const finalBuffer = await sharp(uniquePixelsBuffer, {
+    raw: {
+      width: modifiedInfo.width,
+      height: modifiedInfo.height,
+      channels: modifiedInfo.channels,
+    },
+  })
+    .jpeg({
+      quality: 95,
+      mozjpeg: true,
+      trellisQuantisation: true,
+      overshootDeringing: true,
+    })
+    .withMetadata()
+    .toBuffer();
+
+  return finalBuffer;
 }
 
-export const getProfileFiles = async (
-  prefix:
-    | 'male'
-    | 'female'
-    | 'adult'
-    | 'vasilisa'
-    | 'casino'
-    | 'onlik'
-    | 'wellside'
-) => {
-  let files: string[] = [];
+/**
+ * Обработать все изображения в случайной подпапке для заданного префикса.
+ * Глобальный фильтр (яркость/темнота) вычисляется один раз по folderHash
+ * и применяется ко всем изображениям, чтобы они выглядели одинаково.
+ */
+export async function getProfileFiles(
+  prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino' | 'onlik' | 'wellside'
+): Promise<CustomFile[]> {
   let folderName = '';
+  let filesInFolder: string[] = [];
+  const rootFolder = path.join(__dirname, 'images', prefix);
 
-  const getFilesFromFolder = () => {
-    const basePath = path.join(__dirname, `images/${prefix}`);
-    if (!fs.existsSync(basePath)) {
-      throw new Error(`Directory not found: ${basePath}`);
+  while (filesInFolder.length === 0) {
+    const subfolders = await fs.readdir(rootFolder, { withFileTypes: true });
+    const onlyDirs = subfolders.filter((d) => d.isDirectory()).map((d) => d.name);
+    if (onlyDirs.length === 0) {
+      throw new Error(`No subfolders found under images/${prefix}`);
     }
-    
-    const folders = fs.readdirSync(basePath, { withFileTypes: true })
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
-      
-    if (!folders.length) {
-      throw new Error(`No folders found in: ${basePath}`);
-    }
-    
-    const randomIndex = Math.floor(Math.random() * folders.length);
-    folderName = folders[randomIndex];
-    
-    const folderPath = path.join(basePath, folderName);
-    files = fs.readdirSync(folderPath)
-      .filter(file => /\.(png|jpg|jpeg)$/i.test(file));
-  };
-
-  while (!files.length) {
-    getFilesFromFolder();
+    folderName = onlyDirs[Math.floor(Math.random() * onlyDirs.length)];
+    const candidateFolder = path.join(rootFolder, folderName);
+    const allFiles = await fs.readdir(candidateFolder);
+    filesInFolder = allFiles.filter((f) => /\.(png|jpe?g)$/i.test(f));
   }
 
-  const uniqueId = crypto.randomBytes(16).toString('hex');
+  const uniqueId = crypto.randomBytes(8).toString('hex');
   const tempDir = path.join(os.tmpdir(), `${uniqueId}-${Date.now()}`);
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
+  await fs.mkdir(tempDir, { recursive: true });
+
+  // Основная «семя» для папки
+  const folderHash = generateUniqueHash(`${folderName}_${prefix}_${Date.now()}`);
+  const folderRand = createRandomGenerator(folderHash);
+
+  // Вычислить единый глобальный коэффициент яркости/темноты для всех изображений
+  const globalFactor = 1 + (folderRand() * 0.3 - 0.15); // [0.85, 1.15]
+
+  const customFiles: CustomFile[] = [];
+  for (const fileName of filesInFolder) {
+    const absolutePath = path.join(rootFolder, folderName, fileName);
+    const fileBuffer = await fs.readFile(absolutePath);
+    const stat = await fs.stat(absolutePath);
+    customFiles.push(new CustomFile(fileName, stat.size, absolutePath, fileBuffer));
   }
 
-  const folderHash = generateUniqueHash(
-    `${folderName}_${prefix}_${Date.now()}_${crypto.randomBytes(32).toString('hex')}`
-  );
+  const processedFiles: CustomFile[] = [];
+  await Promise.all(
+    customFiles.map(async (file, index) => {
+      if (!file.buffer) return;
+      let workingBuffer = await cropToSquare(file.buffer);
+      const entropy = [
+        file.filePath,
+        index.toString(),
+        Date.now().toString(),
+        crypto.randomBytes(16).toString('hex'),
+      ].join('_');
+      const imageHash = generateUniqueHash(entropy);
+      const params = generateModificationParams(imageHash, folderHash, index);
+      workingBuffer = await modifyImageAdvanced(workingBuffer, params, globalFactor);
 
-  const customFiles = files.map((fileName) => {
-    const filePath = path.join(
-      __dirname,
-      `images/${prefix}/${folderName}/${fileName}`
-    );
-    const originalBuffer = fs.readFileSync(filePath);
-
-    return new CustomFile(
-      fileName,
-      fs.statSync(filePath).size,
-      filePath,
-      originalBuffer
-    );
-  });
-
-  return Promise.all(
-    customFiles.map(async (file, fileIndex) => {
-      if (file.buffer) {
-        file.buffer = await cropImageBuffer(file.buffer);
-
-        const entropy = [
-          file.path,
-          fileIndex.toString(),
-          Date.now().toString(),
-          crypto.randomBytes(48).toString('hex'),
-          Math.random().toString(36).slice(2, 12)
-        ].join('_');
-        
-        const uniqueHash = generateUniqueHash(entropy);
-        const params = generateModificationParams(
-          uniqueHash,
-          folderHash,
-          fileIndex
-        );
-        
-        file.buffer = await modifyImageAdvanced(file.buffer, params);
-        
-        const tempFileName = `${uniqueHash}-${crypto.randomBytes(12).toString('hex')}${path.extname(file.name)}`;
-        const tempFilePath = path.join(tempDir, tempFileName);
-
-        fs.writeFileSync(tempFilePath, file.buffer);
-
-        file.path = tempFilePath;
-        file.name = tempFileName;
-        file.size = file.buffer.length;
-      }
-      return file;
+      const newFileName = `${params.metadata.id}-${crypto.randomBytes(4).toString(
+        'hex'
+      )}${path.extname(file.name)}`;
+      const newFilePath = path.join(tempDir, newFileName);
+      await fs.writeFile(newFilePath, workingBuffer);
+      const newStat = await fs.stat(newFilePath);
+      file.name = newFileName;
+      file.filePath = newFilePath;
+      file.size = newStat.size;
+      file.buffer = workingBuffer;
+      processedFiles.push(file);
     })
   );
-};
+
+  return processedFiles;
+}
