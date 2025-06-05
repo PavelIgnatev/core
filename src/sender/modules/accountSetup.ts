@@ -82,6 +82,46 @@ export const accountSetup = async (
     });
   }
 
+  const photos2 = await invokeRequest(
+    client,
+    new GramJs.photos.GetUserPhotos({
+      userId: new GramJs.InputUserSelf(),
+      limit: 40,
+      offset: 0,
+      maxId: BigInt('0'),
+    })
+  );
+
+  if (!photos2) {
+    await sendToMainBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
+ID: ${accountId}`);
+    throw new Error('GLOBAL_ERROR');
+  }
+  const photoIds2 = [];
+  for (const photo of photos2.photos) {
+    if (photo instanceof GramJs.PhotoEmpty) {
+      continue;
+    }
+
+    photoIds2.push(
+      new GramJs.InputPhoto({
+        id: photo.id,
+        accessHash: photo.accessHash,
+        fileReference: Buffer.alloc(0),
+      })
+    );
+  }
+
+  if (photoIds2.length) {
+    await invokeRequest(
+      client,
+      new GramJs.photos.DeletePhotos({
+        id: photoIds2,
+      })
+    );
+  }
+
+
   if (
     id &&
     me.username === username &&
