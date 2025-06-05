@@ -116,7 +116,6 @@ ERROR: ${err.message}`);
     const [meName, meId] = await accountSetup(client, account);
 
     await personalChannel(account, client);
-    await autoSender(client, ID, meId);
 
     let i = -1;
     while (true) {
@@ -153,7 +152,7 @@ ERROR: ${err.message}`);
 
           if (i === randomI) {
             await automaticCheck(client, account);
-            // await autoSender(client, ID, meId);
+            await autoSender(client, ID, meId);
           }
           await sleep(60000);
         })(),
