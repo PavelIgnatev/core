@@ -24,9 +24,11 @@ export const getAccountCreationDate = async () => {
       {
         banned: { $ne: true },
         stopped: { $ne: true },
+        accountId: { $not: RegExp("prefix") },
       },
       { projection: { accountId: 1 } }
     )
+    .limit(200)
     .toArray();
 
   const accountsWithTimestamp = accounts.map((account) => ({
