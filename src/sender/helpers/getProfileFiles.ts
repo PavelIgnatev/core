@@ -89,6 +89,7 @@ function generateModificationParams(
     [folderRand() * 0.001, folderRand() * 0.001, 1 + (folderRand() * 0.004 - 0.002)],
   ];
 
+  // Сгенерировать shiftPattern длиной 64 со случайными {-1,0,1}
   const shiftPattern: number[] = Array.from({ length: 64 }, () => Math.floor(rand() * 3) - 1);
   const uniqueData = crypto.randomBytes(12).toString('hex');
   const id = `${imageHash.substring(0, 12)}${timestamp}${index}`;
@@ -102,9 +103,9 @@ function generateModificationParams(
     blurRadius: 0,
     flipHorizontal: false,
     forceChange: {
-      rShift: 0,
-      gShift: 0,
-      bShift: 0,
+      rShift: Math.floor(rand() * 3) - 1,    // случайный shift в {-1, 0, 1}
+      gShift: Math.floor(rand() * 3) - 1,
+      bShift: Math.floor(rand() * 3) - 1,
       shiftPattern,
       copyIndex: index,
     },
@@ -139,7 +140,7 @@ function guaranteePixelUniqueness(
     [0.11, 0.15, 0.11],
   ];
 
-  // Сформировать карту изменений через ядро 3×3
+  // Построить карту изменений через ядро 3×3
   for (let y = 1; y < height - 1; y++) {
     for (let x = 1; x < width - 1; x++) {
       const baseIndex = (y * width + x) * channels;
@@ -159,7 +160,7 @@ function guaranteePixelUniqueness(
     }
   }
 
-  // Применить плавные корректировки + шум
+  // Применить плавную корректировку и шум
   for (let i = 0; i < totalPixels; i++) {
     const x = i % width;
     const y = Math.floor(i / width);
@@ -174,7 +175,7 @@ function guaranteePixelUniqueness(
     }
   }
 
-  // Если пиксель остался точно таким же, перевернуть один младший бит
+  // Если пиксель остался без изменений, перевернуть один LSB
   const lsbRand = createRandomGenerator(hash);
   for (let i = 0; i < totalPixels; i++) {
     const baseIndex = i * channels;
@@ -192,7 +193,7 @@ function guaranteePixelUniqueness(
     }
   }
 
-  // Добавить по всему изображению случайные младшие биты
+  // Вставить случайные LSB по всему изображению
   for (let i = 0; i < totalPixels; i++) {
     const baseIndex = i * channels;
     for (let c = 0; c < 3; c++) {
@@ -205,19 +206,25 @@ function guaranteePixelUniqueness(
 }
 
 /**
- * Модифицировать один буфер изображения с учётом глобального фактора яркости (globalFactor),
- * затем пер-пиксельно уникализировать, применить глобальный и локальный затемняющие фильтры.
+ * Модифицировать один буфер изображения:
+ * 1) Цветокоррекция через sharp.modulate + recomb
+ * 2) Пер-пиксельная уникализация (smoothing + noise + LSB)
+ * 3) Применить forceChange: добавить сдвиг из shiftPattern и r/g/b Shift
+ * 4) Глобальный фильтр яркости/темноты
+ * 5) Локальный (пер-пиксельный) фильтр затемнения до 15%
+ * 6) Перекодировка в JPEG
  */
 async function modifyImageAdvanced(
   imageBuffer: Buffer,
   params: ModifyParams,
   globalFactor: number
 ): Promise<Buffer> {
+  // 1. Извлечь «сырые» данные оригинала
   const { data: sourceData } = await sharp(imageBuffer)
     .raw()
     .toBuffer({ resolveWithObject: true });
 
-  // 1. Цветовые преобразования через sharp.modulate и recomb
+  // Цветовые преобразования
   let intermediate = sharp(imageBuffer).modulate({
     brightness: params.brightness,
     saturation: params.saturation,
@@ -250,7 +257,24 @@ async function modifyImageAdvanced(
     modifiedInfo.height
   );
 
-  // 3. Глобальный фильтр яркости/темноты (один раз для всего изображения)
+  // 3. Применить forceChange (shiftPattern + rShift/gShift/bShift)
+  const totalPixels = modifiedInfo.width * modifiedInfo.height;
+  const channels = modifiedInfo.channels;
+  for (let i = 0; i < totalPixels; i++) {
+    const baseIndex = i * channels;
+    const patternShift = params.forceChange.shiftPattern[i % params.forceChange.shiftPattern.length];
+    // R
+    let rVal = uniquePixelsBuffer[baseIndex] + patternShift + params.forceChange.rShift;
+    uniquePixelsBuffer[baseIndex] = Math.max(0, Math.min(255, Math.round(rVal)));
+    // G
+    let gVal = uniquePixelsBuffer[baseIndex + 1] + patternShift + params.forceChange.gShift;
+    uniquePixelsBuffer[baseIndex + 1] = Math.max(0, Math.min(255, Math.round(gVal)));
+    // B
+    let bVal = uniquePixelsBuffer[baseIndex + 2] + patternShift + params.forceChange.bShift;
+    uniquePixelsBuffer[baseIndex + 2] = Math.max(0, Math.min(255, Math.round(bVal)));
+  }
+
+  // 4. Глобальный фильтр яркости/темноты (один раз для всего изображения)
   for (let i = 0; i < uniquePixelsBuffer.length; i++) {
     uniquePixelsBuffer[i] = Math.max(
       0,
@@ -258,7 +282,7 @@ async function modifyImageAdvanced(
     );
   }
 
-  // 4. Локальное (пер-пиксельное) затемнение до 15%
+  // 5. Локальное (пер-пиксельное) затемнение до 15%
   const randPerPixel = createRandomGenerator(params.metadata.id + 'perpixel');
   for (let i = 0; i < uniquePixelsBuffer.length; i++) {
     const dimFactor = 1 - randPerPixel() * 0.15; // [0.85, 1.0]
@@ -268,7 +292,7 @@ async function modifyImageAdvanced(
     );
   }
 
-  // 5. Перекодировать в JPEG
+  // 6. Перекодировать в JPEG
   const finalBuffer = await sharp(uniquePixelsBuffer, {
     raw: {
       width: modifiedInfo.width,
@@ -292,6 +316,7 @@ async function modifyImageAdvanced(
  * Обработать все изображения в случайной подпапке для заданного префикса.
  * Глобальный фильтр (яркость/темнота) вычисляется один раз по folderHash
  * и применяется ко всем изображениям, чтобы они выглядели одинаково.
+ * Именование файлов полностью рандомное (crypto.randomUUID()), без связи с оригиналом.
  */
 export async function getProfileFiles(
   prefix: 'male' | 'female' | 'adult' | 'vasilisa' | 'casino' | 'onlik' | 'wellside'
@@ -346,13 +371,12 @@ export async function getProfileFiles(
       const params = generateModificationParams(imageHash, folderHash, index);
       workingBuffer = await modifyImageAdvanced(workingBuffer, params, globalFactor);
 
-      const newFileName = `${params.metadata.id}-${crypto.randomBytes(4).toString(
-        'hex'
-      )}${path.extname(file.name)}`;
-      const newFilePath = path.join(tempDir, newFileName);
+      // Сгенерировать абсолютно рандомное название через UUID, без связи с оригиналом
+      const randomName = `${crypto.randomUUID()}${path.extname(file.name)}`;
+      const newFilePath = path.join(tempDir, randomName);
       await fs.writeFile(newFilePath, workingBuffer);
       const newStat = await fs.stat(newFilePath);
-      file.name = newFileName;
+      file.name = randomName;
       file.filePath = newFilePath;
       file.size = newStat.size;
       file.buffer = workingBuffer;

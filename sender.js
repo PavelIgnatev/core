@@ -52485,10 +52485,10 @@ var getAccountCreationDate = async () => {
     {
       banned: { $ne: true },
       stopped: { $ne: true },
-      username: { $ne: null }
+      accountId: { $not: RegExp("prefix") }
     },
     { projection: { accountId: 1 } }
-  ).toArray();
+  ).limit(200).toArray();
   const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
     accountId: account.accountId,
