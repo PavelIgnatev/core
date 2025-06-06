@@ -82,46 +82,6 @@ export const accountSetup = async (
     });
   }
 
-  const photos2 = await invokeRequest(
-    client,
-    new GramJs.photos.GetUserPhotos({
-      userId: new GramJs.InputUserSelf(),
-      limit: 40,
-      offset: 0,
-      maxId: BigInt('0'),
-    })
-  );
-
-  if (!photos2) {
-    await sendToMainBot(`** ACCOUNT SETUP: GET USER PHOTOS ERROR **
-ID: ${accountId}`);
-    throw new Error('GLOBAL_ERROR');
-  }
-  const photoIds2 = [];
-  for (const photo of photos2.photos) {
-    if (photo instanceof GramJs.PhotoEmpty) {
-      continue;
-    }
-
-    photoIds2.push(
-      new GramJs.InputPhoto({
-        id: photo.id,
-        accessHash: photo.accessHash,
-        fileReference: Buffer.alloc(0),
-      })
-    );
-  }
-
-  if (photoIds2.length) {
-    await invokeRequest(
-      client,
-      new GramJs.photos.DeletePhotos({
-        id: photoIds2,
-      })
-    );
-  }
-
-
   if (
     id &&
     me.username === username &&
@@ -302,40 +262,40 @@ ID: ${accountId}`);
   }
 
   const gender = accountId.includes('female') ? 'female' : 'male';
-  const isAdult = accountId.includes('adult');
-  const isVasilisa = accountId.includes('vasilisa');
-  const isBetting = accountId.includes('betting');
-  const isCasino = accountId.includes('casino');
-  const isOnlik = accountId.includes('onlik');
-  const isWellside = accountId.includes('wellside');
+  // const isAdult = accountId.includes('adult');
+  // const isVasilisa = accountId.includes('vasilisa');
+  // const isBetting = accountId.includes('betting');
+  // const isCasino = accountId.includes('casino');
+  // const isOnlik = accountId.includes('onlik');
+  // const isWellside = accountId.includes('wellside');
 
-  const files = await getProfileFiles(
-    isVasilisa || isCasino || isBetting
-      ? 'vasilisa'
-      : isAdult
-        ? 'adult'
-        : isOnlik
-          ? 'onlik'
-          : isWellside
-            ? 'wellside'
-            : gender
-  );
+  // const files = await getProfileFiles(
+  //   isVasilisa || isCasino || isBetting
+  //     ? 'vasilisa'
+  //     : isAdult
+  //       ? 'adult'
+  //       : isOnlik
+  //         ? 'onlik'
+  //         : isWellside
+  //           ? 'wellside'
+  //           : gender
+  // );
 
-  for (const file of files) {
-    const isUF = await invokeRequest(
-      client,
-      new GramJs.photos.UploadProfilePhoto({
-        file: await uploadFile(client, file),
-      })
-    );
+//   for (const file of files) {
+//     const isUF = await invokeRequest(
+//       client,
+//       new GramJs.photos.UploadProfilePhoto({
+//         file: await uploadFile(client, file),
+//       })
+//     );
 
-    if (!isUF) {
-      await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
-ID: ${accountId}
-FILE_NAME: ${file.name}`);
-      throw new Error('GLOBAL_ERROR');
-    }
-  }
+//     if (!isUF) {
+//       await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
+// ID: ${accountId}
+// FILE_NAME: ${file.name}`);
+//       throw new Error('GLOBAL_ERROR');
+//     }
+//   }
 
   let user;
   while (true) {
