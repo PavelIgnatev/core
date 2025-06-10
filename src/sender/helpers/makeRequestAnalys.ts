@@ -143,7 +143,6 @@ JSON: ${resultData?.message?.content?.[0]?.text}`);
 
       await sendToFormBot(`[ANALYSIS_RESULT]
 ID: ${accountId}
-JSON: ${JSON.stringify(parsedData)}
 STATUS: ${parsedData.status}
 REASON: ${parsedData.reason}`);
 
