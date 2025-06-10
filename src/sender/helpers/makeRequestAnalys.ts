@@ -6,50 +6,55 @@ import { sendToMainBot } from './sendToMainBot';
 
 type Status = 'negative' | 'normal' | 'meeting';
 
-function extractStatusAndReason(
-  input: string
-): { status: Status; reason: string } | null {
+function extractStatusAndReason(input: string) {
   if (!input) return null;
 
   try {
-    const cleanedInput = input
-      .replace(/```json\n?/g, '')
-      .replace(/```[a-zA-Z]*\n?/g, '')
-      .replace(/```/g, '')
-      .replace(/^\s+|\s+$/g, '')
-      .replace(/\n/g, ' ')
-      .replace(/\r/g, '')
-      .replace(/\t/g, ' ')
-      .replace(/\s+/g, ' ')
-      .replace(/\\n/g, ' ')
-      .replace(/\\r/g, '')
-      .replace(/\\t/g, ' ')
-      .replace(/\s+(?=(?:[^"]*"[^"]*")*[^"]*$)/g, ' ')
-      .trim();
+    function extractBalancedBraces(str: string) {
+      const result = [];
+      let start = -1;
+      let count = 0;
 
-    const jsonObject = JSON.parse(cleanedInput);
+      for (let i = 0; i < str.length; i++) {
+        const char = str[i];
+        if (char === '{') {
+          if (count === 0) start = i;
+          count++;
+        } else if (char === '}') {
+          if (count > 0) count--;
+          if (count === 0 && start !== -1) {
+            result.push(str.substring(start, i + 1));
+            start = -1;
+          }
+        }
+      }
+      return result;
+    }
 
-    if (!jsonObject || typeof jsonObject !== 'object') return null;
-    if (!jsonObject.status || !jsonObject.reason) return null;
-    if (
-      typeof jsonObject.status !== 'string' ||
-      typeof jsonObject.reason !== 'string'
-    )
-      return null;
+    const braceBlocks = extractBalancedBraces(input);
 
-    const status = jsonObject.status.toLowerCase();
+    for (const block of braceBlocks) {
+      try {
+        let jsonStr = block
+          .replace(/(\w+)\s*:/g, '"$1":')
+          .replace(/:[\s\n]*'([^']+)'[\s\n]*(,?)/g, ': "$1"$2')
+          .replace(/([:,]\s*)([^"{\[\s][^,}\]\s]*)(\s*[},])/g, '$1"$2"$3');
 
-    if (!isValidStatus(status)) return null;
+        const obj = JSON.parse(jsonStr);
 
-    return {
-      status,
-      reason: jsonObject.reason,
-    };
-  } catch {
+        if (obj.status && obj.reason) {
+          const status = obj.status.toLowerCase();
+          if (['negative', 'normal', 'meeting'].includes(status)) {
+            return { status, reason: obj.reason };
+          }
+        }
+      } catch {}
+    }
+    return null;
+  } catch (e) {
     return null;
   }
 }
-
 function isValidStatus(status: string): status is Status {
   return ['negative', 'normal', 'meeting'].includes(status);
 }
