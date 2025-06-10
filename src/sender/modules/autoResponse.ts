@@ -91,7 +91,8 @@ export const autoResponse = async (
         messages.map((m) => ({
           role: m.fromId === String(recipientId) ? 'user' : 'assistant',
           content: m.text,
-        }))
+        })),
+        language
       );
 
       let systemPrompt = `<ASSISTANT_IDENTITY>

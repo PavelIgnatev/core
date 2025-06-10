@@ -6,7 +6,9 @@ import { sendToMainBot } from './sendToMainBot';
 
 type Status = 'negative' | 'normal' | 'meeting';
 
-function extractStatusAndReason(input: string): { status: Status; reason: string } | null {
+function extractStatusAndReason(
+  input: string
+): { status: Status; reason: string } | null {
   if (!input) return null;
 
   try {
@@ -36,7 +38,7 @@ function extractStatusAndReason(input: string): { status: Status; reason: string
       return null;
 
     const status = jsonObject.status.toLowerCase();
-    
+
     if (!isValidStatus(status)) return null;
 
     return {
@@ -57,7 +59,8 @@ export async function makeRequestAnalysis(
   messages: {
     role: 'assistant' | 'system' | 'user';
     content: string;
-  }[]
+  }[],
+  language: string
 ): Promise<{ status: Status; reason: string }> {
   const errors: string[] = [];
   let retryCount = 0;
@@ -100,13 +103,17 @@ export async function makeRequestAnalysis(
    - **MEETING**: The user actively discusses or agrees to a **meeting**. This includes proposing a time for the meeting, confirming availability, or discussing specifics related to the meeting (e.g., time, access, platform, etc.). Once the **Meeting** status is triggered, it will remain **Meeting** until **Negative** signals are detected.
    - **NORMAL**: All other conversations, including **mild rejections** such as “I’m not interested right now” or “Maybe later,” or neutral, ongoing exchanges. Soft refusals and any conversation that does not fit into **negative** or **meeting** categories.
 
-4. **Structured JSON Response**  
+4. **Reason Language**  
+   - For translation purposes, replace the reason in the desired language using ${language} to automatically translate the reason. For example, if the user’s language is Russian, translate the reason into Russian. You will replace the "reason" with the translated version based on the user's language preference.
+
+5. **Structured JSON Response**  
 Your response should be a JSON object with the following fields:  
 {  
   "status": "negative" | "meeting" | "normal",  
   "reason": "<Specific trigger detected, e.g., user explicitly rejects the meeting, user confirms time for the meeting, etc.>"  
 }  
 Please ensure that the analysis is precise and each classification is supported by clear references to the user’s messages. The response should be concise and specific.
+For translation purposes, replace the reason in the desired language using ${language} to automatically translate the reason. For example, if the user’s language is Russian, translate the reason into Russian. You will replace the "reason" with the translated version based on the user's language preference.
 
 **Structured JSON Response**  
 Your response should be a JSON object with the following fields:  
