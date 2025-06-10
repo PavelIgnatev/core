@@ -255,7 +255,7 @@ ${replyMessage}`);
         });
       }
 
-      if (analysis.status === 'interesting') {
+      if (analysis.status === 'meeting') {
         await crmSender(accountId, recipientId, messages, analysis);
       }
 

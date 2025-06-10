@@ -7,9 +7,9 @@ import { getDialogue } from '../../db/dialogues';
 import {
   capitalizeFirstLetter,
   formatDateToUTC,
-  reduceSpaces,
   removeNonAlphaPrefix,
   sleep,
+  smartFilterMessage,
 } from '../../helpers/helpers';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
 import { invokeRequest } from '../../modules/invokeRequest';
@@ -93,7 +93,7 @@ export const sendMessage = async (
     }
 
     const filtredMessage = withFilter
-      ? removeNonAlphaPrefix(capitalizeFirstLetter(reduceSpaces(message)))
+      ? removeNonAlphaPrefix(capitalizeFirstLetter(smartFilterMessage(message)))
       : message;
 
     const update = await invokeRequest(

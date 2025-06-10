@@ -6,7 +6,10 @@ export const aiReqest: Record<string, number> = {};
 export const aiRetryError: Record<string, number> = {};
 export const peerFloods: Record<string, number> = {};
 export const allTimings: Array<number> = [];
-export const messageStats: Record<string, { single: boolean; double: boolean }> = {}; 
+export const messageStats: Record<
+  string,
+  { single: boolean; double: boolean }
+> = {};
 
 export function reduceSpaces(string: string) {
   return string.replace(/\s+/g, ' ').trim();
@@ -105,3 +108,33 @@ export const getDateNow = () => {
     hour12: false,
   })}`;
 };
+
+export function smartFilterMessage(message: string): string {
+  let result = reduceSpaces(message);
+
+  // Время: убираем пробелы вокруг двоеточия между числами
+  result = result.replace(/(\d+)\s*:\s*(\d+)/g, '$1:$2');
+
+  // Даты: убираем пробелы вокруг точек между числами
+  result = result.replace(/(\d+)\s*\.\s*(\d+)/g, '$1.$2');
+
+  // Проценты: убираем пробелы между числом и знаком %
+  result = result.replace(/(\d+)\s*%/g, '$1%');
+
+  // Деньги: убираем пробелы между числом и знаком валюты ($, ₽, € и т.д.)
+  result = result.replace(/(\d+)\s*([₽$€])/g, '$1$2');
+
+  // Убираем пробелы перед знаками препинания
+  result = result.replace(/\s+([.,:;!?])/g, '$1');
+
+  // Оставляем только один пробел после знаков препинания (если не конец строки)
+  result = result.replace(/([.,:;!?])\s+/g, '$1 ');
+
+  // Добавляем пробел после точки, если дальше заглавная буква и нет пробела
+  result = result.replace(/\.([A-ZА-ЯЁ])/g, '. $1');
+
+  // Убираем пробелы в начале и конце строки
+  result = result.trim();
+
+  return result;
+}

@@ -10,7 +10,7 @@ export const crmSender = async (
   recipientId: string,
   messages: Array<{ id: number; text: string; fromId: string; date: number }>,
   analysis: {
-    status: 'interesting' | 'normal' | 'stop';
+    status: 'meeting' | 'normal' | 'negative';
     reason: string;
   }
 ) => {

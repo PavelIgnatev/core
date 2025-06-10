@@ -3,7 +3,7 @@ import axios from 'axios';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
 interface ApiUrlLeadData {
-  status: 'interesting' | 'normal' | 'stop';
+  status: 'meeting' | 'normal' | 'negative';
   reason: string;
 
   leadId: string;
@@ -15,7 +15,7 @@ interface ApiUrlLeadData {
     text: string;
     from: 'ai' | 'lead';
     date: number;
-  }>;
+  }>; 
 }
 
 export const sendToApiUrl = async (apiUrl: string, data: ApiUrlLeadData) => {

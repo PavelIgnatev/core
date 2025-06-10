@@ -26,7 +26,7 @@ export interface Dialogue {
 
   pings?: Array<{ title: string; date: Date }>;
   extra?: {
-    status: 'interesting' | 'normal' | 'stop';
+    status: 'meeting' | 'normal' | 'negative';
     reason: string;
     crmId?: string;
   };
