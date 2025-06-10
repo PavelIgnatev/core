@@ -49,7 +49,7 @@ function extractStatusAndReason(input: string): { status: Status; reason: string
 }
 
 function isValidStatus(status: string): status is Status {
-  return ['negative', 'normal', 'meetring'].includes(status);
+  return ['negative', 'normal', 'meeting'].includes(status);
 }
 
 export async function makeRequestAnalysis(
