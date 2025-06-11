@@ -1,63 +1,11 @@
 import axios from 'axios';
 
+import { extractJsonResponse } from './extractJsonResponse';
 import { sleep } from './helpers';
 import { sendToFormBot } from './sendToFormBot';
 import { sendToMainBot } from './sendToMainBot';
 
 type Status = 'negative' | 'normal' | 'meeting';
-
-function extractStatusAndReason(input: string) {
-  if (!input) return null;
-
-  try {
-    function extractBalancedBraces(str: string) {
-      const result = [];
-      let start = -1;
-      let count = 0;
-
-      for (let i = 0; i < str.length; i++) {
-        const char = str[i];
-        if (char === '{') {
-          if (count === 0) start = i;
-          count++;
-        } else if (char === '}') {
-          if (count > 0) count--;
-          if (count === 0 && start !== -1) {
-            result.push(str.substring(start, i + 1));
-            start = -1;
-          }
-        }
-      }
-      return result;
-    }
-
-    const braceBlocks = extractBalancedBraces(input);
-
-    for (const block of braceBlocks) {
-      try {
-        let jsonStr = block
-          .replace(/(\w+)\s*:/g, '"$1":')
-          .replace(/:[\s\n]*'([^']+)'[\s\n]*(,?)/g, ': "$1"$2')
-          .replace(/([:,]\s*)([^"{\[\s][^,}\]\s]*)(\s*[},])/g, '$1"$2"$3');
-
-        const obj = JSON.parse(jsonStr);
-
-        if (obj.status && obj.reason) {
-          const status = obj.status.toLowerCase();
-          if (['negative', 'normal', 'meeting'].includes(status)) {
-            return { status, reason: obj.reason };
-          }
-        }
-      } catch {}
-    }
-    return null;
-  } catch (e) {
-    return null;
-  }
-}
-function isValidStatus(status: string): status is Status {
-  return ['negative', 'normal', 'meeting'].includes(status);
-}
 
 export async function makeRequestAnalysis(
   accountId: string,
@@ -130,7 +78,7 @@ Your response should be a JSON object with the following fields:
           ],
         }
       );
-      const parsedData = extractStatusAndReason(
+      const parsedData = extractJsonResponse(
         resultData?.message?.content?.[0]?.text
       );
 
