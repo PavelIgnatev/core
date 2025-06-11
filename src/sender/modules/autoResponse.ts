@@ -256,7 +256,7 @@ ${replyMessage}`);
         });
       }
 
-      if (analysis.status === 'meeting') {
+      if (stage > 1 && analysis.status === 'meeting') {
         await crmSender(accountId, recipientId, messages, analysis);
       }
 
