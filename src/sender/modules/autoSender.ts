@@ -52,11 +52,11 @@ export const autoSender = async (
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
 
-    const firstSendResult = await trySend(client, accountId, telegramId);
+    await trySend(client, accountId, telegramId);
 
-    if (firstSendResult) {
-      await trySend(client, accountId, telegramId, true);
-    }
+    // if (firstSendResult) {
+    //   await trySend(client, accountId, telegramId, true);
+    // }
   }
 };
 
