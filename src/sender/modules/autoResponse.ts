@@ -24,6 +24,16 @@ import { invokeRequest } from './invokeRequest';
 const pattern =
   /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,2000}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
 
+interface AnalysisData {
+  status: 'negative' | 'normal' | 'meeting';
+  reason: string;
+}
+
+type AddedData = {
+  viewed: boolean;
+  extra?: AnalysisData;
+};
+
 export const autoResponse = async (
   client: TelegramClient,
   account: Account,
@@ -86,15 +96,6 @@ export const autoResponse = async (
             ? part.trim()
             : '';
 
-      const analysis = await makeRequestAnalysis(
-        accountId,
-        messages.map((m) => ({
-          role: m.fromId === String(recipientId) ? 'user' : 'assistant',
-          content: m.text,
-        })),
-        language
-      );
-
       let systemPrompt = `<ASSISTANT_IDENTITY>
   [NAME]${myName}[/NAME]
   [GENDER] ${gender}[/GENDER]
@@ -113,7 +114,7 @@ export const autoResponse = async (
       ? `[DIALOGUE_FLOW] ${flowHandling}[/DIALOGUE_FLOW]`
       : ''
   }
-  [CONTEXTUAL_DATA] You work with cold traffic, conducting unsolicited communications to potential clients via Telegram messenger. Your interaction is “cold”, meaning you initiate contact with a user who has not interacted with you before. Communication and possible communication with the user takes place via text messages only. It is important to note that neither you nor the user know each other or have met in real life. The user doesn't know you or the context of your message. You offer various services and solutions in an effort to convert these cold potential customers into interested ones. Never under any circumstances apologize in your reply;\n${
+  [CONTEXTUAL_DATA] You work with cold traffic, conducting unsolicited communications to potential clients via Telegram messenger. Your interaction is "cold", meaning you initiate contact with a user who has not interacted with you before. Communication and possible communication with the user takes place via text messages only. It is important to note that neither you nor the user know each other or have met in real life. The user doesn't know you or the context of your message. You offer various services and solutions in an effort to convert these cold potential customers into interested ones. Never under any circumstances apologize in your reply;\n${
     stage !== 1 && addedInformation ? addedInformation : ''
   }[/CONTEXTUAL_DATA]
   [CURRENT_DATE_TIME]${getDateNow()}[/CURRENT_DATE_TIME]
@@ -161,7 +162,7 @@ export const autoResponse = async (
     - ** mandatory question should be targeted, not complex **
     - Never apologize in your reply, under any circumstances. **don't apologize**
     - Do not use generic greetings like "Hello" or "Hi".
-    - Never use the name of the interlocutor, any form of personal address, or title such as “client,” “interlocutor,” “respected,” and so on
+    - Never use the name of the interlocutor, any form of personal address, or title such as "client," "interlocutor," "respected," and so on
     - Use the company description to craft your reply, highlighting relevant points for the user.
     - Focus on providing value based on the company's offerings.
     - Avoid making assumptions about the user's profession or activities.
@@ -202,6 +203,22 @@ ID: ${accountId}
 GID: ${dialogGroupId}
 RID: ${recipientId}
 ${replyMessage}`);
+
+      const addedData: AddedData = {
+        viewed: false,
+      };
+      if (stage > 2) {
+        const analysis = await makeRequestAnalysis(
+          accountId,
+          messages.map((m) => ({
+            role: m.fromId === String(recipientId) ? 'user' : 'assistant',
+            content: m.text,
+          })),
+          language
+        );
+
+        addedData['extra'] = analysis;
+      }
 
       const lastQuestion = extractLastQuestion(replyMessage);
       if (lastQuestion && replyMessage.replace(lastQuestion, '').length > 0) {
@@ -256,8 +273,8 @@ ${replyMessage}`);
         });
       }
 
-      if (stage > 1 && analysis.status === 'meeting') {
-        await crmSender(accountId, recipientId, messages, analysis);
+      if (stage > 2 && addedData.extra?.status === 'meeting') {
+        await crmSender(accountId, recipientId, messages, addedData.extra);
       }
 
       await saveRecipient(
@@ -268,9 +285,7 @@ ${replyMessage}`);
         dialog,
         messages,
         'update',
-        {
-          viewed: false,
-        }
+        addedData
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {
