@@ -1,3 +1,4 @@
+import { addAmoLead } from '../api/amo';
 import { sendToApiUrl } from '../api/apiUrl';
 import { addBitrixLead, updateBitrixLead } from '../api/bitrix';
 import { getCrm } from '../db/crm';
@@ -78,6 +79,34 @@ ${formatDialogue(messages, recipientId)}`,
           dialogueUpdate.extra.crmId = String(result.result);
         }
       }
+    } else if (crm.type === 'amo') {
+      const lastMessage = messages[messages.length - 1];
+      const firstMessage = messages[0];
+
+      const body = {
+        // Данные для TITLE
+        TITLE_RECIPIENT: dialogue.recipientTitle,
+        TITLE_USERNAME: dialogue.recipientUsername,
+        TITLE_PHONE: dialogue.recipientPhone,
+        TITLE_FALLBACK: 'NEW_LEAD',
+
+        // Данные для SOURCE_DESCRIPTION
+        DESC_PHONE: dialogue.recipientPhone,
+        DESC_USERNAME: dialogue.recipientUsername,
+        DESC_COMMENT: analysis.reason,
+
+        // Данные для COMMENTS
+        COMMENTS_GROUP_ID: dialogue.groupId,
+        COMMENTS_ACCOUNT_ID: accountId,
+        COMMENTS_RECIPIENT_ID: recipientId,
+        COMMENTS_DIALOGUE: formatDialogue(messages, recipientId),
+
+        // Даты
+        DATE_CREATE: new Date(firstMessage.date * 1000).toISOString(),
+        DATE_MODIFY: new Date(lastMessage.date * 1000).toISOString(),
+      };
+
+      await addAmoLead(crm.webhook, body);
     } else if (crm.type === 'api') {
       const formattedMessages = messages.map((msg) => ({
         text: msg.text,

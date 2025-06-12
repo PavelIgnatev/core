@@ -24,16 +24,6 @@ import { invokeRequest } from './invokeRequest';
 const pattern =
   /((http|https):\/\/)?(www\.)?([a-zA-Z0-9\-_]+\.)+[a-zA-Z]{2,2000}(\/[a-zA-Z0-9\&\;\:\.\,\?\=\-\_\+\%\'\~\#]*)*/g;
 
-interface AnalysisData {
-  status: 'negative' | 'normal' | 'meeting';
-  reason: string;
-}
-
-type AddedData = {
-  viewed: boolean;
-  extra?: AnalysisData;
-};
-
 export const autoResponse = async (
   client: TelegramClient,
   account: Account,
@@ -204,11 +194,9 @@ GID: ${dialogGroupId}
 RID: ${recipientId}
 ${replyMessage}`);
 
-      const addedData: AddedData = {
-        viewed: false,
-      };
+      let analysis = null;
       if (stage > 2) {
-        const analysis = await makeRequestAnalysis(
+        analysis = await makeRequestAnalysis(
           accountId,
           messages.map((m) => ({
             role: m.fromId === String(recipientId) ? 'user' : 'assistant',
@@ -216,8 +204,6 @@ ${replyMessage}`);
           })),
           language
         );
-
-        addedData['extra'] = analysis;
       }
 
       const lastQuestion = extractLastQuestion(replyMessage);
@@ -273,8 +259,8 @@ ${replyMessage}`);
         });
       }
 
-      if (stage > 2 && addedData.extra?.status === 'meeting') {
-        await crmSender(accountId, recipientId, messages, addedData.extra);
+      if (stage > 2 && analysis?.status === 'meeting') {
+        await crmSender(accountId, recipientId, messages, analysis);
       }
 
       await saveRecipient(
@@ -285,7 +271,9 @@ ${replyMessage}`);
         dialog,
         messages,
         'update',
-        addedData
+        {
+          viewed: false,
+        }
       );
     } catch (error: any) {
       if (error.message.includes('ALLOW_PAYMENT_REQUIRED')) {

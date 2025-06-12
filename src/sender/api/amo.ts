@@ -1,0 +1,44 @@
+import axios from 'axios';
+
+import { sendToMainBot } from '../helpers/sendToMainBot';
+
+interface AmoLeadBody {
+  TITLE_RECIPIENT: string;
+  TITLE_USERNAME: string | null;
+  TITLE_PHONE: string | null;
+  TITLE_FALLBACK: string;
+  DESC_PHONE: string | null;
+  DESC_USERNAME: string | null;
+  DESC_COMMENT: string;
+  COMMENTS_GROUP_ID: string;
+  COMMENTS_ACCOUNT_ID: string;
+  COMMENTS_RECIPIENT_ID: string;
+  COMMENTS_DIALOGUE: string;
+  DATE_CREATE: string;
+  DATE_MODIFY: string;
+}
+
+interface AmoResponse {
+  result?: number;
+  error?: string;
+}
+
+export const addAmoLead = async (
+  webhook: string,
+  body: AmoLeadBody
+): Promise<AmoResponse> => {
+  try {
+    const response = await axios.post(webhook, {
+      data: body
+    });
+    return response.data;
+  } catch (error) {
+    await sendToMainBot(
+      `** ADD_AMO_LEAD_ERROR **
+ERROR: ${error}
+WEBHOOK: ${webhook}
+BODY: ${JSON.stringify(body)}`
+    );
+    throw error;
+  }
+};
