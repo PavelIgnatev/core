@@ -27,7 +27,6 @@ export const getAccountCreationDate = async () => {
       },
       { projection: { accountId: 1 } }
     )
-    .limit(1000)
     .toArray();
 
   const accountsWithTimestamp = accounts.map((account) => ({
