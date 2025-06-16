@@ -47266,7 +47266,7 @@ var getAccountCreationDate = async () => {
       stopped: { $ne: true }
     },
     { projection: { accountId: 1 } }
-  ).toArray();
+  ).limit(1e3).toArray();
   const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
     accountId: account.accountId,
@@ -47742,9 +47742,7 @@ var main = async () => {
   console.log({
     message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
   });
-  const workers = [
-    createWorker(0, ["6081274137"])
-  ];
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
