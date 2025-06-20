@@ -5,7 +5,6 @@ import {
   getDialogue,
   getManualControlDialogsIds,
   getPingDialogsIds,
-  getUnreadFirstDialogsIds,
   updateAutomaticDialogue,
 } from '../db/dialogues';
 import { getCombinedMessages } from '../helpers/getCombinedMessages';
@@ -21,17 +20,15 @@ export const getClassifiedDialogs = async (
 ) => {
   const dialogs = await getDialogs(client, accountId, 0, true);
   if (!dialogs.length) {
-    return [[], [], [], []];
+    return [[], [], []];
   }
 
   const pingDialogsIds = await getPingDialogsIds(accountId);
   const manualControlDialogsIds = await getManualControlDialogsIds(accountId);
-  const unreadFirstDialogsIds = await getUnreadFirstDialogsIds(accountId);
 
   const stableDialogs = [];
   const pingDialogs = [];
   const manualDialogs = [];
-  const unreadFirstDialogs = [];
 
   for (const dialog of dialogs) {
     const { type, message, user } = dialog;
@@ -44,7 +41,6 @@ export const getClassifiedDialogs = async (
       user.self ||
       user.status instanceof GramJs.UserStatusEmpty ||
       (message.out &&
-        !unreadFirstDialogsIds.includes(String(user.id)) &&
         !pingDialogsIds.includes(String(user.id)) &&
         !manualControlDialogsIds.includes(String(user.id)))
     ) {
@@ -147,8 +143,6 @@ export const getClassifiedDialogs = async (
       if (!account.spamBlockDate) {
         manualDialogs.push(dialogData);
       }
-    } else if (unreadFirstDialogsIds.includes(recipientId)) {
-      unreadFirstDialogs.push(dialogData);
     } else if (pingDialogsIds.includes(recipientId)) {
       pingDialogs.push(dialogData);
     } else {
@@ -156,5 +150,5 @@ export const getClassifiedDialogs = async (
     }
   }
 
-  return [stableDialogs, pingDialogs, manualDialogs, unreadFirstDialogs];
+  return [stableDialogs, pingDialogs, manualDialogs];
 };
