@@ -22,9 +22,8 @@ export const getAccountCreationDate = async () => {
   const accounts = await accountCollection
     .find<Account>(
       {
-        reason: 'ACCOUNT_FROZEN_TEST',
-        // banned: { $ne: true },
-        // stopped: { $ne: true },
+        banned: { $ne: true },
+        stopped: { $ne: true },
       },
       { projection: { accountId: 1 } }
     )
