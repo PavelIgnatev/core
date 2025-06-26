@@ -1,229 +1,181 @@
+import axios from 'axios';
+
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import { sleep } from '../helpers/helpers';
-import proxyAxios from '../helpers/proxyAxios';
-import { sendMessage } from '../methods/messages/sendMessage';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getHistory } from '../methods/messages/getHistory';
+import { sendMessage } from '../methods/messages/sendMessage';
+
+const CAPTCHA_CHECK_INTERVAL_MS = 5000; // Интервал проверки статуса капчи - 5 сек
+const MAX_CAPTCHA_ATTEMPTS = 12; // Максимум попыток проверки капчи - 1 минута
+const RUCAPTCHA_REQUEST_TIMEOUT_MS = 60000; // Таймаут HTTP запросов к RuCaptcha - 60 сек
+const TOKEN_PROCESSING_DELAY_MS = 5000; // Задержка после отправки токена - 5 сек
+const SPAMBOT_RESPONSE_DELAY_MS = 5000; // Задержка ожидания ответа SpamBot - 5 сек
 
 export const solveCaptcha = async (
   client: TelegramClient,
   accountId: string,
   userId: string,
   accessHash: string,
-  captchaUrl: string
-): Promise<string | null> => {
+  websiteURL: string
+) => {
   try {
-    console.log('=== STARTING RUCAPTCHA SOLVE ===');
-    console.log('CAPTCHA URL:', captchaUrl);
-
-    // Получаем HTML страницы для извлечения параметров
-    const response = await proxyAxios.get(captchaUrl);
+    const response = await axios.get(websiteURL);
     const html = response.data;
-    
-    // Извлекаем sitekey
-    const siteKeyMatch = html.match(/data-sitekey="([^"]+)"/);
-    const siteKey = siteKeyMatch ? siteKeyMatch[1] : null;
 
-    // Извлекаем actor и scope из JavaScript
+    const siteKeyMatch = html.match(/data-sitekey="([^"]+)"/);
     const actorMatch = html.match(/actor:\s*'([^']+)'/);
     const scopeMatch = html.match(/scope:\s*'([^']+)'/);
-    const actor = actorMatch ? actorMatch[1] : null;
-    const scope = scopeMatch ? scopeMatch[1] : null;
 
-    console.log('Extracted parameters:');
-    console.log('- sitekey:', siteKey);
-    console.log('- actor:', actor);
-    console.log('- scope:', scope);
+    const websiteKey = siteKeyMatch ? siteKeyMatch[1] : null;
+    const websiteActor = actorMatch ? actorMatch[1] : null;
+    const websiteScope = scopeMatch ? scopeMatch[1] : null;
 
-    if (!siteKey || !actor || !scope) {
-      console.log('ERROR: Missing required parameters');
-      console.log('HTML preview:', html.substring(0, 500));
-      return null;
-    }
+    if (!websiteKey) throw new Error('CAPTCHA_PAGE_SITEKEY_MISSING');
+    if (!websiteActor) throw new Error('CAPTCHA_PAGE_WEBSITE_ACTOR_MISSING');
+    if (!websiteScope) throw new Error('CAPTCHA_PAGE_WEBSITE_SCOPE_MISSING');
 
-    // Создаем задачу в RuCaptcha
-    const createTaskResponse = await fetch('https://api.rucaptcha.com/createTask', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        clientKey: 'c5e207fdea33dd778847c4b507143ec3',
-        task: {
-          type: 'TurnstileTaskProxyless',
-          websiteURL: captchaUrl,
-          websiteKey: siteKey,
-        },
-      }),
-      signal: AbortSignal.timeout(60000),
-    });
-
-    const createTaskData = await createTaskResponse.json();
-    console.log('Create task response:', createTaskData);
-
-    if (createTaskData.errorId !== 0) {
-      throw new Error(`CAPTCHA_API_ERROR: ${createTaskData.errorDescription}`);
-    }
-
-    const taskId = createTaskData.taskId;
-    console.log('Task created with ID:', taskId);
-
-    // Ожидаем решения капчи
-    let attempts = 0;
-    const maxAttempts = 40;
-
-    while (attempts < maxAttempts) {
-      await sleep(6000);
-
-      console.log(`Attempt ${attempts + 1}/${maxAttempts} - checking result...`);
-
-      const resultResponse = await fetch('https://api.rucaptcha.com/getTaskResult', {
+    const createTaskResponse = await fetch(
+      'https://api.rucaptcha.com/createTask',
+      {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           clientKey: 'c5e207fdea33dd778847c4b507143ec3',
-          taskId,
+          task: {
+            type: 'TurnstileTaskProxyless',
+            websiteURL,
+            websiteKey,
+          },
         }),
-        signal: AbortSignal.timeout(60000),
-      });
+        signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
+      }
+    );
+
+    const createTaskData = await createTaskResponse.json();
+    if (createTaskData.errorId !== 0) {
+      throw new Error(
+        `RUCAPTCHA_CREATE_TASK_FAILED: ${createTaskData.errorDescription}`
+      );
+    }
+
+    const taskId = createTaskData.taskId;
+    if (!taskId) throw new Error('RUCAPTCHA_TASK_ID_MISSING');
+
+    let attempts = 0;
+    let captchaToken = null;
+
+    while (attempts < MAX_CAPTCHA_ATTEMPTS) {
+      await sleep(CAPTCHA_CHECK_INTERVAL_MS);
+
+      const pageCheckResponse = await axios.get(websiteURL);
+      const currentSiteKeyMatch = pageCheckResponse.data.match(
+        /data-sitekey="([^"]+)"/
+      );
+      const currentSiteKey = currentSiteKeyMatch
+        ? currentSiteKeyMatch[1]
+        : null;
+
+      if (!currentSiteKey) {
+        throw new Error('CAPTCHA_PAGE_SITEKEY_DISAPPEARED');
+      }
+
+      const resultResponse = await fetch(
+        'https://api.rucaptcha.com/getTaskResult',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            clientKey: 'c5e207fdea33dd778847c4b507143ec3',
+            taskId,
+          }),
+          signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
+        }
+      );
 
       const resultData = await resultResponse.json();
-      console.log(`Result:`, resultData);
 
       if (resultData.errorId !== 0) {
-        throw new Error(`CAPTCHA_RESULT_ERROR: ${resultData.errorDescription}`);
+        throw new Error(
+          `RUCAPTCHA_GET_RESULT_FAILED: ${resultData.errorDescription}`
+        );
       }
 
       if (resultData.status === 'ready') {
-        const captchaToken = resultData.solution.token;
-        console.log('🎉 CAPTCHA SOLVED! Token:', captchaToken.substring(0, 50) + '...');
-        
-        // Отправляем токен в Telegram для верификации
-        console.log('📤 Submitting token to Telegram...');
-        try {
-          const submitResponse = await proxyAxios.post('/captcha/checkcaptcha', {
-            token: captchaToken,
-            actor: actor,
-            scope: scope
-          }, {
-            baseURL: 'https://telegram.org',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'X-Requested-With': 'XMLHttpRequest',
-              'Referer': captchaUrl
-            },
-            withCredentials: true
-          });
-
-          console.log('✅ Token submission response:', submitResponse.data);
-          
-          if (submitResponse.data.error) {
-            throw new Error(`Token submission failed: ${submitResponse.data.error}`);
-          }
-          
-          if (submitResponse.data.pending) {
-            console.log('⏳ Token is pending, waiting for verification...');
-            // Можно добавить дополнительную логику ожидания
-          }
-          
-        } catch (tokenError) {
-          const tokenErrorMessage = tokenError instanceof Error ? tokenError.message : String(tokenError);
-          console.error('❌ Error submitting token to Telegram:', tokenErrorMessage);
-          throw new Error(`TOKEN_SUBMISSION_ERROR: ${tokenErrorMessage}`);
-        }
-        
-        // Дополнительная пауза для обработки токена системой
-        console.log('⏳ Waiting 5 seconds for token to be processed...');
-        await sleep(5000);
+        captchaToken = resultData.solution.token;
         break;
       }
 
       attempts++;
     }
 
-    if (attempts >= maxAttempts) {
-      throw new Error('CAPTCHA_SOLVE_TIMEOUT');
-    }
+    if (attempts >= MAX_CAPTCHA_ATTEMPTS)
+      throw new Error('CAPTCHA_PAGE_SITEKEY_TIMEOUT');
+    if (!captchaToken) throw new Error('RUCAPTCHA_TOKEN_NOT_RECEIVED');
 
-    console.log('🚀 Proceeding to send Done messages...');
-    
-    // Отправляем сообщение "Done" несколько раз пока не получим другой ответ
-    let doneAttempts = 0;
-    const maxDoneAttempts = 10;
-    let lastResponse = '';
+    const submitResponse = await axios.post(
+      '/captcha/checkcaptcha',
+      {
+        token: captchaToken,
+        actor: websiteActor,
+        scope: websiteScope,
+      },
+      {
+        baseURL: 'https://telegram.org',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest',
+          Referer: websiteURL,
+        },
+        withCredentials: true,
+      }
+    );
 
-    while (doneAttempts < maxDoneAttempts) {
-      const doneMessage = await sendMessage(
-        client,
-        userId,
-        accessHash,
-        'Done',
-        accountId,
-        false,
-        false
+    if (submitResponse.data.error) {
+      throw new Error(
+        `TELEGRAM_TOKEN_SUBMIT_FAILED: ${submitResponse.data.error}`
       );
+    }
 
-      await sleep(5000);
+    await sleep(TOKEN_PROCESSING_DELAY_MS);
 
-      // Получаем ответ от SpamBot
-      const responseMessages = await getHistory(
-        client,
-        userId,
-        accessHash,
-        doneMessage.id
-      );
+    const doneMessage = await sendMessage(
+      client,
+      userId,
+      accessHash,
+      'Done',
+      accountId,
+      false,
+      false
+    );
 
-      // Проверяем статус капчи после каждой попытки Done
-      try {
-        const captchaCheckResponse = await proxyAxios.get(captchaUrl);
-        const currentSiteKeyMatch = captchaCheckResponse.data.match(/data-sitekey="([^"]+)"/);
-        const currentSiteKey = currentSiteKeyMatch ? currentSiteKeyMatch[1] : null;
-        
-        console.log(`🔍 Captcha URL check after Done ${doneAttempts + 1}: siteKey = ${currentSiteKey}`);
-        
-        if (!currentSiteKey) {
-          console.log('✅ Captcha page no longer has sitekey - verification successful!');
-        }
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.log(`❌ Error checking captcha URL: ${errorMessage}`);
-      }
+    await sleep(SPAMBOT_RESPONSE_DELAY_MS);
 
-      if (responseMessages[0]?.message) {
-        lastResponse = responseMessages[0].message;
-        console.log(
-          `✉️  Done attempt ${doneAttempts + 1}: SpamBot response:`,
-          lastResponse
-        );
+    const responseMessages = await getHistory(
+      client,
+      userId,
+      accessHash,
+      doneMessage.id
+    );
 
-        // Если ответ не "Please verify you are a human.", то выходим из цикла
-        if (lastResponse !== 'Please verify you are a human.') {
-          console.log('🎉 Got different response, breaking loop');
-          return lastResponse;
-        }
-      } else {
-        console.log(
-          `❌ Done attempt ${doneAttempts + 1}: No response from SpamBot`
-        );
-      }
+    if (responseMessages[0]?.message) {
+      const lastResponse = responseMessages[0].message;
 
-      doneAttempts++;
-
-      if (doneAttempts < maxDoneAttempts) {
-        await sleep(3000); // Дополнительная пауза между попытками
+      if (lastResponse !== 'Please verify you are a human.') {
+        return responseMessages;
       }
     }
 
-    if (doneAttempts >= maxDoneAttempts) {
-      console.log('⚠️  Max Done attempts reached, last response:', lastResponse);
-      return null;
-    }
+    throw new Error('SPAMBOT_STILL_REQUIRES_VERIFICATION');
+  } catch (error: any) {
+    await sendToMainBot(`** SOLVE_CAPTCHA_ERROR **
+ID: ${accountId}
+ERROR: ${error.message}`);
 
-    return lastResponse;
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Ошибка при решении капчи:', errorMessage);
     return null;
   }
-}; 
+};

@@ -83,6 +83,10 @@ export const automaticCheck = async (
         const { user } = dialog;
 
         if (user instanceof GramJs.User && user.bot) {
+          if (String(user.id) === '178220800') {
+            continue;
+          }
+
           await deleteHistory(client, peer, false);
           await blockContact(client, peer);
         } else if (!dialogsIds.includes(String(user.id))) {

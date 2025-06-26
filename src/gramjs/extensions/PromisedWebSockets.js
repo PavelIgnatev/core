@@ -67,7 +67,7 @@ class PromisedWebSockets {
     this.client = new WebSocket(
       this.website,
       'binary',
-      this._proxy
+      this._proxy && process.env.DEV !== 'true'
         ? {
             agent: new HttpsProxyAgent(this._proxy),
           }

@@ -10,6 +10,7 @@ import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { deleteHistory } from '../methods/messages/deleteHistory';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
+import { solveCaptcha } from './solveCaptcha';
 
 const fileComplaint = async (
   client: TelegramClient,
@@ -47,7 +48,7 @@ const fileComplaint = async (
       return;
     }
     if (!m1 || !m1.includes('you going to do anything like that?')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_001');
     }
 
     const s2 = await sendMessage(
@@ -64,7 +65,7 @@ const fileComplaint = async (
     const m2 = h2[0]?.message;
 
     if (!m2 || !m2.includes('think your account was limited')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_002');
     }
 
     const reason = await getSpamBotReason(accountId);
@@ -82,7 +83,7 @@ const fileComplaint = async (
     const m3 = h3[0]?.message;
 
     if (!m3 || !m3.includes('successfully submitted')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_003');
     }
 
     await updateAccountById(accountId, {
@@ -106,7 +107,7 @@ const fileComplaint = async (
       return;
     }
     if (!m1 || !m1.includes('you like to submit a complaint')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_004');
     }
 
     const s2 = await sendMessage(
@@ -123,9 +124,12 @@ const fileComplaint = async (
     const m2 = h2[0]?.message;
 
     if (!m2 || !m2.includes('you ever do any of this')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_005');
     }
 
+    await new Promise((r) =>
+      setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+    );
     const s3 = await sendMessage(
       client,
       userId,
@@ -143,10 +147,35 @@ const fileComplaint = async (
       !m3 ||
       !(m3.includes('what went wrong') || m3.includes('verify you are a human'))
     ) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_006');
     }
 
-    if (m3.includes('verify you are a human')) {
+    if (
+      m3.includes('verify you are a human') &&
+      accountId.includes('prefix-female-aisender')
+    ) {
+      const captchaUrl = h3[0].entities?.filter(
+        (e) => e instanceof GramJs.MessageEntityTextUrl
+      )?.[0]?.url;
+
+      if (!captchaUrl) {
+        return;
+      }
+
+      const solveCaptchaMessages = await solveCaptcha(
+        client,
+        accountId,
+        String(userId),
+        String(accessHash),
+        captchaUrl
+      );
+      const solveCaptchaMessage = solveCaptchaMessages?.[0]?.message;
+
+      if (!solveCaptchaMessage?.includes('what went wrong')) {
+        throw new Error('CAPTCHA_SOLVE_UNEXPECTED_RESPONSE_007');
+      }
+    } else if (m3.includes('what went wrong')) {
+    } else {
       return;
     }
 
@@ -165,7 +194,7 @@ const fileComplaint = async (
     const m4 = h4[0]?.message;
 
     if (!m4 || !m4.includes('successfully submitted')) {
-      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND');
+      throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_008');
     }
 
     await updateAccountById(accountId, {
@@ -186,9 +215,9 @@ export const checkSpamBlock = async (
     messageCount = 0,
   } = account;
 
-  await new Promise((r) =>
-    setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
-  );
+  // await new Promise((r) =>
+  //   setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+  // );
 
   const result = await resolveUsername(client, 'spambot');
 
@@ -307,13 +336,5 @@ SPAM_BLOCK_INIT_DATE: ${spamBlockInitDate}`);
     await updateAccountById(accountId, updateData);
   }
 
-  await deleteHistory(
-    client,
-    new GramJs.InputPeerUser({
-      userId,
-      accessHash,
-    }),
-    true
-  );
   return true;
 };

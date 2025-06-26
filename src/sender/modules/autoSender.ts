@@ -32,22 +32,7 @@ export const autoSender = async (
     return;
   }
 
-  // if (!accountId.includes('prefix')) {
-  //   return;
-  // }
-
   const currentTime = new Date();
-  // const currentUTCHours = currentTime.getUTCHours();
-  // if (
-  //   !(
-  //     accountId.includes('auto') ||
-  //     accountId.includes('bls') ||
-  //     accountId.includes('sender')
-  //   ) &&
-  //   (currentUTCHours < 5 || currentUTCHours > 14)
-  // ) {
-  //   return;
-  // }
 
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
