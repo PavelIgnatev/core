@@ -150,10 +150,7 @@ const fileComplaint = async (
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_006');
     }
 
-    if (
-      m3.includes('verify you are a human') &&
-      accountId.includes('prefix-female-aisender')
-    ) {
+    if (m3.includes('verify you are a human')) {
       const captchaUrl = h3[0].entities?.filter(
         (e) => e instanceof GramJs.MessageEntityTextUrl
       )?.[0]?.url;
