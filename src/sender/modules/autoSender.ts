@@ -1,6 +1,10 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
-import { getAccountById } from '../db/accounts';
+import {
+  getAccountById,
+  unsetAccountById,
+  updateAccountById,
+} from '../db/accounts';
 import { getDialogueByGidRid } from '../db/dialogues';
 import { updateFailedMessage, updateSendMessage } from '../db/groupIdUsers';
 import { getUserInformation } from '../helpers/getUserInformation';
@@ -171,14 +175,17 @@ const trySend = async (
       messageStats[accountId].single = true;
     }
 
+    await unsetAccountById(accountId, { phoneSearchBlocked: null });
+
     return true;
   } catch (e: any) {
-    if (e.message === 'STABLE_RESULT_ERROR') {
+    if (e.message === 'STABLE_PHONE_SEARCH_ERROR') {
       await updateSendMessage(recipient.username, recipient.groupId, {
         p: null,
       });
 
       if (phoneSearchError[accountId] > 1) {
+        await updateAccountById(accountId, { phoneSearchBlocked: true });
         return false;
       }
       phoneSearchError[accountId] = (phoneSearchError[accountId] || 0) + 1;

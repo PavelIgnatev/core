@@ -28,7 +28,7 @@ export const resolvePhone = async (client: TelegramClient, phone: string) => {
     { shouldIgnoreErrors: true }
   );
   if (!randomContact) {
-    throw new Error('STABLE_RESULT_ERROR');
+    throw new Error('STABLE_PHONE_SEARCH_ERROR');
   }
 
   return null;
