@@ -147,7 +147,7 @@ ERROR: ${err.message}`);
         (async () => {
           if (isAutoResponse) {
             isAutoResponse = false;
-            await autoResponse(client, account, meId, meName);
+            // await autoResponse(client, account, meId, meName);
           }
 
           if (i === randomI) {
