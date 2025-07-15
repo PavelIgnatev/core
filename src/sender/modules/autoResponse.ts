@@ -116,7 +116,8 @@ export const autoResponse = async (
         );
 
         await sendToFormBot(`[ANALYSIS_RESULT]
-ID: ${accountId}
+GID: ${accountId}
+RID: ${recipientId}
 STATUS: ${analysis.status}
 LEAD_DEFINITION: ${leadDefinition}
 REASON: ${analysis.reason}`);
