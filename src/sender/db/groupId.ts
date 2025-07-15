@@ -1,5 +1,7 @@
 import { GroupId } from '../@types/GroupId';
+import { sendToMainBot } from '../helpers/sendToMainBot';
 import { coreDB } from './db';
+import { validateGroupId } from './schemas/groupId';
 
 const getGroupIdCollection = async () => {
   return (await coreDB()).collection('groupId');
@@ -14,6 +16,27 @@ export const getGroupId = async (groupId: string) => {
     },
     { projection: { history: 0, dateUpdated: 0, _id: 0 } }
   );
+
+  if (result) {
+    const correctedResult = {
+      ...result,
+      leadDefinition:
+        result.leadDefinition ||
+        `НЕ СЧИТАЙ НИКОГО ЛИДОМ, ЛИДОМ ВЫДЕЛЯТЬ НЕЛЬЗЯ, ЕСТЬ ТОЛЬКО NEGATIVE | CONTINUE
+DON'T CONSIDER ANYONE A LEAD, THERE ARE NO LEADS, ONLY NEGATIVE | CONTINUE`,
+      leadGoal: result.leadGoal || result.goal,
+    };
+
+    try {
+      validateGroupId(correctedResult);
+    } catch (error) {
+      await sendToMainBot(`** GROUP_ID_VALIDATION_ERROR **
+GROUP_ID: ${groupId}
+RESULT: ${JSON.stringify(correctedResult)}
+ERROR: ${error instanceof Error ? error.message : error}`);
+      return null;
+    }
+  }
 
   return result;
 };

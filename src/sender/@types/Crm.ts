@@ -1,19 +1,19 @@
 export type BitrixCrm = {
   type: 'bitrix';
-  prefix: string;
+  groupId: string;
   webhook: string;
 };
 
 export type AmoCrm = {
   type: 'amo';
-  prefix: string;
+  groupId: string;
   webhook: string;
 };
 
-export type ApiUrlCrm = {
+export type ApiCrm = {
   type: 'api';
-  prefix: string;
-  apiUrl: string;
+  groupId: string;
+  webhook: string;
 };
 
-export type Crm = BitrixCrm | AmoCrm | ApiUrlCrm;
+export type Crm = BitrixCrm | AmoCrm | ApiCrm;

@@ -11,7 +11,6 @@ interface AmoLeadBody {
   DESC_USERNAME: string | null;
   DESC_COMMENT: string;
   COMMENTS_GROUP_ID: string;
-  COMMENTS_ACCOUNT_ID: string;
   COMMENTS_RECIPIENT_ID: string;
   COMMENTS_DIALOGUE: string;
   DATE_CREATE: string;
@@ -28,9 +27,7 @@ export const addAmoLead = async (
   body: AmoLeadBody
 ): Promise<AmoResponse> => {
   try {
-    const response = await axios.post(webhook, {
-      data: body
-    });
+    const response = await axios.post(webhook, body);
     return response.data;
   } catch (error) {
     await sendToMainBot(

@@ -121,9 +121,9 @@ const main = async () => {
     message: '💥 ITERATION INIT 💥',
   });
 
-  // 7564095141-prefix-aisender
+  // // 7564095141-prefix-aisender
   // const workers = [
-  //   createWorker(0, ['6081274137']),
+  //   createWorker(0, ['7568825214-prefix-aisender']),
   // ];
 
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));

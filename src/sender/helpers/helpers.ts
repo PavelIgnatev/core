@@ -110,7 +110,11 @@ export const getDateNow = () => {
 };
 
 export function smartFilterMessage(message: string): string {
-  let result = reduceSpaces(message);
+  const newlineMarker = 'NEW_LINE';
+  const messageWithMarkers = message.replace(/\n/g, newlineMarker);
+
+  // Применяем стандартную фильтрацию
+  let result = reduceSpaces(messageWithMarkers);
 
   // Время: убираем пробелы вокруг двоеточия между числами
   result = result.replace(/(\d+)\s*:\s*(\d+)/g, '$1:$2');
@@ -136,5 +140,6 @@ export function smartFilterMessage(message: string): string {
   // Убираем пробелы в начале и конце строки
   result = result.trim();
 
-  return result;
+  // Восстанавливаем переносы строк
+  return result.replace(new RegExp(newlineMarker, 'g'), '\n');
 }

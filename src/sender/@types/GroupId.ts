@@ -1,22 +1,25 @@
-export interface GroupId {
+export type GroupId = {
   groupId: string;
-  addedInformation: string;
-  addedQuestion: string;
-  aiRole: string;
-  goal: string;
-  companyDescription: string;
 
-  currentCount: number;
+  name: string;
   target: number;
+  currentCount: number;
+  messagesCount: number;
 
-  gender?: string;
+  aiRole: string;
+  companyDescription: string;
+  goal: string;
 
-  part?: string;
-  language?: 'RUSSIAN' | 'ENGLISH' | 'UKRAINIAN';
-  flowHandling?: string;
-  messagesCount?: number;
-  firstMessagePrompt?: string;
-  secondMessagePrompt?: string;
+  firstMessagePrompt: string;
+  secondMessagePrompt: string;
 
-  dateUpdated: Date;
-}
+  language: 'ENGLISH' | 'RUSSIAN' | 'UKRAINIAN';
+
+  leadDefinition: string;
+  leadGoal: string;
+
+  part: string | null;
+  flowHandling: string | null;
+  addedInformation: string | null;
+  addedQuestion: string | null;
+};

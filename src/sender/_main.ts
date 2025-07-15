@@ -169,7 +169,8 @@ ERROR: ${err.message}`);
 
     if (
       e.message.includes('GLOBAL_ERROR') ||
-      e.message.includes('No workers running')
+      e.message.includes('No workers running') ||
+      e.message.includes('ANALYSIS_ERROR')
     ) {
     } else if (e.message.includes('STOPPED_ERROR')) {
       await updateAccountById(ID, {

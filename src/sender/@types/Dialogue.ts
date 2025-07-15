@@ -24,12 +24,10 @@ export interface Dialogue {
 
   deletedAndBlocked?: boolean;
 
+  aiStatus: string |  null;
+  aiReason: string | null
+
   pings?: Array<{ title: string; date: Date }>;
-  extra?: {
-    status: 'meeting' | 'normal' | 'negative';
-    reason: string;
-    crmId?: string;
-  };
 
   dateLastOnline?: Date;
   dateLastRead?: Date;

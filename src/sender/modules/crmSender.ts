@@ -1,51 +1,30 @@
 import { addAmoLead } from '../api/amo';
-import { sendToApiUrl } from '../api/apiUrl';
-import { addBitrixLead, updateBitrixLead } from '../api/bitrix';
+import { sendToApi } from '../api/api';
+import { addBitrixLead } from '../api/bitrix';
 import { getCrm } from '../db/crm';
-import { getDialogueCrm, updateDialogue } from '../db/dialogues';
+import { getDialogueCrm } from '../db/dialogues';
 import { formatDialogue } from '../helpers/formatDialogue';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
 export const crmSender = async (
-  accountId: string,
+  groupId: string,
   recipientId: string,
-  messages: Array<{ id: number; text: string; fromId: string; date: number }>,
-  analysis: {
-    status: 'meeting' | 'normal' | 'negative';
-    reason: string;
-  }
+  reason: string,
+  messages: Array<{ id: number; text: string; fromId: string; date: number }>
 ) => {
-  const prefix = accountId.includes('-prefix-')
-    ? accountId.split('-prefix-')[1]
-    : null;
-
-  if (!prefix) {
-    return;
-  }
-
-  const crm = await getCrm(prefix);
+  const crm = await getCrm(groupId);
   if (!crm) {
     return;
   }
 
-  const dialogue = await getDialogueCrm(accountId, recipientId);
+  const dialogue = await getDialogueCrm(groupId, recipientId);
   if (!dialogue) {
     await sendToMainBot(`** CRM_SENDER_ERROR: NO_CRM_DATA **
-ACCOUNT_ID: ${accountId}
+GROUP_ID: ${groupId}
 RECIPIENT_ID: ${recipientId}
     `);
     return;
   }
-
-  const dialogueUpdate = {
-    accountId,
-    recipientId,
-    extra: {
-      ...dialogue.extra,
-      status: analysis.status,
-      reason: analysis.reason,
-    },
-  };
 
   try {
     if (crm.type === 'bitrix') {
@@ -61,9 +40,8 @@ RECIPIENT_ID: ${recipientId}
               : 'NO_DATA'
         })`,
         SOURCE_DESCRIPTION: `${dialogue?.recipientPhone ? `Телефон: ${dialogue.recipientPhone}\n` : ''}Юзернейм: ${dialogue?.recipientUsername || ''}
-Комментарий: ${analysis.reason}`,
+Комментарий: ${reason}`,
         COMMENTS: `GROUP_ID: ${dialogue.groupId}
-ACCOUNT_ID: ${accountId}
 RECIPIENT_ID: ${recipientId}
 ДИАЛОГ:
 ${formatDialogue(messages, recipientId)}`,
@@ -71,37 +49,25 @@ ${formatDialogue(messages, recipientId)}`,
         DATE_MODIFY: new Date(lastMessage.date * 1000).toISOString(),
       };
 
-      if (dialogue.extra?.crmId) {
-        await updateBitrixLead(crm.webhook, dialogue.extra.crmId, fields);
-      } else {
-        const result = await addBitrixLead(crm.webhook, fields);
-        if (result.result) {
-          dialogueUpdate.extra.crmId = String(result.result);
-        }
-      }
+      await addBitrixLead(crm.webhook, fields);
     } else if (crm.type === 'amo') {
       const lastMessage = messages[messages.length - 1];
       const firstMessage = messages[0];
 
       const body = {
-        // Данные для TITLE
         TITLE_RECIPIENT: dialogue.recipientTitle,
         TITLE_USERNAME: dialogue.recipientUsername,
         TITLE_PHONE: dialogue.recipientPhone,
         TITLE_FALLBACK: 'NEW_LEAD',
 
-        // Данные для SOURCE_DESCRIPTION
         DESC_PHONE: dialogue.recipientPhone,
         DESC_USERNAME: dialogue.recipientUsername,
-        DESC_COMMENT: analysis.reason,
+        DESC_COMMENT: reason,
 
-        // Данные для COMMENTS
         COMMENTS_GROUP_ID: dialogue.groupId,
-        COMMENTS_ACCOUNT_ID: accountId,
         COMMENTS_RECIPIENT_ID: recipientId,
         COMMENTS_DIALOGUE: formatDialogue(messages, recipientId),
 
-        // Даты
         DATE_CREATE: new Date(firstMessage.date * 1000).toISOString(),
         DATE_MODIFY: new Date(lastMessage.date * 1000).toISOString(),
       };
@@ -116,9 +82,9 @@ ${formatDialogue(messages, recipientId)}`,
         date: msg.date * 1000,
       }));
 
-      await sendToApiUrl(crm.apiUrl, {
-        status: analysis.status,
-        reason: analysis.reason,
+      await sendToApi(crm.webhook, {
+        status: 'lead',
+        reason,
 
         leadId: dialogue.recipientId,
         leadTitle: dialogue.recipientTitle,
@@ -129,14 +95,10 @@ ${formatDialogue(messages, recipientId)}`,
         messages: formattedMessages,
       });
     }
-
-    await updateDialogue(dialogueUpdate);
   } catch (error) {
-    await updateDialogue(dialogueUpdate);
-
     await sendToMainBot(`** CRM_SENDER_ERROR **
 TYPE: ${crm.type}
-ACCOUNT_ID: ${accountId}
+GROUP_ID: ${groupId}
 RECIPIENT_ID: ${recipientId}
 ERROR: ${error}
     `);
