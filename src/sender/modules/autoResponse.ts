@@ -213,7 +213,7 @@ REASON: ${analysis.reason}`);
       }
 
       if (stage > 1 && aiStatus !== 'lead' && analysis?.status === 'lead') {
-        await crmSender(accountId, recipientId, analysis.reason, messages);
+        await crmSender(dialogGroupId, recipientId, analysis.reason, messages);
       }
 
       await sendToFormBot(`**** AUTO REPLY MESSAGE (${language}) ****
