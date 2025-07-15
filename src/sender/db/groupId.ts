@@ -19,6 +19,14 @@ export const getGroupId = async (groupId: string) => {
 
   if (result) {
     const correctedResult = {
+      // @ts-ignore
+      addedQuestion: null,
+      // @ts-ignore
+      addedInformation: null,
+      // @ts-ignore
+      part: null,
+      // @ts-ignore
+      flowHandling: null,
       ...result,
       leadDefinition:
         result.leadDefinition ||
