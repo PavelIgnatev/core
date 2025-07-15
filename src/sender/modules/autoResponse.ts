@@ -114,6 +114,12 @@ export const autoResponse = async (
               }),
           }
         );
+
+        await sendToFormBot(`[ANALYSIS_RESULT]
+ID: ${accountId}
+STATUS: ${analysis.status}
+LEAD_DEFINITION: ${leadDefinition}
+REASON: ${analysis.reason}`);
       }
 
       const autoResponse = await getAutoResponse(
@@ -162,7 +168,7 @@ export const autoResponse = async (
       const restoredMainText = llmRestoreLinks({
         ...autoResponse,
         text: mainText,
-      }).replace(/\\n/g, '\n')
+      }).replace(/\\n/g, '\n');
 
       const sentMainText = await sendMessage(
         client,
@@ -185,7 +191,7 @@ export const autoResponse = async (
         const restoredQuestion = llmRestoreLinks({
           ...autoResponse,
           text: question,
-        }).replace(/\\n/g, '\n')
+        }).replace(/\\n/g, '\n');
 
         const sentRestoredText = await sendMessage(
           client,
