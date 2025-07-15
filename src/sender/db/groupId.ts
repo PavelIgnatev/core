@@ -28,6 +28,7 @@ export const getGroupId = async (groupId: string) => {
       // @ts-ignore
       flowHandling: null,
       ...result,
+      target: 10000000,
       leadDefinition:
         result.leadDefinition ||
         `НЕ СЧИТАЙ НИКОГО ЛИДОМ, ЛИДОМ ВЫДЕЛЯТЬ НЕЛЬЗЯ, ЕСТЬ ТОЛЬКО NEGATIVE | CONTINUE
