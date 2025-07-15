@@ -36,9 +36,11 @@ RESULT: ${JSON.stringify(correctedResult)}
 ERROR: ${error instanceof Error ? error.message : error}`);
       return null;
     }
+
+    return correctedResult;
   }
 
-  return result;
+  return null
 };
 
 export const incrementCurrentCount = async (groupId: string) => {
