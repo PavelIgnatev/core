@@ -27,6 +27,8 @@ export interface Dialogue {
   aiStatus: string |  null;
   aiReason: string | null
 
+  crmSent?: boolean;
+
   pings?: Array<{ title: string; date: Date }>;
 
   dateLastOnline?: Date;
@@ -34,4 +36,5 @@ export interface Dialogue {
   dateAutoCheck?: Date;
   dateCreated?: Date;
   dateUpdated?: Date;
+  crmSentDate?: Date;
 }

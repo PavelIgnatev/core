@@ -2,7 +2,7 @@ import { addAmoLead } from '../api/amo';
 import { sendToApi } from '../api/api';
 import { addBitrixLead } from '../api/bitrix';
 import { getCrm } from '../db/crm';
-import { getDialogueCrm } from '../db/dialogues';
+import { getDialogueCrm, updateSimpleDialogue } from '../db/dialogues';
 import { formatDialogue } from '../helpers/formatDialogue';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 
@@ -50,6 +50,11 @@ ${formatDialogue(messages, recipientId)}`,
       };
 
       await addBitrixLead(crm.webhook, fields);
+
+      await updateSimpleDialogue(dialogue.accountId, recipientId, {
+        crmSent: true,
+        crmSentDate: new Date(),
+      });
     } else if (crm.type === 'amo') {
       const lastMessage = messages[messages.length - 1];
       const firstMessage = messages[0];
@@ -73,6 +78,11 @@ ${formatDialogue(messages, recipientId)}`,
       };
 
       await addAmoLead(crm.webhook, body);
+
+      await updateSimpleDialogue(dialogue.accountId, recipientId, {
+        crmSent: true,
+        crmSentDate: new Date(),
+      });
     } else if (crm.type === 'api') {
       const formattedMessages = messages.map((msg) => ({
         text: msg.text,
@@ -93,6 +103,11 @@ ${formatDialogue(messages, recipientId)}`,
         leadBio: dialogue.recipientBio,
 
         messages: formattedMessages,
+      });
+
+      await updateSimpleDialogue(dialogue.accountId, recipientId, {
+        crmSent: true,
+        crmSentDate: new Date(),
       });
     }
   } catch (error) {
