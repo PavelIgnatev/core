@@ -24,8 +24,8 @@ export interface Dialogue {
 
   deletedAndBlocked?: boolean;
 
-  aiStatus: string |  null;
-  aiReason: string | null
+  aiStatus?: string;
+  aiReason?: string;
 
   crmSent?: boolean;
 

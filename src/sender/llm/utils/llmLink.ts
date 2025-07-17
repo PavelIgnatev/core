@@ -29,7 +29,7 @@ function findPotentialDomains(text: string): string[] {
         } else {
           cur = cur.toLowerCase();
         }
-        return cur.replace(/\*/g, '');
+        return cur;
       })
     )
   );
@@ -63,7 +63,10 @@ export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
   for (const { domain, isValid } of checks) {
     if (isValid) {
       const placeholder = `LINK${Math.floor(Math.random() * 10 ** 10)}`;
-      links.set(placeholder, domain);
+      links.set(
+        placeholder,
+        domain.replace('https://t.me', 't.me').replace('http://t.me', 't.me')
+      );
       processedText = processedText.replace(domain, placeholder);
     }
   }
@@ -74,10 +77,21 @@ export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
   };
 }
 
-export function llmRestoreLinks(processedText: LlmProcessedText): string {
+export function llmRestoreLinks(
+  processedText: LlmProcessedText,
+  personalChannel?: string
+): string {
   let restoredText = processedText.text;
-  processedText.links.forEach((url, placeholder) => {
-    restoredText = restoredText.replace(placeholder, url);
-  });
+
+  if (personalChannel) {
+    const personalChannelUrl = `t.me/${personalChannel}`;
+    processedText.links.forEach((_, placeholder) => {
+      restoredText = restoredText.replace(placeholder, personalChannelUrl);
+    });
+  } else {
+    processedText.links.forEach((url, placeholder) => {
+      restoredText = restoredText.replace(placeholder, url);
+    });
+  }
   return restoredText;
 }

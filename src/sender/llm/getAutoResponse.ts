@@ -78,7 +78,10 @@ export async function getAutoResponse(
       messages = [{ role: 'system', content: systemPrompt }];
 
       for (let j = 0; j < generations.length; j++) {
-        const restoredText = llmRestoreLinks(generations[j]);
+        const restoredText = llmRestoreLinks(
+          generations[j],
+          context.personalChannel
+        );
 
         messages.push({
           role: 'assistant',
@@ -119,7 +122,10 @@ export async function getAutoResponse(
       const processedMessage = await llmExtractLinks(llmResponse);
       const normalizedText = fullNormalize(processedMessage.text);
       generations.push({ ...processedMessage, text: normalizedText });
-      message = llmRestoreLinks({ ...processedMessage, text: normalizedText });
+      message = llmRestoreLinks(
+        { ...processedMessage, text: normalizedText },
+        context.personalChannel
+      );
 
       llmDefaultValidation(normalizedText, stage);
 
@@ -141,8 +147,7 @@ export async function getAutoResponse(
       onLogger?.('AR_RESPONSE', {
         name: context.companyName,
         attempt: i + 1,
-        message: normalizedText,
-        links: processedMessage.links,
+        message,
       });
 
       return { ...processedMessage, text: normalizedText };
@@ -168,7 +173,7 @@ export async function getAutoResponse(
     onThrow?.(`** GENERATION_ERROR **
 _____________
 GENERATIONS:
-${generations.map((g, i) => `${i + 1}: ${g.text}`).join('\n')}
+${generations.map((g, i) => `${i + 1}: ${llmRestoreLinks(g)}`).join('\n')}
 ERRORS:
 ${errors.map((e, i) => `${i + 1}: ${e}`).join('\n')}
 _____________`);

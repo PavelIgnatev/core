@@ -166,10 +166,13 @@ REASON: ${analysis.reason}`);
 
       const { mainText, question } = extractLastQuestion(autoResponse.text);
 
-      const restoredMainText = llmRestoreLinks({
-        ...autoResponse,
-        text: mainText,
-      }).replace(/\\n/g, '\n');
+      const restoredMainText = llmRestoreLinks(
+        {
+          ...autoResponse,
+          text: mainText,
+        },
+        personalChannel
+      ).replace(/\\n/g, '\n');
 
       const sentMainText = await sendMessage(
         client,
@@ -189,10 +192,13 @@ REASON: ${analysis.reason}`);
       });
 
       if (question) {
-        const restoredQuestion = llmRestoreLinks({
-          ...autoResponse,
-          text: question,
-        }).replace(/\\n/g, '\n');
+        const restoredQuestion = llmRestoreLinks(
+          {
+            ...autoResponse,
+            text: question,
+          },
+          personalChannel
+        ).replace(/\\n/g, '\n');
 
         const sentRestoredText = await sendMessage(
           client,
@@ -220,7 +226,7 @@ REASON: ${analysis.reason}`);
 ID: ${accountId}
 GID: ${dialogGroupId}
 RID: ${recipientId}
-${autoResponse.text}`);
+${llmRestoreLinks(autoResponse, personalChannel)}`);
 
       await saveRecipient(
         accountId,

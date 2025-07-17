@@ -48,7 +48,7 @@ ERROR: ${error instanceof Error ? error.message : error}`);
     return correctedResult;
   }
 
-  return null
+  return null;
 };
 
 export const incrementCurrentCount = async (groupId: string) => {
