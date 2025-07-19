@@ -147,17 +147,17 @@ export const getUserInformation = async (
 
   if (language === 'RUSSIAN') {
     const fm = firstMessage.replace(/[^а-яА-ЯёЁ]+/g, '');
-    const userData = await getUser(
-      `${firstName.toLowerCase()} ${lastName.toLowerCase()} ${username}`,
-      language
-    );
+    // const userData = await getUser(
+    //   `${firstName.toLowerCase()} ${lastName.toLowerCase()} ${username}`,
+    //   language
+    // );
 
-    if (userData?.aiName) {
-      user = userData;
-      firstMessage = `${fm}, ${userData.aiName}!`;
-    } else {
-      firstMessage = `${fm}!`;
-    }
+    // if (userData?.aiName) {
+    //   user = userData;
+    //   firstMessage = `${fm}, ${userData.aiName}!`;
+    // } else {
+    firstMessage = `${fm}!`;
+    // }
   }
 
   return { user, firstMessage, secondMessage };
