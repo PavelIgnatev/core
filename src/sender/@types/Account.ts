@@ -16,9 +16,9 @@ export interface Account {
 
   id: string;
   firstName: string;
+  username: string;
 
   lastName?: string;
-  username?: string;
   messageCount?: number;
   aiContactCount?: number;
   phone?: string
