@@ -1,0 +1,29 @@
+{
+  "name": "oauth-google-sheets-api",
+  "version": "1.0.0",
+  "description": "Simple OAuth Google Sheets API with personal account for creating and managing spreadsheets",
+  "main": "oauth-sheets.js",
+  "scripts": {
+    "test": "node test.js",
+    "start": "node oauth-sheets.js",
+    "demo": "node oauth-sheets.js"
+  },
+  "dependencies": {
+    "googleapis": "^131.0.0",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": [
+    "google-sheets",
+    "spreadsheets",
+    "oauth",
+    "personal-account",
+    "auto-refresh",
+    "tables",
+    "crm"
+  ],
+  "author": "",
+  "license": "ISC"
+}

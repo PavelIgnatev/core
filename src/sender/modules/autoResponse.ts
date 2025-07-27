@@ -154,7 +154,10 @@ REASON: ${analysis.reason}`);
             p: 0.95,
             messages: dialogue,
           },
-          onThrow: (error) => sendToErrorGenerateBot(error),
+          onThrow: (error) =>
+            sendToErrorGenerateBot(
+              `${error}\nGROUP ID: ${dialogGroupId}\nACCOUNT ID: ${accountId}`
+            ),
           onLogger: (type, data) =>
             console.log({
               accountId,
