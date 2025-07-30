@@ -180,10 +180,6 @@ const trySend = async (
     return true;
   } catch (e: any) {
     if (e.message === 'STABLE_PHONE_SEARCH_ERROR') {
-      await updateSendMessage(recipient.username, recipient.groupId, {
-        p: null,
-      });
-
       if (phoneSearchError[accountId] > 1) {
         await updateAccountById(accountId, { phoneSearchBlocked: true });
         return false;
@@ -221,9 +217,6 @@ const trySend = async (
 
     if (e.message.includes('PEER_FLOOD')) {
       peerFloods[accountId] = 1;
-      await updateSendMessage(recipient.username, recipient.groupId, {
-        p: null,
-      });
     } else {
       await sendToMainBot(`** AUTO_SENDER_ERROR **
 USER_DATA: ${recipient.username}

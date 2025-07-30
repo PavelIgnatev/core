@@ -4,6 +4,15 @@ const getGroupIdUsersCollection = async () => {
   return (await coreDB()).collection('groupIdUsers');
 };
 
+export const resetAllPFields = async () => {
+  const messagesCollection = await getGroupIdUsersCollection();
+
+  await messagesCollection.updateMany(
+    { p: { $ne: null } },
+    { $set: { p: null } }
+  );
+};
+
 export const updateFailedMessage = async (
   accountId: string,
   username: string,

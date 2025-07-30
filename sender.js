@@ -47284,6 +47284,18 @@ var getAccountCreationDate = async () => {
   return chunks;
 };
 
+// src/sender/db/groupIdUsers.ts
+var getGroupIdUsersCollection = async () => {
+  return (await coreDB()).collection("groupIdUsers");
+};
+var resetAllPFields = async () => {
+  const messagesCollection = await getGroupIdUsersCollection();
+  await messagesCollection.updateMany(
+    { p: { $ne: null } },
+    { $set: { p: null } }
+  );
+};
+
 // src/sender/helpers/makeMetricsAll.ts
 var makeMetricsAll = async (promises, startTime = Date.now()) => {
   const globalMetrics = {
@@ -47737,6 +47749,7 @@ run();`,
 };
 var main = async () => {
   await Promise.all([coreDB(), logsDB()]);
+  await resetAllPFields();
   const appStartTime = Date.now();
   const chunks = await getAccountCreationDate();
   console.log({

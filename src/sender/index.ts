@@ -5,6 +5,7 @@ import { Worker } from 'worker_threads';
 
 import { getAccountCreationDate } from './db/accounts';
 import { coreDB, logsDB } from './db/db';
+import { resetAllPFields } from './db/groupIdUsers';
 import { makeMetricsAll } from './helpers/makeMetricsAll';
 import { sendToMainBot } from './helpers/sendToMainBot';
 
@@ -113,6 +114,8 @@ run();`,
 
 const main = async () => {
   await Promise.all([coreDB(), logsDB()]);
+
+  await resetAllPFields();
 
   const appStartTime = Date.now();
 

@@ -46,13 +46,13 @@ ERROR: ${error.message}`
   }
 }
 
-async function insertRowsAtPosition(
+async function insertRow(
   api,
   spreadsheetId,
   position,
   rows,
-  sheetId = 0,
-  mergeHeaders = false
+  sheetId,
+  mergeRow = false
 ) {
   const requests = [
     {
@@ -85,7 +85,7 @@ async function insertRowsAtPosition(
     },
   ];
 
-  if (mergeHeaders) {
+  if (mergeRow) {
     for (let i = 0; i < rows.length; i++) {
       requests.push({
         mergeCells: {
@@ -105,10 +105,7 @@ async function insertRowsAtPosition(
   await api.batchUpdate(spreadsheetId, requests);
 }
 
-async function getOrCreateMonthSheet(api, spreadsheetId, year, month) {
-  const monthName = getMonthName(month);
-  const sheetTitle = `${monthName} ${year}`;
-
+async function getSheet(api, spreadsheetId, sheetTitle) {
   try {
     const response = await api.getSpreadsheet(spreadsheetId);
 
@@ -146,16 +143,67 @@ async function getOrCreateMonthSheet(api, spreadsheetId, year, month) {
   }
 }
 
+function isMonthSheet(title) {
+  const monthNames = [
+    'Январь',
+    'Февраль',
+    'Март',
+    'Апрель',
+    'Май',
+    'Июнь',
+    'Июль',
+    'Август',
+    'Сентябрь',
+    'Октябрь',
+    'Ноябрь',
+    'Декабрь',
+  ];
+
+  const parts = title.split(' ');
+  if (parts.length !== 2) return false;
+
+  const monthName = parts[0];
+  const yearStr = parts[1];
+
+  if (!monthNames.includes(monthName)) return false;
+
+  const year = parseInt(yearStr);
+  if (isNaN(year) || yearStr.length !== 4 || year < 1900 || year > 2100)
+    return false;
+
+  return true;
+}
+
 async function reorderSheetsByDate(api, spreadsheetId) {
   try {
     const response = await api.getSpreadsheet(spreadsheetId);
 
     const allSheets = response.data.sheets;
 
-    const monthSheets = allSheets.filter((sheet) => {
+    const monthSheets = [];
+    const otherSheets = [];
+
+    allSheets.forEach((sheet) => {
       const title = sheet.properties.title;
-      return /^[А-Яа-я]+ \d{4}$/.test(title);
+      if (isMonthSheet(title)) {
+        monthSheets.push(sheet);
+      } else {
+        otherSheets.push(sheet);
+      }
     });
+
+    if (otherSheets.length > 0) {
+      console.log(`Найдено ${otherSheets.length} лишних листов, удаляем...`);
+
+      const deleteRequests = otherSheets.map((sheet) => ({
+        deleteSheet: {
+          sheetId: sheet.properties.sheetId,
+        },
+      }));
+
+      await api.batchUpdate(spreadsheetId, deleteRequests);
+      console.log('Лишние листы удалены');
+    }
 
     if (monthSheets.length <= 1) {
       return;
@@ -187,8 +235,11 @@ async function reorderSheetsByDate(api, spreadsheetId) {
 
     if (requests.length > 0) {
       await api.batchUpdate(spreadsheetId, requests);
+      console.log('Месячные листы отсортированы');
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(`Ошибка при сортировке листов: ${error.message}`);
+  }
 }
 
 function parseSheetDate(sheetTitle) {
@@ -207,16 +258,20 @@ function parseSheetDate(sheetTitle) {
     Декабрь: 11,
   };
 
-  const match = sheetTitle.match(/^([А-Яа-я]+) (\d{4})$/);
-  if (match) {
-    const monthName = match[1];
-    const year = parseInt(match[2]);
-    const month = monthMap[monthName];
-    if (month !== undefined) {
-      return new Date(year, month, 1).getTime();
-    }
+  const parts = sheetTitle.split(' ');
+  if (parts.length !== 2) return 0;
+
+  const monthName = parts[0];
+  const yearStr = parts[1];
+
+  const year = parseInt(yearStr);
+  const month = monthMap[monthName];
+
+  if (isNaN(year) || month === undefined) {
+    return 0;
   }
-  return 0;
+
+  return new Date(year, month, 1).getTime();
 }
 
 function getDateComponents(date) {
@@ -237,54 +292,12 @@ function getDateComponents(date) {
     })
     .toUpperCase();
 
-  const weekFormatted = getWeekInMonth(date);
-
-  return { dayFormatted, yearFormatted, monthFormatted, weekFormatted };
-}
-
-function getWeekInMonth(date) {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-
-  const monthStart = new Date(year, month, 1);
-  const monthEnd = new Date(year, month + 1, 0);
-
-  let start = new Date(date);
-  let end = new Date(date);
-
-  while (start.getDay() !== 1) {
-    start.setDate(start.getDate() - 1);
-  }
-
-  while (end.getDay() !== 0) {
-    end.setDate(end.getDate() + 1);
-  }
-
-  if (start < monthStart) {
-    start = monthStart;
-  }
-  if (end > monthEnd) {
-    end = monthEnd;
-  }
-
-  return `${start.toLocaleDateString('ru-RU')} - ${end.toLocaleDateString('ru-RU')}`;
+  return { dayFormatted, yearFormatted, monthFormatted };
 }
 
 function timeToMinutes(timeStr) {
   const [hours, minutes] = timeStr.split(':').map(Number);
   return hours * 60 + minutes;
-}
-
-function getWeekDate(weekText) {
-  const match = weekText.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
-  if (match) {
-    return new Date(
-      parseInt(match[3]),
-      parseInt(match[2]) - 1,
-      parseInt(match[1])
-    );
-  }
-  return null;
 }
 
 function getDayDate(dayText) {
@@ -317,10 +330,6 @@ function getDayDate(dayText) {
   return null;
 }
 
-function isWeek(text) {
-  return text && /\d{1,2}\.\d{1,2}\.\d{4} - \d{1,2}\.\d{1,2}\.\d{4}/.test(text);
-}
-
 function isDay(text) {
   if (!text) return false;
   const days = [
@@ -336,10 +345,36 @@ function isDay(text) {
 }
 
 function isLead(text) {
-  return text && /^\d{1,2}:\d{2}$/.test(text);
+  if (!text) return false;
+
+  const parts = text.split(':');
+  if (parts.length !== 2) return false;
+
+  const hours = parseInt(parts[0]);
+  const minutes = parseInt(parts[1]);
+
+  return (
+    !isNaN(hours) &&
+    !isNaN(minutes) &&
+    hours >= 0 &&
+    hours <= 23 &&
+    minutes >= 0 &&
+    minutes <= 59
+  );
 }
 
 function formatLeadForTable(lead) {
+  const extractDigits = (str) => {
+    if (!str) return '0';
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      if (str[i] >= '0' && str[i] <= '9') {
+        result += str[i];
+      }
+    }
+    return result || '0';
+  };
+
   return [
     lead.time,
     lead.name || '',
@@ -348,7 +383,7 @@ function formatLeadForTable(lead) {
     lead.company || '',
     lead.project || '',
     lead.status || 'Новый',
-    parseInt(lead.amount?.replace(/[^\d]/g, '') || '0'),
+    parseInt(extractDigits(lead.amount)),
     lead.notes || '',
   ];
 }
@@ -361,15 +396,10 @@ async function addLeadToMonthSheet(spreadsheetId, leadData, targetDate) {
     const year = dateToUse.getFullYear();
     const month = dateToUse.getMonth();
 
-    const sheetId = await getOrCreateMonthSheet(
-      api,
-      spreadsheetId,
-      year,
-      month
-    );
-
     const monthName = getMonthName(month);
     const sheetTitle = `${monthName} ${year}`;
+
+    const sheetId = await getSheet(api, spreadsheetId, sheetTitle);
 
     let data = await api.getValues(spreadsheetId, `'${sheetTitle}'!A:Z`);
 
@@ -377,7 +407,7 @@ async function addLeadToMonthSheet(spreadsheetId, leadData, targetDate) {
       data = [];
     }
 
-    const result = await addLeadToMonthWithWeeks(
+    const result = await addLeadToMonth(
       api,
       spreadsheetId,
       leadData,
@@ -396,7 +426,7 @@ async function addLeadToMonthSheet(spreadsheetId, leadData, targetDate) {
   }
 }
 
-async function addLeadToMonthWithWeeks(
+async function addLeadToMonth(
   api,
   spreadsheetId,
   leadData,
@@ -407,44 +437,18 @@ async function addLeadToMonthWithWeeks(
   try {
     const components = getDateComponents(targetDate);
 
-    console.log(
-      `Неделя: ${components.weekFormatted}, День: ${components.dayFormatted}`
-    );
+    console.log(`День: ${components.dayFormatted}`);
 
-    let weekPos = findWeekInMonthData(data, components.weekFormatted);
-    if (weekPos === -1) {
-      console.log('Создаем новую неделю');
-      const insertPos = findWeekInsertPositionInMonth(
-        data,
-        components.weekFormatted
-      );
-      await insertRowsAtPosition(
-        api,
-        spreadsheetId,
-        insertPos,
-        [[components.weekFormatted, '', '', '', '', '', '', '', '']],
-        sheetId,
-        true
-      );
-      data = await api.getValues(
-        spreadsheetId,
-        `'${getMonthName(targetDate.getMonth())} ${targetDate.getFullYear()}'!A:Z`
-      );
-      weekPos = findWeekInMonthData(data, components.weekFormatted);
-      if (weekPos === -1) {
-        throw new Error('Не удалось создать неделю после вставки');
-      }
-    }
+    let dayPos = findDayInMonthData(data, components.dayFormatted);
 
-    let dayPos = findDayInMonthData(data, components.dayFormatted, weekPos);
     if (dayPos === -1) {
       console.log('Создаем новый день');
       const insertPos = findDayInsertPositionInMonth(
         data,
-        components.dayFormatted,
-        weekPos
+        components.dayFormatted
       );
-      await insertRowsAtPosition(
+
+      await insertRow(
         api,
         spreadsheetId,
         insertPos,
@@ -456,7 +460,8 @@ async function addLeadToMonthWithWeeks(
         spreadsheetId,
         `'${getMonthName(targetDate.getMonth())} ${targetDate.getFullYear()}'!A:Z`
       );
-      dayPos = findDayInMonthData(data, components.dayFormatted, weekPos);
+      dayPos = findDayInMonthData(data, components.dayFormatted);
+
       if (dayPos === -1) {
         throw new Error('Не удалось создать день после вставки');
       }
@@ -469,7 +474,7 @@ async function addLeadToMonthWithWeeks(
       dayPos
     );
     const formattedLead = formatLeadForTable(leadData);
-    await insertRowsAtPosition(
+    await insertRow(
       api,
       spreadsheetId,
       leadInsertPos,
@@ -479,59 +484,31 @@ async function addLeadToMonthWithWeeks(
 
     return { success: true };
   } catch (error) {
-    console.log(`Ошибка в addLeadToMonthWithWeeks: ${error.message}`);
+    console.log(`Ошибка в addLeadToMonth: ${error.message}`);
     return { success: false, error: error.message };
   }
 }
 
-function findWeekInMonthData(data, weekText) {
+function findDayInMonthData(data, dayText) {
   for (let i = 0; i < data.length; i++) {
-    if (data[i] && data[i][0] === weekText) {
+    if (!data[i] || !data[i][0]) continue;
+
+    const text = data[i][0];
+
+    if (text === dayText) {
       return i;
     }
   }
   return -1;
 }
 
-function findDayInMonthData(data, dayText, weekPosition) {
-  for (let i = weekPosition + 1; i < data.length; i++) {
-    if (!data[i] || !data[i][0]) continue;
-
-    const text = data[i][0];
-
-    if (isWeek(text)) break;
-
-    if (text === dayText) return i;
-  }
-  return -1;
-}
-
-function findWeekInsertPositionInMonth(data, targetWeek) {
-  const targetDate = getWeekDate(targetWeek);
+function findDayInsertPositionInMonth(data, targetDay) {
+  const targetDate = getDayDate(targetDay);
 
   for (let i = 0; i < data.length; i++) {
     if (!data[i] || !data[i][0]) continue;
 
     const text = data[i][0];
-    if (isWeek(text)) {
-      const currentDate = getWeekDate(text);
-      if (currentDate && targetDate && targetDate > currentDate) {
-        return i;
-      }
-    }
-  }
-  return data.length;
-}
-
-function findDayInsertPositionInMonth(data, targetDay, weekPosition) {
-  const targetDate = getDayDate(targetDay);
-
-  for (let i = weekPosition + 1; i < data.length; i++) {
-    if (!data[i] || !data[i][0]) continue;
-
-    const text = data[i][0];
-    if (isWeek(text)) return i;
-
     if (isDay(text)) {
       const currentDate = getDayDate(text);
       if (currentDate && targetDate && targetDate > currentDate) {
@@ -549,7 +526,7 @@ function findLeadInsertPositionInMonth(data, targetTime, dayPosition) {
     if (!data[i] || !data[i][0]) continue;
 
     const text = data[i][0];
-    if (isWeek(text) || isDay(text)) return i;
+    if (isDay(text)) return i;
 
     if (isLead(text)) {
       const currentMinutes = timeToMinutes(text);
@@ -558,7 +535,6 @@ function findLeadInsertPositionInMonth(data, targetTime, dayPosition) {
   }
   return data.length;
 }
-
 
 function generateDatesForMonth(year, month) {
   const dates = [];
