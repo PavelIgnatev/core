@@ -18,6 +18,8 @@ export type GroupId = {
   leadDefinition: string;
   leadGoal: string;
 
+  googleTableCrmId?: string;
+
   part: string | null;
   flowHandling: string | null;
   addedInformation: string | null;

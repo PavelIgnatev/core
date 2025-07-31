@@ -1,5 +1,5 @@
 const sendToBotByChatIdText = async (chatId: string, text: string) => {
-  const token = '7340207766:AAGA80GwPsYYdOfd28_yCSDAwiBAg6XrAcM';
+  const token = '8313888175:AAF-0t25OPYn6yYGOM6VM9hsXGQWyBWyCos';
   const sendMessageUrl = `https://api.telegram.org/bot${token}/sendMessage`;
 
   const splitTextIntoChunks = (text: string, chunkSize = 4096) => {

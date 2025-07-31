@@ -2,6 +2,7 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import { Account } from '../@types/Account';
 import { updateAutomaticDialogue } from '../db/dialogues';
 import { getGroupId } from '../db/groupId';
+import { addLead } from '../google-crm/oauth-sheets';
 import { converterName } from '../helpers/converterName';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
 import { generateRandomString } from '../helpers/generateRandomString';
@@ -9,6 +10,7 @@ import { getDateNow } from '../helpers/helpers';
 import { makeRequestGpt } from '../helpers/makeRequestGpt';
 import { sendToErrorGenerateBot } from '../helpers/sendToErrorGenerateBot';
 import { sendToFormBot } from '../helpers/sendToFormBot';
+import { sendToGoogleCrmBot } from '../helpers/sendToGoogleCrmBot';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getAutoResponse } from '../llm/getAutoResponse';
 import { getDialogueAnalysis } from '../llm/getDialogueAnalysis';
@@ -41,6 +43,9 @@ export const autoResponse = async (
       aiReason,
       recipientId,
       recipientAccessHash,
+      recipientPhone,
+      recipientUsername,
+      recipientTitle,
       groupId: dialogGroupId,
       aiName: recipientName,
       aiGender: recipientGender,
@@ -77,6 +82,7 @@ export const autoResponse = async (
         leadGoal,
         addedInformation,
         companyDescription,
+        googleTableCrmId,
       } = groupId;
 
       const dialogue = messages.map(
@@ -222,6 +228,40 @@ REASON: ${analysis.reason}`);
       }
 
       if (stage > 1 && aiStatus !== 'lead' && analysis?.status === 'lead') {
+        if (googleTableCrmId && accountId.includes('sender')) {
+          try {
+            await addLead(googleTableCrmId, {
+              groupId: dialogGroupId,
+              recipientId,
+              aiReason: analysis.reason,
+              recipientTitle,
+              recipientUsername,
+              recipientPhone,
+              dateUpdated: new Date(),
+            });
+            await sendToGoogleCrmBot(
+              `[ADD_LEAD_OK]
+GID: ${dialogGroupId}
+ACCOUNT ID: ${accountId}
+DATA: ${JSON.stringify({
+                groupId: dialogGroupId,
+                recipientId,
+                aiReason: analysis.reason,
+                recipientTitle,
+                recipientUsername,
+                recipientPhone,
+                dateUpdated: new Date(),
+              })}`
+            );
+          } catch (error: any) {
+            await sendToGoogleCrmBot(
+              `[ADD_LEAD_ERROR]
+GID: ${dialogGroupId}
+ACCOUNT ID: ${accountId}
+ERROR: ${error.message}`
+            );
+          }
+        }
         await crmSender(dialogGroupId, recipientId, analysis.reason, messages);
       }
 
