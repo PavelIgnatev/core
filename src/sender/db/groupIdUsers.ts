@@ -8,7 +8,7 @@ export const resetAllPFields = async () => {
   const messagesCollection = await getGroupIdUsersCollection();
 
   await messagesCollection.updateMany(
-    { p: { $ne: null } },
+    { p: { $ne: null }, s: { $ne: true } },
     { $set: { p: null } }
   );
 };
