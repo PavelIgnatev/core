@@ -228,7 +228,7 @@ REASON: ${analysis.reason}`);
       }
 
       if (stage > 1 && aiStatus !== 'lead' && analysis?.status === 'lead') {
-        if (googleTableCrmId && accountId.includes('sender')) {
+        if (googleTableCrmId) {
           try {
             await addLead(googleTableCrmId, {
               groupId: dialogGroupId,
