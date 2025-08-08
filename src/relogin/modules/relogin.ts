@@ -160,7 +160,6 @@ export const relogin = async (ID: string) => {
 
     await updateAccountById(id, updateId);
     await updateAccountById(ID, updateID);
-    await invokeRequest(client, new GramJs.auth.LogOut());
 
     console.warn({
       accountId: ID,
