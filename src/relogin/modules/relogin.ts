@@ -2,6 +2,7 @@ import BigInt from 'big-integer';
 
 import { TelegramClient } from '../../gramjs';
 import GramJs from '../../gramjs/tl/api';
+import { Account } from '../@types/Account';
 import {
   LoginCodeHandler,
   LoginCodeResult,
@@ -42,7 +43,6 @@ const createLoginCodeHandler = (): LoginCodeHandler => {
   return { promise, handleUpdate };
 };
 
-const DEFAULT_API_ID = 2496;
 const API_PAIRS: Record<number, string> = {
   4: '014b35b6184100b085b0d0572f9b5103',
   5: '1c5c96d5edd401b1ed40db3fb5633e2d',
@@ -124,6 +124,78 @@ const requestLoginCode = async (
   }
 };
 
+const loginWithCode = async (
+  phoneNumber: string,
+  account: Account,
+  prefix: string,
+  loginCodeHandler: LoginCodeHandler
+) => {
+  let currentApiId = 2496;
+
+  let clientForLogin = await initClient(
+    {
+      accountId: phoneNumber,
+      prefix,
+      dcId: account.dcId,
+      empty: true,
+      apiId: currentApiId,
+    },
+    () => {},
+    (error) => sendToMainBot(error)
+  );
+
+  let codeResult = await requestLoginCode(
+    clientForLogin,
+    phoneNumber,
+    loginCodeHandler.promise,
+    currentApiId
+  );
+
+  if (codeResult.error === 'CODE_TIMEOUT' && currentApiId === 2496) {
+    currentApiId = 2040;
+    clientForLogin = await initClient(
+      {
+        accountId: phoneNumber,
+        prefix,
+        dcId: account.dcId,
+        empty: true,
+        apiId: currentApiId,
+      },
+      () => {},
+      (error) => sendToMainBot(error)
+    );
+
+    codeResult = await requestLoginCode(
+      clientForLogin,
+      phoneNumber,
+      loginCodeHandler.promise,
+      currentApiId
+    );
+  }
+
+  if (codeResult.error) {
+    throw Error(codeResult.error);
+  }
+  if (!codeResult.code || !codeResult.phoneCodeHash) {
+    throw Error('CODE_ERROR');
+  }
+
+  const signIn = await invokeRequest(
+    clientForLogin,
+    new GramJs.auth.SignIn({
+      phoneNumber,
+      phoneCodeHash: codeResult.phoneCodeHash,
+      phoneCode: codeResult.code,
+    })
+  );
+
+  if (!signIn || signIn instanceof GramJs.auth.AuthorizationSignUpRequired) {
+    throw Error('SIGN_IN_ERROR');
+  }
+
+  return { clientForLogin, apiId: currentApiId };
+};
+
 export const relogin = async (ID: string) => {
   const clients: TelegramClient[] = [];
   const account = await getAccountById(ID);
@@ -157,51 +229,15 @@ export const relogin = async (ID: string) => {
     }
 
     await setup2FA(client, account);
-    const { phone: phoneNumber } = await getMeFromUsers(client, ID);
+    const { phone: phoneNumber, id } = await getMeFromUsers(client, ID);
 
-    let finalApiId = currentApiId;
-    finalApiId = DEFAULT_API_ID;
-
-    const clientReLogin = await initClient(
-      {
-        accountId: phoneNumber,
-        prefix,
-        dcId: account.dcId,
-        empty: true,
-        apiId: finalApiId,
-      },
-      () => {},
-      (error) => sendToMainBot(error)
-    );
-    clients.push(clientReLogin);
-
-    const codeResult = await requestLoginCode(
-      clientReLogin,
+    const { clientForLogin, apiId } = await loginWithCode(
       phoneNumber,
-      loginCodeHandler.promise,
-      finalApiId
+      account,
+      prefix,
+      loginCodeHandler
     );
-
-    if (codeResult.error) {
-      throw Error(codeResult.error);
-    }
-    if (!codeResult.code || !codeResult.phoneCodeHash) {
-      throw Error('CODE_ERROR');
-    }
-
-    const signIn = await invokeRequest(
-      clientReLogin,
-      new GramJs.auth.SignIn({
-        phoneNumber,
-        phoneCodeHash: codeResult.phoneCodeHash,
-        phoneCode: codeResult.code,
-      })
-    );
-
-    if (!signIn || signIn instanceof GramJs.auth.AuthorizationSignUpRequired) {
-      throw Error('SIGN_IN_ERROR');
-    }
-    const { id, phone } = await getMeFromUsers(clientReLogin, ID);
+    clients.push(clientForLogin);
 
     const isExists = await getAccountById(id);
     if (isExists) {
@@ -213,7 +249,7 @@ export const relogin = async (ID: string) => {
       throw new Error('ACCOUNT_ALREADY_EXISTS');
     }
 
-    const sessionData = clientReLogin.session.getSessionData();
+    const sessionData = clientForLogin.session.getSessionData();
     const { keys, mainDcId } = sessionData;
     if (!keys || !Object.keys(keys) || !mainDcId || !keys[mainDcId]) {
       throw Error('SESSION_DATA_ERROR');
@@ -222,9 +258,9 @@ export const relogin = async (ID: string) => {
     const updateId: Record<string, any> = {
       accountId: id,
       parentAccountId: ID,
-      phone,
+      phone: phoneNumber,
       dcId: Number(mainDcId),
-      nextApiId: finalApiId,
+      nextApiId: apiId,
       prefix,
     };
     updateId[`dc${mainDcId}`] = keys[mainDcId];
@@ -232,10 +268,10 @@ export const relogin = async (ID: string) => {
     const updateID: Record<string, any> = {
       workedOut: true,
       error: null,
-      nextApiId: finalApiId,
+      nextApiId: apiId,
       reloginDate: new Date(),
     };
-    if (finalApiId !== currentApiId) {
+    if (apiId !== currentApiId) {
       updateId['prevApiId'] = currentApiId;
     }
 
