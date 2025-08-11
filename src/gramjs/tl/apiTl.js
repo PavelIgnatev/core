@@ -1475,6 +1475,8 @@ account.updateNotifySettings#84be5b93 peer:InputNotifyPeer settings:InputPeerNot
 account.getNotifySettings#12b3ad31 peer:InputNotifyPeer = PeerNotifySettings;
 account.updateProfile#78515775 flags:# first_name:flags.0?string last_name:flags.1?string about:flags.2?string = User;
 account.updateStatus#6628562c offline:Bool = Bool;
+account.deleteAutoSaveExceptions#53bc0020 = Bool;
+account.updatePersonalChannel#d94305e0 channel:InputChannel = Bool;
 account.getWallPapers#7967d36 hash:long = account.WallPapers;
 account.reportPeer#c5ba3d86 peer:InputPeer reason:ReportReason message:string = Bool;
 account.checkUsername#2714d86c username:string = Bool;
