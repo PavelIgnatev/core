@@ -1530,6 +1530,7 @@ contacts.getBlocked#9a868f80 flags:# my_stories_from:flags.0?true offset:int lim
 contacts.search#11f812d8 q:string limit:int = contacts.Found;
 contacts.resolveUsername#725afbbc flags:# username:string referer:flags.0?string = contacts.ResolvedPeer;
 contacts.getTopPeers#973478b6 flags:# correspondents:flags.0?true bots_pm:flags.1?true bots_inline:flags.2?true phone_calls:flags.3?true forward_users:flags.4?true forward_chats:flags.5?true groups:flags.10?true channels:flags.15?true bots_app:flags.16?true offset:int limit:int hash:long = contacts.TopPeers;
+contacts.resetSaved#879537f1 = Bool;
 contacts.addContact#e8f463d0 flags:# add_phone_privacy_exception:flags.0?true id:InputUser first_name:string last_name:string phone:string = Updates;
 contacts.resolvePhone#8af94344 phone:string = contacts.ResolvedPeer;
 contacts.editCloseFriends#ba6705f0 id:Vector<long> = Bool;
