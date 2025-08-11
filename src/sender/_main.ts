@@ -116,6 +116,8 @@ ERROR: ${err.message}`);
     const [meName, meId] = await accountSetup(client, account);
 
     await personalChannel(account, client);
+    await automaticCheck(client, account);
+    await autoSender(client, ID, meId);
 
     let i = -1;
     while (true) {
