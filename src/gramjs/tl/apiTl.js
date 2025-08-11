@@ -1513,6 +1513,7 @@ account.changeAuthorizationSettings#40f48462 flags:# confirmed:flags.3?true hash
 account.updateEmojiStatus#fbd3de6b emoji_status:EmojiStatus = Bool;
 account.getRecentEmojiStatuses#f578105 hash:long = account.EmojiStatuses;
 account.reorderUsernames#ef500eab order:Vector<string> = Bool;
+account.saveAutoSaveSettings#d69b8361 flags:# users:flags.0?true chats:flags.1?true broadcasts:flags.2?true peer:flags.3?InputPeer settings:AutoSaveSettings = Bool;
 account.toggleUsername#58d6b376 username:string active:Bool = Bool;
 account.resolveBusinessChatLink#5492e5ee slug:string = account.ResolvedBusinessChatLinks;
 account.toggleSponsoredMessages#b9d9a38d enabled:Bool = Bool;
