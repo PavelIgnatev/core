@@ -7,6 +7,7 @@ export async function clearAuthorizations(client: TelegramClient) {
     client,
     new GramJs.account.GetAuthorizations()
   );
+
   const authorizations = invokedAuthorizations?.authorizations || [];
   let currentApiId;
 
