@@ -53326,7 +53326,11 @@ var getGroupIdUsersCollection = async () => {
 var resetAllPFields = async () => {
   const messagesCollection = await getGroupIdUsersCollection();
   await messagesCollection.updateMany(
-    { p: { $ne: null }, s: { $ne: true } },
+    {
+      p: { $exists: true },
+      s: { $ne: true },
+      f: { $ne: true }
+    },
     { $set: { p: null } }
   );
 };
