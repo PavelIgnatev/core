@@ -272,7 +272,7 @@ RID: ${recipientId}
 ${llmRestoreLinks(autoResponse, personalChannel)}`);
 
       await saveRecipient(
-        accountId,
+        account,
         recipientId,
         recipientAccessHash,
         recipientFull,
@@ -396,7 +396,7 @@ GID: ${dialogGroupId}
 ${pingMessage}`);
 
       await saveRecipient(
-        accountId,
+        account,
         recipientId,
         recipientAccessHash,
         recipientFull,
@@ -464,7 +464,7 @@ ERROR: ${error.message}`);
       }
 
       await saveRecipient(
-        accountId,
+        account,
         recipientId,
         recipientAccessHash,
         recipientFull,
