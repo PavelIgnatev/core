@@ -19067,7 +19067,7 @@ var require_bignumber = __commonJS({
         BigNumber2.minimum = BigNumber2.min = function() {
           return maxOrMin(arguments, 1);
         };
-        BigNumber2.random = function() {
+        BigNumber2.random = (function() {
           var pow2_53 = 9007199254740992;
           var random53bitInt = Math.random() * pow2_53 & 2097151 ? function() {
             return mathfloor(Math.random() * pow2_53);
@@ -19135,13 +19135,13 @@ var require_bignumber = __commonJS({
             rand.c = c;
             return rand;
           };
-        }();
+        })();
         BigNumber2.sum = function() {
           var i = 1, args = arguments, sum = new BigNumber2(args[0]);
           for (; i < args.length; ) sum = sum.plus(args[i++]);
           return sum;
         };
-        convertBase = /* @__PURE__ */ function() {
+        convertBase = /* @__PURE__ */ (function() {
           var decimal = "0123456789";
           function toBaseOut(str, baseIn, baseOut, alphabet) {
             var j, arr = [0], arrL, i = 0, len = str.length;
@@ -19214,8 +19214,8 @@ var require_bignumber = __commonJS({
             }
             return str;
           };
-        }();
-        div = /* @__PURE__ */ function() {
+        })();
+        div = /* @__PURE__ */ (function() {
           function multiply(x, k, base) {
             var m, temp, xlo, xhi, carry = 0, i = x.length, klo = k % SQRT_BASE, khi = k / SQRT_BASE | 0;
             for (x = x.slice(); i--; ) {
@@ -19356,7 +19356,7 @@ var require_bignumber = __commonJS({
             }
             return q;
           };
-        }();
+        })();
         function format(n, i, rm, id) {
           var c0, e, ne, len, str;
           if (rm == null) rm = ROUNDING_MODE;
@@ -19415,7 +19415,7 @@ var require_bignumber = __commonJS({
           }
           return n;
         }
-        parseNumeric = /* @__PURE__ */ function() {
+        parseNumeric = /* @__PURE__ */ (function() {
           var basePrefix = /^(-?)0([xbo])(?=\w[\w.]*$)/i, dotAfter = /^([^.]+)\.$/, dotBefore = /^\.([^.]+)$/, isInfinityOrNaN = /^-?(Infinity|NaN)$/, whitespaceOrPlus = /^\s*\+(?=[\w.])|^\s+|\s+$/g;
           return function(x, str, isNum, b) {
             var base, s = isNum ? str : str.replace(whitespaceOrPlus, "");
@@ -19440,7 +19440,7 @@ var require_bignumber = __commonJS({
             }
             x.c = x.e = null;
           };
-        }();
+        })();
         function round(x, sd, rm, r) {
           var d, i, j, k, n, ni, rd, xc = x.c, pows10 = POWS_TEN;
           if (xc) {
@@ -20518,7 +20518,7 @@ var require_parse = __commonJS({
         if (ch) {
           error("Syntax error");
         }
-        return typeof reviver === "function" ? function walk(holder, key) {
+        return typeof reviver === "function" ? (function walk(holder, key) {
           var k, v, value2 = holder[key];
           if (value2 && typeof value2 === "object") {
             Object.keys(value2).forEach(function(k2) {
@@ -20531,7 +20531,7 @@ var require_parse = __commonJS({
             });
           }
           return reviver.call(holder, key, value2);
-        }({ "": result }, "") : result;
+        })({ "": result }, "") : result;
       };
     };
     module2.exports = json_parse;
@@ -20613,7 +20613,7 @@ var require_gcp_residency = __commonJS({
 var require_src4 = __commonJS({
   "node_modules/gcp-metadata/build/src/index.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -20622,10 +20622,10 @@ var require_src4 = __commonJS({
         } };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
+    }));
     var __exportStar = exports2 && exports2.__exportStar || function(m, exports3) {
       for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p)) __createBinding(exports3, m, p);
     };
@@ -24849,7 +24849,7 @@ var require_whatwg_url = __commonJS({
 var require_redact = __commonJS({
   "node_modules/mongodb-connection-string-url/lib/redact.js"(exports2) {
     "use strict";
-    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? function(o, m, k, k2) {
+    var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       var desc = Object.getOwnPropertyDescriptor(m, k);
       if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -24858,13 +24858,13 @@ var require_redact = __commonJS({
         } };
       }
       Object.defineProperty(o, k2, desc);
-    } : function(o, m, k, k2) {
+    }) : (function(o, m, k, k2) {
       if (k2 === void 0) k2 = k;
       o[k2] = m[k];
-    });
-    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? function(o, v) {
+    }));
+    var __setModuleDefault = exports2 && exports2.__setModuleDefault || (Object.create ? (function(o, v) {
       Object.defineProperty(o, "default", { enumerable: true, value: v });
-    } : function(o, v) {
+    }) : function(o, v) {
       o["default"] = v;
     });
     var __importStar = exports2 && exports2.__importStar || function(mod) {
@@ -48556,7 +48556,7 @@ var require_get_intrinsic = __commonJS({
     var throwTypeError = function() {
       throw new $TypeError();
     };
-    var ThrowTypeError = $gOPD ? function() {
+    var ThrowTypeError = $gOPD ? (function() {
       try {
         arguments.callee;
         return throwTypeError;
@@ -48567,7 +48567,7 @@ var require_get_intrinsic = __commonJS({
           return throwTypeError;
         }
       }
-    }() : throwTypeError;
+    })() : throwTypeError;
     var hasSymbols = require_has_symbols()();
     var getDunderProto = require_get();
     var getProto = typeof Reflect === "function" && Reflect.getPrototypeOf || $Object.getPrototypeOf || getDunderProto;
@@ -51347,13 +51347,13 @@ var formDataToStream = (form, headersHandler, options) => {
     computedHeaders["Content-Length"] = contentLength;
   }
   headersHandler && headersHandler(computedHeaders);
-  return import_stream2.Readable.from(async function* () {
+  return import_stream2.Readable.from((async function* () {
     for (const part of parts) {
       yield boundaryBytes;
       yield* part.encode();
     }
     yield footerBytes;
-  }());
+  })());
 };
 var formDataToStream_default = formDataToStream;
 
