@@ -1,5 +1,6 @@
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
+import { Account } from '../@types/Account';
 import {
   getAccountById,
   unsetAccountById,
@@ -41,20 +42,21 @@ export const autoSender = async (
   if (currentTime >= new Date(account.remainingTime || currentTime)) {
     startSender[accountId] = 1;
 
-    const firstSendResult = await trySend(client, accountId, telegramId);
+    const firstSendResult = await trySend(client, account, telegramId);
 
     if (firstSendResult) {
-      await trySend(client, accountId, telegramId, true);
+      await trySend(client, account, telegramId, true);
     }
   }
 };
 
 const trySend = async (
   client: TelegramClient,
-  accountId: string,
+  account: Account,
   telegramId: string,
   isSecondAttempt: boolean = false
 ): Promise<boolean> => {
+  const { accountId } = account
   const recipient = await getRecipient(accountId);
   if (!recipient) {
     errorSender[accountId] = 1;
@@ -143,7 +145,7 @@ const trySend = async (
     );
 
     await saveRecipient(
-      accountId,
+      account,
       String(id),
       String(accessHash),
       fullContact,
@@ -186,7 +188,7 @@ const trySend = async (
       }
       phoneSearchError[accountId] = (phoneSearchError[accountId] || 0) + 1;
 
-      return await trySend(client, accountId, telegramId, isSecondAttempt);
+      return await trySend(client, account, telegramId, isSecondAttempt);
     }
 
     if (
@@ -210,7 +212,7 @@ const trySend = async (
         e.message
       );
 
-      return await trySend(client, accountId, telegramId, isSecondAttempt);
+      return await trySend(client, account, telegramId, isSecondAttempt);
     }
 
     errorSender[accountId] = 1;

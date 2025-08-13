@@ -1,4 +1,5 @@
 import GramJs from '../../../gramjs/tl/api';
+import { Account } from '../../@types/Account';
 import { Dialogue } from '../../@types/Dialogue';
 import { incrementMessageCount, updateAccountById } from '../../db/accounts';
 import { updateDialogue } from '../../db/dialogues';
@@ -8,8 +9,9 @@ import { getCombinedMessages } from '../../helpers/getCombinedMessages';
 import { sleep } from '../../helpers/helpers';
 import { sendToMainBot } from '../../helpers/sendToMainBot';
 
+
 export const saveRecipient = async (
-  accountId: string,
+  account: Account,
   recipientId: string,
   recipientAccessHash: string,
   recipient: GramJs.users.UserFull,
@@ -18,6 +20,8 @@ export const saveRecipient = async (
   status: 'create' | 'update',
   addedData: Record<string, unknown> = {}
 ) => {
+  const { accountId, phone: accountPhone } = account;
+
   let isSave = false;
   while (!isSave) {
     try {
@@ -76,9 +80,9 @@ export const saveRecipient = async (
       });
 
       if (status === 'create') {
-        if (accountId.includes('-prefix-premium')) {
+        if (accountPhone && /^\+7/.test(accountPhone)) {
           await updateAccountById(accountId, {
-            remainingTime: new Date(new Date().getTime() + 1500000),
+            remainingTime: new Date(new Date().getTime() + 21600000),
           });
         } else {
           await updateAccountById(accountId, {

@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 
 export interface Dialogue {
-  _id: ObjectId;
+  _id?: ObjectId;
   groupId: string;
   accountId: string;
   recipientId: string;
