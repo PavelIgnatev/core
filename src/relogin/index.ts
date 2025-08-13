@@ -24,7 +24,7 @@ const reLogin = async () => {
   const startCheckerTime = performance.now();
   const reloginPromises: Promise<any>[] = [];
 
-  accounts.slice(0, 5000).forEach((accountId: string) => {
+  accounts.slice(0, 1000).forEach((accountId: string) => {
     reloginPromises.push(relogin(accountId));
   });
 
