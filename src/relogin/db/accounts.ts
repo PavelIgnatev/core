@@ -14,6 +14,7 @@ export const getAccountsReLogin = async () => {
     banned: { $ne: true },
     parentAccountId: null,
     workedOut: { $ne: true },
+    prefix: 'pf_me9megv7_vpf2',
     $or: [
       { reloginAttemptDate: { $lt: thirtyMinutesAgo } },
       { reloginAttemptDate: { $exists: false } },
