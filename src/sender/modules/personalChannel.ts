@@ -18,9 +18,9 @@ const twoMinutes = 120000; // 120000
 const halfMinute = 30000; // 30000
 
 const isPersonalChannel = (account: Account) => {
-  const { personalChannel, personalChannelDate } = account;
+  const { personalChannel, personalChannelDate, accountId } = account;
 
-  if (personalChannel) {
+  if (personalChannel || accountId.includes('phone')) {
     return false;
   }
 
@@ -45,7 +45,7 @@ export const personalChannel = async (
     ? accountId.split('-prefix-')[1]
     : null;
 
-  if (!pc) {
+  if (!pc || !prefix) {
     return;
   }
 
@@ -73,10 +73,6 @@ export const personalChannel = async (
       }),
       { shouldIgnoreErrors: true }
     );
-  }
-
-  if (!prefix) {
-    return;
   }
 
   try {
@@ -259,18 +255,18 @@ export const personalChannel = async (
     const buttons =
       lastMessage.replyMarkup instanceof GramJs.ReplyInlineMarkup
         ? lastMessage.replyMarkup.rows
-            .map((row) =>
-              row.buttons
-                .filter(
-                  (button): button is GramJs.KeyboardButtonUrl =>
-                    button instanceof GramJs.KeyboardButtonUrl
-                )
-                .map((button) => ({
-                  text: button.text,
-                  url: button.url,
-                }))
-            )
-            .filter((row) => row.length)
+          .map((row) =>
+            row.buttons
+              .filter(
+                (button): button is GramJs.KeyboardButtonUrl =>
+                  button instanceof GramJs.KeyboardButtonUrl
+              )
+              .map((button) => ({
+                text: button.text,
+                url: button.url,
+              }))
+          )
+          .filter((row) => row.length)
         : [];
 
     if (!lastMessage.message || !buttons.length) {
