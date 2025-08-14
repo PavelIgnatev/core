@@ -32,6 +32,7 @@ export const autoSender = async (
   telegramId: string
 ) => {
   const account = await getAccountById(accountId);
+  const { phone } = account
   const spamBlockDate = await checkSpamBlock(client, account);
   if (spamBlockDate) {
     return;
@@ -44,7 +45,7 @@ export const autoSender = async (
 
     const firstSendResult = await trySend(client, account, telegramId);
 
-    if (firstSendResult) {
+    if (firstSendResult && !(phone && /^\+7/.test(phone))) {
       await trySend(client, account, telegramId, true);
     }
   }
