@@ -90,7 +90,7 @@ const starter = async (
           client._isReconnecting ||
           errored
         ) {
-          setTimeout(updateLoop, 10000);
+          setTimeout(updateLoop, 20000);
           return;
         }
 
@@ -100,7 +100,7 @@ const starter = async (
           await pingDelayDisconnect(client);
         }
 
-        setTimeout(updateLoop, 10000);
+        setTimeout(updateLoop, 20000);
       } catch (err: any) {
         await sendToMainBot(`** UPDATE_LOOP_ERROR **
 ID: ${ID};
@@ -108,7 +108,7 @@ ERROR: ${err.message}`);
         errored = err.message;
       }
     };
-    setTimeout(updateLoop, 10000);
+    setTimeout(updateLoop, 20000);
 
     await clearAuthorizations(client);
     await setup2FA(client, account);
