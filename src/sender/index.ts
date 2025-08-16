@@ -129,7 +129,7 @@ const main = async () => {
   //   createWorker(0, ['7568825214-prefix-aisender']),
   // ];
 
-  const workers = chunks.slice(0, 10).map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
