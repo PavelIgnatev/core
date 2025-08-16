@@ -96,9 +96,10 @@ const starter = async (
 
         await updateStatus(client, false);
 
-        if (updateCounter === 0 || ++updateCounter % 10 === 0) {
+        if (updateCounter % 10 === 0) {
           await pingDelayDisconnect(client);
         }
+        updateCounter+= 1
 
         setTimeout(updateLoop, 20000);
       } catch (err: any) {
