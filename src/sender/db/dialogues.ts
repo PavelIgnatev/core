@@ -236,13 +236,13 @@ export const updateDateCheckedIds = async (
 export const getRandomPhone = async (): Promise<string | null> => {
   const dialoguesCollection = await getDialoguesCollection();
 
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 2);
+  const sixMonthAgo = new Date();
+  sixMonthAgo.setMonth(sixMonthAgo.getMonth() - 6);
 
   const pipeline = [
     {
       $match: {
-        dateCreated: { $gte: oneMonthAgo },
+        dateCreated: { $gte: sixMonthAgo },
         recipientPhone: { $ne: null },
       },
     },

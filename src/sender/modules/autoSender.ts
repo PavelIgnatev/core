@@ -13,7 +13,6 @@ import {
   errorSender,
   messageStats,
   peerFloods,
-  phoneSearchError,
   sleep,
   startSender,
   withoutRecipientError,
@@ -32,7 +31,7 @@ export const autoSender = async (
   telegramId: string
 ) => {
   const account = await getAccountById(accountId);
-  const { phone } = account
+  const { phone } = account;
   const spamBlockDate = await checkSpamBlock(client, account);
   if (spamBlockDate) {
     return;
@@ -45,7 +44,10 @@ export const autoSender = async (
 
     const firstSendResult = await trySend(client, account, telegramId);
 
-    if (firstSendResult && !(phone && /^\+7/.test(phone))) {
+    if (
+      firstSendResult &&
+      !(phone && /^\+7/.test(phone))
+    ) {
       await trySend(client, account, telegramId, true);
     }
   }
@@ -57,7 +59,7 @@ const trySend = async (
   telegramId: string,
   isSecondAttempt: boolean = false
 ): Promise<boolean> => {
-  const { accountId } = account
+  const { accountId } = account;
   const recipient = await getRecipient(accountId);
   if (!recipient) {
     errorSender[accountId] = 1;
@@ -182,14 +184,12 @@ const trySend = async (
 
     return true;
   } catch (e: any) {
-    if (e.message === 'STABLE_PHONE_SEARCH_ERROR') {
-      if (phoneSearchError[accountId] > 1) {
-        await updateAccountById(accountId, { phoneSearchBlocked: true });
-        return false;
-      }
-      phoneSearchError[accountId] = (phoneSearchError[accountId] || 0) + 1;
-
-      return await trySend(client, account, telegramId, isSecondAttempt);
+    if (e.message === 'PHONE_SEARCH_ERROR') {
+      await updateAccountById(accountId, {
+        phoneSearchBlocked: true,
+        remainingTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+      });
+      return false;
     }
 
     if (
@@ -220,6 +220,12 @@ const trySend = async (
 
     if (e.message.includes('PEER_FLOOD')) {
       peerFloods[accountId] = 1;
+
+      if (/^phone/.test(accountId.toLowerCase())) {
+        await updateAccountById(accountId, {
+          remainingTime: new Date(new Date().getTime() + 6 * 60 * 60 * 1000),
+        });
+      }
     } else {
       await sendToMainBot(`** AUTO_SENDER_ERROR **
 USER_DATA: ${recipient.username}

@@ -15,21 +15,24 @@ export const resolvePhone = async (client: TelegramClient, phone: string) => {
     return contact;
   }
 
-  const randomPhone = await getRandomPhone();
-  if (!randomPhone) {
-    throw new Error('RANDOM_PHONE_NOT_FOUND');
+  for (let i = 0; i < 3; i++) {
+    const randomPhone = await getRandomPhone();
+    if (!randomPhone) {
+      throw new Error('RANDOM_PHONE_NOT_FOUND');
+    }
+
+    const randomContact = await invokeRequest(
+      client,
+      new GramJs.contacts.ResolvePhone({
+        phone: `+${randomPhone}`,
+      }),
+      { shouldIgnoreErrors: true }
+    );
+
+    if (randomContact) {
+      return null;
+    }
   }
 
-  const randomContact = await invokeRequest(
-    client,
-    new GramJs.contacts.ResolvePhone({
-      phone: `+${randomPhone}`,
-    }),
-    { shouldIgnoreErrors: true }
-  );
-  if (!randomContact) {
-    throw new Error('STABLE_PHONE_SEARCH_ERROR');
-  }
-
-  return null;
+  throw new Error('PHONE_SEARCH_ERROR');
 };

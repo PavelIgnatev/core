@@ -49,7 +49,7 @@ AI_BOT_NAME: ${aiBotName}
 AI_BOT_USERNAME: ${aiBotUsername}
 DIALOGUE:
 ${formatDialogue(messages, recipientId)}`,
-        DATE_CREATE: dialogue._id.getTimestamp().toISOString(),
+        DATE_CREATE: dialogue._id!.getTimestamp().toISOString(),
         DATE_MODIFY: new Date().toISOString(),
       };
 
@@ -77,7 +77,7 @@ ${formatDialogue(messages, recipientId)}`,
         COMMENTS_AI_BOT_USERNAME: aiBotUsername,
         COMMENTS_DIALOGUE: formatDialogue(messages, recipientId),
 
-        DATE_CREATE: dialogue._id.getTimestamp().toISOString(),
+        DATE_CREATE: dialogue._id!.getTimestamp().toISOString(),
         DATE_MODIFY: new Date().toISOString(),
       };
 
@@ -112,7 +112,7 @@ ${formatDialogue(messages, recipientId)}`,
 
         messages: formattedMessages,
 
-        dateCreated: dialogue._id.getTimestamp().toISOString(),
+        dateCreated: dialogue._id!.getTimestamp().toISOString(),
         dateUpdated: new Date().toISOString(),
       });
 
