@@ -123,7 +123,6 @@ class TelegramClient {
     this.session.setAuthKey(this._sender.authKey);
 
     if (!this.session._working) {
-      console.log('z nenen')
       await this._sender.send(this._initWith(new requests.help.GetConfig({})));
     }
   }
