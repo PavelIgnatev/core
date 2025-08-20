@@ -96,10 +96,10 @@ const starter = async (
 
         await updateStatus(client, false);
 
-        // if (updateCounter % 10 === 0) {
-        //   await pingDelayDisconnect(client);
-        // }
-        // updateCounter+= 1
+        if (updateCounter % 10 === 0) {
+          await pingDelayDisconnect(client);
+        }
+        updateCounter+= 1
 
         setTimeout(updateLoop, 20000);
       } catch (err: any) {
@@ -116,7 +116,7 @@ ERROR: ${err.message}`);
 
     const [meName, meId] = await accountSetup(client, account);
 
-    // await personalChannel(account, client);
+    await personalChannel(account, client);
 
     let i = -1;
     while (true) {

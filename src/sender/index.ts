@@ -126,7 +126,7 @@ const main = async () => {
 
   // // 7564095141-prefix-aisender
   // const workers = [
-  //   createWorker(0, ['7568825214-prefix-aisender']),
+  //   createWorker(0, ['7939021935-prefix-female-senderok']),
   // ];
 
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
