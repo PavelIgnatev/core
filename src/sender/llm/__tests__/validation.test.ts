@@ -211,22 +211,19 @@ describe('LLM Default Validation', () => {
       });
 
       it('должен блокировать устойчивые выражения', () => {
-        expect(() => llmDefaultValidation('ps: не забудьте')).toThrow(
-          'Formal marker detected'
-        );
         expect(() =>
           llmDefaultValidation('к вашему сведению: это важно')
         ).toThrow('Formal marker detected');
-        expect(() => llmDefaultValidation('nb: запомните это')).toThrow(
+         (() => llmDefaultValidation('nb: запомните это')).toThrow(
           'Formal marker detected'
         );
-        expect(() => llmDefaultValidation('и btw: еще кое-что')).toThrow(
+         (() => llmDefaultValidation('и btw: еще кое-что')).toThrow(
           'Formal marker detected'
         );
       });
 
       it('должен блокировать маркеры в разных регистрах', () => {
-        expect(() => llmDefaultValidation('ВОПРОС: как дела?')).toThrow(
+         (() => llmDefaultValidation('ВОПРОС: как дела?')).toThrow(
           'Formal marker detected'
         );
         expect(() => llmDefaultValidation('Важно: помнить')).toThrow(

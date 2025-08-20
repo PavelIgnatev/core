@@ -44,6 +44,7 @@
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.1",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20.12.7",
     "@types/user-agents": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
