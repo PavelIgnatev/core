@@ -221,9 +221,9 @@ const trySend = async (
     if (e.message.includes('PEER_FLOOD')) {
       peerFloods[accountId] = 1;
 
-      if (/^phone/.test(accountId.toLowerCase())) {
+      if (accountId.toLowerCase().includes('phone')) {
         await updateAccountById(accountId, {
-          remainingTime: new Date(new Date().getTime() + 6 * 60 * 60 * 1000),
+          remainingTime: new Date(new Date().getTime() + 4 * 60 * 60 * 1000),
         });
       }
     } else {
