@@ -96,7 +96,7 @@ const starter = async (
 
         await updateStatus(client, false);
 
-        if (updateCounter % 10 === 0) {
+        if (updateCounter % 3 === 0) {
           await pingDelayDisconnect(client);
         }
         updateCounter+= 1
