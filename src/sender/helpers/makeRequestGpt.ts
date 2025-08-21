@@ -294,6 +294,7 @@ ${errors.map((error) => `- **${error}**`).join('\n')}`,
           .replace('<ASSISTANT>', '')
           .replaceAll(/[«»„“”‘’'"`『』「」]/g, '')
           .replace('т.me', 't.me')
+          .replace('nt.me', 't.me')
           .replace('т .me', 't.me')
           .replace('т. me', 't.me')
           .trim(),
