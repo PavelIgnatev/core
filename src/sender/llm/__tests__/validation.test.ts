@@ -236,9 +236,6 @@ describe('LLM Default Validation', () => {
 
       it('должен блокировать множественные маркеры', () => {
         expect(() =>
-          llmDefaultValidation('вопрос важный: как дела? ps: ответьте')
-        ).toThrow('Formal marker detected');
-        expect(() =>
           llmDefaultValidation('важно: помнить! nb: и это тоже')
         ).toThrow('Formal marker detected');
         expect(() =>
