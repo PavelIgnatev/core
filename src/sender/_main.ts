@@ -46,7 +46,7 @@ const starter = async (
 ) => {
   const startTime = performance.now();
 
-  let errored = false;
+  let errored: string | boolean = false;
   let isAutoResponse = true;
   let account: Account | null = null;
   let client: TelegramClient | null = null;
@@ -72,7 +72,15 @@ const starter = async (
     client = await initClient(
       { ...account, nextApiId },
       (update) =>
-        handleUpdate(client, ID, update, () => (isAutoResponse = true)),
+        handleUpdate(
+          client,
+          ID,
+          update,
+          () => (isAutoResponse = true),
+          (error) => {
+            errored = error;
+          }
+        ),
       (error) => sendToMainBot(error)
     );
 
@@ -99,7 +107,7 @@ const starter = async (
         if (updateCounter % 10 === 0) {
           await pingDelayDisconnect(client);
         }
-        updateCounter+= 1
+        updateCounter += 1;
 
         setTimeout(updateLoop, 20000);
       } catch (err: any) {

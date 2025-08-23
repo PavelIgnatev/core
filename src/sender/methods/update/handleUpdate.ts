@@ -7,8 +7,11 @@ import {
   updateDialogue,
   updateSimpleDialogue,
 } from '../../db/dialogues';
+import { invokeRequest } from '../../modules/invokeRequest';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
+
+const deleteMessagesTimers = new Map<string, NodeJS.Timeout>();
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -26,7 +29,8 @@ export const handleUpdate = async (
   accountId: string,
   update: any,
 
-  onNewMessage: () => void
+  onNewMessage: () => void,
+  onNewError: (error: string) => void
 ) => {
   if (!update) {
     return;
@@ -130,5 +134,49 @@ export const handleUpdate = async (
         });
       }
     }
+  } else if (update instanceof GramJs.UpdateDeleteMessages) {
+    const existingTimer = deleteMessagesTimers.get(accountId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        if (!client) return;
+
+        const appConfig = await invokeRequest(
+          client,
+          new GramJs.help.GetAppConfig({})
+        );
+
+        if (
+          !appConfig ||
+          appConfig instanceof GramJs.help.AppConfigNotModified ||
+          appConfig.config instanceof GramJs.JsonNull
+        ) {
+          onNewError('APP_CONFIG_NOT_DEFINED');
+          return;
+        }
+
+        const {
+          config: { value },
+        } = appConfig;
+
+        const isFrozen = Boolean(
+          value.find((k: any) => ({ ...k }).key === 'freeze_until_date')
+        );
+
+        if (isFrozen) {
+          onNewError('ACCOUNT_FROZEN');
+          return;
+        }
+      } catch (error: any) {
+        onNewError(error.message);
+      } finally {
+        deleteMessagesTimers.delete(accountId);
+      }
+    }, 5000);
+
+    deleteMessagesTimers.set(accountId, timer);
   }
 };
