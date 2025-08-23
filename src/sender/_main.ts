@@ -77,9 +77,7 @@ const starter = async (
           ID,
           update,
           () => (isAutoResponse = true),
-          (error) => {
-            errored = error;
-          }
+          (error) => (errored = error)
         ),
       (error) => sendToMainBot(error)
     );

@@ -154,8 +154,7 @@ export const handleUpdate = async (
           appConfig instanceof GramJs.help.AppConfigNotModified ||
           appConfig.config instanceof GramJs.JsonNull
         ) {
-          onNewError('APP_CONFIG_NOT_DEFINED');
-          return;
+          throw new Error('APP_CONFIG_NOT_DEFINED');
         }
 
         const {
@@ -167,8 +166,7 @@ export const handleUpdate = async (
         );
 
         if (isFrozen) {
-          onNewError('ACCOUNT_FROZEN');
-          return;
+          throw new Error('ACCOUNT_FROZEN');
         }
       } catch (error: any) {
         onNewError(error.message);
