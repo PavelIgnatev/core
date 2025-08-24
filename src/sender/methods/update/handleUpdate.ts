@@ -2,6 +2,7 @@ import BigInt from 'big-integer';
 
 import { TelegramClient } from '../../../gramjs';
 import GramJs from '../../../gramjs/tl/api';
+import { getAccountById } from '../../db/accounts';
 import {
   getDialogue,
   updateDialogue,
@@ -10,8 +11,6 @@ import {
 import { invokeRequest } from '../../modules/invokeRequest';
 import { clearAuthorizations } from '../account/clearAuthorizations';
 import { deleteHistory } from '../messages/deleteHistory';
-
-const deleteMessagesTimers = new Map<string, NodeJS.Timeout>();
 
 function findValue(obj: Record<string, any>, valueKey: string) {
   return (
@@ -134,16 +133,11 @@ export const handleUpdate = async (
         });
       }
     }
-  } else if (update instanceof GramJs.UpdateDeleteMessages) {
-    const existingTimer = deleteMessagesTimers.get(accountId);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
+  } else if (update instanceof GramJs.UpdateUserName) {
+    try {
+      const { id } = await getAccountById(accountId);
 
-    const timer = setTimeout(async () => {
-      try {
-        if (!client) return;
-
+      if (client && id === String(update.userId)) {
         const appConfig = await invokeRequest(
           client,
           new GramJs.help.GetAppConfig({})
@@ -168,13 +162,9 @@ export const handleUpdate = async (
         if (isFrozen) {
           throw new Error('ACCOUNT_FROZEN');
         }
-      } catch (error: any) {
-        onNewError(error.message);
-      } finally {
-        deleteMessagesTimers.delete(accountId);
       }
-    }, 5000);
-
-    deleteMessagesTimers.set(accountId, timer);
+    } catch (error: any) {
+      onNewError(error.message);
+    }
   }
 };
