@@ -137,7 +137,7 @@ export const handleUpdate = async (
     try {
       const { id } = await getAccountById(accountId);
 
-      if (client && id === userId) {
+      if (client && id === String(userId)) {
         const appConfig = await invokeRequest(
           client,
           new GramJs.help.GetAppConfig({})
