@@ -64,7 +64,7 @@ export const recheck = async (ID: string) => {
 
     await clearAuthorizations(client);
 
-    await sleep(180000);
+    await sleep(10000);
 
     if (errored) {
       throw new Error(errored);
