@@ -49,7 +49,7 @@ const reCheck = async () => {
   const startCheckerTime = performance.now();
   const reloginPromises: Promise<any>[] = [];
 
-  accounts.forEach((accountId: string) => {
+  accounts.slice(0, 1000).forEach((accountId: string) => {
     reloginPromises.push(recheck(accountId));
   });
 
