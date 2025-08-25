@@ -13,13 +13,21 @@ export const getAccounts = async () => {
     { $set: { banned: true, reason: 'manual-stopped' } }
   );
 
-  const accounts = await accountCollection.distinct('accountId', {
-    stable: true,
-    banned: { $ne: true },
-    stopped: { $ne: true },
-    parentAccountId: { $ne: null },
-    forceStop: { $ne: true },
-  });
+  const accounts = await accountCollection
+    .find({
+      stable: true,
+      banned: { $ne: true },
+      stopped: { $ne: true },
+      parentAccountId: { $ne: null },
+      forceStop: { $ne: true },
+    },
+    { projection: { accountId: 1 } }
+  )
+    .sort({ checkDate: 1 })
+    .limit(1000)
+    .toArray();
+
+  return accounts.map(account => account.accountId);
 
   return accounts;
 };
