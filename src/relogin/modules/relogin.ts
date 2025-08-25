@@ -239,15 +239,15 @@ export const relogin = async (ID: string) => {
     );
     clients.push(clientForLogin);
 
-    const isExists = await getAccountById(id);
-    if (isExists) {
-      await updateAccountById(ID, {
-        banned: true,
-        reason: 'ACCOUNT_ALREADY_EXISTS',
-        bannedDate: new Date(),
-      });
-      throw new Error('ACCOUNT_ALREADY_EXISTS');
-    }
+    // const isExists = await getAccountById(id);
+    // if (isExists) {
+    //   await updateAccountById(ID, {
+    //     banned: true,
+    //     reason: 'ACCOUNT_ALREADY_EXISTS',
+    //     bannedDate: new Date(),
+    //   });
+    //   throw new Error('ACCOUNT_ALREADY_EXISTS');
+    // }
 
     const sessionData = clientForLogin.session.getSessionData();
     const { keys, mainDcId } = sessionData;
