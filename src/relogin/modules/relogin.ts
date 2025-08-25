@@ -152,7 +152,7 @@ const loginWithCode = async (
   );
 
   if (codeResult.error === 'CODE_TIMEOUT' && currentApiId === 2040) {
-    currentApiId = 2496;
+    currentApiId = 2040;
     clientForLogin = await initClient(
       {
         accountId: phoneNumber,
