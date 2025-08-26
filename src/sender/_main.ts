@@ -122,7 +122,7 @@ ERROR: ${err.message}`);
 
     const [meName, meId] = await accountSetup(client, account);
 
-    await personalChannel(account, client);
+    // await personalChannel(account, client);
 
     let i = -1;
     while (true) {
