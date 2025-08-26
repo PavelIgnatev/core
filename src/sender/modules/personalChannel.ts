@@ -20,7 +20,11 @@ const halfMinute = 30000; // 30000
 const isPersonalChannel = (account: Account) => {
   const { personalChannel, personalChannelDate, accountId } = account;
 
-  if (personalChannel || accountId.includes('phone')) {
+  if (
+    personalChannel ||
+    accountId.includes('phone') ||
+    accountId.includes('prefix-female-special')
+  ) {
     return false;
   }
 
@@ -44,7 +48,7 @@ export const personalChannel = async (
   const prefix = accountId.includes('-prefix-')
     ? accountId.split('-prefix-')[1]
     : null;
-
+ 
   if (!pc || !prefix) {
     return;
   }
@@ -117,13 +121,9 @@ export const personalChannel = async (
     }
 
     const { title } = parentChannelChat;
-    const { chatPhoto, about = "" } = fullParentChannel.fullChat;
+    const { chatPhoto, about = '' } = fullParentChannel.fullChat;
 
-    if (
-      !title ||
-      !chatPhoto ||
-      !(chatPhoto instanceof GramJs.Photo)
-    ) {
+    if (!title || !chatPhoto || !(chatPhoto instanceof GramJs.Photo)) {
       throw new Error('CHANNEL_DATA_NOT_FOUND');
     }
 
@@ -255,18 +255,18 @@ export const personalChannel = async (
     const buttons =
       lastMessage.replyMarkup instanceof GramJs.ReplyInlineMarkup
         ? lastMessage.replyMarkup.rows
-          .map((row) =>
-            row.buttons
-              .filter(
-                (button): button is GramJs.KeyboardButtonUrl =>
-                  button instanceof GramJs.KeyboardButtonUrl
-              )
-              .map((button) => ({
-                text: button.text,
-                url: button.url,
-              }))
-          )
-          .filter((row) => row.length)
+            .map((row) =>
+              row.buttons
+                .filter(
+                  (button): button is GramJs.KeyboardButtonUrl =>
+                    button instanceof GramJs.KeyboardButtonUrl
+                )
+                .map((button) => ({
+                  text: button.text,
+                  url: button.url,
+                }))
+            )
+            .filter((row) => row.length)
         : [];
 
     if (!lastMessage.message || !buttons.length) {

@@ -82,7 +82,7 @@ export const saveRecipient = async (
       if (status === 'create') {
         if (accountPhone && /^\+7/.test(accountPhone)) {
           await updateAccountById(accountId, {
-            remainingTime: new Date(new Date().getTime() + 5 * 60 * 60 * 1000),
+            remainingTime: new Date(new Date().getTime() + 4 * 60 * 60 * 1000),
           });
         } else {
           await updateAccountById(accountId, {
