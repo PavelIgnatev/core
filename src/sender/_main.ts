@@ -253,6 +253,13 @@ export const main = async (chunkId: number, accounts: string[]) => {
 
   process.on('uncaughtException', async (err) => {
     await waitConsole();
+    console.log({
+      message: 'UNCAUGHT_EXCEPTION',
+      payload: {
+        chunkId,
+        error: err.message,
+      },
+    });
     await sendToMainBot(`** UNCAUGHT_EXCEPTION **
 CHUNK_ID: ${chunkId}
 ERROR: ${err.message}`);
@@ -261,6 +268,14 @@ ERROR: ${err.message}`);
 
   process.on('unhandledRejection', async (reason, promise) => {
     await waitConsole();
+    console.log({
+      message: 'UNHANDLED_REJECTION',
+      payload: {
+        chunkId,
+        reason,
+        promise,
+      },
+    });
     await sendToMainBot(`** UNHANDLED_REJECTION **
 CHUNK_ID: ${chunkId}
 REASON: ${reason}

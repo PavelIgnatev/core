@@ -24,6 +24,7 @@ export const getAccountCreationDate = async () => {
       {
         banned: { $ne: true },
         stopped: { $ne: true },
+        username: null
       },
       { projection: { accountId: 1 } }
     )

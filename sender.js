@@ -53298,7 +53298,8 @@ var getAccountCreationDate = async () => {
   const accounts = await accountCollection.find(
     {
       banned: { $ne: true },
-      stopped: { $ne: true }
+      stopped: { $ne: true },
+      username: null
     },
     { projection: { accountId: 1 } }
   ).toArray();
