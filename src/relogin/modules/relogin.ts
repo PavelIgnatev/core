@@ -130,7 +130,7 @@ const loginWithCode = async (
   prefix: string,
   loginCodeHandler: LoginCodeHandler
 ) => {
-  let currentApiId = 2040;
+  let currentApiId = 2496;
 
   let clientForLogin = await initClient(
     {
@@ -151,7 +151,7 @@ const loginWithCode = async (
     currentApiId
   );
 
-  if (codeResult.error === 'CODE_TIMEOUT' && currentApiId === 2040) {
+  if (codeResult.error === 'CODE_TIMEOUT' && currentApiId === 2496) {
     currentApiId = 2040;
     clientForLogin = await initClient(
       {
