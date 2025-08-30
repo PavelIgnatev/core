@@ -38,13 +38,19 @@ type WorkerSuccessData = {
   clients: ClientData[];
   clientsData: ClientsData;
   endTime: string;
+  isFrozen: boolean;
 };
 
 export const makeMetricsAll = async (
   promises: WorkerSuccessData[],
   startTime: number = Date.now()
 ) => {
-  const globalMetrics = {
+  // Разделяем пачки на frozen и regular
+  const frozenPromises = promises.filter(p => p.isFrozen);
+  const regularPromises = promises.filter(p => !p.isFrozen);
+
+  // Функция для создания глобальных метрик
+  const createGlobalMetrics = () => ({
     clients: [] as ClientData[],
     clientsData: {
       aiReqest: {},
@@ -57,36 +63,47 @@ export const makeMetricsAll = async (
       withoutRecipientError: {},
       messageStats: {},
     } as ClientsData,
-  };
+  });
 
-  // Объединяем все данные из промисов
-  for (const promise of promises) {
-    const { clients, clientsData } = promise;
+  const globalMetrics = createGlobalMetrics();
+  const frozenMetrics = createGlobalMetrics();
+  const regularMetrics = createGlobalMetrics();
 
-    // Добавляем клиентов в общий массив
-    globalMetrics.clients.push(...clients);
+  // Функция для объединения данных из промисов
+  const mergeMetrics = (targetMetrics: ReturnType<typeof createGlobalMetrics>, sourcePromises: WorkerSuccessData[]) => {
+    for (const promise of sourcePromises) {
+      const { clients, clientsData } = promise;
 
-    // Объединяем данные клиентов
-    for (const key in clientsData) {
-      if (key === 'allTimings') {
-        globalMetrics.clientsData.allTimings.push(...clientsData.allTimings);
-      } else {
-        const target =
-          globalMetrics.clientsData[
-            key as keyof Omit<ClientsData, 'allTimings'>
-          ];
-        const source =
-          clientsData[key as keyof Omit<ClientsData, 'allTimings'>];
-        if (typeof target === 'object' && target !== null) {
-          for (const k in source) {
-            (target as Record<string, number>)[k] =
-              ((target as Record<string, number>)[k] || 0) +
-              (source as Record<string, number>)[k];
+      // Добавляем клиентов в общий массив
+      targetMetrics.clients.push(...clients);
+
+      // Объединяем данные клиентов
+      for (const key in clientsData) {
+        if (key === 'allTimings') {
+          targetMetrics.clientsData.allTimings.push(...clientsData.allTimings);
+        } else {
+          const target =
+            targetMetrics.clientsData[
+              key as keyof Omit<ClientsData, 'allTimings'>
+            ];
+          const source =
+            clientsData[key as keyof Omit<ClientsData, 'allTimings'>];
+          if (typeof target === 'object' && target !== null) {
+            for (const k in source) {
+              (target as Record<string, number>)[k] =
+                ((target as Record<string, number>)[k] || 0) +
+                (source as Record<string, number>)[k];
+            }
           }
         }
       }
     }
-  }
+  };
+
+  // Объединяем данные для всех типов метрик
+  mergeMetrics(globalMetrics, promises);
+  mergeMetrics(frozenMetrics, frozenPromises);
+  mergeMetrics(regularMetrics, regularPromises);
 
   // Вычисляем общие метрики
   const initTimings = globalMetrics.clients.map((p) => ({
@@ -185,6 +202,10 @@ export const makeMetricsAll = async (
     message: '💥 ALL CHUNKS DONE 💥',
     totalChunks: promises.length,
     totalClients: globalMetrics.clients.length,
+    frozenChunks: frozenPromises.length,
+    frozenClients: frozenMetrics.clients.length,
+    regularChunks: regularPromises.length,
+    regularClients: regularMetrics.clients.length,
   });
 
   const reconnectDistribution: Record<string, number> = {};
@@ -271,9 +292,9 @@ export const makeMetricsAll = async (
 * ВРЕМЯ ВЫПОЛНЕНИЯ ЧАНКОВ *
 ${chunkTimesStats}
 
-* АККАУНТЫ * 
-ВСЕГО ЧАНКОВ: ${promises.length}
-В РАБОТЕ: ${globalMetrics.clients.length}
+* АККАУНТЫ *
+ВСЕГО ЧАНКОВ: ${promises.length} (FROZEN: ${frozenPromises.length}, REGULAR: ${regularPromises.length})
+В РАБОТЕ: ${globalMetrics.clients.length} (FROZEN: ${frozenMetrics.clients.length}, REGULAR: ${regularMetrics.clients.length})
 СРЕДНЕЕ ВРЕМЯ ЗАПУСКА: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
 СРЕДНЕЕ ВРЕМЯ РАБОТЫ: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
 

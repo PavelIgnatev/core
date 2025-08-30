@@ -271,6 +271,7 @@ export const main = async (chunkId: number, accounts: string[]) => {
   const startTime = performance.now();
   const promises: Promise<TelegramClient | null>[] = [];
   const accountsInWork: Record<string, number> = {};
+  const isFrozen = accounts.some(accountId => accountId.includes('frozen'));
 
   await Promise.all([coreDB(), logsDB()]);
   for (const accountId of accounts) {
@@ -279,7 +280,7 @@ export const main = async (chunkId: number, accounts: string[]) => {
 
   const interval = setInterval(() => {
     console.log({
-      message: `CHUNK #${chunkId} IN PROGRESS (${Object.keys(accountsInWork).length})`,
+      message: `${isFrozen ? 'FROZEN' : 'REGULAR'} CHUNK #${chunkId} IN PROGRESS (${Object.keys(accountsInWork).length})`,
       accountsInWork,
     });
   }, 60000);

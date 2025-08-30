@@ -7764,23 +7764,23 @@ var require_utils = __commonJS({
     function promiseWithResolvers() {
       let resolve;
       let reject;
-      const promise = new Promise(function withResolversExecutor(promiseResolve, promiseReject) {
+      const promise2 = new Promise(function withResolversExecutor(promiseResolve, promiseReject) {
         resolve = promiseResolve;
         reject = promiseReject;
       });
-      return { promise, resolve, reject };
+      return { promise: promise2, resolve, reject };
     }
     function squashError(_error) {
       return;
     }
     exports2.randomBytes = (0, util_1.promisify)(crypto3.randomBytes);
     async function once(ee, name) {
-      const { promise, resolve, reject } = promiseWithResolvers();
+      const { promise: promise2, resolve, reject } = promiseWithResolvers();
       const onEvent = (data) => resolve(data);
       const onError = (error) => reject(error);
       ee.once(name, onEvent).once("error", onError);
       try {
-        const res = await promise;
+        const res = await promise2;
         ee.off("error", onError);
         return res;
       } catch (error) {
@@ -29087,11 +29087,11 @@ var require_sessions = __commonJS({
           while (!committed) {
             this.startTransaction(options);
             try {
-              const promise = fn(this);
-              if (!(0, utils_1.isPromiseLike)(promise)) {
+              const promise2 = fn(this);
+              if (!(0, utils_1.isPromiseLike)(promise2)) {
                 throw new error_1.MongoInvalidArgumentError("Function provided to `withTransaction` must return a Promise");
               }
-              result = await promise;
+              result = await promise2;
               if (this.transaction.state === transactions_1.TxnState.NO_TRANSACTION || this.transaction.state === transactions_1.TxnState.TRANSACTION_COMMITTED || this.transaction.state === transactions_1.TxnState.TRANSACTION_ABORTED) {
                 return result;
               }
@@ -29674,9 +29674,9 @@ var require_on_data = __commonJS({
           }
           if (finished)
             return closeHandler();
-          const { promise, resolve, reject } = (0, utils_1.promiseWithResolvers)();
+          const { promise: promise2, resolve, reject } = (0, utils_1.promiseWithResolvers)();
           unconsumedPromises.push({ resolve, reject });
-          return promise;
+          return promise2;
         },
         return() {
           return closeHandler();
@@ -29696,16 +29696,16 @@ var require_on_data = __commonJS({
       timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.then(void 0, errorHandler);
       return iterator2;
       function eventHandler(value) {
-        const promise = unconsumedPromises.shift();
-        if (promise != null)
-          promise.resolve({ value, done: false });
+        const promise2 = unconsumedPromises.shift();
+        if (promise2 != null)
+          promise2.resolve({ value, done: false });
         else
           unconsumedEvents.push(value);
       }
       function errorHandler(err) {
-        const promise = unconsumedPromises.shift();
-        if (promise != null)
-          promise.reject(err);
+        const promise2 = unconsumedPromises.shift();
+        if (promise2 != null)
+          promise2.reject(err);
         else
           error = err;
         void closeHandler();
@@ -29716,8 +29716,8 @@ var require_on_data = __commonJS({
         finished = true;
         timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.clear();
         const doneResult = { value: void 0, done: finished };
-        for (const promise of unconsumedPromises) {
-          promise.resolve(doneResult);
+        for (const promise2 of unconsumedPromises) {
+          promise2.resolve(doneResult);
         }
         return Promise.resolve(doneResult);
       }
@@ -30996,7 +30996,7 @@ var require_connection_pool = __commonJS({
       async checkOut(options) {
         const checkoutTime = (0, utils_1.now)();
         this.emitAndLog(_ConnectionPool.CONNECTION_CHECK_OUT_STARTED, new connection_pool_events_1.ConnectionCheckOutStartedEvent(this));
-        const { promise, resolve, reject } = (0, utils_1.promiseWithResolvers)();
+        const { promise: promise2, resolve, reject } = (0, utils_1.promiseWithResolvers)();
         const timeout = options.timeoutContext.connectionCheckoutTimeout;
         const waitQueueMember = {
           resolve,
@@ -31007,7 +31007,7 @@ var require_connection_pool = __commonJS({
         process.nextTick(() => this.processWaitQueue());
         try {
           timeout == null ? void 0 : timeout.throwIfExpired();
-          return await (timeout ? Promise.race([promise, timeout]) : promise);
+          return await (timeout ? Promise.race([promise2, timeout]) : promise2);
         } catch (error) {
           if (timeout_1.TimeoutError.is(error)) {
             timeout == null ? void 0 : timeout.clear();
@@ -52824,7 +52824,7 @@ var Axios = class {
     this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
       responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
     });
-    let promise;
+    let promise2;
     let i = 0;
     let len;
     if (!synchronousRequestInterceptors) {
@@ -52832,11 +52832,11 @@ var Axios = class {
       chain.unshift.apply(chain, requestInterceptorChain);
       chain.push.apply(chain, responseInterceptorChain);
       len = chain.length;
-      promise = Promise.resolve(config);
+      promise2 = Promise.resolve(config);
       while (i < len) {
-        promise = promise.then(chain[i++], chain[i++]);
+        promise2 = promise2.then(chain[i++], chain[i++]);
       }
-      return promise;
+      return promise2;
     }
     len = requestInterceptorChain.length;
     let newConfig = config;
@@ -52852,16 +52852,16 @@ var Axios = class {
       }
     }
     try {
-      promise = dispatchRequest.call(this, newConfig);
+      promise2 = dispatchRequest.call(this, newConfig);
     } catch (error) {
       return Promise.reject(error);
     }
     i = 0;
     len = responseInterceptorChain.length;
     while (i < len) {
-      promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+      promise2 = promise2.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
     }
-    return promise;
+    return promise2;
   }
   getUri(config) {
     config = mergeConfig(this.defaults, config);
@@ -52917,14 +52917,14 @@ var CancelToken = class _CancelToken {
     });
     this.promise.then = (onfulfilled) => {
       let _resolve;
-      const promise = new Promise((resolve) => {
+      const promise2 = new Promise((resolve) => {
         token.subscribe(resolve);
         _resolve = resolve;
       }).then(onfulfilled);
-      promise.cancel = function reject() {
+      promise2.cancel = function reject() {
         token.unsubscribe(_resolve);
       };
-      return promise;
+      return promise2;
     };
     executor(function cancel(message, config, request) {
       if (token.reason) {
@@ -53239,7 +53239,7 @@ var insertLog = async (data) => {
   }
 };
 var mongoLog = async (level, ...args) => {
-  const promise = (async () => {
+  const promise2 = (async () => {
     try {
       if (typeof args[0] !== "object") {
         if (typeof args[0] === "string" && args[0].includes("MaxListenersExceededWarning")) {
@@ -53265,14 +53265,14 @@ var mongoLog = async (level, ...args) => {
 ERROR: ${JSON.stringify(args[0])}`);
     }
   })();
-  activePromises.push(promise);
-  promise.finally(() => {
-    const index = activePromises.indexOf(promise);
+  activePromises.push(promise2);
+  promise2.finally(() => {
+    const index = activePromises.indexOf(promise2);
     if (index > -1) {
       activePromises.splice(index, 1);
     }
   });
-  return promise;
+  return promise2;
 };
 if (process.env.DEV !== "true") {
   console.log = async (...args) => {
@@ -53307,14 +53307,31 @@ var getAccountCreationDate = async () => {
     accountId: account.accountId,
     timestamp: account._id.getTimestamp()
   }));
-  const sortedAccounts = accountsWithTimestamp.sort(
+  const frozenAccounts = accountsWithTimestamp.filter(
+    (account) => account.accountId.includes("frozen")
+  );
+  const regularAccounts = accountsWithTimestamp.filter(
+    (account) => !account.accountId.includes("frozen")
+  );
+  const sortedFrozenAccounts = frozenAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
+  const sortedRegularAccounts = [];
   const CHUNK_SIZE = 100;
   const chunks = [];
-  for (let i = 0; i < sortedAccounts.length; i += CHUNK_SIZE) {
-    const chunk = sortedAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
-    chunks.push(chunk);
+  for (let i = 0; i < sortedFrozenAccounts.length; i += CHUNK_SIZE) {
+    const chunk = sortedFrozenAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
+    chunks.push({
+      accountIds: chunk,
+      isFrozen: true
+    });
+  }
+  for (let i = 0; i < sortedRegularAccounts.length; i += CHUNK_SIZE) {
+    const chunk = sortedRegularAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
+    chunks.push({
+      accountIds: chunk,
+      isFrozen: false
+    });
   }
   return chunks;
 };
@@ -53337,7 +53354,9 @@ var resetAllPFields = async () => {
 
 // src/sender/helpers/makeMetricsAll.ts
 var makeMetricsAll = async (promises, startTime = Date.now()) => {
-  const globalMetrics = {
+  const frozenPromises = promises.filter((p) => p.isFrozen);
+  const regularPromises = promises.filter((p) => !p.isFrozen);
+  const createGlobalMetrics = () => ({
     clients: [],
     clientsData: {
       aiReqest: {},
@@ -53350,24 +53369,32 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
       withoutRecipientError: {},
       messageStats: {}
     }
-  };
-  for (const promise of promises) {
-    const { clients, clientsData } = promise;
-    globalMetrics.clients.push(...clients);
-    for (const key in clientsData) {
-      if (key === "allTimings") {
-        globalMetrics.clientsData.allTimings.push(...clientsData.allTimings);
-      } else {
-        const target = globalMetrics.clientsData[key];
-        const source = clientsData[key];
-        if (typeof target === "object" && target !== null) {
-          for (const k in source) {
-            target[k] = (target[k] || 0) + source[k];
+  });
+  const globalMetrics = createGlobalMetrics();
+  const frozenMetrics = createGlobalMetrics();
+  const regularMetrics = createGlobalMetrics();
+  const mergeMetrics = (targetMetrics, sourcePromises) => {
+    for (const promise2 of sourcePromises) {
+      const { clients, clientsData } = promise2;
+      targetMetrics.clients.push(...clients);
+      for (const key in clientsData) {
+        if (key === "allTimings") {
+          targetMetrics.clientsData.allTimings.push(...clientsData.allTimings);
+        } else {
+          const target = targetMetrics.clientsData[key];
+          const source = clientsData[key];
+          if (typeof target === "object" && target !== null) {
+            for (const k in source) {
+              target[k] = (target[k] || 0) + source[k];
+            }
           }
         }
       }
     }
-  }
+  };
+  mergeMetrics(globalMetrics, promises);
+  mergeMetrics(frozenMetrics, frozenPromises);
+  mergeMetrics(regularMetrics, regularPromises);
   const initTimings = globalMetrics.clients.map((p) => ({
     id: p.accountId,
     value: Number(p.initTime)
@@ -53442,7 +53469,11 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
   console.log({
     message: "\u{1F4A5} ALL CHUNKS DONE \u{1F4A5}",
     totalChunks: promises.length,
-    totalClients: globalMetrics.clients.length
+    totalClients: globalMetrics.clients.length,
+    frozenChunks: frozenPromises.length,
+    frozenClients: frozenMetrics.clients.length,
+    regularChunks: regularPromises.length,
+    regularClients: regularMetrics.clients.length
   });
   const reconnectDistribution = {};
   for (const client of globalMetrics.clients) {
@@ -53475,8 +53506,8 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
   let totalDoubleSends = 0;
   let totalCompletedSends = 0;
   const mergedMessageStats = {};
-  for (const promise of promises) {
-    const { clientsData } = promise;
+  for (const promise2 of promises) {
+    const { clientsData } = promise2;
     if (clientsData.messageStats) {
       for (const accountId in clientsData.messageStats) {
         const metrics = clientsData.messageStats[accountId];
@@ -53506,9 +53537,9 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
 * \u0412\u0420\u0415\u041C\u042F \u0412\u042B\u041F\u041E\u041B\u041D\u0415\u041D\u0418\u042F \u0427\u0410\u041D\u041A\u041E\u0412 *
 ${chunkTimesStats}
 
-* \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B * 
-\u0412\u0421\u0415\u0413\u041E \u0427\u0410\u041D\u041A\u041E\u0412: ${promises.length}
-\u0412 \u0420\u0410\u0411\u041E\u0422\u0415: ${globalMetrics.clients.length}
+* \u0410\u041A\u041A\u0410\u0423\u041D\u0422\u042B *
+\u0412\u0421\u0415\u0413\u041E \u0427\u0410\u041D\u041A\u041E\u0412: ${promises.length} (FROZEN: ${frozenPromises.length}, REGULAR: ${regularPromises.length})
+\u0412 \u0420\u0410\u0411\u041E\u0422\u0415: ${globalMetrics.clients.length} (FROZEN: ${frozenMetrics.clients.length}, REGULAR: ${regularMetrics.clients.length})
 \u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0417\u0410\u041F\u0423\u0421\u041A\u0410: ${getTimeStringByTime(midInitTimings)} (max: ${getTimeStringByTime(maxInitTiming.value)})
 \u0421\u0420\u0415\u0414\u041D\u0415\u0415 \u0412\u0420\u0415\u041C\u042F \u0420\u0410\u0411\u041E\u0422\u042B: ${getTimeStringByTime(midEndTimings)} (max: ${getTimeStringByTime(maxEndTiming.value)})
 
@@ -53726,6 +53757,7 @@ ${formatTop(bottomByAvgReceivedPacketSize, true)}`;
 var WORKER_TIMEOUT_MS = 90 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
+    const isFrozen = promise.accountIds.some((accountId) => accountId.includes("frozen"));
     const worker = new import_worker_threads.Worker(
       `
 const { workerData, parentPort } = require('worker_threads');
@@ -53742,7 +53774,7 @@ async function run() {
       chunkId: workerData.chunkId,
     });
   } catch (error) {
-    parentPort.postMessage({ 
+    parentPort.postMessage({
       type: 'error',
       error: error.message,
       chunkId: workerData.chunkId
@@ -53759,19 +53791,21 @@ run();`,
       resolve({
         type: "error",
         error: `WORKER_TIMEOUT_ERROR`,
-        chunkId
+        chunkId,
+        isFrozen
       });
     }, WORKER_TIMEOUT_MS);
     worker.on("message", (message) => {
       clearTimeout(timeoutId);
-      resolve(message);
+      resolve({ ...message, isFrozen });
     });
     worker.on("error", (error) => {
       clearTimeout(timeoutId);
       resolve({
         type: "error",
         error: error.message,
-        chunkId
+        chunkId,
+        isFrozen
       });
     });
     worker.on("exit", (code) => {
@@ -53780,7 +53814,8 @@ run();`,
         resolve({
           type: "error",
           error: `WORKER_STOPPED_WITH_CODE_${code}`,
-          chunkId
+          chunkId,
+          isFrozen
         });
       }
     });
@@ -53792,22 +53827,27 @@ var main = async () => {
   const appStartTime = Date.now();
   const chunks = await getAccountCreationDate();
   console.log({
-    message: "\u{1F4A5} ITERATION INIT \u{1F4A5}"
+    message: "\u{1F4A5} ITERATION INIT \u{1F4A5}",
+    totalChunks: chunks.length,
+    frozenChunks: chunks.filter((c) => c.isFrozen).length,
+    regularChunks: chunks.filter((c) => !c.isFrozen).length
   });
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
   const promises = await Promise.all(workers);
   const successPromises = [];
-  for (const promise of promises) {
-    if (promise.type === "error") {
-      await sendToMainBot(`** WORKER_ERROR **
-ERROR: ${promise.error}
-CHUNK_ID: ${promise.chunkId}`);
+  for (const promise2 of promises) {
+    if (promise2.type === "error") {
+      const chunkType = promise2.isFrozen ? "FROZEN" : "REGULAR";
+      await sendToMainBot(`** WORKER_ERROR (${chunkType}) **
+ERROR: ${promise2.error}
+CHUNK_ID: ${promise2.chunkId}`);
     } else {
       successPromises.push({
-        chunkId: promise.chunkId,
-        clients: promise.clients,
-        clientsData: promise.clientsData,
-        endTime: promise.endTime
+        chunkId: promise2.chunkId,
+        clients: promise2.clients,
+        clientsData: promise2.clientsData,
+        endTime: promise2.endTime,
+        isFrozen: promise2.isFrozen
       });
     }
   }

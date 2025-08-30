@@ -13,6 +13,7 @@ type WorkerMessageError = {
   type: 'error';
   error: string;
   chunkId: number;
+  isFrozen: boolean
 };
 
 type WorkerMessageSuccess = {
@@ -39,6 +40,7 @@ type WorkerMessageSuccess = {
   };
   endTime: string;
   chunkId: number;
+  isFrozen: boolean;
 };
 
 type WorkerMessage = WorkerMessageSuccess | WorkerMessageError;
@@ -47,6 +49,8 @@ const WORKER_TIMEOUT_MS = 90 * 60 * 1000;
 
 const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
+    const isFrozen = promise.accountIds.some(accountId => accountId.includes('frozen'));
+
     const worker = new Worker(
       `
 const { workerData, parentPort } = require('worker_threads');
@@ -63,7 +67,7 @@ async function run() {
       chunkId: workerData.chunkId,
     });
   } catch (error) {
-    parentPort.postMessage({ 
+    parentPort.postMessage({
       type: 'error',
       error: error.message,
       chunkId: workerData.chunkId
@@ -77,17 +81,19 @@ run();`,
       }
     );
 
+
     const timeoutId = setTimeout(() => {
       resolve({
         type: 'error',
         error: `WORKER_TIMEOUT_ERROR`,
         chunkId,
+        isFrozen
       });
     }, WORKER_TIMEOUT_MS);
 
     worker.on('message', (message: WorkerMessage) => {
       clearTimeout(timeoutId);
-      resolve(message);
+      resolve({ ...message, isFrozen });
     });
 
     worker.on('error', (error) => {
@@ -96,6 +102,7 @@ run();`,
         type: 'error',
         error: error.message,
         chunkId,
+        isFrozen
       });
     });
 
@@ -106,6 +113,7 @@ run();`,
           type: 'error',
           error: `WORKER_STOPPED_WITH_CODE_${code}`,
           chunkId,
+          isFrozen
         });
       }
     });
@@ -122,20 +130,24 @@ const main = async () => {
   const chunks = await getAccountCreationDate();
   console.log({
     message: '💥 ITERATION INIT 💥',
+    totalChunks: chunks.length,
+    frozenChunks: chunks.filter(c => c.isFrozen).length,
+    regularChunks: chunks.filter(c => !c.isFrozen).length,
   });
 
   // // 7564095141-prefix-aisender
   // const workers = [
-  //   createWorker(0, ['8476871532-prefix-phone']),
+  //   createWorker(0, ['8476871532-prefix-phone'], false),
   // ];
 
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk));
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
   for (const promise of promises) {
     if (promise.type === 'error') {
-      await sendToMainBot(`** WORKER_ERROR **
+      const chunkType = promise.isFrozen ? 'FROZEN' : 'REGULAR';
+      await sendToMainBot(`** WORKER_ERROR (${chunkType}) **
 ERROR: ${promise.error}
 CHUNK_ID: ${promise.chunkId}`);
     } else {
@@ -144,6 +156,7 @@ CHUNK_ID: ${promise.chunkId}`);
         clients: promise.clients,
         clientsData: promise.clientsData,
         endTime: promise.endTime,
+        isFrozen: promise.isFrozen,
       });
     }
   }

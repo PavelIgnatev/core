@@ -35,18 +35,46 @@ export const getAccountCreationDate = async () => {
     timestamp: account._id.getTimestamp(),
   }));
 
-  const sortedAccounts = accountsWithTimestamp.sort(
+  // Разделяем аккаунты на frozen и обычные
+  const frozenAccounts = accountsWithTimestamp.filter(account =>
+    account.accountId.includes('frozen')
+  );
+  const regularAccounts = accountsWithTimestamp.filter(account =>
+    !account.accountId.includes('frozen')
+  );
+
+  // Сортируем каждую группу по дате создания
+  const sortedFrozenAccounts = frozenAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
+  // const sortedRegularAccounts = regularAccounts.sort(
+  //   (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  // );
+  const sortedRegularAccounts = []
 
   const CHUNK_SIZE = 100;
   const chunks = [];
 
-  for (let i = 0; i < sortedAccounts.length; i += CHUNK_SIZE) {
-    const chunk = sortedAccounts
+  // Создаем пачки для frozen аккаунтов
+  for (let i = 0; i < sortedFrozenAccounts.length; i += CHUNK_SIZE) {
+    const chunk = sortedFrozenAccounts
       .slice(i, i + CHUNK_SIZE)
       .map((acc) => acc.accountId);
-    chunks.push(chunk);
+    chunks.push({
+      accountIds: chunk,
+      isFrozen: true
+    });
+  }
+
+  // Создаем пачки для обычных аккаунтов
+  for (let i = 0; i < sortedRegularAccounts.length; i += CHUNK_SIZE) {
+    const chunk = sortedRegularAccounts
+      .slice(i, i + CHUNK_SIZE)
+      .map((acc) => acc.accountId);
+    chunks.push({
+      accountIds: chunk,
+      isFrozen: false
+    });
   }
 
   return chunks;
