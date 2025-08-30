@@ -47,10 +47,9 @@ export const getAccountCreationDate = async () => {
   const sortedFrozenAccounts = frozenAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
-  // const sortedRegularAccounts = regularAccounts.sort(
-  //   (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-  // );
-  const sortedRegularAccounts = []
+  const sortedRegularAccounts = regularAccounts.sort(
+    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+  );
 
   const CHUNK_SIZE = 100;
   const chunks = [];

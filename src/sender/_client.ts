@@ -10,6 +10,7 @@ async function init(
   account: {
     accountId: string;
     nextApiId: number;
+    isFrozen: boolean
 
     dcId: number;
     dc1?: string;
