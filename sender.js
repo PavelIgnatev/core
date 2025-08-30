@@ -7764,23 +7764,23 @@ var require_utils = __commonJS({
     function promiseWithResolvers() {
       let resolve;
       let reject;
-      const promise2 = new Promise(function withResolversExecutor(promiseResolve, promiseReject) {
+      const promise = new Promise(function withResolversExecutor(promiseResolve, promiseReject) {
         resolve = promiseResolve;
         reject = promiseReject;
       });
-      return { promise: promise2, resolve, reject };
+      return { promise, resolve, reject };
     }
     function squashError(_error) {
       return;
     }
     exports2.randomBytes = (0, util_1.promisify)(crypto3.randomBytes);
     async function once(ee, name) {
-      const { promise: promise2, resolve, reject } = promiseWithResolvers();
+      const { promise, resolve, reject } = promiseWithResolvers();
       const onEvent = (data) => resolve(data);
       const onError = (error) => reject(error);
       ee.once(name, onEvent).once("error", onError);
       try {
-        const res = await promise2;
+        const res = await promise;
         ee.off("error", onError);
         return res;
       } catch (error) {
@@ -29087,11 +29087,11 @@ var require_sessions = __commonJS({
           while (!committed) {
             this.startTransaction(options);
             try {
-              const promise2 = fn(this);
-              if (!(0, utils_1.isPromiseLike)(promise2)) {
+              const promise = fn(this);
+              if (!(0, utils_1.isPromiseLike)(promise)) {
                 throw new error_1.MongoInvalidArgumentError("Function provided to `withTransaction` must return a Promise");
               }
-              result = await promise2;
+              result = await promise;
               if (this.transaction.state === transactions_1.TxnState.NO_TRANSACTION || this.transaction.state === transactions_1.TxnState.TRANSACTION_COMMITTED || this.transaction.state === transactions_1.TxnState.TRANSACTION_ABORTED) {
                 return result;
               }
@@ -29674,9 +29674,9 @@ var require_on_data = __commonJS({
           }
           if (finished)
             return closeHandler();
-          const { promise: promise2, resolve, reject } = (0, utils_1.promiseWithResolvers)();
+          const { promise, resolve, reject } = (0, utils_1.promiseWithResolvers)();
           unconsumedPromises.push({ resolve, reject });
-          return promise2;
+          return promise;
         },
         return() {
           return closeHandler();
@@ -29696,16 +29696,16 @@ var require_on_data = __commonJS({
       timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.then(void 0, errorHandler);
       return iterator2;
       function eventHandler(value) {
-        const promise2 = unconsumedPromises.shift();
-        if (promise2 != null)
-          promise2.resolve({ value, done: false });
+        const promise = unconsumedPromises.shift();
+        if (promise != null)
+          promise.resolve({ value, done: false });
         else
           unconsumedEvents.push(value);
       }
       function errorHandler(err) {
-        const promise2 = unconsumedPromises.shift();
-        if (promise2 != null)
-          promise2.reject(err);
+        const promise = unconsumedPromises.shift();
+        if (promise != null)
+          promise.reject(err);
         else
           error = err;
         void closeHandler();
@@ -29716,8 +29716,8 @@ var require_on_data = __commonJS({
         finished = true;
         timeoutForSocketRead == null ? void 0 : timeoutForSocketRead.clear();
         const doneResult = { value: void 0, done: finished };
-        for (const promise2 of unconsumedPromises) {
-          promise2.resolve(doneResult);
+        for (const promise of unconsumedPromises) {
+          promise.resolve(doneResult);
         }
         return Promise.resolve(doneResult);
       }
@@ -30996,7 +30996,7 @@ var require_connection_pool = __commonJS({
       async checkOut(options) {
         const checkoutTime = (0, utils_1.now)();
         this.emitAndLog(_ConnectionPool.CONNECTION_CHECK_OUT_STARTED, new connection_pool_events_1.ConnectionCheckOutStartedEvent(this));
-        const { promise: promise2, resolve, reject } = (0, utils_1.promiseWithResolvers)();
+        const { promise, resolve, reject } = (0, utils_1.promiseWithResolvers)();
         const timeout = options.timeoutContext.connectionCheckoutTimeout;
         const waitQueueMember = {
           resolve,
@@ -31007,7 +31007,7 @@ var require_connection_pool = __commonJS({
         process.nextTick(() => this.processWaitQueue());
         try {
           timeout == null ? void 0 : timeout.throwIfExpired();
-          return await (timeout ? Promise.race([promise2, timeout]) : promise2);
+          return await (timeout ? Promise.race([promise, timeout]) : promise);
         } catch (error) {
           if (timeout_1.TimeoutError.is(error)) {
             timeout == null ? void 0 : timeout.clear();
@@ -52824,7 +52824,7 @@ var Axios = class {
     this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
       responseInterceptorChain.push(interceptor.fulfilled, interceptor.rejected);
     });
-    let promise2;
+    let promise;
     let i = 0;
     let len;
     if (!synchronousRequestInterceptors) {
@@ -52832,11 +52832,11 @@ var Axios = class {
       chain.unshift.apply(chain, requestInterceptorChain);
       chain.push.apply(chain, responseInterceptorChain);
       len = chain.length;
-      promise2 = Promise.resolve(config);
+      promise = Promise.resolve(config);
       while (i < len) {
-        promise2 = promise2.then(chain[i++], chain[i++]);
+        promise = promise.then(chain[i++], chain[i++]);
       }
-      return promise2;
+      return promise;
     }
     len = requestInterceptorChain.length;
     let newConfig = config;
@@ -52852,16 +52852,16 @@ var Axios = class {
       }
     }
     try {
-      promise2 = dispatchRequest.call(this, newConfig);
+      promise = dispatchRequest.call(this, newConfig);
     } catch (error) {
       return Promise.reject(error);
     }
     i = 0;
     len = responseInterceptorChain.length;
     while (i < len) {
-      promise2 = promise2.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
+      promise = promise.then(responseInterceptorChain[i++], responseInterceptorChain[i++]);
     }
-    return promise2;
+    return promise;
   }
   getUri(config) {
     config = mergeConfig(this.defaults, config);
@@ -52917,14 +52917,14 @@ var CancelToken = class _CancelToken {
     });
     this.promise.then = (onfulfilled) => {
       let _resolve;
-      const promise2 = new Promise((resolve) => {
+      const promise = new Promise((resolve) => {
         token.subscribe(resolve);
         _resolve = resolve;
       }).then(onfulfilled);
-      promise2.cancel = function reject() {
+      promise.cancel = function reject() {
         token.unsubscribe(_resolve);
       };
-      return promise2;
+      return promise;
     };
     executor(function cancel(message, config, request) {
       if (token.reason) {
@@ -53239,7 +53239,7 @@ var insertLog = async (data) => {
   }
 };
 var mongoLog = async (level, ...args) => {
-  const promise2 = (async () => {
+  const promise = (async () => {
     try {
       if (typeof args[0] !== "object") {
         if (typeof args[0] === "string" && args[0].includes("MaxListenersExceededWarning")) {
@@ -53265,14 +53265,14 @@ var mongoLog = async (level, ...args) => {
 ERROR: ${JSON.stringify(args[0])}`);
     }
   })();
-  activePromises.push(promise2);
-  promise2.finally(() => {
-    const index = activePromises.indexOf(promise2);
+  activePromises.push(promise);
+  promise.finally(() => {
+    const index = activePromises.indexOf(promise);
     if (index > -1) {
       activePromises.splice(index, 1);
     }
   });
-  return promise2;
+  return promise;
 };
 if (process.env.DEV !== "true") {
   console.log = async (...args) => {
@@ -53374,8 +53374,8 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
   const frozenMetrics = createGlobalMetrics();
   const regularMetrics = createGlobalMetrics();
   const mergeMetrics = (targetMetrics, sourcePromises) => {
-    for (const promise2 of sourcePromises) {
-      const { clients, clientsData } = promise2;
+    for (const promise of sourcePromises) {
+      const { clients, clientsData } = promise;
       targetMetrics.clients.push(...clients);
       for (const key in clientsData) {
         if (key === "allTimings") {
@@ -53506,8 +53506,8 @@ var makeMetricsAll = async (promises, startTime = Date.now()) => {
   let totalDoubleSends = 0;
   let totalCompletedSends = 0;
   const mergedMessageStats = {};
-  for (const promise2 of promises) {
-    const { clientsData } = promise2;
+  for (const promise of promises) {
+    const { clientsData } = promise;
     if (clientsData.messageStats) {
       for (const accountId in clientsData.messageStats) {
         const metrics = clientsData.messageStats[accountId];
@@ -53757,7 +53757,7 @@ ${formatTop(bottomByAvgReceivedPacketSize, true)}`;
 var WORKER_TIMEOUT_MS = 90 * 60 * 1e3;
 var createWorker = (chunkId, accountIds) => {
   return new Promise((resolve) => {
-    const isFrozen = promise.accountIds.some((accountId) => accountId.includes("frozen"));
+    const isFrozen = accountIds.some((accountId) => accountId.includes("frozen"));
     const worker = new import_worker_threads.Worker(
       `
 const { workerData, parentPort } = require('worker_threads');
@@ -53835,19 +53835,19 @@ var main = async () => {
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
   const promises = await Promise.all(workers);
   const successPromises = [];
-  for (const promise2 of promises) {
-    if (promise2.type === "error") {
-      const chunkType = promise2.isFrozen ? "FROZEN" : "REGULAR";
+  for (const promise of promises) {
+    if (promise.type === "error") {
+      const chunkType = promise.isFrozen ? "FROZEN" : "REGULAR";
       await sendToMainBot(`** WORKER_ERROR (${chunkType}) **
-ERROR: ${promise2.error}
-CHUNK_ID: ${promise2.chunkId}`);
+ERROR: ${promise.error}
+CHUNK_ID: ${promise.chunkId}`);
     } else {
       successPromises.push({
-        chunkId: promise2.chunkId,
-        clients: promise2.clients,
-        clientsData: promise2.clientsData,
-        endTime: promise2.endTime,
-        isFrozen: promise2.isFrozen
+        chunkId: promise.chunkId,
+        clients: promise.clients,
+        clientsData: promise.clientsData,
+        endTime: promise.endTime,
+        isFrozen: promise.isFrozen
       });
     }
   }

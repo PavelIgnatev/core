@@ -75,7 +75,7 @@ const starter = async (
     }
 
     client = await initClient(
-      { ...account, nextApiId },
+      { ...account, nextApiId, isFrozen },
       (update) =>
         handleUpdate(
           client,

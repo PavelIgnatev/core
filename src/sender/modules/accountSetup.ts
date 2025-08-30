@@ -83,6 +83,10 @@ export const accountSetup = async (
     });
   }
 
+  if (isFrozen) {
+    return ['FROZEN_NAME', meId];
+  }
+
   if (
     id &&
     me.username === username &&

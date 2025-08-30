@@ -49,7 +49,7 @@ const WORKER_TIMEOUT_MS = 90 * 60 * 1000;
 
 const createWorker = (chunkId: number, accountIds: string[]) => {
   return new Promise<WorkerMessage>((resolve) => {
-    const isFrozen = promise.accountIds.some(accountId => accountId.includes('frozen'));
+    const isFrozen = accountIds.some(accountId => accountId.includes('frozen'));
 
     const worker = new Worker(
       `
@@ -128,6 +128,7 @@ const main = async () => {
   const appStartTime = Date.now();
 
   const chunks = await getAccountCreationDate();
+
   console.log({
     message: '💥 ITERATION INIT 💥',
     totalChunks: chunks.length,

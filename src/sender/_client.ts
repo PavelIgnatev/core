@@ -22,7 +22,7 @@ async function init(
   onError: (error: any) => void
 ) {
   const startTime = performance.now();
-  const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId, accountId } = account;
+  const { dcId, dc1, dc2, dc3, dc4, dc5, nextApiId, accountId, isFrozen } = account;
   const keys: Record<string, string> = {};
 
   if (dc1) keys['1'] = dc1;
@@ -36,7 +36,7 @@ async function init(
     keys,
     hashes: {},
   };
-  const session = new CallbackSession(sessionData, () => {}, true);
+  const session = new CallbackSession(sessionData, () => {}, true, isFrozen);
   const userAgent = new UserAgent();
   const { userAgent: userAgentString, platform } = userAgent.data;
 
@@ -117,6 +117,7 @@ export const initClient = async (
   account: {
     accountId: string;
     nextApiId: number;
+    isFrozen: boolean
 
     dcId: number;
     dc1?: string;

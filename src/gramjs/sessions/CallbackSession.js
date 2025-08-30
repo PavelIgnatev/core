@@ -3,7 +3,7 @@ const AuthKey = require('../crypto/AuthKey');
 const utils = require('../Utils');
 
 class CallbackSession extends MemorySession {
-  constructor(sessionData, callback, working = false) {
+  constructor(sessionData, callback, working = false, forceConnect = false) {
     super();
 
     this._sessionData = sessionData;
@@ -11,6 +11,7 @@ class CallbackSession extends MemorySession {
 
     this._authKeys = {};
     this._working = working;
+    this._forceConnect = forceConnect
   }
 
   get authKey() {
