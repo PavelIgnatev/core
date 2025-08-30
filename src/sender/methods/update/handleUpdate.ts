@@ -135,7 +135,7 @@ export const handleUpdate = async (
     }
   } else if (
     update instanceof GramJs.UpdateUserName &&
-    accountId.includes('frozen')
+    !accountId.includes('frozen')
   ) {
     try {
       const { id } = await getAccountById(accountId);
