@@ -133,7 +133,10 @@ export const handleUpdate = async (
         });
       }
     }
-  } else if (update instanceof GramJs.UpdateUserName) {
+  } else if (
+    update instanceof GramJs.UpdateUserName &&
+    accountId.includes('frozen')
+  ) {
     try {
       const { id } = await getAccountById(accountId);
 

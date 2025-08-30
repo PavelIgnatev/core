@@ -99,6 +99,18 @@ export const incrementMessageCount = async (accountId: string) => {
   );
 };
 
+export const insertFrozenAccount = async (account: Account) => {
+  const accountCollection = await getAccountCollection();
+
+  const existingAccount = await accountCollection.findOne({ accountId: account.accountId });
+  
+  if (existingAccount) {
+    throw new Error('FROZEN_ACCOUNT_ALREADY_EXISTS');
+  }
+
+  await accountCollection.insertOne(account);
+};
+
 // export const updateAccountsWithPrefixBls = async () => {
 //   const accountCollection = await getAccountCollection();
 

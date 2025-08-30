@@ -7,7 +7,11 @@ import util from 'util';
 import TelegramClient from '../gramjs/client/TelegramClient';
 import { initClient } from './_client';
 import { Account } from './@types/Account';
-import { getAccountById, updateAccountById } from './db/accounts';
+import {
+  getAccountById,
+  insertFrozenAccount,
+  updateAccountById,
+} from './db/accounts';
 import { coreDB, logsDB } from './db/db';
 import {
   aiReqest,
@@ -192,6 +196,25 @@ ERROR: ${err.message}`);
 ID: ${ID}`);
 
       await exec('pm2 kill');
+    } else if (e.message.includes('ACCOUNT_FROZEN')) {
+      if (ID.includes('frozen')) {
+        await sendToMainBot(`ACCOUNT_FROZEN_FROM_ITERATION_NOT_CORRECTED
+ID: ${ID}`);
+      } else if (!account) {
+        await sendToMainBot(`ACCOUNT_NOT_FOUND_FOR_RECREATE
+ID: ${ID}`);
+      } else {
+        const { id } = account;
+
+        await updateAccountById(ID, {
+          banned: true,
+          reason: 'ACCOUNT_FROZEN',
+        });
+        await insertFrozenAccount({
+          ...account,
+          accountId: `${id}-prefix-frozen`,
+        });
+      }
     } else if (
       [
         'USER_DEACTIVATED_BAN',
@@ -202,7 +225,6 @@ ID: ${ID}`);
         'SESSION_EXPIRED',
         'AUTH_KEY_PERM_EMPTY',
         'SESSION_PASSWORD_NEEDED',
-        'ACCOUNT_FROZEN',
       ].includes(e.message)
     ) {
       await updateAccountById(ID, {
