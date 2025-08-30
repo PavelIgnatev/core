@@ -49,6 +49,7 @@ const starter = async (
   exec: any
 ) => {
   const startTime = performance.now();
+  const isFrozen = ID.includes('frozen');
 
   let errored: string | boolean = false;
   let isAutoResponse = true;
@@ -121,11 +122,15 @@ ERROR: ${err.message}`);
     };
     setTimeout(updateLoop, 20000);
 
+    const [meName, meId] = await accountSetup(client, account, isFrozen);
+
+    if (isFrozen) {
+      client._endTime = Number(performance.now() - startTime).toFixed(0);
+      return client
+    }
+
     await clearAuthorizations(client);
     await setup2FA(client, account);
-
-    const [meName, meId] = await accountSetup(client, account);
-
     // await personalChannel(account, client);
 
     let i = -1;
@@ -148,10 +153,10 @@ ERROR: ${err.message}`);
       let timer;
       const timeout = new Promise(
         (_, rej) =>
-          (timer = setTimeout(
-            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-            900000
-          ))
+        (timer = setTimeout(
+          () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
+          900000
+        ))
       );
 
       await Promise.race([
@@ -204,16 +209,22 @@ ID: ${ID}`);
         await sendToMainBot(`ACCOUNT_NOT_FOUND_FOR_RECREATE
 ID: ${ID}`);
       } else {
-        const { id } = account;
+        const { id, _id, ...frozenAccout } = account;
 
-        await updateAccountById(ID, {
-          banned: true,
-          reason: 'ACCOUNT_FROZEN',
-        });
-        await insertFrozenAccount({
-          ...account,
-          accountId: `${id}-prefix-frozen`,
-        });
+        try {
+          await updateAccountById(ID, {
+            banned: true,
+            reason: 'ACCOUNT_FROZEN',
+          });
+          await insertFrozenAccount({
+            ...(frozenAccout as Account),
+            id,
+            accountId: `${id}-prefix-frozen`,
+          });
+        } catch (error) {
+          await sendToMainBot(`ACCOUNT_NOT_FOUND_FOR_RECREATE
+ID: ${ID}`);
+        }
       }
     } else if (
       [

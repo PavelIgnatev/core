@@ -62,7 +62,8 @@ const ukraineEmojis = ['🇺🇦'];
 
 export const accountSetup = async (
   client: TelegramClient,
-  account: Account
+  account: Account,
+  isFrozen = false
 ) => {
   const {
     id,
@@ -74,7 +75,7 @@ export const accountSetup = async (
     messageCount = 0,
   } = account;
 
-  const { me, id: meId } = await getMe(client);
+  const { me, id: meId } = await getMe(client, !isFrozen);
 
   if (`+${me.phone}` !== phone) {
     await updateAccountById(accountId, {
@@ -281,21 +282,21 @@ ID: ${accountId}`);
   //           : gender
   // );
 
-//   for (const file of files) {
-//     const isUF = await invokeRequest(
-//       client,
-//       new GramJs.photos.UploadProfilePhoto({
-//         file: await uploadFile(client, file),
-//       })
-//     );
+  //   for (const file of files) {
+  //     const isUF = await invokeRequest(
+  //       client,
+  //       new GramJs.photos.UploadProfilePhoto({
+  //         file: await uploadFile(client, file),
+  //       })
+  //     );
 
-//     if (!isUF) {
-//       await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
-// ID: ${accountId}
-// FILE_NAME: ${file.name}`);
-//       throw new Error('GLOBAL_ERROR');
-//     }
-//   }
+  //     if (!isUF) {
+  //       await sendToMainBot(`** ACCOUNT SETUP: UPLOAD PROFILE PHOTO ERROR **
+  // ID: ${accountId}
+  // FILE_NAME: ${file.name}`);
+  //       throw new Error('GLOBAL_ERROR');
+  //     }
+  //   }
 
   let user;
   while (true) {
