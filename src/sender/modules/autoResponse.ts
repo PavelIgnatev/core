@@ -13,6 +13,7 @@ import { sendToFormBot } from '../helpers/sendToFormBot';
 import { sendToGoogleCrmBot } from '../helpers/sendToGoogleCrmBot';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getAutoResponse } from '../llm/getAutoResponse';
+import { getPing } from '../llm/getPing';
 import { getDialogueAnalysis } from '../llm/getDialogueAnalysis';
 import { llmRestoreLinks } from '../llm/utils/llmLink';
 import { sendMessage } from '../methods/messages/sendMessage';
@@ -357,9 +358,9 @@ ERROR: ${error.message}`);
       const pingMessage = await getPing(
         {
           aiName: aiName || 'UNKNOWN_NAME (Do not address the person you are talking to by name)',
-          userGender: aiGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
+          aiGender: aiGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
           language,
-          addedInformation: addedInformation || null
+          addedInformation: addedInformation || ''
         },
         {
           options: {},
