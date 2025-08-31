@@ -41,6 +41,7 @@ export const autoResponse = async (
       messages,
       aiStatus,
       aiReason,
+      aiThink,
       recipientId,
       recipientAccessHash,
       recipientPhone,
@@ -66,9 +67,9 @@ export const autoResponse = async (
         continue;
       }
 
-      // const {
-      //   fullUser: { about },
-      // } = recipientFull;
+      const {
+        fullUser: { about },
+      } = recipientFull;
       const {
         goal,
         part,
@@ -98,8 +99,9 @@ export const autoResponse = async (
       const myName = language === 'RUSSIAN' ? converterName(meName) : meName;
 
       let analysis = null;
-      if (stage > 1 && aiStatus !== 'lead') {
-        analysis = await getDialogueAnalysis(
+      let analysisThink = null;
+      if (stage > 1 && aiStatus !== 'lead' && aiStatus !== 'negative') {
+        const { analysisResult, responseThink } = await getDialogueAnalysis(
           {
             companyName: dialogGroupId,
             leadDefinition,
@@ -107,7 +109,7 @@ export const autoResponse = async (
           },
           {
             llmParams: {
-              model: 'command-a-03-2025',
+              model: 'command-a-reasoning-08-2025',
               temperature: 0.1,
               k: 1,
               messages: dialogue,
@@ -120,18 +122,24 @@ export const autoResponse = async (
               }),
           }
         );
+        analysis = analysisResult
+        analysisThink = responseThink
 
         await sendToFormBot(`[ANALYSIS_RESULT]
 GID: ${accountId}
 RID: ${recipientId}
-STATUS: ${analysis.status}
-LEAD_DEFINITION: ${leadDefinition}
-REASON: ${analysis.reason}`);
+STATUS: ${analysisResult.status}
+REASON: ${analysisResult.reason}`);
       }
-
+      const isLead = aiStatus === 'lead' || analysis?.status === 'lead'
+      
       const autoResponse = await getAutoResponse(
         {
           aiRole,
+          aiAnalysis:
+          isLead || stage === 1
+            ? ''
+            : analysis?.reason || '',
           goal,
           part,
           language,
@@ -145,12 +153,13 @@ REASON: ${analysis.reason}`);
           meGender: myGender,
           companyName: dialogGroupId,
           firstQuestion: secondMessagePrompt,
-          userName: recipientName || 'UNKNOWN_NAME',
-          userGender: recipientGender || 'UNKNOWN_GENDER',
+          userName: recipientName || 'UNKNOWN_NAME (Do not address the person you are talking to by name)',
+          userGender: recipientGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
+          userAbout: about || null
         },
         {
           options: {
-            isLead: aiStatus === 'lead' || analysis?.status === 'lead',
+            isLead,
           },
           llmParams: {
             model: 'command-a-03-2025',
@@ -283,6 +292,7 @@ ${llmRestoreLinks(autoResponse, personalChannel)}`);
           viewed: false,
           aiStatus: analysis?.status || aiStatus,
           aiReason: analysis?.reason || aiReason,
+          aiThink: analysisThink || aiThink
         }
       );
     } catch (error: any) {
@@ -333,44 +343,39 @@ ERROR: ${error.message}`);
         continue;
       }
 
-      const { language: gLanguage } = groupId;
+      const { language: gLanguage, addedInformation } = groupId;
       const language = gLanguage || 'RUSSIAN';
 
-      const pingMessage = await makeRequestGpt(
-        accountId,
-        [
-          {
-            role: 'system',
-            content: `You are a reminder message generator for users with the USER role. Your task is to create a short and clear reminder message for the USER role conversation partner based on the information in their USER DATA. The message should convey that you are waiting for an answer to the last question and that it is very important to you. If possible, address the interlocutor by name, use the name only if it is a proper name and it actually exists in ${language}. LANGUAGE reply: ${language}. Only ${language}.`,
-          },
-          {
-            role: 'user',
-            content: `## STYLE GUIDE
-Maximum length of reminder message 100 characters
+      const dialogue = messages.map(
+        (m) =>
+          ({
+            role: m.fromId === String(recipientId) ? 'user' : 'assistant',
+            content: m.text,
+          }) as { role: 'user' | 'assistant'; content: string }
+      );
 
-## USER DATA
-${aiName ? `\nNAME: ${aiName};\nGENDER: ${aiGender}` : ''}
-Today's date is ${getDateNow()};
-      
-## DIALOG
-${messages
-  .map((m) => ({
-    role: m.fromId === String(recipientId) ? 'USER' : 'CHATBOT',
-    message: m.text,
-  }))
-  .slice(-15)
-  .map((chat) => `${chat.role}: ${chat.message}`)
-  .join('\n')}`,
+      const pingMessage = await getPing(
+        {
+          aiName: aiName || 'UNKNOWN_NAME (Do not address the person you are talking to by name)',
+          userGender: aiGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
+          language,
+          addedInformation: addedInformation || null
+        },
+        {
+          options: {},
+          llmParams: {
+            model: 'command-a-03-2025',
+            k: 30,
+            temperature: 1,
+            presence_penalty: 0.8,
+            p: 0.95,
+            messages: dialogue
           },
-        ],
-        '',
-        'ANY',
-        false,
-        false,
-        1,
-        false,
-        dialogGroupId,
-        { k: 30, temperature: 1, presence_penalty: 0.8, p: 0.95 }
+          onThrow: (error) =>
+            sendToErrorGenerateBot(
+              `${error}\nGROUP ID: ${dialogGroupId}\nACCOUNT ID: ${accountId}`
+            ),
+        }
       );
 
       const sentPingMessage = await sendMessage(

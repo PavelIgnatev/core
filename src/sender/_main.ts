@@ -125,7 +125,16 @@ ERROR: ${err.message}`);
     const [meName, meId] = await accountSetup(client, account, isFrozen);
 
     if (isFrozen) {
+      await client.destroy();
+
       client._endTime = Number(performance.now() - startTime).toFixed(0);
+      delete accountsInWork[ID];
+
+      console.warn({
+        accountId: ID,
+        message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
+      });
+      
       return client
     }
 

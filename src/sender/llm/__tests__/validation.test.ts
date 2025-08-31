@@ -214,16 +214,16 @@ describe('LLM Default Validation', () => {
         expect(() =>
           llmDefaultValidation('к вашему сведению: это важно')
         ).toThrow('Formal marker detected');
-         (() => llmDefaultValidation('nb: запомните это')).toThrow(
+        expect(() => llmDefaultValidation('nb: запомните это')).toThrow(
           'Formal marker detected'
         );
-         (() => llmDefaultValidation('и btw: еще кое-что')).toThrow(
+        expect(() => llmDefaultValidation('и btw: еще кое-что')).toThrow(
           'Formal marker detected'
         );
       });
 
       it('должен блокировать маркеры в разных регистрах', () => {
-         (() => llmDefaultValidation('ВОПРОС: как дела?')).toThrow(
+        expect(() => llmDefaultValidation('ВОПРОС: как дела?')).toThrow(
           'Formal marker detected'
         );
         expect(() => llmDefaultValidation('Важно: помнить')).toThrow(

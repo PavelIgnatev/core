@@ -29,6 +29,7 @@ export interface Dialogue {
 
   aiStatus?: string;
   aiReason?: string;
+  aiThink?: string
 
   crmSent?: boolean;
 
