@@ -94,6 +94,10 @@ const starter = async (
     let updateCounter = 0;
     const updateLoop = async () => {
       try {
+        if(isFrozen){
+          return
+        }
+        
         if (
           !client ||
           !client._sender ||
