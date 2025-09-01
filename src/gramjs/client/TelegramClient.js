@@ -56,7 +56,7 @@ class TelegramClient {
     this._connectErrorCounts = 0;
     this._reconnectHistory = [];
 
-    // if (!this.session._working || this.session._forceConnect) {
+    if (!this.session._working || this.session._forceConnect) {
       this._initWith = (x) => {
         return new requests.InvokeWithLayer({
           layer: LAYER,
@@ -72,7 +72,7 @@ class TelegramClient {
             proxy: undefined,
           }),
         });
-      // };
+      };
     }
   }
 
@@ -122,9 +122,9 @@ class TelegramClient {
 
     this.session.setAuthKey(this._sender.authKey);
 
-    // if (!this.session._working || this.session._forceConnect) {
+    if (!this.session._working || this.session._forceConnect) {
       await this._sender.send(this._initWith(new requests.help.GetConfig({})));
-    // }
+    }
   }
 
   async reconnect() {
