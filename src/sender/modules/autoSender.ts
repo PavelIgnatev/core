@@ -46,8 +46,8 @@ export const autoSender = async (
 
     if (
       firstSendResult &&
-      !(phone && /^\+7/.test(phone))
-    ) {
+      !accountId.includes('phone') &&
+      !(phone && /^\+7/.test(phone))) {
       await trySend(client, account, telegramId, true);
     }
   }
@@ -57,7 +57,8 @@ const trySend = async (
   client: TelegramClient,
   account: Account,
   telegramId: string,
-  isSecondAttempt: boolean = false
+  isSecondAttempt: boolean = false,
+  attemptCount: number = 1
 ): Promise<boolean> => {
   const { accountId } = account;
   const recipient = await getRecipient(accountId);
@@ -213,7 +214,11 @@ const trySend = async (
         e.message
       );
 
-      return await trySend(client, account, telegramId, isSecondAttempt);
+      if (attemptCount >= 3) {
+        return true; 
+      }
+
+      return await trySend(client, account, telegramId, isSecondAttempt, attemptCount + 1);
     }
 
     errorSender[accountId] = 1;
