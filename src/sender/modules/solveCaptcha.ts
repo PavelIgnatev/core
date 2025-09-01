@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Agent as HttpsAgent } from 'https';
 
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import { sleep } from '../helpers/helpers';
@@ -6,11 +7,37 @@ import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 
-const CAPTCHA_CHECK_INTERVAL_MS = 5000; // Интервал проверки статуса капчи - 5 сек
-const MAX_CAPTCHA_ATTEMPTS = 12; // Максимум попыток проверки капчи - 1 минута
-const RUCAPTCHA_REQUEST_TIMEOUT_MS = 60000; // Таймаут HTTP запросов к RuCaptcha - 60 сек
-const TOKEN_PROCESSING_DELAY_MS = 5000; // Задержка после отправки токена - 5 сек
-const SPAMBOT_RESPONSE_DELAY_MS = 5000; // Задержка ожидания ответа SpamBot - 5 сек
+const CAPTCHA_CHECK_INTERVAL_MS = 5000;
+const MAX_CAPTCHA_ATTEMPTS = 12;
+const RUCAPTCHA_REQUEST_TIMEOUT_MS = 60000;
+const TOKEN_PROCESSING_DELAY_MS = 5000;
+const SPAMBOT_RESPONSE_DELAY_MS = 5000;
+const NETWORK_RETRY_ATTEMPTS = 3;
+
+const retryNetworkRequest = async <T>(
+  requestFn: () => Promise<T>,
+  maxAttempts: number = NETWORK_RETRY_ATTEMPTS
+): Promise<T> => {
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await requestFn();
+    } catch (error: any) {
+      lastError = error;
+
+      if (error.message?.includes('CAPTCHA_PAGE') ||
+          error.message?.includes('RUCAPTCHA_TASK') ||
+          error.message?.includes('TELEGRAM_TOKEN')) {
+        throw error;
+      }
+
+
+    }
+  }
+
+  throw lastError!;
+};
 
 export const solveCaptcha = async (
   client: TelegramClient,
@@ -117,22 +144,27 @@ export const solveCaptcha = async (
       throw new Error('CAPTCHA_PAGE_SITEKEY_TIMEOUT');
     if (!captchaToken) throw new Error('RUCAPTCHA_TOKEN_NOT_RECEIVED');
 
-    const submitResponse = await axios.post(
-      '/captcha/checkcaptcha',
-      {
-        token: captchaToken,
-        actor: websiteActor,
-        scope: websiteScope,
-      },
-      {
-        baseURL: 'https://telegram.org',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest',
-          Referer: websiteURL,
+    const submitResponse = await retryNetworkRequest(() =>
+      axios.post(
+        '/captcha/checkcaptcha',
+        {
+          token: captchaToken,
+          actor: websiteActor,
+          scope: websiteScope,
         },
-        withCredentials: true,
-      }
+        {
+          baseURL: 'https://telegram.org',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest',
+            Referer: websiteURL,
+          },
+          withCredentials: true,
+          httpsAgent: new HttpsAgent({
+            family: 4,
+          }),
+        }
+      )
     );
 
     if (submitResponse.data.error) {
