@@ -25,8 +25,14 @@ export async function getPing(
   PingSchema.parse(context);
   PingOptionsSchema.parse(options);
 
-  const { llmParams, options: config, onRequest, onTry, onThrow, onLogger } =
-    options;
+  const {
+    llmParams,
+    options: config,
+    onRequest,
+    onTry,
+    onThrow,
+    onLogger,
+  } = options;
   const { messages, ...otherLlmParams } = llmParams;
   const maxRetries = LLM_CONSTANTS.DEFAULT_MAX_RETRIES;
 
@@ -109,7 +115,11 @@ export async function getPing(
       errors.push(errorMessage);
 
       onTry?.(errorMessage);
-      onLogger?.('PING_ERROR', { message, error: errorMessage, attempt: i + 1 });
+      onLogger?.('PING_ERROR', {
+        message,
+        error: errorMessage,
+        attempt: i + 1,
+      });
 
       if (i < maxRetries - 1) {
         await sleep(LLM_CONSTANTS.DEFAULT_RETRY_DELAY);

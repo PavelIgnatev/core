@@ -88,13 +88,7 @@ export async function getSpamBotReason(
 ): Promise<string> {
   SpamBotReasonOptionsSchema.parse(options);
 
-  const {
-    llmParams,
-    onRequest,
-    onTry,
-    onThrow,
-    onLogger,
-  } = options;
+  const { llmParams, onRequest, onTry, onThrow, onLogger } = options;
 
   const maxRetries = LLM_CONSTANTS.DEFAULT_MAX_RETRIES;
 

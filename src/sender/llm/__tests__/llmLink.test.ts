@@ -566,6 +566,22 @@ describe('llmLink', () => {
     }
   });
 
+  it('все вхождения одной и той же ссылки заменяются одним плейсхолдером и корректно восстанавливаются', async () => {
+    const input =
+      'Наши решения помогают оптимизировать процессы, экономя время и ресурсы. Вы можете ознакомиться с подробностями по ссылке: t.me/bidkoganbot?start=aisender.\nКак Вы считаете, t.me/bidkoganbot?start=aisender, какие аспекты Вашего бизнеса могут быть улучшены с помощью автоматизации?';
+
+    const extracted = await llmExtractLinks(input);
+    const placeholders = Array.from(extracted.links.keys());
+    const values = Array.from(extracted.links.values());
+
+    expect(placeholders.length).toBe(1);
+    expect(new Set(placeholders).size).toBe(1);
+    expect(values).toEqual(['t.me/bidkoganbot?start=aisender']);
+
+    const restored = llmRestoreLinks(extracted);
+    expect(restored).toBe(input);
+  });
+
   it('проверка граничных случаев', async () => {
     const testCases = [
       {

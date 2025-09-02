@@ -61,17 +61,16 @@ export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
   );
 
   for (const { domain, isValid } of checks) {
-    if (isValid) {
-      const placeholder = `LINK${Math.floor(Math.random() * 10 ** 10)}`;
-      links.set(
-        placeholder,
-        domain
-          .replace('https://t.me', 't.me')
-          .replace('http://t.me', 't.me')
-          .replace(/\*+$/, '')
-      );
-      processedText = processedText.replace(domain, placeholder);
-    }
+    if (!isValid) continue;
+    const placeholder = `LINK${Math.floor(Math.random() * 10 ** 10)}`;
+    links.set(
+      placeholder,
+      domain
+        .replace('https://t.me', 't.me')
+        .replace('http://t.me', 't.me')
+        .replace(/\*+$/, '')
+    );
+    processedText = processedText.replaceAll(domain, placeholder);
   }
 
   return {
@@ -89,11 +88,11 @@ export function llmRestoreLinks(
   if (personalChannel) {
     const personalChannelUrl = `t.me/${personalChannel}`;
     processedText.links.forEach((_, placeholder) => {
-      restoredText = restoredText.replace(placeholder, personalChannelUrl);
+      restoredText = restoredText.replaceAll(placeholder, personalChannelUrl);
     });
   } else {
     processedText.links.forEach((url, placeholder) => {
-      restoredText = restoredText.replace(placeholder, url);
+      restoredText = restoredText.replaceAll(placeholder, url);
     });
   }
   return restoredText;
