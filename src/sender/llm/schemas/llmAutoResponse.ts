@@ -10,8 +10,6 @@ export const AutoResponseSchema = z.object({
   meName: z.string().min(1),
   messagesCount: z.number(),
   meGender: z.string().min(1),
-  userName: z.string().min(1),
-  userGender: z.string().min(1),
   firstQuestion: z.string().min(1),
   leadGoal: z.string().min(1),
   part: z.string().nullable(),

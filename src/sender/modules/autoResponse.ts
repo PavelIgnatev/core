@@ -149,12 +149,6 @@ REASON: ${analysisResult.reason}`);
           meGender: myGender,
           companyName: dialogGroupId,
           firstQuestion: secondMessagePrompt,
-          userName:
-            recipientName ||
-            'UNKNOWN_NAME (Do not address the person you are talking to by name)',
-          userGender:
-            recipientGender ||
-            'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
           userAbout: about || null,
         },
         {
@@ -356,12 +350,6 @@ ERROR: ${error.message}`);
 
       const pingMessage = await getPing(
         {
-          aiName:
-            aiName ||
-            'UNKNOWN_NAME (Do not address the person you are talking to by name)',
-          aiGender:
-            aiGender ||
-            'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
           language,
           addedInformation: addedInformation || '',
         },

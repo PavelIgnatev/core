@@ -100,8 +100,9 @@ function createAnalysisPrompt(
 ): string {
   return `You are an AI conversation analyst. Your objective is to analyze the entire conversation context and determine the user's engagement status. Follow these instructions precisely:
 
-1. **Emotional & Linguistic Analysis**  
+1. **Emotional & Linguistic Analysis**
   - Assess the tone (positive, neutral, negative), style (formal, informal, slang, emojis), message length, and explicit objections or misunderstandings throughout the conversation.
+  - Prefer and encourage gender-neutral phrasing in all quoted or suggested wording; avoid gendered word forms in reasoning examples.
 
 2. **Engagement Triggers & Classification**  
 

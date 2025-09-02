@@ -2,8 +2,6 @@ import { z } from 'zod';
 import { CohereAIParamsSchema } from './llmCohereAi';
 
 export const PingSchema = z.object({
-  aiName: z.string().min(1),
-  aiGender: z.string().min(1),
   language: z.enum(['ENGLISH', 'RUSSIAN', 'UKRAINIAN']),
   addedInformation: z.string().optional(),
 });

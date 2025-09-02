@@ -214,7 +214,8 @@ ${selectedStyle.description}
 - No greetings
 - Natural English speech, how people actually talk
 - No questions or exclamations
-- Specifics instead of general phrases`;
+- Specifics instead of general phrases
+- Use gender-neutral phrasing suitable for any gender; avoid gendered word forms`;
 }
 
 function createUserPrompt(): string {
@@ -231,7 +232,7 @@ FACT: ${selectedFact}.
 
 IMPACT: ${selectedImpact}.
 
-Start with stating the fact, then mention the impact. Style should be ${selectedStyle.tone}. Maximum 300 characters, 3 sentences.`;
+Start with stating the fact, then mention the impact. Style should be ${selectedStyle.tone}. Maximum 300 characters, 3 sentences. Use gender-neutral phrasing suitable for any gender; avoid gendered word forms.`;
 }
 
 function createRetryPrompt(lastMessage: string, lastError: string): string {

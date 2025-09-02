@@ -25,14 +25,8 @@ export async function getPing(
   PingSchema.parse(context);
   PingOptionsSchema.parse(options);
 
-  const {
-    llmParams,
-    options: config,
-    onRequest,
-    onTry,
-    onThrow,
-    onLogger,
-  } = options;
+  const { llmParams, options: config, onRequest, onTry, onThrow, onLogger } =
+    options;
   const { messages, ...otherLlmParams } = llmParams;
   const maxRetries = LLM_CONSTANTS.DEFAULT_MAX_RETRIES;
 
@@ -83,11 +77,7 @@ export async function getPing(
 
     let message = '';
     try {
-      onLogger?.('PING_REQUEST', {
-        name: context.aiName,
-        params: currentParams,
-        attempt: i + 1,
-      });
+      onLogger?.('PING_REQUEST', { params: currentParams, attempt: i + 1 });
 
       onRequest?.();
 
@@ -111,11 +101,7 @@ export async function getPing(
         throw new Error(error);
       }
 
-      onLogger?.('PING_RESPONSE', {
-        name: context.aiName,
-        attempt: i + 1,
-        message,
-      });
+      onLogger?.('PING_RESPONSE', { attempt: i + 1, message });
 
       return responseText;
     } catch (error: any) {
@@ -123,12 +109,7 @@ export async function getPing(
       errors.push(errorMessage);
 
       onTry?.(errorMessage);
-      onLogger?.('PING_ERROR', {
-        name: context.aiName,
-        message,
-        error: errorMessage,
-        attempt: i + 1,
-      });
+      onLogger?.('PING_ERROR', { message, error: errorMessage, attempt: i + 1 });
 
       if (i < maxRetries - 1) {
         await sleep(LLM_CONSTANTS.DEFAULT_RETRY_DELAY);
@@ -158,7 +139,7 @@ function createPingPrompt(
   }
 ): string {
   const { messages } = options;
-  const { aiName, language, addedInformation } = context;
+  const { language, addedInformation } = context;
 
   const dialogueHistory = buildDialogueMarkup(messages.slice(-15));
   const userMessages = messages.filter((m) => m.role === 'user');
@@ -170,18 +151,25 @@ function createPingPrompt(
 Create a reminder message that brings the user back to continue our conversation.
 </TASK>
 
-<PROFILE>
-[NAME]${aiName}[/NAME]
+<USER_PROFILE>
 [LANGUAGE]${language}[/LANGUAGE]
-</PROFILE>
+[META]
+- Target role: USER
+- Identify recipient by <USER> tags in DIALOGUE_HISTORY
+- Generate a reminder addressed to the USER of this dialogue
+- Channel: Telegram
+- Mode: text messages
+[/META]
+</USER_PROFILE>
 
-${
-  addedInformation
-    ? `<ADDITIONAL_INFO>
-${addedInformation}
-</ADDITIONAL_INFO>`
-    : ''
-}
+<ASSISTANT_PROFILE>
+[INITIATOR]ASSISTANT_IDENTITY[/INITIATOR]
+${addedInformation ? `[ADDITIONAL_INFO]${addedInformation}[/ADDITIONAL_INFO]` : ''}
+[GUIDE]
+- You initiated the original conversation
+- Do not restate identity; keep it implicit
+[/GUIDE]
+</ASSISTANT_PROFILE>
 
 <CONVERSATION_CONTEXT>
 [LAST_USER_MESSAGE]${lastUserMessage?.content || 'none'}[/LAST_USER_MESSAGE]
@@ -201,6 +189,11 @@ ${dialogueHistory}
 - Focus on continuing the discussion
 - Show genuine interest in their response
 ${language === 'RUSSIAN' ? '- Use "ВЫ" when addressing' : ''}
+- Use gender-neutral phrasing suitable for any gender
+- In ${language}, avoid gendered word forms; prefer neutral or impersonal constructions
+- Role clarity: you are reminding the user to continue the existing conversation, not starting a new one
+- Address the user directly and naturally; avoid greetings and identity restatements
+- Recipient clarity: craft the message for the USER role specifically
 </REQUIREMENTS>
 
 <INSTRUCTION>
