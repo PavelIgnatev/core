@@ -170,7 +170,7 @@ export async function getAutoResponse(
   }
 
   if (generations.length > 0) {
-    onThrow?.(`** GENERATION_ERROR **
+    onThrow?.(`** AUTO_RESPONSE_GENERATION_ERROR **
 _____________
 GENERATIONS:
 ${generations.map((g, i) => `${i + 1}: ${llmRestoreLinks(g)}`).join('\n')}

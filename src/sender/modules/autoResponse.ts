@@ -6,15 +6,13 @@ import { addLead } from '../google-crm/oauth-sheets';
 import { converterName } from '../helpers/converterName';
 import { extractLastQuestion } from '../helpers/extractLastQuestion';
 import { generateRandomString } from '../helpers/generateRandomString';
-import { getDateNow } from '../helpers/helpers';
-import { makeRequestGpt } from '../helpers/makeRequestGpt';
 import { sendToErrorGenerateBot } from '../helpers/sendToErrorGenerateBot';
 import { sendToFormBot } from '../helpers/sendToFormBot';
 import { sendToGoogleCrmBot } from '../helpers/sendToGoogleCrmBot';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { getAutoResponse } from '../llm/getAutoResponse';
-import { getPing } from '../llm/getPing';
 import { getDialogueAnalysis } from '../llm/getDialogueAnalysis';
+import { getPing } from '../llm/getPing';
 import { llmRestoreLinks } from '../llm/utils/llmLink';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { saveRecipient } from '../methods/recipient/saveRecipient';
@@ -123,8 +121,8 @@ export const autoResponse = async (
               }),
           }
         );
-        analysis = analysisResult
-        analysisThink = responseThink
+        analysis = analysisResult;
+        analysisThink = responseThink;
 
         await sendToFormBot(`[ANALYSIS_RESULT]
 GID: ${accountId}
@@ -132,15 +130,12 @@ RID: ${recipientId}
 STATUS: ${analysisResult.status}
 REASON: ${analysisResult.reason}`);
       }
-      const isLead = aiStatus === 'lead' || analysis?.status === 'lead'
-      
+      const isLead = aiStatus === 'lead' || analysis?.status === 'lead';
+
       const autoResponse = await getAutoResponse(
         {
           aiRole,
-          aiAnalysis:
-          isLead || stage === 1
-            ? ''
-            : analysis?.reason || '',
+          aiAnalysis: isLead || stage === 1 ? '' : analysis?.reason || '',
           goal,
           part,
           language,
@@ -154,9 +149,13 @@ REASON: ${analysisResult.reason}`);
           meGender: myGender,
           companyName: dialogGroupId,
           firstQuestion: secondMessagePrompt,
-          userName: recipientName || 'UNKNOWN_NAME (Do not address the person you are talking to by name)',
-          userGender: recipientGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
-          userAbout: about || null
+          userName:
+            recipientName ||
+            'UNKNOWN_NAME (Do not address the person you are talking to by name)',
+          userGender:
+            recipientGender ||
+            'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
+          userAbout: about || null,
         },
         {
           options: {
@@ -293,7 +292,7 @@ ${llmRestoreLinks(autoResponse, personalChannel)}`);
           viewed: false,
           aiStatus: analysis?.status || aiStatus,
           aiReason: analysis?.reason || aiReason,
-          aiThink: analysisThink || aiThink
+          aiThink: analysisThink || aiThink,
         }
       );
     } catch (error: any) {
@@ -357,10 +356,14 @@ ERROR: ${error.message}`);
 
       const pingMessage = await getPing(
         {
-          aiName: aiName || 'UNKNOWN_NAME (Do not address the person you are talking to by name)',
-          aiGender: aiGender || 'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
+          aiName:
+            aiName ||
+            'UNKNOWN_NAME (Do not address the person you are talking to by name)',
+          aiGender:
+            aiGender ||
+            'UNKNOWN_GENDER (Do not refer to your conversation partner by gender; use general forms that are appropriate for both masculine and feminine genders)',
           language,
-          addedInformation: addedInformation || ''
+          addedInformation: addedInformation || '',
         },
         {
           options: {},
@@ -370,7 +373,7 @@ ERROR: ${error.message}`);
             temperature: 1,
             presence_penalty: 0.8,
             p: 0.95,
-            messages: dialogue
+            messages: dialogue,
           },
           onThrow: (error) =>
             sendToErrorGenerateBot(

@@ -2,9 +2,9 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { unsetAccountById, updateAccountById } from '../db/accounts';
-import { getSpamBotReason } from '../helpers/getSpamBotReason';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
+import { getSpamBotReason } from '../llm/getSpamBotReason';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
 import { unBlockContact } from '../methods/contacts/unBlockContact';
 import { deleteHistory } from '../methods/messages/deleteHistory';
@@ -68,7 +68,16 @@ const fileComplaint = async (
       throw new Error('SPAMBOT_MESSAGE_NOT_FOUND_002');
     }
 
-    const reason = await getSpamBotReason(accountId);
+    const reason = await getSpamBotReason({
+      llmParams: {
+        messages: [],
+        model: 'command-a-03-2025',
+        temperature: 1,
+        presence_penalty: 0.8,
+        p: 0.85,
+      },
+      options: {},
+    });
     const s3 = await sendMessage(
       client,
       userId,
@@ -176,7 +185,16 @@ const fileComplaint = async (
       return;
     }
 
-    const reason = await getSpamBotReason(accountId);
+    const reason = await getSpamBotReason({
+      llmParams: {
+        messages: [],
+        model: 'command-a-03-2025',
+        temperature: 1,
+        presence_penalty: 0.8,
+        p: 0.85,
+      },
+      options: {},
+    });
     const s4 = await sendMessage(
       client,
       userId,

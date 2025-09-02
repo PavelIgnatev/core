@@ -1,12 +1,10 @@
 import BigInt from 'big-integer';
 
 import TelegramClient from '../../gramjs/client/TelegramClient';
-import { uploadFile } from '../../gramjs/client/uploadFile';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
 import { generateUser } from '../helpers/generateUser';
-import { getProfileFiles } from '../helpers/getProfileFiles';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
 import { updateProfile } from '../methods/account/updateProfile';
@@ -60,6 +58,28 @@ const defaultEmojis = [
 
 const ukraineEmojis = ['🇺🇦'];
 
+const getFrozenLegalName = (firstName: string, lastName?: string): { firstName: string; lastName: string } => {
+  const processName = (text: string): string => {
+    const filteredName = text.replace(/[^a-zA-Z]/g, '');
+    return filteredName.length >= 4 ? filteredName : '';
+  };
+
+  const processedFirstName = processName(firstName || '');
+  const processedLastName = processName(lastName || '');
+
+  if (processedFirstName && processedLastName) {
+    return { firstName: processedFirstName, lastName: processedLastName };
+  }
+
+  const randomGender = Math.random() < 0.5 ? 'male' : 'female';
+  const newUser = generateUser(randomGender);
+
+  return {
+    firstName: processedFirstName || newUser.firstName,
+    lastName: processedLastName || newUser.lastName,
+  };
+};
+
 export const accountSetup = async (
   client: TelegramClient,
   account: Account,
@@ -84,7 +104,8 @@ export const accountSetup = async (
   }
 
   if (isFrozen) {
-    return ['FROZEN_NAME', meId];
+    const { firstName, lastName } = getFrozenLegalName(me.firstName || '', me.lastName);
+    return [`${firstName} ${lastName}`, meId];
   }
 
   if (

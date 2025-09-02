@@ -137,7 +137,7 @@ export async function getPing(
   }
 
   if (generations.length > 0) {
-    onThrow?.(`** GENERATION_ERROR **
+    onThrow?.(`** PING_GENERATION_ERROR **
 _____________
 GENERATIONS:
 ${generations.map((g, i) => `${i + 1}: ${g}`).join('\n')}
@@ -157,14 +157,10 @@ function createPingPrompt(
     messages: { role: 'assistant' | 'user'; content: string }[];
   }
 ): string {
-  const { config, messages } = options;
-  const { aiName, aiGender, language, addedInformation } = context;
+  const { messages } = options;
+  const { aiName, language, addedInformation } = context;
 
   const dialogueHistory = buildDialogueMarkup(messages.slice(-15));
-  const lastAssistantMessage = messages
-    .slice()
-    .reverse()
-    .find((m) => m.role === 'assistant');
   const userMessages = messages.filter((m) => m.role === 'user');
   const lastUserMessage = userMessages[userMessages.length - 1];
 

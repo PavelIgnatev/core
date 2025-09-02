@@ -56,16 +56,13 @@ export async function getDialogueAnalysis(
     params,
   });
 
-  const attempts: string[] = [];
   const errors: string[] = [];
 
   for (let i = 0; i < maxRetries; i++) {
-    let llmResponse = '';
     try {
       onRequest?.();
 
       const { responseText, responseThink } = await makeLLMRequest(params);
-      llmResponse = responseText;
       const analysisResult = extractJsonResponse(responseText);
 
       if (!analysisResult) {
@@ -80,7 +77,6 @@ export async function getDialogueAnalysis(
       return { analysisResult, responseThink };
     } catch (error: any) {
       const errorMessage = error.message || 'UNDEFINED_ERROR';
-      attempts.push(llmResponse || 'NO_RESPONSE');
       errors.push(errorMessage);
 
       onTry?.(errorMessage);

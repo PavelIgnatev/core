@@ -58,4 +58,6 @@ export interface Account {
   lazyCheckDate?: Date;
 
   remainingTime?: string;
+
+  frozenAppealDates?: Date[];
 }
