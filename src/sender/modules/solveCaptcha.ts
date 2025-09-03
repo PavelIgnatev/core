@@ -1,5 +1,5 @@
-import axios from 'axios';
 import { Agent as HttpsAgent } from 'https';
+import axios from 'axios';
 
 import TelegramClient from '../../gramjs/client/TelegramClient';
 import { sleep } from '../helpers/helpers';
@@ -26,9 +26,11 @@ const retryNetworkRequest = async <T>(
     } catch (error: any) {
       lastError = error;
 
-      if (error.message?.includes('CAPTCHA_PAGE') ||
-          error.message?.includes('RUCAPTCHA_TASK') ||
-          error.message?.includes('TELEGRAM_TOKEN')) {
+      if (
+        error.message?.includes('CAPTCHA_PAGE') ||
+        error.message?.includes('RUCAPTCHA_TASK') ||
+        error.message?.includes('TELEGRAM_TOKEN')
+      ) {
         throw error;
       }
 
@@ -62,7 +64,7 @@ export const solveCaptcha = async (
     } catch (error: any) {
       throw new Error(`FETCH_WEBSITE_FAILED: ${error.message}`);
     }
-    
+
     const html = response.data;
 
     const siteKeyMatch = html.match(/data-sitekey="([^"]+)"/);
@@ -79,24 +81,21 @@ export const solveCaptcha = async (
 
     let createTaskResponse;
     try {
-      createTaskResponse = await fetch(
-        'https://api.rucaptcha.com/createTask',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+      createTaskResponse = await fetch('https://api.rucaptcha.com/createTask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          clientKey: 'c5e207fdea33dd778847c4b507143ec3',
+          task: {
+            type: 'TurnstileTaskProxyless',
+            websiteURL,
+            websiteKey,
           },
-          body: JSON.stringify({
-            clientKey: 'c5e207fdea33dd778847c4b507143ec3',
-            task: {
-              type: 'TurnstileTaskProxyless',
-              websiteURL,
-              websiteKey,
-            },
-          }),
-          signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
-        }
-      );
+        }),
+        signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
+      });
     } catch (error: any) {
       throw new Error(`RUCAPTCHA_CREATE_REQUEST_FAILED: ${error.message}`);
     }
