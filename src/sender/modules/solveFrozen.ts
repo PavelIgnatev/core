@@ -53,7 +53,8 @@ const submitFrozenAppeal = async (
     throw new Error('FROZEN_BOT_START_RESPONSE_MISSING_VIOLATIONS');
   }
 
-  const appealFlow = generateAppealFlow();
+  // const appealFlow = generateAppealFlow();
+  const appealFlow = 'mistake'
   const responseText =
     appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
 
