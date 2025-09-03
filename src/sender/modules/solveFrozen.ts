@@ -55,8 +55,9 @@ const submitFrozenAppeal = async (
     }
 
     const appealFlow = generateAppealFlow();
-    const responseText = appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
-    
+    const responseText =
+      appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
+
     const mistakeMessage = await sendMessage(
       client,
       userId,
@@ -113,34 +114,36 @@ const submitFrozenAppeal = async (
       throw new Error('FROZEN_BOT_NO_COMPLAINT_RESPONSE');
     }
 
-    const expectedComplaintText = appealFlow === 'hacked' 
-      ? 'When and how was your account compromised' 
-      : 'what went wrong';
+    const expectedComplaintText =
+      appealFlow === 'hacked'
+        ? 'When and how was your account compromised'
+        : 'what went wrong';
     if (!complaintResponse.includes(expectedComplaintText)) {
       throw new Error('FROZEN_BOT_COMPLAINT_RESPONSE_MISSING');
     }
 
-    const detailsText = appealFlow === 'hacked'
-      ? await getHackedReason({
-          llmParams: {
-            messages: [],
-            model: 'command-a-03-2025',
-            temperature: 1,
-            presence_penalty: 0.8,
-            p: 0.85,
-          },
-          options: {},
-        })
-      : await getFrozenReason({
-          llmParams: {
-            messages: [],
-            model: 'command-a-03-2025',
-            temperature: 1,
-            presence_penalty: 0.8,
-            p: 0.85,
-          },
-          options: {},
-        });
+    const detailsText =
+      appealFlow === 'hacked'
+        ? await getHackedReason({
+            llmParams: {
+              messages: [],
+              model: 'command-a-03-2025',
+              temperature: 1,
+              presence_penalty: 0.8,
+              p: 0.85,
+            },
+            options: {},
+          })
+        : await getFrozenReason({
+            llmParams: {
+              messages: [],
+              model: 'command-a-03-2025',
+              temperature: 1,
+              presence_penalty: 0.8,
+              p: 0.85,
+            },
+            options: {},
+          });
     const dailyUsageText = generateDailyUsage();
     const discoverySourceText = generateDiscoverySource();
 
@@ -266,7 +269,7 @@ const submitFrozenAppeal = async (
       false,
       false
     );
-    
+
     await sleep(5000);
     const discoveryHistory = await getHistory(
       client,
@@ -311,6 +314,10 @@ const submitFrozenAppeal = async (
     if (!usageResponse.includes('acknowledge and agree')) {
       throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
     }
+
+    await new Promise((r) =>
+      setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
+    );
 
     const confirmMessage = await sendMessage(
       client,
@@ -371,13 +378,16 @@ const submitFrozenAppeal = async (
     }
 
     await updateAccountById(accountId, {
-      frozenAppealDates: [...(account.frozenAppealDates || []), {
-        date: new Date(),
-        appealFlow,
-        detailsText,
-        dailyUsageText,
-        discoverySourceText
-      }],
+      frozenAppealDates: [
+        ...(account.frozenAppealDates || []),
+        {
+          date: new Date(),
+          appealFlow,
+          detailsText,
+          dailyUsageText,
+          discoverySourceText,
+        },
+      ],
     });
 
     return true;
@@ -397,9 +407,9 @@ export const solveFrozen = async (
 ) => {
   const { accountId } = account;
 
-    await new Promise((r) =>
-      setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
-    );
+  await new Promise((r) =>
+    setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+  );
 
   try {
     const result = await resolveUsername(client, 'spambot');

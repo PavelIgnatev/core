@@ -95,10 +95,6 @@ const starter = async (
     let updateCounter = 0;
     const updateLoop = async () => {
       try {
-        if (isFrozen) {
-          return
-        }
-
         if (
           !client ||
           !client._sender ||
@@ -146,7 +142,7 @@ ERROR: ${err.message}`);
 
     await clearAuthorizations(client);
     await setup2FA(client, account);
-    // await personalChannel(account, client);
+    await personalChannel(account, client);
 
     let i = -1;
     while (true) {

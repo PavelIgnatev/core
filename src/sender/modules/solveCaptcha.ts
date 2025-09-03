@@ -47,7 +47,12 @@ export const solveCaptcha = async (
   websiteURL: string
 ) => {
   try {
-    const response = await axios.get(websiteURL);
+    let response;
+    try {
+      response = await axios.get(websiteURL);
+    } catch (error: any) {
+      throw new Error(`FETCH_WEBSITE_FAILED: ${error.message}`);
+    }
     const html = response.data;
 
     const siteKeyMatch = html.match(/data-sitekey="([^"]+)"/);
@@ -62,26 +67,36 @@ export const solveCaptcha = async (
     if (!websiteActor) throw new Error('CAPTCHA_PAGE_WEBSITE_ACTOR_MISSING');
     if (!websiteScope) throw new Error('CAPTCHA_PAGE_WEBSITE_SCOPE_MISSING');
 
-    const createTaskResponse = await fetch(
-      'https://api.rucaptcha.com/createTask',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          clientKey: 'c5e207fdea33dd778847c4b507143ec3',
-          task: {
-            type: 'TurnstileTaskProxyless',
-            websiteURL,
-            websiteKey,
+    let createTaskResponse;
+    try {
+      createTaskResponse = await fetch(
+        'https://api.rucaptcha.com/createTask',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        }),
-        signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
-      }
-    );
+          body: JSON.stringify({
+            clientKey: 'c5e207fdea33dd778847c4b507143ec3',
+            task: {
+              type: 'TurnstileTaskProxyless',
+              websiteURL,
+              websiteKey,
+            },
+          }),
+          signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
+        }
+      );
+    } catch (error: any) {
+      throw new Error(`RUCAPTCHA_CREATE_REQUEST_FAILED: ${error.message}`);
+    }
 
-    const createTaskData = await createTaskResponse.json();
+    let createTaskData;
+    try {
+      createTaskData = await createTaskResponse.json();
+    } catch (error: any) {
+      throw new Error(`RUCAPTCHA_CREATE_PARSE_FAILED: ${error.message}`);
+    }
     if (createTaskData.errorId !== 0) {
       throw new Error(
         `RUCAPTCHA_CREATE_TASK_FAILED: ${createTaskData.errorDescription}`
@@ -97,7 +112,12 @@ export const solveCaptcha = async (
     while (attempts < MAX_CAPTCHA_ATTEMPTS) {
       await sleep(CAPTCHA_CHECK_INTERVAL_MS);
 
-      const pageCheckResponse = await axios.get(websiteURL);
+      let pageCheckResponse;
+      try {
+        pageCheckResponse = await axios.get(websiteURL);
+      } catch (error: any) {
+        throw new Error(`CAPTCHA_PAGE_CHECK_FAILED: ${error.message}`);
+      }
       const currentSiteKeyMatch = pageCheckResponse.data.match(
         /data-sitekey="([^"]+)"/
       );
@@ -109,22 +129,32 @@ export const solveCaptcha = async (
         throw new Error('CAPTCHA_PAGE_SITEKEY_DISAPPEARED');
       }
 
-      const resultResponse = await fetch(
-        'https://api.rucaptcha.com/getTaskResult',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            clientKey: 'c5e207fdea33dd778847c4b507143ec3',
-            taskId,
-          }),
-          signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
-        }
-      );
+      let resultResponse;
+      try {
+        resultResponse = await fetch(
+          'https://api.rucaptcha.com/getTaskResult',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              clientKey: 'c5e207fdea33dd778847c4b507143ec3',
+              taskId,
+            }),
+            signal: AbortSignal.timeout(RUCAPTCHA_REQUEST_TIMEOUT_MS),
+          }
+        );
+      } catch (error: any) {
+        throw new Error(`RUCAPTCHA_RESULT_REQUEST_FAILED: ${error.message}`);
+      }
 
-      const resultData = await resultResponse.json();
+      let resultData;
+      try {
+        resultData = await resultResponse.json();
+      } catch (error: any) {
+        throw new Error(`RUCAPTCHA_RESULT_PARSE_FAILED: ${error.message}`);
+      }
 
       if (resultData.errorId !== 0) {
         throw new Error(
@@ -175,24 +205,34 @@ export const solveCaptcha = async (
 
     await sleep(TOKEN_PROCESSING_DELAY_MS);
 
-    const doneMessage = await sendMessage(
-      client,
-      userId,
-      accessHash,
-      'Done',
-      accountId,
-      false,
-      false
-    );
+    let doneMessage;
+    try {
+      doneMessage = await sendMessage(
+        client,
+        userId,
+        accessHash,
+        'Done',
+        accountId,
+        false,
+        false
+      );
+    } catch (error: any) {
+      throw new Error(`TELEGRAM_SEND_DONE_FAILED: ${error.message}`);
+    }
 
     await sleep(SPAMBOT_RESPONSE_DELAY_MS);
 
-    const responseMessages = await getHistory(
-      client,
-      userId,
-      accessHash,
-      doneMessage.id
-    );
+    let responseMessages;
+    try {
+      responseMessages = await getHistory(
+        client,
+        userId,
+        accessHash,
+        doneMessage.id
+      );
+    } catch (error: any) {
+      throw new Error(`TELEGRAM_GET_HISTORY_FAILED: ${error.message}`);
+    }
 
     if (responseMessages[0]?.message) {
       const lastResponse = responseMessages[0].message;
