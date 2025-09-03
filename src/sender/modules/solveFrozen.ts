@@ -72,8 +72,7 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_START_RESPONSE_MISSING_VIOLATIONS');
     }
 
-    // const appealFlow = generateAppealFlow();
-    const appealFlow = 'mistake'
+    const appealFlow = generateAppealFlow();
     const responseText = appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
     
     const mistakeMessage = await sendMessage(
@@ -327,42 +326,8 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_NO_USAGE_RESPONSE');
     }
 
-    if (appealFlow === 'mistake') {
-      if (!usageResponse.includes('text message')) {
-        throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_TEXT_MESSAGE');
-      }
-
-      const textConfirmMessage = await sendMessage(
-        client,
-        userId,
-        accessHash,
-        detailsText,
-        accountId,
-        false,
-        false,
-        false
-      );
-
-      await sleep(5000);
-      const textConfirmHistory = await getHistory(
-        client,
-        userId,
-        accessHash,
-        textConfirmMessage.id
-      );
-      const textConfirmResponse = textConfirmHistory[0]?.message;
-
-      if (!textConfirmResponse) {
-        throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
-      }
-
-      if (!textConfirmResponse.includes('acknowledge and agree')) {
-        throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
-      }
-    } else {
-      if (!usageResponse.includes('acknowledge and agree')) {
-        throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
-      }
+    if (!usageResponse.includes('acknowledge and agree')) {
+      throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
     }
 
     const confirmMessage = await sendMessage(
@@ -389,11 +354,49 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_NO_CONFIRM_RESPONSE');
     }
 
-    if (!confirmResponse.includes('verify you are a human')) {
-      throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
-    }
+    let finalHistory = confirmHistory;
 
-    const captchaUrl = confirmHistory[0].entities?.filter(
+    // if (appealFlow === 'mistake') {
+    //   if (!confirmResponse.includes('text message')) {
+    //     throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_TEXT_MESSAGE');
+    //   }
+
+    //   const textConfirmMessage = await sendMessage(
+    //     client,
+    //     userId,
+    //     accessHash,
+    //     detailsText,
+    //     accountId,
+    //     false,
+    //     false,
+    //     false
+    //   );
+
+    //   await sleep(5000);
+    //   const textConfirmHistory = await getHistory(
+    //     client,
+    //     userId,
+    //     accessHash,
+    //     textConfirmMessage.id
+    //   );
+    //   const textConfirmResponse = textConfirmHistory[0]?.message;
+
+    //   if (!textConfirmResponse) {
+    //     throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
+    //   }
+
+    //   if (!textConfirmResponse.includes('verify you are a human')) {
+    //     throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
+    //   }
+
+    //   finalHistory = textConfirmHistory;
+    // } else {
+      if (!confirmResponse.includes('verify you are a human')) {
+        throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
+      }
+    // }
+
+    const captchaUrl = finalHistory[0].entities?.filter(
       (e) => e instanceof GramJs.MessageEntityTextUrl
     )?.[0]?.url;
 

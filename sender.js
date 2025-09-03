@@ -53834,9 +53834,7 @@ var main = async () => {
     frozenChunks: chunks.filter((c) => c.isFrozen).length,
     regularChunks: chunks.filter((c) => !c.isFrozen).length
   });
-  const workers = [
-    createWorker(0, ["8077205791-prefix-frozen"])
-  ];
+  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
