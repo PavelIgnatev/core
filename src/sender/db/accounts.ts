@@ -27,7 +27,7 @@ export const getAccountCreationDate = async () => {
       },
       { projection: { accountId: 1 } }
     )
-    .toArray()
+    .toArray();
 
   const accountsWithTimestamp = accounts.map((account) => ({
     _id: account._id,
@@ -36,17 +36,17 @@ export const getAccountCreationDate = async () => {
   }));
 
   // Разделяем аккаунты на frozen и обычные
-  const frozenAccounts = accountsWithTimestamp.filter(account =>
+  const frozenAccounts = accountsWithTimestamp.filter((account) =>
     account.accountId.includes('frozen')
   );
-  const regularAccounts = accountsWithTimestamp.filter(account =>
-    !account.accountId.includes('frozen')
+  const regularAccounts = accountsWithTimestamp.filter(
+    (account) => !account.accountId.includes('frozen')
   );
 
   // Сортируем каждую группу по дате создания
   const sortedFrozenAccounts = frozenAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-  ).slice(0, 100)
+  );
   const sortedRegularAccounts = regularAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
@@ -61,7 +61,7 @@ export const getAccountCreationDate = async () => {
       .map((acc) => acc.accountId);
     chunks.push({
       accountIds: chunk,
-      isFrozen: true
+      isFrozen: true,
     });
   }
 
@@ -72,7 +72,7 @@ export const getAccountCreationDate = async () => {
       .map((acc) => acc.accountId);
     chunks.push({
       accountIds: chunk,
-      isFrozen: false
+      isFrozen: false,
     });
   }
 
@@ -129,8 +129,10 @@ export const incrementMessageCount = async (accountId: string) => {
 export const insertFrozenAccount = async (account: Account) => {
   const accountCollection = await getAccountCollection();
 
-  const existingAccount = await accountCollection.findOne({ accountId: account.accountId });
-  
+  const existingAccount = await accountCollection.findOne({
+    accountId: account.accountId,
+  });
+
   if (existingAccount) {
     throw new Error('FROZEN_ACCOUNT_ALREADY_EXISTS');
   }

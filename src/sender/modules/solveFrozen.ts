@@ -26,24 +26,6 @@ const submitFrozenAppeal = async (
   const { accountId, id } = account;
 
   try {
-    const initialHistory = await getHistory(client, userId, accessHash, 0);
-    const lastMessage = initialHistory[0]?.message;
-    const messages = [
-      'please verify you are a human',
-      'your appeal has been successfully submitted',
-      'your account was blocked for violations',
-      'already submitted a complaint recently'
-    ];
-
-    if (
-      !messages.some((p) => lastMessage?.toLowerCase().includes(p)) &&
-      lastMessage
-    ) {
-      await sendToMainBot(`🤖 SPAMBOT UNUSUAL MESSAGE 🤖
-ACCOUNT_ID: ${accountId}
-MESSAGE: ${lastMessage}`);
-    }
-
     const startMessage = await sendMessage(
       client,
       userId,
