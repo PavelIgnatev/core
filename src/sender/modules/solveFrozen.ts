@@ -354,49 +354,11 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_NO_CONFIRM_RESPONSE');
     }
 
-    let finalHistory = confirmHistory;
+    if (!confirmResponse.includes('verify you are a human')) {
+      throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
+    }
 
-    // if (appealFlow === 'mistake') {
-    //   if (!confirmResponse.includes('text message')) {
-    //     throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_TEXT_MESSAGE');
-    //   }
-
-    //   const textConfirmMessage = await sendMessage(
-    //     client,
-    //     userId,
-    //     accessHash,
-    //     detailsText,
-    //     accountId,
-    //     false,
-    //     false,
-    //     false
-    //   );
-
-    //   await sleep(5000);
-    //   const textConfirmHistory = await getHistory(
-    //     client,
-    //     userId,
-    //     accessHash,
-    //     textConfirmMessage.id
-    //   );
-    //   const textConfirmResponse = textConfirmHistory[0]?.message;
-
-    //   if (!textConfirmResponse) {
-    //     throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
-    //   }
-
-    //   if (!textConfirmResponse.includes('verify you are a human')) {
-    //     throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
-    //   }
-
-    //   finalHistory = textConfirmHistory;
-    // } else {
-      if (!confirmResponse.includes('verify you are a human')) {
-        throw new Error('FROZEN_BOT_CONFIRM_RESPONSE_MISSING_VERIFY_HUMAN');
-      }
-    // }
-
-    const captchaUrl = finalHistory[0].entities?.filter(
+    const captchaUrl = confirmHistory[0].entities?.filter(
       (e) => e instanceof GramJs.MessageEntityTextUrl
     )?.[0]?.url;
 
@@ -453,9 +415,9 @@ export const solveFrozen = async (
 ) => {
   const { accountId } = account;
 
-  //   await new Promise((r) =>
-  //     setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
-  //   );
+    await new Promise((r) =>
+      setTimeout(r, (Math.floor(Math.random() * 60) + 1) * 1000)
+    );
 
   try {
     const result = await resolveUsername(client, 'spambot');
