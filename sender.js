@@ -53313,9 +53313,7 @@ var getAccountCreationDate = async () => {
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes("frozen")
   );
-  const sortedFrozenAccounts = frozenAccounts.sort(
-    (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
-  );
+  const sortedFrozenAccounts = frozenAccounts.sort(() => Math.random() - 0.5).slice(0, 200);
   const sortedRegularAccounts = regularAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
@@ -53834,7 +53832,9 @@ var main = async () => {
     frozenChunks: chunks.filter((c) => c.isFrozen).length,
     regularChunks: chunks.filter((c) => !c.isFrozen).length
   });
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
+  const workers = [
+    createWorker(0, ["573262932e959beee3db18251ccb0dc6-prefix-frozen"])
+  ];
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
