@@ -72,7 +72,8 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_START_RESPONSE_MISSING_VIOLATIONS');
     }
 
-    const appealFlow = generateAppealFlow();
+    // const appealFlow = generateAppealFlow();
+    const appealFlow = 'mistake'
     const responseText = appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
     
     const mistakeMessage = await sendMessage(
@@ -298,42 +299,8 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_NO_DISCOVERY_RESPONSE');
     }
 
-    if (appealFlow === 'mistake') {
-      if (!discoveryResponse.includes('text message')) {
-        throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_TEXT_MESSAGE');
-      }
-
-      const textConfirmMessage = await sendMessage(
-        client,
-        userId,
-        accessHash,
-        detailsText,
-        accountId,
-        false,
-        false,
-        false
-      );
-
-      await sleep(5000);
-      const textConfirmHistory = await getHistory(
-        client,
-        userId,
-        accessHash,
-        textConfirmMessage.id
-      );
-      const textConfirmResponse = textConfirmHistory[0]?.message;
-
-      if (!textConfirmResponse) {
-        throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
-      }
-
-      if (!textConfirmResponse.includes('daily use of Telegram')) {
-        throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_DAILY_USE');
-      }
-    } else {
-      if (!discoveryResponse.includes('daily use of Telegram')) {
-        throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_DAILY_USE');
-      }
+    if (!discoveryResponse.includes('daily use of Telegram')) {
+      throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_DAILY_USE');
     }
 
     const usageMessage = await sendMessage(
@@ -360,8 +327,42 @@ MESSAGE: ${lastMessage}`);
       throw new Error('FROZEN_BOT_NO_USAGE_RESPONSE');
     }
 
-    if (!usageResponse.includes('acknowledge and agree')) {
-      throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
+    if (appealFlow === 'mistake') {
+      if (!usageResponse.includes('text message')) {
+        throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_TEXT_MESSAGE');
+      }
+
+      const textConfirmMessage = await sendMessage(
+        client,
+        userId,
+        accessHash,
+        detailsText,
+        accountId,
+        false,
+        false,
+        false
+      );
+
+      await sleep(5000);
+      const textConfirmHistory = await getHistory(
+        client,
+        userId,
+        accessHash,
+        textConfirmMessage.id
+      );
+      const textConfirmResponse = textConfirmHistory[0]?.message;
+
+      if (!textConfirmResponse) {
+        throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
+      }
+
+      if (!textConfirmResponse.includes('acknowledge and agree')) {
+        throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
+      }
+    } else {
+      if (!usageResponse.includes('acknowledge and agree')) {
+        throw new Error('FROZEN_BOT_USAGE_RESPONSE_MISSING_ACKNOWLEDGE_AGREE');
+      }
     }
 
     const confirmMessage = await sendMessage(

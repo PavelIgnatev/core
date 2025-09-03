@@ -137,11 +137,11 @@ const main = async () => {
   });
 
   // // 7564095141-prefix-aisender
-  // const workers = [
-  //   createWorker(0, ['7345220728-prefix-frozen']),
-  // ];
+  const workers = [
+    createWorker(0, ['8077205791-prefix-frozen']),
+  ];
 
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
+  // const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
   const promises = await Promise.all(workers);
 
   const successPromises = [];
