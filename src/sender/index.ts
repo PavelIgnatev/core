@@ -138,7 +138,7 @@ const main = async () => {
 
   // // 7564095141-prefix-aisender
   // const workers = [
-  //   createWorker(0, ['540ee4899f79d2b7266aad8381303b51-prefix-frozen']),
+  //   createWorker(0, ['7345220728-prefix-frozen']),
   // ];
 
   const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));

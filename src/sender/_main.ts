@@ -130,7 +130,7 @@ ERROR: ${err.message}`);
     const [meName, meId] = await accountSetup(client, account, isFrozen);
 
     if (isFrozen) {
-      // await solveFrozen(client, account, meName);
+      await solveFrozen(client, account, meName);
       await client.destroy();
 
       client._endTime = Number(performance.now() - startTime).toFixed(0);

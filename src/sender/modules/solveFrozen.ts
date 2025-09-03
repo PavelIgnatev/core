@@ -2,11 +2,16 @@ import TelegramClient from '../../gramjs/client/TelegramClient';
 import GramJs from '../../gramjs/tl/api';
 import { Account } from '../@types/Account';
 import { updateAccountById } from '../db/accounts';
+import { generateAppealFlow } from '../helpers/frozen/generateAppealFlow';
+import { generateDailyUsage } from '../helpers/frozen/generateDailyUsage';
+import { generateDiscoverySource } from '../helpers/frozen/generateDiscoverySource';
+import { generateEmailFromName } from '../helpers/frozen/generateEmailFromName';
+import { getYearById } from '../helpers/frozen/getYearById';
 import { sleep } from '../helpers/helpers';
 import { sendToMainBot } from '../helpers/sendToMainBot';
+import { getFrozenReason } from '../llm/getFrozenReason';
+import { getHackedReason } from '../llm/getHackedReason';
 import { resolveUsername } from '../methods/contacts/resolveUsername';
-import { unBlockContact } from '../methods/contacts/unBlockContact';
-import { deleteHistory } from '../methods/messages/deleteHistory';
 import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { solveCaptcha } from './solveCaptcha';
@@ -18,9 +23,27 @@ const submitFrozenAppeal = async (
   accessHash: string,
   frozenLegalName: string
 ) => {
-  const { accountId } = account;
+  const { accountId, id } = account;
 
   try {
+    const initialHistory = await getHistory(client, userId, accessHash, 0);
+    const lastMessage = initialHistory[0]?.message;
+    const messages = [
+      'please verify you are a human',
+      'your appeal has been successfully submitted',
+      'your account was blocked for violations',
+      'already submitted a complaint recently'
+    ];
+
+    if (
+      !messages.some((p) => lastMessage?.toLowerCase().includes(p)) &&
+      lastMessage
+    ) {
+      await sendToMainBot(`🤖 SPAMBOT UNUSUAL MESSAGE 🤖
+ACCOUNT_ID: ${accountId}
+MESSAGE: ${lastMessage}`);
+    }
+
     const startMessage = await sendMessage(
       client,
       userId,
@@ -49,11 +72,14 @@ const submitFrozenAppeal = async (
       throw new Error('FROZEN_BOT_START_RESPONSE_MISSING_VIOLATIONS');
     }
 
+    const appealFlow = generateAppealFlow();
+    const responseText = appealFlow === 'hacked' ? 'My account was hacked' : 'This is a mistake';
+    
     const mistakeMessage = await sendMessage(
       client,
       userId,
       accessHash,
-      'This is a mistake',
+      responseText,
       accountId,
       false,
       false,
@@ -105,11 +131,36 @@ const submitFrozenAppeal = async (
       throw new Error('FROZEN_BOT_NO_COMPLAINT_RESPONSE');
     }
 
-    if (!complaintResponse.includes('what went wrong')) {
-      throw new Error('FROZEN_BOT_COMPLAINT_RESPONSE_MISSING_WHAT_WENT_WRONG');
+    const expectedComplaintText = appealFlow === 'hacked' 
+      ? 'When and how was your account compromised' 
+      : 'what went wrong';
+    if (!complaintResponse.includes(expectedComplaintText)) {
+      throw new Error('FROZEN_BOT_COMPLAINT_RESPONSE_MISSING');
     }
 
-    const detailsText = 'I was just messaging my friends and family members';
+    const detailsText = appealFlow === 'hacked'
+      ? await getHackedReason({
+          llmParams: {
+            messages: [],
+            model: 'command-a-03-2025',
+            temperature: 1,
+            presence_penalty: 0.8,
+            p: 0.85,
+          },
+          options: {},
+        })
+      : await getFrozenReason({
+          llmParams: {
+            messages: [],
+            model: 'command-a-03-2025',
+            temperature: 1,
+            presence_penalty: 0.8,
+            p: 0.85,
+          },
+          options: {},
+        });
+    const dailyUsageText = generateDailyUsage();
+    const discoverySourceText = generateDiscoverySource();
 
     const detailsMessage = await sendMessage(
       client,
@@ -171,7 +222,7 @@ const submitFrozenAppeal = async (
       client,
       userId,
       accessHash,
-      'john.doe@gmail.com',
+      generateEmailFromName(frozenLegalName),
       accountId,
       false,
       false,
@@ -199,7 +250,7 @@ const submitFrozenAppeal = async (
       client,
       userId,
       accessHash,
-      '2014',
+      String(getYearById(id)),
       accountId,
       false,
       false,
@@ -227,13 +278,13 @@ const submitFrozenAppeal = async (
       client,
       userId,
       accessHash,
-      'friend',
+      discoverySourceText,
       accountId,
       false,
       false,
       false
     );
-
+    
     await sleep(5000);
     const discoveryHistory = await getHistory(
       client,
@@ -247,43 +298,49 @@ const submitFrozenAppeal = async (
       throw new Error('FROZEN_BOT_NO_DISCOVERY_RESPONSE');
     }
 
-    if (!discoveryResponse.includes('text message')) {
-      throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_TEXT_MESSAGE');
-    }
+    if (appealFlow === 'mistake') {
+      if (!discoveryResponse.includes('text message')) {
+        throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_TEXT_MESSAGE');
+      }
 
-    const textConfirmMessage = await sendMessage(
-      client,
-      userId,
-      accessHash,
-      detailsText,
-      accountId,
-      false,
-      false,
-      false
-    );
+      const textConfirmMessage = await sendMessage(
+        client,
+        userId,
+        accessHash,
+        detailsText,
+        accountId,
+        false,
+        false,
+        false
+      );
 
-    await sleep(5000);
-    const textConfirmHistory = await getHistory(
-      client,
-      userId,
-      accessHash,
-      textConfirmMessage.id
-    );
-    const textConfirmResponse = textConfirmHistory[0]?.message;
+      await sleep(5000);
+      const textConfirmHistory = await getHistory(
+        client,
+        userId,
+        accessHash,
+        textConfirmMessage.id
+      );
+      const textConfirmResponse = textConfirmHistory[0]?.message;
 
-    if (!textConfirmResponse) {
-      throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
-    }
+      if (!textConfirmResponse) {
+        throw new Error('FROZEN_BOT_NO_TEXT_CONFIRM_RESPONSE');
+      }
 
-    if (!textConfirmResponse.includes('daily use of Telegram')) {
-      throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_DAILY_USE');
+      if (!textConfirmResponse.includes('daily use of Telegram')) {
+        throw new Error('FROZEN_BOT_TEXT_CONFIRM_RESPONSE_MISSING_DAILY_USE');
+      }
+    } else {
+      if (!discoveryResponse.includes('daily use of Telegram')) {
+        throw new Error('FROZEN_BOT_DISCOVERY_RESPONSE_MISSING_DAILY_USE');
+      }
     }
 
     const usageMessage = await sendMessage(
       client,
       userId,
       accessHash,
-      '?????????????????????',
+      dailyUsageText,
       accountId,
       false,
       false,
@@ -366,7 +423,13 @@ const submitFrozenAppeal = async (
     }
 
     await updateAccountById(accountId, {
-      frozenAppealDates: [...(account.frozenAppealDates || []), new Date()],
+      frozenAppealDates: [...(account.frozenAppealDates || []), {
+        date: new Date(),
+        appealFlow,
+        detailsText,
+        dailyUsageText,
+        discoverySourceText
+      }],
     });
 
     return true;
