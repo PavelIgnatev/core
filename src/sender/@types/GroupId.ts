@@ -24,4 +24,6 @@ export type GroupId = {
   flowHandling: string | null;
   addedInformation: string | null;
   addedQuestion: string | null;
+
+  skipQuestionValidations?: boolean;
 };

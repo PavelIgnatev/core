@@ -1,5 +1,7 @@
 import { z } from 'zod';
-import type { GroupId } from '../../@types/GroupId';
+
+import { GroupId } from '../../@types/GroupId';
+import { llmExtractLinks, llmRestoreLinks } from '../../llm/utils/llmLink';
 
 const GroupIdSchema = z.object({
   groupId: z.string().min(1),
@@ -19,6 +21,8 @@ const GroupIdSchema = z.object({
   flowHandling: z.string().nullable(),
   addedInformation: z.string().nullable(),
   addedQuestion: z.string().nullable(),
+  googleTableCrmId: z.string().optional(),
+  skipQuestionValidations: z.boolean().optional(),
 });
 
 const VALIDATION_PATTERNS = {
@@ -71,6 +75,8 @@ const VALIDATION_MESSAGES = {
   REQUIRED_FIELD: 'Обязательное поле!',
   FORBIDDEN_HTTP_TELEGRAM:
     'Ссылки на Telegram следует указывать в формате t.me/username без префиксов https:// или http://',
+  INVALID_PART_LINK: 'Некорректная ссылка',
+  PART_LINK_TOO_LONG: 'Ссылка слишком длинная (максимум 50 символов)',
 } as const;
 
 const EXCLUDED_GROUP_IDS = [
@@ -349,12 +355,6 @@ function validateGroupIdFields(data: GroupId) {
       message: VALIDATION_MESSAGES.FORBIDDEN_BASIC_SYMBOLS,
     },
     {
-      value: goal,
-      name: 'Целевое действие',
-      pattern: VALIDATION_PATTERNS.FORBIDDEN_BASIC_SYMBOLS,
-      message: VALIDATION_MESSAGES.FORBIDDEN_BASIC_SYMBOLS,
-    },
-    {
       value: companyDescription,
       name: 'Описание компании',
       pattern: VALIDATION_PATTERNS.FORBIDDEN_BASIC_SYMBOLS,
@@ -562,7 +562,7 @@ function validateTelegramLinks(data: GroupId) {
   }
 }
 
-export function validateGroupId(data: GroupId) {
+export async function validateGroupId(data: GroupId) {
   try {
     GroupIdSchema.parse(data);
   } catch (error) {
@@ -572,7 +572,14 @@ export function validateGroupId(data: GroupId) {
     throw error;
   }
 
-  const { goal, part, secondMessagePrompt, addedQuestion, language } = data;
+  const {
+    goal,
+    part,
+    secondMessagePrompt,
+    addedQuestion,
+    language,
+    skipQuestionValidations,
+  } = data;
 
   if (!['ENGLISH', 'RUSSIAN', 'UKRAINIAN'].includes(language)) {
     throw new Error(
@@ -585,6 +592,30 @@ export function validateGroupId(data: GroupId) {
   validateQuestionMarks(secondMessagePrompt, addedQuestion || null);
   validateNumericFields(data);
   validateAtSymbol(data);
-  validateRandomStrings(data);
+  if (!skipQuestionValidations) {
+    validateRandomStrings(data);
+  }
   validateTelegramLinks(data);
+  if (part) {
+    const source = part.trim();
+
+    const processed = await llmExtractLinks(source);
+    if (processed.links.size === 1) {
+      const restored = llmRestoreLinks(processed).trim();
+      const normalize = (s: string) =>
+        s.replace(/^https?:\/\/t\.me\//i, 't.me/');
+      if (normalize(restored) === normalize(source)) {
+        if (restored.length > 50) {
+          throw new Error(
+            `Ошибка в поле "Уникальная часть": ${VALIDATION_MESSAGES.PART_LINK_TOO_LONG}`
+          );
+        }
+        return;
+      }
+    }
+
+    throw new Error(
+      `Ошибка в поле "Уникальная часть": ${VALIDATION_MESSAGES.INVALID_PART_LINK}`
+    );
+  }
 }
