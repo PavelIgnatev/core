@@ -32,7 +32,9 @@ const retryNetworkRequest = async <T>(
         throw error;
       }
 
-
+      if (attempt < maxAttempts) {
+        await sleep(2000 * attempt);
+      }
     }
   }
 
@@ -49,10 +51,18 @@ export const solveCaptcha = async (
   try {
     let response;
     try {
-      response = await axios.get(websiteURL);
+      response = await retryNetworkRequest(() =>
+        axios.get(websiteURL, {
+          httpsAgent: new HttpsAgent({
+            family: 4,
+          }),
+          timeout: 30000,
+        })
+      );
     } catch (error: any) {
       throw new Error(`FETCH_WEBSITE_FAILED: ${error.message}`);
     }
+    
     const html = response.data;
 
     const siteKeyMatch = html.match(/data-sitekey="([^"]+)"/);
@@ -114,7 +124,14 @@ export const solveCaptcha = async (
 
       let pageCheckResponse;
       try {
-        pageCheckResponse = await axios.get(websiteURL);
+        pageCheckResponse = await retryNetworkRequest(() =>
+          axios.get(websiteURL, {
+            httpsAgent: new HttpsAgent({
+              family: 4,
+            }),
+            timeout: 30000,
+          })
+        );
       } catch (error: any) {
         throw new Error(`CAPTCHA_PAGE_CHECK_FAILED: ${error.message}`);
       }

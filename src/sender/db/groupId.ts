@@ -37,7 +37,7 @@ DON'T CONSIDER ANYONE A LEAD, THERE ARE NO LEADS, ONLY NEGATIVE | CONTINUE`,
     };
 
     try {
-      validateGroupId(correctedResult);
+      await validateGroupId(correctedResult);
     } catch (error) {
       await sendToMainBot(`** GROUP_ID_VALIDATION_ERROR **
 GROUP_ID: ${groupId}
