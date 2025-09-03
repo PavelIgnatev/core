@@ -392,10 +392,6 @@ const submitFrozenAppeal = async (
 
     return true;
   } catch (error: any) {
-    await sendToMainBot(`** FROZEN_APPEAL_ERROR **
-ACCOUNT_ID: ${accountId}
-ERROR: ${error.message}`);
-
     throw error;
   }
 };
