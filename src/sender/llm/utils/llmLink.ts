@@ -56,7 +56,7 @@ export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
   const checks = await Promise.all(
     domains.map(async (domain) => ({
       domain,
-      isValid: await llmCheckUrl(domain),
+      isValid: true,
     }))
   );
 
@@ -70,7 +70,9 @@ export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
         .replace('http://t.me', 't.me')
         .replace(/\*+$/, '')
     );
-    processedText = processedText.replaceAll(domain, placeholder);
+    while (processedText.includes(domain)) {
+      processedText = processedText.replace(domain, placeholder);
+    }
   }
 
   return {
@@ -88,11 +90,15 @@ export function llmRestoreLinks(
   if (personalChannel) {
     const personalChannelUrl = `t.me/${personalChannel}`;
     processedText.links.forEach((_, placeholder) => {
-      restoredText = restoredText.replaceAll(placeholder, personalChannelUrl);
+      while (restoredText.includes(placeholder)) {
+        restoredText = restoredText.replace(placeholder, personalChannelUrl);
+      }
     });
   } else {
     processedText.links.forEach((url, placeholder) => {
-      restoredText = restoredText.replaceAll(placeholder, url);
+      while (restoredText.includes(placeholder)) {
+        restoredText = restoredText.replace(placeholder, url);
+      }
     });
   }
   return restoredText;
