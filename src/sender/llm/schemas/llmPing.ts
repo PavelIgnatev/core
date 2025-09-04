@@ -4,6 +4,7 @@ import { CohereAIParamsSchema } from './llmCohereAi';
 export const PingSchema = z.object({
   language: z.enum(['ENGLISH', 'RUSSIAN', 'UKRAINIAN']),
   addedInformation: z.string().optional(),
+  dialogueAnalysis: z.string(),
 });
 
 export const PingConfigSchema = z.object({});

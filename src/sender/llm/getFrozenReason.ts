@@ -25,7 +25,8 @@ const scenarios = [
   {
     activity: 'coordinating with colleagues and business partners',
     context: 'discussing work projects and sharing important documents',
-    timing: 'especially during busy periods when quick communication is essential',
+    timing:
+      'especially during busy periods when quick communication is essential',
   },
   {
     activity: 'communicating with old friends from school and university',
@@ -45,7 +46,8 @@ const scenarios = [
   {
     activity: 'communicating with service providers and local businesses',
     context: 'coordinating appointments and discussing service details',
-    timing: 'when arranging home repairs, medical appointments, or other services',
+    timing:
+      'when arranging home repairs, medical appointments, or other services',
   },
 ];
 

@@ -1,17 +1,16 @@
-import { makeLLMRequest } from './utils/llmRequest';
+import {
+  Ping,
+  PingConfig,
+  PingOptions,
+  PingOptionsSchema,
+  PingSchema,
+} from './schemas/llmPing';
 import { getValidationRules } from './utils/llmDefaultValidation';
 import { llmLanguageValidation } from './utils/llmLanguageValidation';
-
-import {
-  PingSchema,
-  PingOptionsSchema,
-  Ping,
-  PingOptions,
-  PingConfig,
-} from './schemas/llmPing';
 import { fullNormalize } from './utils/llmNormalize';
-import { sleep } from './utils/llmSleep';
 import { llmPingValidation } from './utils/llmPingValidation';
+import { makeLLMRequest } from './utils/llmRequest';
+import { sleep } from './utils/llmSleep';
 
 const LLM_CONSTANTS = {
   DEFAULT_MAX_RETRIES: 5,
@@ -149,7 +148,7 @@ function createPingPrompt(
   }
 ): string {
   const { messages } = options;
-  const { language, addedInformation } = context;
+  const { language, addedInformation, dialogueAnalysis } = context;
 
   const dialogueHistory = buildDialogueMarkup(messages.slice(-15));
   const userMessages = messages.filter((m) => m.role === 'user');
@@ -174,10 +173,12 @@ Create a reminder message that brings the user back to continue our conversation
 
 <ASSISTANT_PROFILE>
 [INITIATOR]ASSISTANT_IDENTITY[/INITIATOR]
+${dialogueAnalysis ? `[DIALOGUE_ANALYSIS]${dialogueAnalysis}[/DIALOGUE_ANALYSIS]` : ''}
 ${addedInformation ? `[ADDITIONAL_INFO]${addedInformation}[/ADDITIONAL_INFO]` : ''}
 [GUIDE]
 - You initiated the original conversation
 - Do not restate identity; keep it implicit
+${dialogueAnalysis ? '- Use dialogue analysis to create more personalized and relevant ping message' : ''}
 [/GUIDE]
 </ASSISTANT_PROFILE>
 
@@ -212,6 +213,7 @@ Write a brief message that:
 - Expresses desire to continue the conversation
 - Asks about their thoughts on the discussed topic
 - Is professional and direct
+${dialogueAnalysis ? '- Incorporates insights from the dialogue analysis to make the ping more relevant and engaging' : ''}
 
 Output only the message text.
 </INSTRUCTION>`;

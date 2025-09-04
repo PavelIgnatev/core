@@ -56,7 +56,7 @@ const hackMethods = [
     method: 'compromised email used for password reset',
     context: 'email account was hacked first',
     timing: 'last month during email security breach',
-  }
+  },
 ];
 
 export async function getHackedReason(
