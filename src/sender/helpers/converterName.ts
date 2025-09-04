@@ -107,10 +107,10 @@ const russianNames = {
   yulia: 'Юлия',
 };
 
-export const converterName = (aiName: string) => {
-  const lowerCaseName = aiName
+export const converterName = (baseName: string) => {
+  const lowerCaseName = baseName
     .toLowerCase()
     .replace('.', '')
     .trim() as keyof typeof russianNames;
-  return russianNames[lowerCaseName] || aiName;
+  return russianNames[lowerCaseName] || baseName;
 };
