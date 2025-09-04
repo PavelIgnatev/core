@@ -53307,23 +53307,14 @@ var getAccountCreationDate = async () => {
     accountId: account.accountId,
     timestamp: account._id.getTimestamp()
   }));
-  const frozenAccounts = [];
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes("frozen")
-  );
-  const sortedFrozenAccounts = frozenAccounts.sort(() => Math.random() - 0.5);
+  ).slice(0, 500);
   const sortedRegularAccounts = regularAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
   const CHUNK_SIZE = 100;
   const chunks = [];
-  for (let i = 0; i < sortedFrozenAccounts.length; i += CHUNK_SIZE) {
-    const chunk = sortedFrozenAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
-    chunks.push({
-      accountIds: chunk,
-      isFrozen: true
-    });
-  }
   for (let i = 0; i < sortedRegularAccounts.length; i += CHUNK_SIZE) {
     const chunk = sortedRegularAccounts.slice(i, i + CHUNK_SIZE).map((acc) => acc.accountId);
     chunks.push({

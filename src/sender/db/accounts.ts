@@ -35,34 +35,16 @@ export const getAccountCreationDate = async () => {
     timestamp: account._id.getTimestamp(),
   }));
 
-  // Разделяем аккаунты на frozen и обычные
-  // const frozenAccounts = accountsWithTimestamp.filter((account) =>
-  //   account.accountId.includes('frozen')
-  // );
-  const frozenAccounts = []
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes('frozen')
-  );
+  ).slice(0, 500)
 
-  const sortedFrozenAccounts = frozenAccounts
-    .sort(() => Math.random() - 0.5)
   const sortedRegularAccounts = regularAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
 
   const CHUNK_SIZE = 100;
   const chunks = [];
-
-  // Создаем пачки для frozen аккаунтов
-  for (let i = 0; i < sortedFrozenAccounts.length; i += CHUNK_SIZE) {
-    const chunk = sortedFrozenAccounts
-      .slice(i, i + CHUNK_SIZE)
-      .map((acc) => acc.accountId);
-    chunks.push({
-      accountIds: chunk,
-      isFrozen: true,
-    });
-  }
 
   // Создаем пачки для обычных аккаунтов
   for (let i = 0; i < sortedRegularAccounts.length; i += CHUNK_SIZE) {
