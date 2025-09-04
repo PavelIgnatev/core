@@ -53309,7 +53309,7 @@ var getAccountCreationDate = async () => {
   }));
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes("frozen")
-  ).slice(0, 500);
+  );
   const sortedRegularAccounts = regularAccounts.sort(
     (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
   );
