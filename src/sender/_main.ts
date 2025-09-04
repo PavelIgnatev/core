@@ -40,7 +40,6 @@ import { autoResponse } from './modules/autoResponse';
 import { autoSender } from './modules/autoSender';
 import { personalChannel } from './modules/personalChannel';
 import { setup2FA } from './modules/setup2FA';
-import { solveFrozen } from './modules/solveFrozen';
 
 const exec = util.promisify(childExec);
 
@@ -95,6 +94,9 @@ const starter = async (
     let updateCounter = 0;
     const updateLoop = async () => {
       try {
+        if (isFrozen) {
+          return;
+        }
         if (
           !client ||
           !client._sender ||
@@ -126,7 +128,6 @@ ERROR: ${err.message}`);
     const [meName, meId] = await accountSetup(client, account, isFrozen);
 
     if (isFrozen) {
-      await solveFrozen(client, account, meName);
       await client.destroy();
 
       client._endTime = Number(performance.now() - startTime).toFixed(0);
@@ -164,10 +165,10 @@ ERROR: ${err.message}`);
       let timer;
       const timeout = new Promise(
         (_, rej) =>
-        (timer = setTimeout(
-          () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
-          900000
-        ))
+          (timer = setTimeout(
+            () => rej(new Error(`ITERATION_TIMEOUT_EXITED: ${i}`)),
+            900000
+          ))
       );
 
       await Promise.race([
@@ -282,7 +283,7 @@ export const main = async (chunkId: number, accounts: string[]) => {
   const startTime = performance.now();
   const promises: Promise<TelegramClient | null>[] = [];
   const accountsInWork: Record<string, number> = {};
-  const isFrozen = accounts.some(accountId => accountId.includes('frozen'));
+  const isFrozen = accounts.some((accountId) => accountId.includes('frozen'));
 
   await Promise.all([coreDB(), logsDB()]);
   for (const accountId of accounts) {
