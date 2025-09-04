@@ -35,19 +35,6 @@ export function findPotentialDomains(text: string): string[] {
   );
 }
 
-async function llmCheckUrl(url: string): Promise<boolean> {
-  try {
-    const hostname = url.replace(/^https?:\/\//, '').split('/')[0];
-    const response = await fetch(
-      `https://dns.google/resolve?name=${hostname}&type=A`
-    );
-    const data = await response.json();
-    return Boolean(data.Answer?.length);
-  } catch {
-    return false;
-  }
-}
-
 export async function llmExtractLinks(text: string): Promise<LlmProcessedText> {
   let processedText = text;
   const links = new Map<string, string>();

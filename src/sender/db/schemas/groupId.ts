@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { GroupId } from '../../@types/GroupId';
 import { llmExtractLinks, llmRestoreLinks } from '../../llm/utils/llmLink';
 
-
 const GroupIdSchema = z.object({
   groupId: z.string().min(1),
   name: z.string().min(1),
