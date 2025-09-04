@@ -7,8 +7,8 @@ import {
   updateAccountById,
 } from '../db/accounts';
 import { getDialogueByGidRid } from '../db/dialogues';
-import { updateFailedMessage, updateSendMessage } from '../db/groupIdUsers';
-import { getUserInformation } from '../helpers/getUserInformation';
+import { updateFailedMessage } from '../db/groupIdUsers';
+import { getSenderInformation } from '../helpers/getSenderInformation';
 import {
   errorSender,
   messageStats,
@@ -82,9 +82,6 @@ const trySend = async (
       fake,
       support,
       deleted,
-      lastName,
-      username,
-      firstName,
       accessHash,
       restricted,
       botBusiness,
@@ -119,13 +116,10 @@ const trySend = async (
       true
     );
 
-    const { user, firstMessage, secondMessage } = await getUserInformation(
+    const { user, firstMessage, secondMessage } = await getSenderInformation(
       recipient.firstMessagePrompt,
       recipient.secondMessagePrompt,
       recipient.language || 'RUSSIAN',
-      firstName || '',
-      lastName || '',
-      username || ''
     );
 
     await sleep(5000);

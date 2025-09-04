@@ -47,8 +47,6 @@ export const autoResponse = async (
       recipientUsername,
       recipientTitle,
       groupId: dialogGroupId,
-      aiName: recipientName,
-      aiGender: recipientGender,
     } = dialog;
 
     try {
@@ -314,8 +312,8 @@ ERROR: ${error.message}`);
       recipientAccessHash,
       messages,
       groupId: dialogGroupId,
-      aiName,
-      aiGender,
+      aiReason,
+      aiStatus,
     } = dialog;
 
     if (accountId.includes('prefix')) {
@@ -352,7 +350,13 @@ ERROR: ${error.message}`);
         {
           language,
           addedInformation: addedInformation || '',
-          dialogueAnalysis: ''
+          dialogueAnalysis:
+            aiStatus &&
+            aiReason &&
+            aiStatus !== 'negative' &&
+            aiStatus !== 'lead'
+              ? aiReason
+              : '',
         },
         {
           options: {},
@@ -368,6 +372,13 @@ ERROR: ${error.message}`);
             sendToErrorGenerateBot(
               `${error}\nGROUP ID: ${dialogGroupId}\nACCOUNT ID: ${accountId}`
             ),
+          onLogger: (type, data) => {
+            console.log({
+              accountId,
+              message: `[${type}]`,
+              payload: { data },
+            });
+          },
         }
       );
 

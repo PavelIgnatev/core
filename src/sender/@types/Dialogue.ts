@@ -12,9 +12,6 @@ export interface Dialogue {
   recipientPhone: string | null;
   messages: Array<{ id: number; text: string; fromId: string; date: number }>;
 
-  aiName?: string;
-  aiGender?: string;
-
   reason?: string;
   automaticReason?: string;
   managerMessage?: string;

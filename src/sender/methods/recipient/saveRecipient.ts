@@ -56,8 +56,6 @@ export const saveRecipient = async (
         recipientUsername: recUsername,
         recipientTitle: `${firstName} ${lastName}`.trim(),
         recipientBio: about || '',
-        aiName: recipientDb?.aiName || null,
-        aiGender: recipientDb?.aiGender || null,
         recipientPhone:
           (status === 'create' && recipientDb?.username?.includes('+')
             ? recipientDb.username.replace('+', '')
