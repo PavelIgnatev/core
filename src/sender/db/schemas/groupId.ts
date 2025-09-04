@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { GroupId } from '../../@types/GroupId';
 import { llmExtractLinks, llmRestoreLinks } from '../../llm/utils/llmLink';
 
+
 const GroupIdSchema = z.object({
   groupId: z.string().min(1),
   name: z.string().min(1),
@@ -363,12 +364,6 @@ function validateGroupIdFields(data: GroupId) {
     {
       value: leadDefinition,
       name: 'Критерии лида',
-      pattern: VALIDATION_PATTERNS.FORBIDDEN_BASIC_SYMBOLS,
-      message: VALIDATION_MESSAGES.FORBIDDEN_BASIC_SYMBOLS,
-    },
-    {
-      value: leadGoal,
-      name: 'Целевое действие при статусе лид',
       pattern: VALIDATION_PATTERNS.FORBIDDEN_BASIC_SYMBOLS,
       message: VALIDATION_MESSAGES.FORBIDDEN_BASIC_SYMBOLS,
     },
