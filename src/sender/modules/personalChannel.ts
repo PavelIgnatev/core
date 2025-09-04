@@ -13,9 +13,9 @@ import { getHistory } from '../methods/messages/getHistory';
 import { sendMessage } from '../methods/messages/sendMessage';
 import { invokeRequest } from './invokeRequest';
 
-const fiveMinutes = 300000; // 300000
-const twoMinutes = 120000; // 120000
-const halfMinute = 30000; // 30000
+const fiveMinutes = 30000; // 300000
+const twoMinutes = 12000; // 120000
+const halfMinute = 3000; // 30000
 
 const isPersonalChannel = (account: Account) => {
   const { personalChannel, personalChannelDate, accountId } = account;
@@ -49,9 +49,9 @@ export const personalChannel = async (
     ? accountId.split('-prefix-')[1]
     : null;
  
-  if (!pc || !prefix) {
-    return;
-  }
+  // if (!pc || !prefix) {
+  //   return;
+  // }
 
   const channels = await invokeRequest(
     client,
@@ -328,9 +328,9 @@ export const personalChannel = async (
     }
 
     if (lastMessage.message && buttons.length) {
-      await new Promise((r) =>
-        setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
-      );
+      // await new Promise((r) =>
+      //   setTimeout(r, (Math.floor(Math.random() * 300) + 1) * 1000)
+      // );
 
       const botFather = await resolveUsername(client, 'botfather');
       if (
@@ -1255,7 +1255,7 @@ export const personalChannel = async (
 
       if (
         !moskowBotControllerMessages[0] ||
-        !moskowBotControllerMessages[0].message.includes('Is it right')
+        !moskowBotControllerMessages[0].message.includes('Correct')
       ) {
         throw new Error('YES_MOSKOW_BOT_CONTROLLER_MESSAGES_NOT_FOUND');
       }

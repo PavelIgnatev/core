@@ -53307,9 +53307,7 @@ var getAccountCreationDate = async () => {
     accountId: account.accountId,
     timestamp: account._id.getTimestamp()
   }));
-  const frozenAccounts = accountsWithTimestamp.filter(
-    (account) => account.accountId.includes("frozen")
-  );
+  const frozenAccounts = [];
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes("frozen")
   );
@@ -53832,7 +53830,9 @@ var main = async () => {
     frozenChunks: chunks.filter((c) => c.isFrozen).length,
     regularChunks: chunks.filter((c) => !c.isFrozen).length
   });
-  const workers = chunks.map((chunk, i) => createWorker(i + 1, chunk.accountIds));
+  const workers = [
+    createWorker(0, ["7273868134-prefix-senderok"])
+  ];
   const promises = await Promise.all(workers);
   const successPromises = [];
   for (const promise of promises) {
