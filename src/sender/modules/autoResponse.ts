@@ -352,6 +352,7 @@ ERROR: ${error.message}`);
         {
           language,
           addedInformation: addedInformation || '',
+          dialogueAnalysis: ''
         },
         {
           options: {},
