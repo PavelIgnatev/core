@@ -36,9 +36,10 @@ export const getAccountCreationDate = async () => {
   }));
 
   // Разделяем аккаунты на frozen и обычные
-  const frozenAccounts = accountsWithTimestamp.filter((account) =>
-    account.accountId.includes('frozen')
-  );
+  // const frozenAccounts = accountsWithTimestamp.filter((account) =>
+  //   account.accountId.includes('frozen')
+  // );
+  const frozenAccounts = []
   const regularAccounts = accountsWithTimestamp.filter(
     (account) => !account.accountId.includes('frozen')
   );
