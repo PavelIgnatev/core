@@ -58,32 +58,9 @@ const defaultEmojis = [
 
 const ukraineEmojis = ['🇺🇦'];
 
-const getFrozenLegalName = (firstName: string, lastName?: string): { firstName: string; lastName: string } => {
-  const processName = (text: string): string => {
-    const filteredName = text.replace(/[^a-zA-Z]/g, '');
-    return filteredName.length >= 4 ? filteredName : '';
-  };
-
-  const processedFirstName = processName(firstName || '');
-  const processedLastName = processName(lastName || '');
-
-  if (processedFirstName && processedLastName) {
-    return { firstName: processedFirstName, lastName: processedLastName };
-  }
-
-  const randomGender = Math.random() < 0.5 ? 'male' : 'female';
-  const newUser = generateUser(randomGender);
-
-  return {
-    firstName: processedFirstName || newUser.firstName,
-    lastName: processedLastName || newUser.lastName,
-  };
-};
-
 export const accountSetup = async (
   client: TelegramClient,
-  account: Account,
-  isFrozen = false
+  account: Account
 ) => {
   const {
     id,
@@ -92,10 +69,14 @@ export const accountSetup = async (
     firstName,
     lastName,
     username,
+    // @ts-ignore
+    testAbout,
+    personalChannel,
     messageCount = 0,
   } = account;
 
-  const { me, id: meId } = await getMe(client, !isFrozen);
+  const { me, fullMe, id: meId } = await getMe(client);
+  const { about } = fullMe;
 
   if (`+${me.phone}` !== phone) {
     await updateAccountById(accountId, {
@@ -103,9 +84,20 @@ export const accountSetup = async (
     });
   }
 
-  if (isFrozen) {
-    const { firstName, lastName } = getFrozenLegalName(me.firstName || '', me.lastName);
-    return [`${firstName} ${lastName}`, meId];
+  if (personalChannel && testAbout) {
+    const generatedAbout = `https://t.me/${personalChannel}`;
+
+    if (about !== generatedAbout) {
+      await invokeRequest(
+        client,
+        new GramJs.account.UpdateProfile({
+          about: generatedAbout,
+        })
+      );
+      await updateAccountById(accountId, {
+        about: generatedAbout,
+      });
+    }
   }
 
   if (

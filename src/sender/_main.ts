@@ -49,7 +49,6 @@ const starter = async (
   exec: any
 ) => {
   const startTime = performance.now();
-  const isFrozen = ID.includes('frozen');
 
   let errored: string | boolean = false;
   let isAutoResponse = true;
@@ -75,7 +74,7 @@ const starter = async (
     }
 
     client = await initClient(
-      { ...account, nextApiId, isFrozen },
+      { ...account, nextApiId },
       (update) =>
         handleUpdate(
           client,
@@ -94,9 +93,6 @@ const starter = async (
     let updateCounter = 0;
     const updateLoop = async () => {
       try {
-        if (isFrozen) {
-          return;
-        }
         if (
           !client ||
           !client._sender ||
@@ -125,21 +121,7 @@ ERROR: ${err.message}`);
     };
     setTimeout(updateLoop, 20000);
 
-    const [meName, meId] = await accountSetup(client, account, isFrozen);
-
-    if (isFrozen) {
-      await client.destroy();
-
-      client._endTime = Number(performance.now() - startTime).toFixed(0);
-      delete accountsInWork[ID];
-
-      console.warn({
-        accountId: ID,
-        message: `💥 EXIT FROM ${ID} (${getTimeString(startTime)}) 💥`,
-      });
-
-      return client;
-    }
+    const [meName, meId] = await accountSetup(client, account);
 
     await clearAuthorizations(client);
     await setup2FA(client, account);
@@ -283,7 +265,6 @@ export const main = async (chunkId: number, accounts: string[]) => {
   const startTime = performance.now();
   const promises: Promise<TelegramClient | null>[] = [];
   const accountsInWork: Record<string, number> = {};
-  const isFrozen = accounts.some((accountId) => accountId.includes('frozen'));
 
   await Promise.all([coreDB(), logsDB()]);
   for (const accountId of accounts) {
@@ -292,7 +273,7 @@ export const main = async (chunkId: number, accounts: string[]) => {
 
   const interval = setInterval(() => {
     console.log({
-      message: `${isFrozen ? 'FROZEN' : 'REGULAR'} CHUNK #${chunkId} IN PROGRESS (${Object.keys(accountsInWork).length})`,
+      message: `CHUNK #${chunkId} IN PROGRESS (${Object.keys(accountsInWork).length})`,
       accountsInWork,
     });
   }, 60000);

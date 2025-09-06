@@ -2,7 +2,7 @@ import TelegramClient from '../../../gramjs/client/TelegramClient';
 import GramJs from '../../../gramjs/tl/api';
 import { invokeRequest } from '../../modules/invokeRequest';
 
-export const getMe = async (client: TelegramClient, throwFrozen = true) => {
+export const getMe = async (client: TelegramClient) => {
   const appConfig = await invokeRequest(
     client,
     new GramJs.help.GetAppConfig({})
@@ -24,7 +24,7 @@ export const getMe = async (client: TelegramClient, throwFrozen = true) => {
     value.find((k: any) => ({ ...k }).key === 'freeze_until_date')
   );
 
-  if (isFrozen && throwFrozen) {
+  if (isFrozen) {
     throw new Error('ACCOUNT_FROZEN');
   }
 
@@ -41,6 +41,7 @@ export const getMe = async (client: TelegramClient, throwFrozen = true) => {
 
   return {
     me: me.users[0],
+    fullMe: me.fullUser,
     id: String(me.fullUser.id),
   };
 };
