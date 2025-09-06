@@ -79,7 +79,7 @@ export const accountSetup = async (
     });
   }
 
-  if (personalChannel && testAbout) {
+  if (personalChannel && accountId.includes('senderok')) {
     const generatedAbout = `https://t.me/${personalChannel}`;
 
     if (about !== generatedAbout) {
