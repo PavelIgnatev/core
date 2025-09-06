@@ -68,6 +68,7 @@ export const autoResponse = async (
         fullUser: { about },
       } = recipientFull;
       const {
+        _id: _groupId,
         goal,
         part,
         aiRole,
@@ -232,7 +233,7 @@ REASON: ${analysisResult.reason}`);
         if (googleTableCrmId) {
           try {
             await addLead(googleTableCrmId, {
-              groupId: dialogGroupId,
+              groupId: String(_groupId),
               recipientId,
               aiReason: analysis.reason,
               recipientTitle,
@@ -245,7 +246,7 @@ REASON: ${analysisResult.reason}`);
 GID: ${dialogGroupId}
 ACCOUNT ID: ${accountId}
 DATA: ${JSON.stringify({
-                groupId: dialogGroupId,
+                groupId: _groupId,
                 recipientId,
                 aiReason: analysis.reason,
                 recipientTitle,

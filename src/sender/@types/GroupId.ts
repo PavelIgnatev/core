@@ -1,4 +1,8 @@
+import { ObjectId } from 'mongodb';
+
 export type GroupId = {
+  _id?: ObjectId;
+
   groupId: string;
 
   name: string;

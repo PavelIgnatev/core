@@ -1,22 +1,23 @@
 'use server';
-import GoogleAPI from './api/google-api';
-import GoogleAuth from './api/google-auth';
-import { getMonthName, formatDayForSheet } from './utils/dates';
-import {
-  formatLeadForTable,
-  findDayInMonthData,
-  findInsertPositionInMonth,
-  LeadSchema,
-  isMonthSheet,
-  parseSheetDate,
-  findInsertPositionForAllLeads,
-} from './utils/data';
-import { Lead } from './schemas/lead';
+
 import {
   BatchUpdateRequest,
   SheetData as SheetDataType,
 } from './@types/google-crm';
+import GoogleAPI from './api/google-api';
+import GoogleAuth from './api/google-auth';
+import { Lead } from './schemas/lead';
 import { SHEETS } from './utils/constants';
+import {
+  findDayInMonthData,
+  findInsertPositionForAllLeads,
+  findInsertPositionInMonth,
+  formatLeadForTable,
+  isMonthSheet,
+  LeadSchema,
+  parseSheetDate,
+} from './utils/data';
+import { formatDayForSheet, getMonthName } from './utils/dates';
 
 async function addHeadersToAllLeads(
   api: GoogleAPI,
@@ -311,65 +312,6 @@ async function addLeadToAll(spreadsheetId: string, leadData: Lead) {
   );
 }
 
-async function createGoogleTable(title: string) {
-  try {
-    const auth = await GoogleAuth.initializeAuth();
-    const api = new GoogleAPI(auth);
-    const spreadsheetId = await api.createSpreadsheet(title);
-    await api.createPermission(spreadsheetId);
-
-    const now = new Date();
-    await api.batchUpdate(spreadsheetId, [
-      {
-        addSheet: {
-          properties: {
-            title: SHEETS.ALL_LEADS_TITLE,
-            gridProperties: {
-              rowCount: SHEETS.ALL_LEADS_ROWS,
-              columnCount: SHEETS.DEFAULT_COLUMNS,
-            },
-            index: 0,
-          },
-        },
-      },
-      {
-        addSheet: {
-          properties: {
-            title: `${getMonthName(now.getMonth())} ${now.getFullYear()}`,
-            gridProperties: {
-              rowCount: SHEETS.MONTH_SHEET_ROWS,
-              columnCount: SHEETS.DEFAULT_COLUMNS,
-            },
-            index: 1,
-          },
-        },
-      },
-    ]);
-
-    await api.batchUpdate(spreadsheetId, [{ deleteSheet: { sheetId: 0 } }]);
-
-    const response = await api.getSpreadsheet(spreadsheetId);
-
-    for (const sheet of response.data.sheets || []) {
-      if (sheet.properties?.sheetId) {
-        await setColumnWidths(api, spreadsheetId, sheet.properties.sheetId);
-
-        if (sheet.properties.title === SHEETS.ALL_LEADS_TITLE) {
-          await addHeadersToAllLeads(
-            api,
-            spreadsheetId,
-            sheet.properties.title
-          );
-        }
-      }
-    }
-
-    return spreadsheetId;
-  } catch (error) {
-    throw new Error(`CREATE_GOOGLE_TABLE_ERROR: ${(error as Error).message}`);
-  }
-}
-
 async function addLead(spreadsheetId: string, leadData: Lead) {
   try {
     LeadSchema.parse(leadData);
@@ -436,4 +378,4 @@ async function addLead(spreadsheetId: string, leadData: Lead) {
   }
 }
 
-export { createGoogleTable, addLead };
+export { addLead };

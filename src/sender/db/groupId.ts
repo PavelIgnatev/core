@@ -14,7 +14,7 @@ export const getGroupId = async (groupId: string) => {
     {
       groupId: String(groupId),
     },
-    { projection: { history: 0, dateUpdated: 0, _id: 0 } }
+    { projection: { history: 0, dateUpdated: 0 } }
   );
 
   if (result) {
